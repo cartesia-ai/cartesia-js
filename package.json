@@ -1,0 +1,46 @@
+{
+	"name": "cartesia",
+	"version": "0.0.0",
+	"description": "Client for the Cartesia API.",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js"
+		},
+		"./react": {
+			"import": "./dist/react/index.mjs",
+			"require": "./dist/react/index.js"
+		}
+	},
+	"dependencies": {
+		"base64-js": "^1.5.1",
+		"emittery": "^1.0.3",
+		"human-id": "^4.1.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "tsup src/ --format cjs,esm --dts --clean",
+		"dev": "bun run build -- --watch"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0",
+		"@types/react": "^18.2.58"
+	},
+	"peerDependenciesMeta": {
+		"react": {
+			"optional": true
+		},
+		"@types/react": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@repo/config-typescript": "workspace:*",
+		"tsup": "^8.0.2"
+	}
+}
