@@ -3,7 +3,7 @@
 Usage:
 
 ```javascript
-import Cartesia from "cartesia";
+import Cartesia from "@cartesia/cartesia-js";
 
 const cartesia = new Cartesia();
 

@@ -1,5 +1,9 @@
 {
-	"name": "cartesia",
+	"name": "@cartesia/cartesia-js",
+	"author": {
+		"name": "Cartesia",
+		"url": "https://cartesia.ai"
+	},
 	"version": "0.0.0",
 	"description": "Client for the Cartesia API.",
 	"main": "./dist/index.js",
@@ -21,7 +25,7 @@
 		"human-id": "^4.1.1"
 	},
 	"publishConfig": {
-		"access": "public"
+		"access": "restricted"
 	},
 	"scripts": {
 		"build": "tsup src/ --format cjs,esm --dts --clean",
