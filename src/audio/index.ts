@@ -82,13 +82,28 @@ export default class extends Client {
 		this.socket?.addEventListener("message", handleMessage, {
 			signal: streamCompleteController.signal,
 		});
-		this.socket?.addEventListener("close", streamCompleteController.abort, {
-			once: true,
-		});
-		this.socket?.addEventListener("error", streamCompleteController.abort, {
-			once: true,
-		});
+		this.socket?.addEventListener(
+			"close",
+			() => {
+				streamCompleteController.abort();
+			},
+			{
+				once: true,
+			},
+		);
+		this.socket?.addEventListener(
+			"error",
+			() => {
+				streamCompleteController.abort();
+			},
+			{
+				once: true,
+			},
+		);
 		streamCompleteController.signal.addEventListener("abort", () => {
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
 			emitter.clearListeners();
 		});
 
