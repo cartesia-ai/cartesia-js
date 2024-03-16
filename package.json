@@ -28,7 +28,7 @@
 		"access": "restricted"
 	},
 	"scripts": {
-		"build": "tsup src/ --format cjs,esm --dts --clean",
+		"build": "tsup src/ --format cjs,esm --dts",
 		"dev": "bun run build -- --watch"
 	},
 	"peerDependencies": {

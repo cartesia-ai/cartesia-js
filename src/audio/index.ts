@@ -3,9 +3,11 @@ import { humanId } from "human-id";
 import { Client } from "../lib/client";
 import { SAMPLE_RATE, constructWebsocketUrl } from "../lib/constants";
 import {
+	type EmitteryCallbacks,
 	type Sentinel,
 	createMessageHandlerForContextId,
 	getBufferDuration,
+	getEmitteryCallbacks,
 	isComplete,
 	isSentinel,
 	playAudioBuffer,
@@ -18,6 +20,10 @@ export type StreamEventData = {
 		chunks: Chunk[];
 	};
 	message: unknown;
+};
+export type ConnectionEventData = {
+	open: never;
+	close: never;
 };
 export default class extends Client {
 	socket?: WebSocket;
@@ -173,10 +179,7 @@ export default class extends Client {
 
 		return {
 			play,
-			on: emitter.on.bind(emitter),
-			off: emitter.off.bind(emitter),
-			once: emitter.once.bind(emitter),
-			events: emitter.events.bind(emitter),
+			...getEmitteryCallbacks(emitter),
 		};
 	}
 
@@ -204,48 +207,53 @@ export default class extends Client {
 	connect() {
 		const url = constructWebsocketUrl(this.baseUrl);
 		url.searchParams.set("api_key", this.apiKey);
+		const emitter = new Emittery<ConnectionEventData>();
 		this.socket = new WebSocket(url);
 		this.socket.onopen = () => {
 			this.isConnected = true;
+			emitter.emit("open");
 		};
 		this.socket.onclose = () => {
 			this.isConnected = false;
+			emitter.emit("close");
 		};
 
-		return new Promise<void>((resolve, reject) => {
-			this.socket?.addEventListener(
-				"open",
-				() => {
-					resolve();
-				},
-				{
-					once: true,
-				},
-			);
+		return new Promise<EmitteryCallbacks<ConnectionEventData>>(
+			(resolve, reject) => {
+				this.socket?.addEventListener(
+					"open",
+					() => {
+						resolve(getEmitteryCallbacks(emitter));
+					},
+					{
+						once: true,
+					},
+				);
 
-			const aborter = new AbortController();
-			this.socket?.addEventListener(
-				"error",
-				() => {
-					aborter.abort();
-					reject(new Error("WebSocket failed to connect."));
-				},
-				{
-					signal: aborter.signal,
-				},
-			);
+				const aborter = new AbortController();
+				this.socket?.addEventListener(
+					"error",
+					() => {
+						aborter.abort();
+						reject(new Error("WebSocket failed to connect."));
+					},
+					{
+						signal: aborter.signal,
+					},
+				);
 
-			this.socket?.addEventListener(
-				"close",
-				() => {
-					aborter.abort();
-					reject(new Error("WebSocket closed before it could connect."));
-				},
-				{
-					signal: aborter.signal,
-				},
-			);
-		});
+				this.socket?.addEventListener(
+					"close",
+					() => {
+						aborter.abort();
+						reject(new Error("WebSocket closed before it could connect."));
+					},
+					{
+						signal: aborter.signal,
+					},
+				);
+			},
+		);
 	}
 
 	/**

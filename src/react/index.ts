@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CartesiaAudio, { type Chunk, type StreamEventData } from "../audio";
 
-interface UseAudioOptions {
-	apiKey: string;
+export type UseAudioOptions = {
+	apiKey: string | null;
 	baseUrl?: string;
-}
+};
 
 interface UseAudioReturn {
 	stream: (options: object) => void;
 	play: (bufferDuration?: number) => Promise<void>;
 	isPlaying: boolean;
+	isConnected: boolean;
 	chunks: Chunk[];
 	messages: StreamEventData["message"][];
 }
@@ -21,6 +22,7 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 		return {
 			stream: () => {},
 			play: async () => {},
+			isConnected: false,
 			isPlaying: false,
 			chunks: [],
 			messages: [],
@@ -33,6 +35,7 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 	}, [apiKey, baseUrl]);
 	const streamReturn = useRef<ReturnType<CartesiaAudio["stream"]> | null>(null);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [isConnected, setIsConnected] = useState(false);
 	const [chunks, setChunks] = useState<Chunk[]>([]);
 	const [messages, setMessages] = useState<StreamEventData["message"][]>([]);
 
@@ -56,17 +59,26 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 	);
 
 	useEffect(() => {
-		async function initialize() {
+		let cleanup: (() => void) | undefined = () => {};
+		async function setupConnection() {
 			try {
-				await audio?.connect();
+				const connection = await audio?.connect();
+				setIsConnected(true);
+				const unsubscribe = connection.on("close", () => {
+					setIsConnected(false);
+				});
+				return () => {
+					unsubscribe();
+					audio.disconnect();
+				};
 			} catch (e) {
 				console.error(e);
 			}
-			return () => {
-				audio?.disconnect();
-			};
 		}
-		initialize();
+		setupConnection().then((cleanupConnection) => {
+			cleanup = cleanupConnection;
+		});
+		return () => cleanup?.();
 	}, [audio]);
 
 	const play = useCallback(
@@ -87,5 +99,5 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 	// - [] Seek to a specific time.
 	// These are probably best implemented by adding event listener
 	// functionality to the base library.
-	return { stream, play, isPlaying, chunks, messages };
+	return { stream, play, isPlaying, isConnected, chunks, messages };
 }

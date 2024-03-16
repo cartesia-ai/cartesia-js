@@ -1,4 +1,5 @@
 import base64 from "base64-js";
+import type Emittery from "emittery";
 import type { Chunk, StreamEventData } from ".";
 import { SAMPLE_RATE } from "../lib/constants";
 
@@ -135,4 +136,26 @@ export function filterSentinel<T>(collection: T[]): Exclude<T, Sentinel>[] {
  */
 export function isComplete(chunks: Chunk[]) {
 	return isSentinel(chunks[chunks.length - 1]);
+}
+
+export type EmitteryCallbacks<T> = {
+	on: Emittery<T>["on"];
+	off: Emittery<T>["off"];
+	once: Emittery<T>["once"];
+	events: Emittery<T>["events"];
+};
+/**
+ * Get user-facing emitter callbacks for an Emittery instance.
+ * @param emitter The Emittery instance to get callbacks for.
+ * @returns User-facing emitter callbacks.
+ */
+export function getEmitteryCallbacks<T>(
+	emitter: Emittery<T>,
+): EmitteryCallbacks<T> {
+	return {
+		on: emitter.on.bind(emitter),
+		off: emitter.off.bind(emitter),
+		once: emitter.once.bind(emitter),
+		events: emitter.events.bind(emitter),
+	};
 }
