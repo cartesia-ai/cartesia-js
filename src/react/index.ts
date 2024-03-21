@@ -4,7 +4,7 @@ import { base64ToArray, bufferToWav } from "../audio/utils";
 import { SAMPLE_RATE } from "../lib/constants";
 
 export type UseAudioOptions = {
-	apiKey: string | null;
+	apiKey: string;
 	baseUrl?: string;
 };
 
@@ -22,7 +22,7 @@ interface UseAudioReturn {
  * React hook to use the Cartesia audio API.
  */
 export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
-	if (typeof window === "undefined" || !apiKey) {
+	if (typeof window === "undefined") {
 		return {
 			stream: () => {},
 			play: async () => {},
