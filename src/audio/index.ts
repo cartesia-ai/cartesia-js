@@ -19,6 +19,9 @@ export type StreamEventData = {
 		chunk: Chunk;
 		chunks: Chunk[];
 	};
+	streamed: {
+		chunks: Chunk[];
+	};
 	message: unknown;
 };
 export type ConnectionEventData = {
@@ -78,6 +81,9 @@ export default class extends Client {
 				});
 				await emitter.emit("message", message);
 				if (isSentinel(chunk)) {
+					await emitter.emit("streamed", {
+						chunks,
+					});
 					streamCompleteController.abort();
 				} else if (timeoutId) {
 					clearTimeout(timeoutId);
