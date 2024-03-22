@@ -4,7 +4,7 @@ import { base64ToArray, bufferToWav } from "../audio/utils";
 import { SAMPLE_RATE } from "../lib/constants";
 
 export type UseAudioOptions = {
-	apiKey: string;
+	apiKey: string | null;
 	baseUrl?: string;
 };
 
@@ -36,6 +36,9 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 	}
 
 	const audio = useMemo(() => {
+		if (!apiKey) {
+			return null;
+		}
 		const audio = new CartesiaAudio({ apiKey, baseUrl });
 		return audio;
 	}, [apiKey, baseUrl]);
@@ -49,19 +52,19 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 	const stream = useCallback(
 		(options: object) => {
 			streamReturn.current = audio?.stream(options) ?? null;
-			streamReturn.current.on(
+			streamReturn.current?.on(
 				"chunk",
 				({ chunks }: StreamEventData["chunk"]) => {
 					setChunks(chunks);
 				},
 			);
-			streamReturn.current.on(
+			streamReturn.current?.on(
 				"message",
 				(message: StreamEventData["message"]) => {
 					setMessages((messages) => [...messages, message]);
 				},
 			);
-			streamReturn.current.on("streamed", ({ chunks }) => {
+			streamReturn.current?.on("streamed", ({ chunks }) => {
 				setIsStreamed(true);
 				setChunks(chunks);
 			});
@@ -82,13 +85,16 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 		async function setupConnection() {
 			try {
 				const connection = await audio?.connect();
+				if (!connection) {
+					return;
+				}
 				setIsConnected(true);
 				const unsubscribe = connection.on("close", () => {
 					setIsConnected(false);
 				});
 				return () => {
 					unsubscribe();
-					audio.disconnect();
+					audio?.disconnect();
 				};
 			} catch (e) {
 				console.error(e);
