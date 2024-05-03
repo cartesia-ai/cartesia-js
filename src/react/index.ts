@@ -50,24 +50,27 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 	const [messages, setMessages] = useState<StreamEventData["message"][]>([]);
 
 	const stream = useCallback(
-		(options: object) => {
+		async (options: object) => {
 			streamReturn.current = audio?.stream(options) ?? null;
-			streamReturn.current?.on(
+			if (!streamReturn.current) {
+				return;
+			}
+			setMessages([]);
+			streamReturn.current.on(
 				"chunk",
 				({ chunks }: StreamEventData["chunk"]) => {
 					setChunks(chunks);
 				},
 			);
-			streamReturn.current?.on(
+			streamReturn.current.on(
 				"message",
 				(message: StreamEventData["message"]) => {
 					setMessages((messages) => [...messages, message]);
 				},
 			);
-			streamReturn.current?.on("streamed", ({ chunks }) => {
-				setIsStreamed(true);
-				setChunks(chunks);
-			});
+			const { chunks } = await streamReturn.current.once("streamed");
+			setChunks(chunks);
+			setIsStreamed(true);
 		},
 		[audio],
 	);
