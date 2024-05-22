@@ -1,5 +1,6 @@
 import Emittery from "emittery";
 import { humanId } from "human-id";
+import { WebSocket } from "partysocket";
 import { Client } from "../lib/client";
 import { SAMPLE_RATE, constructWebsocketUrl } from "../lib/constants";
 import {
@@ -28,9 +29,19 @@ export type ConnectionEventData = {
 	open: never;
 	close: never;
 };
+export type StreamRequest = {
+	inputs: object;
+	options: {
+		timeout?: number;
+	};
+};
+
 export default class extends Client {
 	socket?: WebSocket;
 	isConnected = false;
+
+	// Stores arguments for stream() calls that were made before the WebSocket was connected.
+	streamQueue: StreamRequest | null = null;
 
 	/**
 	 * Stream audio from a model.
@@ -46,7 +57,9 @@ export default class extends Client {
 	 */
 	stream(inputs: object, { timeout = 0 }: { timeout?: number } = {}) {
 		if (!this.isConnected) {
-			throw new Error("Not connected to WebSocket. Call .connect() first.");
+			// Queue the stream request if WebSocket not connected. Replace any existing re
+			this.streamQueue = { inputs, options: { timeout } };
+			return false;
 		}
 
 		// Send audio request.
@@ -214,10 +227,20 @@ export default class extends Client {
 		const url = constructWebsocketUrl(this.baseUrl);
 		url.searchParams.set("api_key", this.apiKey);
 		const emitter = new Emittery<ConnectionEventData>();
-		this.socket = new WebSocket(url);
+		this.socket = new WebSocket(url.toString());
 		this.socket.onopen = () => {
 			this.isConnected = true;
 			emitter.emit("open");
+
+			// Flush any queued stream requests
+			if (this.streamQueue) {
+				const streamResult = this.stream(
+					this.streamQueue.inputs,
+					this.streamQueue.options,
+				);
+				this.streamQueue = null;
+				if (streamResult) streamResult.play({ bufferDuration: 0 });
+			}
 		};
 		this.socket.onclose = () => {
 			this.isConnected = false;
