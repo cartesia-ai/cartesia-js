@@ -57,7 +57,7 @@ export default class extends Client {
 	 */
 	stream(inputs: object, { timeout = 0 }: { timeout?: number } = {}) {
 		if (!this.isConnected) {
-			// Queue the stream request if WebSocket not connected. Replace any existing re
+			// Queue the stream request if WebSocket not connected. Replace any existing request.
 			this.streamQueue = { inputs, options: { timeout } };
 			return false;
 		}
