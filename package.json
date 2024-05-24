@@ -22,8 +22,7 @@
 	"dependencies": {
 		"base64-js": "^1.5.1",
 		"emittery": "^1.0.3",
-		"human-id": "^4.1.1",
-		"partysocket": "^1.0.1"
+		"human-id": "^4.1.1"
 	},
 	"publishConfig": {
 		"access": "public"
