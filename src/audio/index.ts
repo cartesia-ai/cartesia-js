@@ -40,9 +40,6 @@ export default class extends Client {
 	socket?: WebSocket;
 	isConnected = false;
 
-	// Stores arguments for stream() calls that were made before the WebSocket was connected.
-	streamQueue: StreamRequest | null = null;
-
 	/**
 	 * Stream audio from a model.
 	 *
@@ -55,11 +52,12 @@ export default class extends Client {
 	 * that plays the audio as it arrives, with `bufferDuration` seconds of audio buffered before
 	 * starting playback.
 	 */
-	stream(inputs: object, { timeout = 0 }: { timeout?: number } = {}) {
+	stream(
+		inputs: StreamRequest["inputs"],
+		{ timeout = 0 }: StreamRequest["options"] = {},
+	) {
 		if (!this.isConnected) {
-			// Queue the stream request if WebSocket not connected. Replace any existing request.
-			this.streamQueue = { inputs, options: { timeout } };
-			return false;
+			throw new Error("Not connected to WebSocket. Call .connect() first.");
 		}
 
 		// Send audio request.
@@ -231,16 +229,6 @@ export default class extends Client {
 		this.socket.onopen = () => {
 			this.isConnected = true;
 			emitter.emit("open");
-
-			// Flush any queued stream requests
-			if (this.streamQueue) {
-				const streamResult = this.stream(
-					this.streamQueue.inputs,
-					this.streamQueue.options,
-				);
-				this.streamQueue = null;
-				if (streamResult) streamResult.play({ bufferDuration: 0 });
-			}
 		};
 		this.socket.onclose = () => {
 			this.isConnected = false;
