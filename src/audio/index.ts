@@ -1,5 +1,6 @@
 import Emittery from "emittery";
 import { humanId } from "human-id";
+import { WebSocket } from "partysocket";
 import { Client } from "../lib/client";
 import { SAMPLE_RATE, constructWebsocketUrl } from "../lib/constants";
 import {
@@ -224,7 +225,7 @@ export default class extends Client {
 		const url = constructWebsocketUrl(this.baseUrl);
 		url.searchParams.set("api_key", this.apiKey);
 		const emitter = new Emittery<ConnectionEventData>();
-		this.socket = new WebSocket(url);
+		this.socket = new WebSocket(url.toString());
 		this.socket.onopen = () => {
 			this.isConnected = true;
 			emitter.emit("open");
