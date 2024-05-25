@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 0.0.3
+
+### Patch Changes
+
+- 8b671ff: Revert queuing feature
+
 ## 0.0.2
 
 ### Patch Changes
