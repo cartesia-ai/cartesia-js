@@ -98,6 +98,9 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 					return;
 				}
 				setIsConnected(true);
+				connection.on("open", () => {
+					setIsConnected(true);
+				});
 				const unsubscribe = connection.on("close", () => {
 					setIsConnected(false);
 				});
