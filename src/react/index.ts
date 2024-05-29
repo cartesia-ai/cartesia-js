@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CartesiaAudio, { type Chunk, type StreamEventData } from "../audio";
 import { base64ToArray, bufferToWav } from "../audio/utils";
 import { SAMPLE_RATE } from "../lib/constants";
+import { pingServer } from "./utils";
 
 export type UseAudioOptions = {
 	apiKey: string | null;
@@ -15,6 +16,7 @@ interface UseAudioReturn {
 	isPlaying: boolean;
 	isConnected: boolean;
 	isStreamed: boolean;
+	isBuffering: boolean;
 	chunks: Chunk[];
 	messages: StreamEventData["message"][];
 }
@@ -30,6 +32,7 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 			isConnected: false,
 			isPlaying: false,
 			isStreamed: false,
+			isBuffering: false,
 			chunks: [],
 			messages: [],
 		};
@@ -45,9 +48,12 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 	const streamReturn = useRef<ReturnType<CartesiaAudio["stream"]> | null>(null);
 	const [isStreamed, setIsStreamed] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [isBuffering, setIsBuffering] = useState(false);
 	const [isConnected, setIsConnected] = useState(false);
 	const [chunks, setChunks] = useState<Chunk[]>([]);
 	const [messages, setMessages] = useState<StreamEventData["message"][]>([]);
+
+	const latencyEndpoint = "https://api.cartesia.ai";
 
 	const stream = useCallback(
 		async (options: object) => {
@@ -109,17 +115,36 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 		return () => cleanup?.();
 	}, [audio]);
 
-	const play = useCallback(
-		async (bufferDuration = 0) => {
-			if (isPlaying || !streamReturn.current) {
-				return;
+	const play = useCallback(async () => {
+		if (isPlaying || !streamReturn.current) {
+			return;
+		}
+		const ping = await pingServer(latencyEndpoint);
+		let bufferingTimeout: NodeJS.Timeout | null;
+
+		let bufferDuration: number;
+		if (ping < 400) {
+			bufferDuration = 0; // No buffering for very low latency
+		} else if (ping > 2000) {
+			bufferDuration = 4; // Max buffering for very high latency (4 seconds)
+		} else {
+			bufferDuration = (ping / 1000) * 2; // Adjust buffer duration based on ping
+		}
+
+		streamReturn.current.once("buffering").then(() => {
+			bufferingTimeout = setTimeout(() => {
+				setIsBuffering(true);
+			}, 250); // Delay for 250ms before showing buffering indicator
+		});
+		streamReturn.current.once("buffered").then(() => {
+			if (bufferingTimeout) {
+				clearTimeout(bufferingTimeout); // Clear the timeout if buffering completes before 500ms
 			}
-			setIsPlaying(true);
-			await streamReturn.current?.play({ bufferDuration });
-			setIsPlaying(false);
-		},
-		[isPlaying],
-	);
+			setIsBuffering(false);
+		});
+		await streamReturn.current?.play({ bufferDuration });
+		setIsPlaying(false);
+	}, [isPlaying]);
 
 	// TODO:
 	// - [] Pause and stop playback.
@@ -134,6 +159,7 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 		isPlaying,
 		isConnected,
 		isStreamed,
+		isBuffering,
 		chunks,
 		messages,
 	};

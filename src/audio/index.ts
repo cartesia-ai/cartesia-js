@@ -24,6 +24,8 @@ export type StreamEventData = {
 		chunks: Chunk[];
 	};
 	message: unknown;
+	buffering: never;
+	buffered: never;
 };
 export type ConnectionEventData = {
 	open: never;
@@ -171,6 +173,7 @@ export default class extends Client {
 				}
 
 				if (getBufferDuration(chunks) > bufferDuration) {
+					emitter.emit("buffered");
 					// Play the initial chunks that we already have.
 					playChunks(chunks);
 					// If the stream is not complete, play new chunks as they
@@ -182,6 +185,7 @@ export default class extends Client {
 					}
 					return true; // Done playing.
 				}
+				emitter.emit("buffering");
 				return false; // Need to buffer more audio.
 			};
 
