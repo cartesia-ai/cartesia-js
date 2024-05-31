@@ -126,7 +126,7 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 		let bufferingTimeout: NodeJS.Timeout | null;
 
 		let bufferDuration: number;
-		if (ping < 400) {
+		if (ping < 275) {
 			bufferDuration = 0; // No buffering for very low latency
 		} else if (ping > 2000) {
 			bufferDuration = 4; // Max buffering for very high latency (4 seconds)
