@@ -57,6 +57,7 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 
 	const stream = useCallback(
 		async (options: object) => {
+			setIsStreamed(false);
 			streamReturn.current = audio?.stream(options) ?? null;
 			if (!streamReturn.current) {
 				return;
