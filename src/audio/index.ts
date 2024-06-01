@@ -26,6 +26,9 @@ export type StreamEventData = {
 	message: unknown;
 	buffering: never;
 	buffered: never;
+	scheduled: {
+		playbackEndsIn: number;
+	};
 };
 export type ConnectionEventData = {
 	open: never;
@@ -192,9 +195,16 @@ export default class extends Client {
 			if (!(await tryStart(chunks))) {
 				for await (const { chunks } of emitter.events("chunk")) {
 					if (await tryStart(chunks)) {
+						const playbackEndsIn =
+							Math.max(0, startNextPlaybackAt - context.currentTime) * 1000;
+						emitter.emit("scheduled", { playbackEndsIn });
 						break;
 					}
 				}
+			} else {
+				const playbackEndsIn =
+					Math.max(0, startNextPlaybackAt - context.currentTime) * 1000;
+				emitter.emit("scheduled", { playbackEndsIn });
 			}
 		};
 

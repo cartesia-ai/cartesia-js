@@ -122,16 +122,17 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 		if (isPlaying || !streamReturn.current) {
 			return;
 		}
+		setIsPlaying(true);
 		const ping = await pingServer(latencyEndpoint);
-		let bufferingTimeout: NodeJS.Timeout | null;
+		let bufferingTimeout: ReturnType<typeof setTimeout> | null;
 
 		let bufferDuration: number;
-		if (ping < 275) {
+		if (ping < 300) {
 			bufferDuration = 0; // No buffering for very low latency
-		} else if (ping > 2000) {
-			bufferDuration = 4; // Max buffering for very high latency (4 seconds)
+		} else if (ping > 1500) {
+			bufferDuration = 6; // Max buffering for very high latency (6 seconds)
 		} else {
-			bufferDuration = (ping / 1000) * 2; // Adjust buffer duration based on ping
+			bufferDuration = (ping / 1000) * 4; // Adjust buffer duration based on ping
 		}
 
 		streamReturn.current.once("buffering").then(() => {
@@ -145,8 +146,15 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 			}
 			setIsBuffering(false);
 		});
+
+		// Wait for the playback to finish before setting isPlaying to false
+		streamReturn.current.once("scheduled").then((data) => {
+			setTimeout(() => {
+				setIsPlaying(false);
+			}, data.playbackEndsIn);
+		});
+
 		await streamReturn.current?.play({ bufferDuration });
-		setIsPlaying(false);
 	}, [isPlaying]);
 
 	// TODO:
