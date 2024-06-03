@@ -6,18 +6,21 @@
 	},
 	"version": "0.0.3",
 	"description": "Client for the Cartesia API.",
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
+	"type": "module",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.mjs",
-			"require": "./dist/index.js"
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
 		},
 		"./react": {
-			"import": "./dist/react/index.mjs",
-			"require": "./dist/react/index.js"
+			"import": "./dist/react/index.js",
+			"require": "./dist/react/index.cjs"
 		}
+	},
+	"engines": {
+		"node": ">=18"
 	},
 	"dependencies": {
 		"base64-js": "^1.5.1",
