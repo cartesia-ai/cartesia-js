@@ -171,6 +171,7 @@ export default class extends Client {
 				startNextPlaybackAt = context.currentTime;
 
 				if (isComplete(chunks) || streamCompleteController.signal.aborted) {
+					emitter.emit("buffered");
 					playChunks(chunks);
 					return true; // Done playing.
 				}
