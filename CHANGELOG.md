@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 0.0.4-alpha.0
+
+### Patch Changes
+
+- 8ecf940: Add provisional Node.js support
+
 ## 0.0.3
 
 ### Patch Changes
