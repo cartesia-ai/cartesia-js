@@ -2,10 +2,15 @@ import Emittery from "emittery";
 import { humanId } from "human-id";
 import { WebSocket } from "partysocket";
 import { Client } from "../lib/client";
-import { SAMPLE_RATE, constructWebsocketUrl } from "../lib/constants";
+import { SAMPLE_RATE, constructApiUrl } from "../lib/constants";
+import type {
+	Chunk,
+	ConnectionEventData,
+	EmitteryCallbacks,
+	StreamEventData,
+	StreamRequest,
+} from "../types";
 import {
-	type EmitteryCallbacks,
-	type Sentinel,
 	createMessageHandlerForContextId,
 	getBufferDuration,
 	getEmitteryCallbacks,
@@ -14,34 +19,7 @@ import {
 	playAudioBuffer,
 } from "./utils";
 
-export type Chunk = string | Sentinel;
-export type StreamEventData = {
-	chunk: {
-		chunk: Chunk;
-		chunks: Chunk[];
-	};
-	streamed: {
-		chunks: Chunk[];
-	};
-	message: unknown;
-	buffering: never;
-	buffered: never;
-	scheduled: {
-		playbackEndsIn: number;
-	};
-};
-export type ConnectionEventData = {
-	open: never;
-	close: never;
-};
-export type StreamRequest = {
-	inputs: object;
-	options: {
-		timeout?: number;
-	};
-};
-
-export default class extends Client {
+export default class TTS extends Client {
 	socket?: WebSocket;
 	isConnected = false;
 
@@ -237,7 +215,7 @@ export default class extends Client {
 	 * @throws {Error} If the WebSocket fails to connect.
 	 */
 	connect() {
-		const url = constructWebsocketUrl(this.baseUrl);
+		const url = constructApiUrl(this.baseUrl, "/audio/websocket", "ws");
 		url.searchParams.set("api_key", this.apiKey);
 		const emitter = new Emittery<ConnectionEventData>();
 		this.socket = new WebSocket(url.toString());

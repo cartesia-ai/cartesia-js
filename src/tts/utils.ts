@@ -1,7 +1,12 @@
 import base64 from "base64-js";
 import type Emittery from "emittery";
-import type { Chunk, StreamEventData } from ".";
 import { SAMPLE_RATE } from "../lib/constants";
+import type {
+	Chunk,
+	EmitteryCallbacks,
+	Sentinel,
+	StreamEventData,
+} from "../types";
 
 /**
  * Get the duration of base64-encoded audio buffer(s) in seconds.
@@ -96,8 +101,6 @@ export function createMessageHandlerForContextId(
 	};
 }
 
-export type Sentinel = null;
-
 /**
  * Get a sentinel value that indicates the end of a stream.
  * @returns A sentinel value to indicate the end of a stream.
@@ -138,12 +141,6 @@ export function isComplete(chunks: Chunk[]) {
 	return isSentinel(chunks[chunks.length - 1]);
 }
 
-export type EmitteryCallbacks<T> = {
-	on: Emittery<T>["on"];
-	off: Emittery<T>["off"];
-	once: Emittery<T>["once"];
-	events: Emittery<T>["events"];
-};
 /**
  * Get user-facing emitter callbacks for an Emittery instance.
  * @param emitter The Emittery instance to get callbacks for.

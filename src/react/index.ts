@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import CartesiaAudio, { type Chunk, type StreamEventData } from "../audio";
-import { base64ToArray, bufferToWav } from "../audio/utils";
 import { SAMPLE_RATE } from "../lib/constants";
+import CartesiaAudio from "../tts";
+import { base64ToArray, bufferToWav } from "../tts/utils";
+import type { Chunk, StreamEventData } from "../types";
 import { pingServer } from "./utils";
 
 export type UseAudioOptions = {
@@ -9,7 +10,7 @@ export type UseAudioOptions = {
 	baseUrl?: string;
 };
 
-interface UseAudioReturn {
+export interface UseAudioReturn {
 	stream: (options: object) => void;
 	play: (bufferDuration?: number) => Promise<void>;
 	download: () => Blob | null;
