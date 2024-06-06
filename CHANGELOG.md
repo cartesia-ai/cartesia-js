@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 1.0.0-alpha.1
+
+### Major Changes
+
+- 3ee5bfc: Initial release of Cartesia client with voices and WebSocket support
+
 ## 0.0.4-alpha.0
 
 ### Patch Changes
