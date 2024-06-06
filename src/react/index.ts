@@ -1,101 +1,123 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SAMPLE_RATE } from "../lib/constants";
-import CartesiaAudio from "../tts";
-import { base64ToArray, bufferToWav } from "../tts/utils";
-import type { Chunk, StreamEventData } from "../types";
+import { Cartesia } from "../lib";
+import Player from "../tts/player";
+import type Source from "../tts/source";
+import type WebSocket from "../tts/websocket";
 import { pingServer } from "./utils";
 
-export type UseAudioOptions = {
+export type UseTTSOptions = {
 	apiKey: string | null;
 	baseUrl?: string;
+	sampleRate: number;
 };
 
-export interface UseAudioReturn {
-	stream: (options: object) => void;
+export type PlaybackStatus = "inactive" | "playing" | "paused" | "finished";
+export type BufferStatus = "inactive" | "buffering" | "buffered";
+
+export type Metrics = {
+	modelLatency: number | null;
+};
+
+export interface UseTTSReturn {
+	buffer: (options: object) => Promise<void>;
 	play: (bufferDuration?: number) => Promise<void>;
-	download: () => Blob | null;
-	isPlaying: boolean;
+	pause: () => Promise<void>;
+	resume: () => Promise<void>;
+	toggle: () => Promise<void>;
+	source: Source | null;
+	playbackStatus: PlaybackStatus;
+	bufferStatus: BufferStatus;
+	isWaiting: boolean;
 	isConnected: boolean;
-	isStreamed: boolean;
-	isBuffering: boolean;
-	chunks: Chunk[];
-	messages: StreamEventData["message"][];
+	metrics: Metrics;
 }
+
+const PING_INTERVAL = 5000;
+const DEFAULT_BUFFER_DURATION = 0.01;
+
+type Message = {
+	step_time: number;
+};
+
 /**
  * React hook to use the Cartesia audio API.
  */
-export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
+export function useTTS({
+	apiKey,
+	baseUrl,
+	sampleRate,
+}: UseTTSOptions): UseTTSReturn {
 	if (typeof window === "undefined") {
 		return {
-			stream: () => {},
+			buffer: async () => {},
 			play: async () => {},
-			download: () => null,
+			pause: async () => {},
+			resume: async () => {},
+			toggle: async () => {},
+			playbackStatus: "inactive",
+			bufferStatus: "inactive",
+			isWaiting: false,
+			source: null,
 			isConnected: false,
-			isPlaying: false,
-			isStreamed: false,
-			isBuffering: false,
-			chunks: [],
-			messages: [],
+			metrics: {
+				modelLatency: null,
+			},
 		};
 	}
 
-	const audio = useMemo(() => {
+	const websocket = useMemo(() => {
 		if (!apiKey) {
 			return null;
 		}
-		const audio = new CartesiaAudio({ apiKey, baseUrl });
-		return audio;
-	}, [apiKey, baseUrl]);
-	const streamReturn = useRef<ReturnType<CartesiaAudio["stream"]> | null>(null);
-	const [isStreamed, setIsStreamed] = useState(false);
-	const [isPlaying, setIsPlaying] = useState(false);
-	const [isBuffering, setIsBuffering] = useState(false);
+		const cartesia = new Cartesia({ apiKey, baseUrl });
+		baseUrl = baseUrl ?? cartesia.baseUrl;
+		return cartesia.tts.websocket({ sampleRate });
+	}, [apiKey, baseUrl, sampleRate]);
+	const websocketReturn = useRef<ReturnType<WebSocket["send"]> | null>(null);
+	const player = useRef<Player | null>(null);
+	const [playbackStatus, setPlaybackStatus] =
+		useState<PlaybackStatus>("inactive");
+	const [bufferStatus, setBufferStatus] = useState<BufferStatus>("inactive");
+	const [isWaiting, setIsWaiting] = useState(false);
 	const [isConnected, setIsConnected] = useState(false);
-	const [chunks, setChunks] = useState<Chunk[]>([]);
-	const [messages, setMessages] = useState<StreamEventData["message"][]>([]);
+	const [bufferDuration, setBufferDuration] = useState<number | null>(null);
+	const [messages, setMessages] = useState<Message[]>([]);
 
-	const latencyEndpoint = "https://api.cartesia.ai";
-
-	const stream = useCallback(
+	const buffer = useCallback(
 		async (options: object) => {
-			setIsStreamed(false);
-			streamReturn.current = audio?.stream(options) ?? null;
-			if (!streamReturn.current) {
+			setMessages([]);
+			setBufferStatus("buffering");
+			websocketReturn.current = websocket?.send(options) ?? null;
+			if (!websocketReturn.current) {
 				return;
 			}
-			setMessages([]);
-			streamReturn.current.on(
-				"chunk",
-				({ chunks }: StreamEventData["chunk"]) => {
-					setChunks(chunks);
-				},
-			);
-			streamReturn.current.on(
-				"message",
-				(message: StreamEventData["message"]) => {
-					setMessages((messages) => [...messages, message]);
-				},
-			);
-			const { chunks } = await streamReturn.current.once("streamed");
-			setChunks(chunks);
-			setIsStreamed(true);
+			websocketReturn.current.on("message", (message) => {
+				setMessages((messages) => [...messages, JSON.parse(message)]);
+			});
+			await websocketReturn.current.source.once("close");
+			setBufferStatus("buffered");
 		},
-		[audio],
+		[websocket],
 	);
 
-	const download = useCallback(() => {
-		if (!isStreamed) {
-			return null;
+	const metrics = useMemo(() => {
+		// Model Latency is the first step time
+		if (messages.length === 0) {
+			return {
+				modelLatency: null,
+			};
 		}
-		const audio = bufferToWav(SAMPLE_RATE, [base64ToArray(chunks)]);
-		return new Blob([audio], { type: "audio/wav" });
-	}, [isStreamed, chunks]);
+		const modelLatency = messages[0].step_time ?? null;
+		return {
+			modelLatency: Math.trunc(modelLatency),
+		};
+	}, [messages]);
 
 	useEffect(() => {
 		let cleanup: (() => void) | undefined = () => {};
 		async function setupConnection() {
 			try {
-				const connection = await audio?.connect();
+				const connection = await websocket?.connect();
 				if (!connection) {
 					return;
 				}
@@ -106,9 +128,25 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 				const unsubscribe = connection.on("close", () => {
 					setIsConnected(false);
 				});
+				const intervalId = setInterval(() => {
+					if (baseUrl) {
+						pingServer(new URL(baseUrl).origin).then((ping) => {
+							let bufferDuration: number;
+							if (ping < 300) {
+								bufferDuration = 0.01; // No buffering for very low latency
+							} else if (ping > 1500) {
+								bufferDuration = 6; // Max buffering for very high latency (6 seconds)
+							} else {
+								bufferDuration = (ping / 1000) * 4; // Adjust buffer duration based on ping
+							}
+							setBufferDuration(bufferDuration);
+						});
+					}
+				}, PING_INTERVAL);
 				return () => {
 					unsubscribe();
-					audio?.disconnect();
+					clearInterval(intervalId);
+					websocket?.disconnect();
 				};
 			} catch (e) {
 				console.error(e);
@@ -118,62 +156,77 @@ export function useAudio({ apiKey, baseUrl }: UseAudioOptions): UseAudioReturn {
 			cleanup = cleanupConnection;
 		});
 		return () => cleanup?.();
-	}, [audio]);
+	}, [websocket, baseUrl]);
 
 	const play = useCallback(async () => {
-		if (isPlaying || !streamReturn.current) {
+		if (playbackStatus === "playing" || !websocketReturn.current) {
 			return;
 		}
-		setIsPlaying(true);
-		const ping = await pingServer(latencyEndpoint);
-		let bufferingTimeout: ReturnType<typeof setTimeout> | null;
+		setPlaybackStatus("playing");
 
-		let bufferDuration: number;
-		if (ping < 300) {
-			bufferDuration = 0; // No buffering for very low latency
-		} else if (ping > 1500) {
-			bufferDuration = 6; // Max buffering for very high latency (6 seconds)
-		} else {
-			bufferDuration = (ping / 1000) * 4; // Adjust buffer duration based on ping
+		const unsubscribes = [];
+		unsubscribes.push(
+			websocketReturn.current.source.on("wait", () => {
+				setIsWaiting(true);
+			}),
+		);
+		unsubscribes.push(
+			websocketReturn.current.source.on("read", () => {
+				setIsWaiting(false);
+			}),
+		);
+
+		player.current = new Player({
+			bufferDuration: bufferDuration ?? DEFAULT_BUFFER_DURATION,
+		});
+		// Wait for the playback to finish before setting isPlaying to false.
+		await player.current.play(websocketReturn.current.source);
+
+		for (const unsubscribe of unsubscribes) {
+			// Deregister the event listeners (.on()) that we registered above to avoid memory leaks.
+			unsubscribe();
 		}
 
-		streamReturn.current.once("buffering").then(() => {
-			bufferingTimeout = setTimeout(() => {
-				setIsBuffering(true);
-			}, 250); // Delay for 250ms before showing buffering indicator
-		});
-		streamReturn.current.once("buffered").then(() => {
-			if (bufferingTimeout) {
-				clearTimeout(bufferingTimeout); // Clear the timeout if buffering completes before 500ms
+		setPlaybackStatus("finished");
+	}, [playbackStatus, bufferDuration]);
+
+	const pause = useCallback(async () => {
+		await player.current?.pause();
+		setPlaybackStatus("paused");
+	}, []);
+
+	const resume = useCallback(async () => {
+		await player.current?.resume();
+		setPlaybackStatus("playing");
+	}, []);
+
+	const toggle = useCallback(async () => {
+		await player.current?.toggle();
+		setPlaybackStatus((status) => {
+			if (status === "playing") {
+				return "paused";
 			}
-			setIsBuffering(false);
+			if (status === "paused") {
+				return "playing";
+			}
+			return status;
 		});
-
-		// Wait for the playback to finish before setting isPlaying to false
-		streamReturn.current.once("scheduled").then((data) => {
-			setTimeout(() => {
-				setIsPlaying(false);
-			}, data.playbackEndsIn);
-		});
-
-		await streamReturn.current?.play({ bufferDuration });
-	}, [isPlaying]);
+	}, []);
 
 	// TODO:
-	// - [] Pause and stop playback.
 	// - [] Access the play and buffer cursors.
 	// - [] Seek to a specific time.
-	// These are probably best implemented by adding event listener
-	// functionality to the base library.
 	return {
-		stream,
+		buffer,
 		play,
-		download,
-		isPlaying,
+		pause,
+		source: websocketReturn.current?.source ?? null,
+		resume,
+		toggle,
+		playbackStatus,
+		bufferStatus,
+		isWaiting,
 		isConnected,
-		isStreamed,
-		isBuffering,
-		chunks,
-		messages,
+		metrics,
 	};
 }

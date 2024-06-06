@@ -9,22 +9,6 @@ export type Sentinel = null;
 
 export type Chunk = string | Sentinel;
 
-export type StreamEventData = {
-	chunk: {
-		chunk: Chunk;
-		chunks: Chunk[];
-	};
-	streamed: {
-		chunks: Chunk[];
-	};
-	message: unknown;
-	buffering: never;
-	buffered: never;
-	scheduled: {
-		playbackEndsIn: number;
-	};
-};
-
 export type ConnectionEventData = {
 	open: never;
 	close: never;
@@ -69,4 +53,15 @@ export type CreateVoice = Pick<Voice, "name" | "description" | "embedding"> &
 
 export type CloneResponse = {
 	embedding: number[];
+};
+
+export type WebSocketOptions = {
+	sampleRate: number;
+};
+
+export type SourceEventData = {
+	enqueue: never;
+	close: never;
+	wait: never;
+	read: never;
 };
