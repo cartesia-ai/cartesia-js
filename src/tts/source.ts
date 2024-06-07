@@ -3,8 +3,9 @@ import type { SourceEventData } from "../types";
 
 export default class Source {
 	#emitter = new Emittery<SourceEventData>();
-	#buffer = new Float32Array();
+	#buffer: Float32Array;
 	#readIndex = 0;
+	#writeIndex = 0;
 	#closed = false;
 	#sampleRate: number;
 
@@ -21,6 +22,7 @@ export default class Source {
 	 */
 	constructor({ sampleRate }: { sampleRate: number }) {
 		this.#sampleRate = sampleRate;
+		this.#buffer = new Float32Array(1024); // Initial size, can be adjusted
 	}
 
 	get sampleRate() {
@@ -33,8 +35,23 @@ export default class Source {
 	 * @param src The audio to append.
 	 */
 	async enqueue(src: Float32Array) {
+		const requiredCapacity = this.#writeIndex + src.length;
+
+		// Resize buffer if necessary
+		if (requiredCapacity > this.#buffer.length) {
+			let newCapacity = this.#buffer.length;
+			while (newCapacity < requiredCapacity) {
+				newCapacity *= 2; // Double the buffer size
+			}
+
+			const newBuffer = new Float32Array(newCapacity);
+			newBuffer.set(this.#buffer);
+			this.#buffer = newBuffer;
+		}
+
 		// Append the audio to the buffer.
-		this.#buffer = new Float32Array([...this.#buffer, ...src]);
+		this.#buffer.set(src, this.#writeIndex);
+		this.#writeIndex += src.length;
 		await this.#emitter.emit("enqueue");
 	}
 
@@ -49,7 +66,7 @@ export default class Source {
 		// Read the buffer into the provided buffer.
 		const targetReadIndex = this.#readIndex + dst.length;
 
-		while (!this.#closed && targetReadIndex > this.#buffer.length) {
+		while (!this.#closed && targetReadIndex > this.#writeIndex) {
 			// Wait for more audio to be enqueued.
 			await this.#emitter.emit("wait");
 			await Promise.race([
@@ -59,8 +76,8 @@ export default class Source {
 			await this.#emitter.emit("read");
 		}
 
-		const read = Math.min(dst.length, this.#buffer.length - this.#readIndex);
-		dst.set(this.#buffer.slice(this.#readIndex, this.#readIndex + read));
+		const read = Math.min(dst.length, this.#writeIndex - this.#readIndex);
+		dst.set(this.#buffer.subarray(this.#readIndex, this.#readIndex + read));
 		this.#readIndex += read;
 		return read;
 	}

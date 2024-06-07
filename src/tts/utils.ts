@@ -10,13 +10,21 @@ import type { Chunk, EmitteryCallbacks, Sentinel } from "../types";
  * @returns The audio buffer(s) as a Float32Array.
  */
 export function base64ToArray(b64: Chunk[]): Float32Array {
-	return filterSentinel(b64).reduce((acc, b) => {
-		const floats = new Float32Array(base64.toByteArray(b).buffer);
-		const newAcc = new Float32Array(acc.length + floats.length);
-		newAcc.set(acc, 0);
-		newAcc.set(floats, acc.length);
-		return newAcc;
-	}, new Float32Array(0));
+	const byteArrays = filterSentinel(b64).map((b) => base64.toByteArray(b));
+	const totalLength = byteArrays.reduce(
+		(acc, arr) => acc + arr.length / Float32Array.BYTES_PER_ELEMENT,
+		0,
+	);
+	const result = new Float32Array(totalLength);
+
+	let offset = 0;
+	for (const arr of byteArrays) {
+		const floats = new Float32Array(arr.buffer);
+		result.set(floats, offset);
+		offset += floats.length;
+	}
+
+	return result;
 }
 
 /**

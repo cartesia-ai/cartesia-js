@@ -54,7 +54,8 @@ export default class Player {
 			// If we've reached the end of the source, then read < buffer.length.
 			// In that case, we don't want to play the entire buffer, as that
 			// will cause repeated audio.
-			const playableAudio = buffer.slice(0, read);
+			// So we set the buffer to the correct length.
+			const playableAudio = buffer.subarray(0, read);
 			plays.push(this.#playBuffer(playableAudio, source.sampleRate));
 
 			if (read < buffer.length) {

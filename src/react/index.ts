@@ -1,3 +1,4 @@
+import type { UnsubscribeFunction } from "emittery";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Cartesia } from "../lib";
 import Player from "../tts/player";
@@ -91,11 +92,12 @@ export function useTTS({
 			if (!websocketReturn.current) {
 				return;
 			}
-			websocketReturn.current.on("message", (message) => {
+			const unsubscribe = websocketReturn.current.on("message", (message) => {
 				setMessages((messages) => [...messages, JSON.parse(message)]);
 			});
 			await websocketReturn.current.source.once("close");
 			setBufferStatus("buffered");
+			unsubscribe();
 		},
 		[websocket],
 	);
@@ -121,13 +123,21 @@ export function useTTS({
 				if (!connection) {
 					return;
 				}
+				const unsubscribes = <UnsubscribeFunction[]>[];
+				// The await ensures that the connection is open, so we already know that we are connected.
 				setIsConnected(true);
-				connection.on("open", () => {
-					setIsConnected(true);
-				});
-				const unsubscribe = connection.on("close", () => {
-					setIsConnected(false);
-				});
+				// If the WebSocket is the kind that automatically reconnects, we need an additional
+				// listener for the open event to update the connection status.
+				unsubscribes.push(
+					connection.on("open", () => {
+						setIsConnected(true);
+					}),
+				);
+				unsubscribes.push(
+					connection.on("close", () => {
+						setIsConnected(false);
+					}),
+				);
 				const intervalId = setInterval(() => {
 					if (baseUrl) {
 						pingServer(new URL(baseUrl).origin).then((ping) => {
@@ -144,7 +154,9 @@ export function useTTS({
 					}
 				}, PING_INTERVAL);
 				return () => {
-					unsubscribe();
+					for (const unsubscribe of unsubscribes) {
+						unsubscribe();
+					}
 					clearInterval(intervalId);
 					websocket?.disconnect();
 				};
