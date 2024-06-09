@@ -1,6 +1,6 @@
 import fetch from "cross-fetch";
 import type { ClientOptions } from "../types";
-import { BASE_URL, constructApiUrl } from "./constants";
+import { BASE_URL, CARTESIA_VERSION, constructApiUrl } from "./constants";
 
 export class Client {
 	apiKey: string;
@@ -22,7 +22,8 @@ export class Client {
 		return fetch(url.toString(), {
 			...options,
 			headers: {
-				"X-API-KEY": this.apiKey,
+				"X-API-Key": this.apiKey,
+				"Cartesia-Version": CARTESIA_VERSION,
 				...options.headers,
 			},
 		});
