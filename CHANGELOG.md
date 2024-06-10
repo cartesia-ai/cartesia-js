@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 1.0.0-alpha.2
+
+### Patch Changes
+
+- 585d2c9: Makes JS client compatible with the Cartesia Stable API (2024-06-10)
+
 ## 1.0.0-alpha.1
 
 ### Major Changes
