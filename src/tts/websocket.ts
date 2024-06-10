@@ -2,7 +2,7 @@ import Emittery from "emittery";
 import { humanId } from "human-id";
 import { WebSocket as PartySocketWebSocket } from "partysocket";
 import { Client } from "../lib/client";
-import { constructApiUrl } from "../lib/constants";
+import { CARTESIA_VERSION, constructApiUrl } from "../lib/constants";
 import type {
 	ConnectionEventData,
 	EmitteryCallbacks,
@@ -150,7 +150,11 @@ export default class WebSocket extends Client {
 	 * @throws {Error} If the WebSocket fails to connect.
 	 */
 	connect() {
-		const url = constructApiUrl(this.baseUrl, "/tts/websocket", "ws");
+		const url = constructApiUrl(
+			this.baseUrl,
+			`/tts/websocket?cartesia_version=${CARTESIA_VERSION}`,
+			"ws",
+		);
 		url.searchParams.set("api_key", this.apiKey);
 		const emitter = new Emittery<ConnectionEventData>();
 		this.socket = new PartySocketWebSocket(url.toString());
