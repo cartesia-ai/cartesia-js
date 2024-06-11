@@ -126,7 +126,7 @@ import { useTTS } from '@cartesia/cartesia-js/react';
 function TextToSpeech() {
 	const tts = useTTS({
 		apiKey: "your-api-key",
-		samplingRate: 44100,
+		sampleRate: 44100,
 	})
 
 	const [text, setText] = useState("");
@@ -134,7 +134,7 @@ function TextToSpeech() {
 	const handlePlay = async () => {
 		// Begin buffering the audio.
 		const response = await tts.buffer({
-			model: "upbeat-moon",
+			model_id: "upbeat-moon",
 			voice: {
 				mode: "embedding",
 				embedding: Array(192).fill(1.0),
