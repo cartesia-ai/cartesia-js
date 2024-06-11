@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 1.0.0-alpha.3
+
+### Patch Changes
+
+- 38af01f: Fix how URLs are constructed, solving WebSocket connection failure
+
 ## 1.0.0-alpha.2
 
 ### Patch Changes
