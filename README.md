@@ -1,4 +1,12 @@
-# JavaScript Client for Cartesia
+# Cartesia JavaScript Client
+
+![NPM Version](https://img.shields.io/npm/v/%40cartesia%2Fcartesia-js?logo=npm)
+[![Discord](https://badgen.net/badge/black/Cartesia/icon?icon=discord&label)](https://discord.gg/ZVxavqHB9X)
+
+This client provides convenient access to [Cartesia's TTS models](https://cartesia.ai/). Sonic is the fastest text-to-speech model around—it can generate a second of audio in just 650ms, and it can stream out the first audio chunk in just 135ms. Alongside Sonic, we also offer an extensive prebuilt voice library for a variety of use cases.
+
+The full API documentation can be found on docs.cartesia.ai.
+
 
 ## Installation
 
@@ -98,10 +106,10 @@ for await (const message of response.events('message')) {
 
 #### Playing audio in the browser
 
-(We currently only support playing audio in the browser. Support for other JS environments is coming soon.)
+(The `WebPlayer` class only supports playing audio in the browser.)
 
 ```js
-// If you're using the client in the browser, you can play the audio like this:
+// If you're using the client in the browser, you can control audio playback using our WebPlayer:
 import { WebPlayer } from "@cartesia/cartesia-js";
 
 console.log("Playing stream...");
@@ -118,7 +126,7 @@ console.log("Done playing.");
 
 ## React
 
-We export a React hook that simplifies the process of using the TTS API. The hook manages the WebSocket connection and provides a simple interface for buffering and playing audio.
+We export a React hook that simplifies the process of using the TTS API. The hook manages the WebSocket connection and provides a simple interface for buffering, playing, pausing and restarting audio.
 
 ```jsx
 import { useTTS } from '@cartesia/cartesia-js/react';

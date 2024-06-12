@@ -103,7 +103,15 @@ export default class Player {
 		}
 	}
 
+	/**
+	 * Stop the audio.
+	 *
+	 * @returns A promise that resolves when the audio has been stopped.
+	 */
 	async stop() {
+		if (!this.#context) {
+			throw new Error("AudioContext not initialized.");
+		}
 		await this.#context?.close();
 	}
 }

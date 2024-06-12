@@ -232,9 +232,6 @@ export function useTTS({
 		});
 	}, []);
 
-	// TODO:
-	// - [] Access the play and buffer cursors.
-	// - [] Seek to a specific time.
 	return {
 		buffer,
 		play,

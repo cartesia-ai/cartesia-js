@@ -1,5 +1,22 @@
 # @cartesia/cartesia-js
 
+## 1.0.0
+
+### Major Changes
+
+- 3ee5bfc: Initial release of Cartesia client with voices and WebSocket support
+
+### Minor Changes
+
+- e49f73a: Stabilize audio playback in the browser to support play/pause functionality.
+
+### Patch Changes
+
+- c98a0c7: Fix typo in README
+- 38af01f: Fix how URLs are constructed, solving WebSocket connection failure
+- 8ecf940: Add provisional Node.js support
+- 585d2c9: Makes JS client compatible with the Cartesia Stable API (2024-06-10)
+
 ## 1.0.0-alpha.4
 
 ### Patch Changes
