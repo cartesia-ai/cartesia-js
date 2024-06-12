@@ -37,13 +37,15 @@ export default class WebSocket extends Client {
 	}
 
 	/**
-	 * Send a message over the WebSocket in order to start a stream.
+	 * Send a message over the WebSocket to start a stream.
 	 *
 	 * @param inputs - Stream options.
 	 * @param options - Options for the stream.
 	 * @param options.timeout - The maximum time to wait for a chunk before cancelling the stream.
-	 * If `0`, the stream will not time out.
+	 *                          If set to `0`, the stream will not time out.
 	 * @returns A Source object that can be passed to a Player to play the audio.
+	 * @returns An Emittery instance that emits messages from the WebSocket.
+	 * @returns An abort function that can be called to cancel the stream.
 	 */
 	send(
 		inputs: StreamRequest["inputs"],
@@ -125,7 +127,11 @@ export default class WebSocket extends Client {
 			}
 		});
 
-		return { source, ...getEmitteryCallbacks(emitter) };
+		return {
+			source,
+			...getEmitteryCallbacks(emitter),
+			stop: streamCompleteController.abort.bind(streamCompleteController),
+		};
 	}
 
 	/**

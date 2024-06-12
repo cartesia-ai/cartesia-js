@@ -1,16 +1,10 @@
-import Emittery from "emittery";
 import type Source from "./source";
 import { playAudioBuffer } from "./utils";
-
-type PlayEventData = {
-	finish: never;
-};
 
 export default class Player {
 	#context: AudioContext | null = null;
 	#startNextPlaybackAt = 0;
 	#bufferDuration: number;
-	#emitter = new Emittery<PlayEventData>();
 
 	/**
 	 * Create a new Player.
@@ -25,6 +19,9 @@ export default class Player {
 	async #playBuffer(buf: Float32Array, sampleRate: number) {
 		if (!this.#context) {
 			throw new Error("AudioContext not initialized.");
+		}
+		if (buf.length === 0) {
+			return;
 		}
 
 		const startAt = this.#startNextPlaybackAt;
@@ -60,11 +57,9 @@ export default class Player {
 
 			if (read < buffer.length) {
 				// No more audio to read.
-				await this.#emitter.emit("finish");
 				break;
 			}
 		}
-
 		await Promise.all(plays);
 	}
 
@@ -106,5 +101,9 @@ export default class Player {
 		} else {
 			await this.resume();
 		}
+	}
+
+	async stop() {
+		await this.#context?.close();
 	}
 }

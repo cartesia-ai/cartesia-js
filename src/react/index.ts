@@ -86,6 +86,8 @@ export function useTTS({
 
 	const buffer = useCallback(
 		async (options: object) => {
+			websocketReturn.current?.stop(); // Abort the previous request if it exists.
+
 			setMessages([]);
 			setBufferStatus("buffering");
 			websocketReturn.current = websocket?.send(options) ?? null;
@@ -174,6 +176,11 @@ export function useTTS({
 		if (playbackStatus === "playing" || !websocketReturn.current) {
 			return;
 		}
+		if (player.current) {
+			// Stop the current player if it exists.
+			await player.current.stop();
+		}
+
 		setPlaybackStatus("playing");
 
 		const unsubscribes = [];
