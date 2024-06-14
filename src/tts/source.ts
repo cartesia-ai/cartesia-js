@@ -100,6 +100,10 @@ export default class Source {
 		return this.#readIndex;
 	}
 
+	get writeIndex() {
+		return this.#writeIndex;
+	}
+
 	/**
 	 * Close the source. This signals that no more audio will be enqueued.
 	 *
