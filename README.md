@@ -81,7 +81,7 @@ try {
 
 // Create a stream.
 const response = await websocket.send({
-	model: "upbeat-moon",
+	model: "sonic-english",
 	voice: {
 		mode: "embedding",
 		embedding: Array(192).fill(1.0),
@@ -142,7 +142,7 @@ function TextToSpeech() {
 	const handlePlay = async () => {
 		// Begin buffering the audio.
 		const response = await tts.buffer({
-			model_id: "upbeat-moon",
+			model_id: "sonic-english",
 			voice: {
 				mode: "embedding",
 				embedding: Array(192).fill(1.0),
