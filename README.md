@@ -104,6 +104,12 @@ for await (const message of response.events('message')) {
 }
 ```
 
+#### Multilingual TTS [Alpha]
+
+You can define the language of the text you want to synthesize by setting the `language` field in the request object. Make sure that you are using `model: "sonic-multilingual"` in the request object.
+
+Supported languages are available at [docs.cartesia.ai](https://docs.cartesia.ai/getting-started/available-models).
+
 #### Playing audio in the browser
 
 (The `WebPlayer` class only supports playing audio in the browser.)
