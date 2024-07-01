@@ -70,8 +70,12 @@ const cartesia = new Cartesia({
 	apiKey: "your-api-key",
 });
 
-// Initialize the WebSocket. Make sure the sample rate you specify is supported.
-const websocket = cartesia.tts.websocket({ sampleRate: 44100 });
+// Initialize the WebSocket. Make sure the output format you specify is supported.
+const websocket = cartesia.tts.websocket({ 
+	container: "raw",
+	encoding: "pcm_f32le",
+	sampleRate: 44100
+});
 
 try {
 	await websocket.connect();
@@ -81,14 +85,13 @@ try {
 
 // Create a stream.
 const response = await websocket.send({
-	model: "sonic-english",
+	model_id: "sonic-english",
 	voice: {
 		mode: "embedding",
 		embedding: Array(192).fill(1.0),
 	},
 	transcript: "Hello, world!"
 	// The WebSocket sets output_format on your behalf.
-	// The container is "raw" and the encoding is "pcm_f32le".
 });
 
 // Access the raw messages from the WebSocket.
@@ -106,13 +109,13 @@ for await (const message of response.events('message')) {
 
 #### Multilingual TTS [Alpha]
 
-You can define the language of the text you want to synthesize by setting the `language` field in the request object. Make sure that you are using `model: "sonic-multilingual"` in the request object.
+You can define the language of the text you want to synthesize by setting the `language` field in the request object. Make sure that you are using `model_id: "sonic-multilingual"` in the request object.
 
 Supported languages are available at [docs.cartesia.ai](https://docs.cartesia.ai/getting-started/available-models).
 
 #### Playing audio in the browser
 
-(The `WebPlayer` class only supports playing audio in the browser.)
+(The `WebPlayer` class only supports playing audio in the browser and the raw PCM format with fp32le encoding.)
 
 ```js
 // If you're using the client in the browser, you can control audio playback using our WebPlayer:

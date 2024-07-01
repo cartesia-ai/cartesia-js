@@ -1,13 +1,20 @@
 import Emittery from "emittery";
-import type { SourceEventData } from "../types";
+import {
+	type Encoding,
+	EncodingMap,
+	type SourceEventData,
+	type TypedArray,
+} from "../types";
 
 export default class Source {
 	#emitter = new Emittery<SourceEventData>();
-	#buffer: Float32Array;
+	#buffer: TypedArray;
 	#readIndex = 0;
 	#writeIndex = 0;
 	#closed = false;
 	#sampleRate: number;
+	#encoding: Encoding;
+	#container: string;
 
 	on = this.#emitter.on.bind(this.#emitter);
 	once = this.#emitter.once.bind(this.#emitter);
@@ -20,13 +27,38 @@ export default class Source {
 	 * @param options - Options for the Source.
 	 * @param options.sampleRate - The sample rate of the audio.
 	 */
-	constructor({ sampleRate }: { sampleRate: number }) {
+	constructor({
+		sampleRate,
+		encoding,
+		container,
+	}: { sampleRate: number; encoding: string; container: string }) {
 		this.#sampleRate = sampleRate;
-		this.#buffer = new Float32Array(1024); // Initial size, can be adjusted
+		this.#encoding = encoding as Encoding;
+		this.#container = container;
+		this.#buffer = this.#createBuffer(1024); // Initial size, can be adjusted
 	}
 
 	get sampleRate() {
 		return this.#sampleRate;
+	}
+
+	get encoding() {
+		return this.#encoding;
+	}
+
+	get container() {
+		return this.#container;
+	}
+
+	/**
+	 * Create a new buffer for the source.
+	 *
+	 * @param size - The size of the buffer to create.
+	 * @returns The new buffer as a TypedArray based on the encoding.
+	 */
+	#createBuffer(size: number): TypedArray {
+		const { arrayType: ArrayType } = EncodingMap[this.#encoding];
+		return new ArrayType(size);
 	}
 
 	/**
@@ -34,7 +66,7 @@ export default class Source {
 	 *
 	 * @param src The audio to append.
 	 */
-	async enqueue(src: Float32Array) {
+	async enqueue(src: TypedArray) {
 		const requiredCapacity = this.#writeIndex + src.length;
 
 		// Resize buffer if necessary
@@ -44,7 +76,7 @@ export default class Source {
 				newCapacity *= 2; // Double the buffer size
 			}
 
-			const newBuffer = new Float32Array(newCapacity);
+			const newBuffer = this.#createBuffer(newCapacity);
 			newBuffer.set(this.#buffer);
 			this.#buffer = newBuffer;
 		}
@@ -62,7 +94,7 @@ export default class Source {
 	 * @returns The number of samples read. If the source is closed, this will be
 	 * less than the length of the provided buffer.
 	 */
-	async read(dst: Float32Array): Promise<number> {
+	async read(dst: TypedArray): Promise<number> {
 		// Read the buffer into the provided buffer.
 		const targetReadIndex = this.#readIndex + dst.length;
 

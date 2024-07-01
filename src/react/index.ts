@@ -4,6 +4,7 @@ import { Cartesia } from "../lib";
 import Player from "../tts/player";
 import type Source from "../tts/source";
 import type WebSocket from "../tts/websocket";
+import type { StreamRequest } from "../types";
 import { pingServer } from "./utils";
 
 export type UseTTSOptions = {
@@ -20,7 +21,7 @@ export type Metrics = {
 };
 
 export interface UseTTSReturn {
-	buffer: (options: object) => Promise<void>;
+	buffer: (options: StreamRequest) => Promise<void>;
 	play: (bufferDuration?: number) => Promise<void>;
 	pause: () => Promise<void>;
 	resume: () => Promise<void>;
@@ -72,7 +73,11 @@ export function useTTS({
 		}
 		const cartesia = new Cartesia({ apiKey, baseUrl });
 		baseUrl = baseUrl ?? cartesia.baseUrl;
-		return cartesia.tts.websocket({ sampleRate });
+		return cartesia.tts.websocket({
+			container: "raw",
+			encoding: "pcm_f32le",
+			sampleRate,
+		});
 	}, [apiKey, baseUrl, sampleRate]);
 	const websocketReturn = useRef<ReturnType<WebSocket["send"]> | null>(null);
 	const player = useRef<Player | null>(null);
@@ -85,7 +90,7 @@ export function useTTS({
 	const [messages, setMessages] = useState<Message[]>([]);
 
 	const buffer = useCallback(
-		async (options: object) => {
+		async (options: StreamRequest) => {
 			websocketReturn.current?.stop(); // Abort the previous request if it exists.
 
 			setMessages([]);

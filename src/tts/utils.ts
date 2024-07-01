@@ -1,25 +1,37 @@
 import base64 from "base64-js";
 import type Emittery from "emittery";
-import type { Chunk, EmitteryCallbacks, Sentinel } from "../types";
+import {
+	type Chunk,
+	type EmitteryCallbacks,
+	type Encoding,
+	EncodingMap,
+	type Sentinel,
+	type TypedArray,
+} from "../types";
 
 /**
- * Convert base64-encoded audio buffer(s) to a Float32Array.
+ * Convert base64-encoded audio buffer(s) to a TypedArray.
  *
  * @param b64 The base64-encoded audio buffer, or an array of base64-encoded
  * audio buffers.
- * @returns The audio buffer(s) as a Float32Array.
+ * @param encoding The encoding of the audio buffer(s).
+ * @returns The audio buffer(s) as a TypedArray.
  */
-export function base64ToArray(b64: Chunk[]): Float32Array {
+export function base64ToArray(b64: Chunk[], encoding: string): TypedArray {
 	const byteArrays = filterSentinel(b64).map((b) => base64.toByteArray(b));
+
+	const { arrayType: ArrayType, bytesPerElement } =
+		EncodingMap[encoding as Encoding];
+
 	const totalLength = byteArrays.reduce(
-		(acc, arr) => acc + arr.length / Float32Array.BYTES_PER_ELEMENT,
+		(acc, arr) => acc + arr.length / bytesPerElement,
 		0,
 	);
-	const result = new Float32Array(totalLength);
+	const result = new ArrayType(totalLength);
 
 	let offset = 0;
 	for (const arr of byteArrays) {
-		const floats = new Float32Array(arr.buffer);
+		const floats = new ArrayType(arr.buffer);
 		result.set(floats, offset);
 		offset += floats.length;
 	}

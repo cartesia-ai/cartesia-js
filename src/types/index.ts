@@ -14,9 +14,30 @@ export type ConnectionEventData = {
 	close: never;
 };
 
+export type VoiceOptions =
+	| {
+			mode: "id";
+			id: string;
+	  }
+	| {
+			mode: "embedding";
+			embedding: number[];
+	  };
+
 export type StreamRequest = {
-	inputs: object;
-	options: {
+	model_id: string;
+	transcript: string;
+	voice: VoiceOptions;
+	output_format?: {
+		container?: string;
+		encoding?: string;
+		sample_rate?: number;
+	};
+	context_id?: string;
+	continue?: boolean;
+	duration?: number;
+	language?: string;
+	options?: {
 		timeout?: number;
 	};
 };
@@ -56,6 +77,8 @@ export type CloneResponse = {
 };
 
 export type WebSocketOptions = {
+	container?: string;
+	encoding?: string;
 	sampleRate: number;
 };
 
@@ -64,4 +87,23 @@ export type SourceEventData = {
 	close: never;
 	wait: never;
 	read: never;
+};
+
+export type TypedArray = Float32Array | Int16Array | Uint8Array;
+
+export type Encoding = "pcm_f32le" | "pcm_s16le" | "pcm_alaw" | "pcm_mulaw";
+
+export type EncodingInfo = {
+	arrayType:
+		| Float32ArrayConstructor
+		| Int16ArrayConstructor
+		| Uint8ArrayConstructor;
+	bytesPerElement: number;
+};
+
+export const EncodingMap: Record<Encoding, EncodingInfo> = {
+	pcm_f32le: { arrayType: Float32Array, bytesPerElement: 4 },
+	pcm_s16le: { arrayType: Int16Array, bytesPerElement: 2 },
+	pcm_alaw: { arrayType: Uint8Array, bytesPerElement: 1 },
+	pcm_mulaw: { arrayType: Uint8Array, bytesPerElement: 1 },
 };

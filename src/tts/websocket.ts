@@ -21,6 +21,8 @@ export default class WebSocket extends Client {
 	socket?: PartySocketWebSocket;
 	#isConnected = false;
 	#sampleRate: number;
+	#container: string;
+	#encoding: string;
 
 	/**
 	 * Create a new WebSocket client.
@@ -28,18 +30,20 @@ export default class WebSocket extends Client {
 	 * @param args - Arguments to pass to the Client constructor.
 	 */
 	constructor(
-		{ sampleRate }: WebSocketOptions,
+		{ sampleRate, container, encoding }: WebSocketOptions,
 		...args: ConstructorParameters<typeof Client>
 	) {
 		super(...args);
 
 		this.#sampleRate = sampleRate;
+		this.#container = container ?? "raw"; // Default to raw audio for backwards compatibility.
+		this.#encoding = encoding ?? "pcm_f32le"; // Default to 32-bit floating point PCM for backwards compatibility.
 	}
 
 	/**
 	 * Send a message over the WebSocket to start a stream.
 	 *
-	 * @param inputs - Stream options.
+	 * @param inputs - Stream options. Defined in the StreamRequest type.
 	 * @param options - Options for the stream.
 	 * @param options.timeout - The maximum time to wait for a chunk before cancelling the stream.
 	 *                          If set to `0`, the stream will not time out.
@@ -48,24 +52,28 @@ export default class WebSocket extends Client {
 	 * @returns An abort function that can be called to cancel the stream.
 	 */
 	send(
-		inputs: StreamRequest["inputs"],
+		{ ...inputs }: StreamRequest,
 		{ timeout = 0 }: StreamRequest["options"] = {},
 	) {
 		if (!this.#isConnected) {
 			throw new Error("Not connected to WebSocket. Call .connect() first.");
 		}
 
+		if (!inputs.context_id) {
+			inputs.context_id = this.#generateId();
+		}
+		if (!inputs.output_format) {
+			inputs.output_format = {
+				container: this.#container,
+				encoding: this.#encoding,
+				sample_rate: this.#sampleRate,
+			};
+		}
+
 		// Send audio request.
-		const contextId = this.#generateId();
 		this.socket?.send(
 			JSON.stringify({
-				context_id: contextId,
 				...inputs,
-				output_format: {
-					container: "raw",
-					encoding: "pcm_f32le",
-					sample_rate: this.#sampleRate,
-				},
 			}),
 		);
 
@@ -74,6 +82,8 @@ export default class WebSocket extends Client {
 		}>();
 		const source = new Source({
 			sampleRate: this.#sampleRate,
+			encoding: this.#encoding,
+			container: this.#container,
 		});
 		// Used to signal that the stream is complete, either because the
 		// WebSocket has closed, or because the stream has finished.
@@ -84,7 +94,7 @@ export default class WebSocket extends Client {
 			timeoutId = setTimeout(streamCompleteController.abort, timeout);
 		}
 		const handleMessage = createMessageHandlerForContextId(
-			contextId,
+			inputs.context_id,
 			async ({ chunk, message }) => {
 				emitter.emit("message", message);
 				if (isSentinel(chunk)) {
@@ -92,7 +102,7 @@ export default class WebSocket extends Client {
 					streamCompleteController.abort();
 					return;
 				}
-				await source.enqueue(base64ToArray([chunk]));
+				await source.enqueue(base64ToArray([chunk], this.#encoding));
 				if (timeoutId) {
 					clearTimeout(timeoutId);
 					timeoutId = setTimeout(streamCompleteController.abort, timeout);
