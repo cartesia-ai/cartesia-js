@@ -11,6 +11,7 @@ export type UseTTSOptions = {
 	apiKey: string | null;
 	baseUrl?: string;
 	sampleRate: number;
+	onError?: (error: Error) => void;
 };
 
 export type PlaybackStatus = "inactive" | "playing" | "paused" | "finished";
@@ -48,6 +49,7 @@ export function useTTS({
 	apiKey,
 	baseUrl,
 	sampleRate,
+	onError,
 }: UseTTSOptions): UseTTSReturn {
 	if (typeof window === "undefined") {
 		return {
@@ -93,20 +95,32 @@ export function useTTS({
 		async (options: StreamRequest) => {
 			websocketReturn.current?.stop(); // Abort the previous request if it exists.
 
-			setMessages([]);
-			setBufferStatus("buffering");
-			websocketReturn.current = websocket?.send(options) ?? null;
-			if (!websocketReturn.current) {
-				return;
+			try {
+				setMessages([]);
+				setBufferStatus("buffering");
+				websocketReturn.current = websocket?.send(options) ?? null;
+				if (!websocketReturn.current) {
+					return;
+				}
+				const unsubscribe = websocketReturn.current.on("message", (message) => {
+					const parsedMessage = JSON.parse(message);
+					setMessages((messages) => [...messages, parsedMessage]);
+					if (parsedMessage.error) {
+						onError?.(new Error(parsedMessage.error));
+					}
+				});
+				await websocketReturn.current.source.once("close");
+				setBufferStatus("buffered");
+				unsubscribe();
+			} catch (error) {
+				if (error instanceof Error) {
+					onError?.(error);
+				} else {
+					console.error(error);
+				}
 			}
-			const unsubscribe = websocketReturn.current.on("message", (message) => {
-				setMessages((messages) => [...messages, JSON.parse(message)]);
-			});
-			await websocketReturn.current.source.once("close");
-			setBufferStatus("buffered");
-			unsubscribe();
 		},
-		[websocket],
+		[websocket, onError],
 	);
 
 	const metrics = useMemo(() => {
@@ -178,64 +192,96 @@ export function useTTS({
 	}, [websocket, baseUrl]);
 
 	const play = useCallback(async () => {
-		if (playbackStatus === "playing" || !websocketReturn.current) {
-			return;
+		try {
+			if (playbackStatus === "playing" || !websocketReturn.current) {
+				return;
+			}
+			if (player.current) {
+				// Stop the current player if it exists.
+				await player.current.stop();
+			}
+
+			setPlaybackStatus("playing");
+
+			const unsubscribes = [];
+			unsubscribes.push(
+				websocketReturn.current.source.on("wait", () => {
+					setIsWaiting(true);
+				}),
+			);
+			unsubscribes.push(
+				websocketReturn.current.source.on("read", () => {
+					setIsWaiting(false);
+				}),
+			);
+
+			player.current = new Player({
+				bufferDuration: bufferDuration ?? DEFAULT_BUFFER_DURATION,
+			});
+			// Wait for the playback to finish before setting isPlaying to false.
+			await player.current.play(websocketReturn.current.source);
+
+			for (const unsubscribe of unsubscribes) {
+				// Deregister the event listeners (.on()) that we registered above to avoid memory leaks.
+				unsubscribe();
+			}
+
+			setPlaybackStatus("finished");
+		} catch (error) {
+			if (error instanceof Error) {
+				onError?.(error);
+			} else {
+				console.error(error);
+			}
 		}
-		if (player.current) {
-			// Stop the current player if it exists.
-			await player.current.stop();
-		}
-
-		setPlaybackStatus("playing");
-
-		const unsubscribes = [];
-		unsubscribes.push(
-			websocketReturn.current.source.on("wait", () => {
-				setIsWaiting(true);
-			}),
-		);
-		unsubscribes.push(
-			websocketReturn.current.source.on("read", () => {
-				setIsWaiting(false);
-			}),
-		);
-
-		player.current = new Player({
-			bufferDuration: bufferDuration ?? DEFAULT_BUFFER_DURATION,
-		});
-		// Wait for the playback to finish before setting isPlaying to false.
-		await player.current.play(websocketReturn.current.source);
-
-		for (const unsubscribe of unsubscribes) {
-			// Deregister the event listeners (.on()) that we registered above to avoid memory leaks.
-			unsubscribe();
-		}
-
-		setPlaybackStatus("finished");
-	}, [playbackStatus, bufferDuration]);
+	}, [playbackStatus, bufferDuration, onError]);
 
 	const pause = useCallback(async () => {
-		await player.current?.pause();
-		setPlaybackStatus("paused");
-	}, []);
+		try {
+			await player.current?.pause();
+			setPlaybackStatus("paused");
+		} catch (error) {
+			if (error instanceof Error) {
+				onError?.(error);
+			} else {
+				console.error(error);
+			}
+		}
+	}, [onError]);
 
 	const resume = useCallback(async () => {
-		await player.current?.resume();
-		setPlaybackStatus("playing");
-	}, []);
+		try {
+			await player.current?.resume();
+			setPlaybackStatus("playing");
+		} catch (error) {
+			if (error instanceof Error) {
+				onError?.(error);
+			} else {
+				console.error(error);
+			}
+		}
+	}, [onError]);
 
 	const toggle = useCallback(async () => {
-		await player.current?.toggle();
-		setPlaybackStatus((status) => {
-			if (status === "playing") {
-				return "paused";
+		try {
+			await player.current?.toggle();
+			setPlaybackStatus((status) => {
+				if (status === "playing") {
+					return "paused";
+				}
+				if (status === "paused") {
+					return "playing";
+				}
+				return status;
+			});
+		} catch (error) {
+			if (error instanceof Error) {
+				onError?.(error);
+			} else {
+				console.error(error);
 			}
-			if (status === "paused") {
-				return "playing";
-			}
-			return status;
-		});
-	}, []);
+		}
+	}, [onError]);
 
 	return {
 		buffer,
