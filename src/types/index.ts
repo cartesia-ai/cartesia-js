@@ -14,7 +14,7 @@ export type ConnectionEventData = {
 	close: never;
 };
 
-export type VoiceOptions =
+export type VoiceSpecifier =
 	| {
 			mode: "id";
 			id: string;
@@ -24,23 +24,74 @@ export type VoiceOptions =
 			embedding: number[];
 	  };
 
+export type Emotion =
+	| "anger"
+	| "sadness"
+	| "positivity"
+	| "curiosity"
+	| "surprise";
+export type Intensity = "lowest" | "low" | "high" | "highest";
+export type EmotionControl = Emotion | `${Emotion}:${Intensity}`;
+
+export type VoiceOptions = VoiceSpecifier & {
+	__experimental_controls?: {
+		speed?: "slowest" | "slow" | "normal" | "fast" | "fastest";
+		emotion?: EmotionControl[];
+	};
+};
+
 export type StreamRequest = {
 	model_id: string;
 	transcript: string;
 	voice: VoiceOptions;
 	output_format?: {
-		container?: string;
-		encoding?: string;
-		sample_rate?: number;
+		container: string;
+		encoding: string;
+		sample_rate: number;
 	};
 	context_id?: string;
 	continue?: boolean;
 	duration?: number;
 	language?: string;
-	options?: {
-		timeout?: number;
-	};
+	add_timestamps?: boolean;
 };
+
+export type StreamOptions = {
+	timeout?: number;
+};
+
+export type WebSocketBaseResponse = {
+	context_id: string;
+	status_code: number;
+	done: boolean;
+};
+
+export type WordTimestamps = {
+	words: string[];
+	start: number[];
+	end: number[];
+};
+
+export type WebSocketTimestampsResponse = WebSocketBaseResponse & {
+	type: "timestamps";
+	word_timestamps: WordTimestamps;
+};
+
+export type WebSocketChunkResponse = WebSocketBaseResponse & {
+	type: "chunk";
+	data: string;
+	step_time: number;
+};
+
+export type WebSocketErrorResponse = WebSocketBaseResponse & {
+	type: "error";
+	error: string;
+};
+
+export type WebSocketResponse =
+	| WebSocketTimestampsResponse
+	| WebSocketChunkResponse
+	| WebSocketErrorResponse;
 
 export type EmitteryCallbacks<T> = {
 	on: Emittery<T>["on"];
@@ -92,18 +143,3 @@ export type SourceEventData = {
 export type TypedArray = Float32Array | Int16Array | Uint8Array;
 
 export type Encoding = "pcm_f32le" | "pcm_s16le" | "pcm_alaw" | "pcm_mulaw";
-
-export type EncodingInfo = {
-	arrayType:
-		| Float32ArrayConstructor
-		| Int16ArrayConstructor
-		| Uint8ArrayConstructor;
-	bytesPerElement: number;
-};
-
-export const EncodingMap: Record<Encoding, EncodingInfo> = {
-	pcm_f32le: { arrayType: Float32Array, bytesPerElement: 4 },
-	pcm_s16le: { arrayType: Int16Array, bytesPerElement: 2 },
-	pcm_alaw: { arrayType: Uint8Array, bytesPerElement: 1 },
-	pcm_mulaw: { arrayType: Uint8Array, bytesPerElement: 1 },
-};

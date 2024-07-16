@@ -1,10 +1,20 @@
 import Emittery from "emittery";
-import {
-	type Encoding,
-	EncodingMap,
-	type SourceEventData,
-	type TypedArray,
-} from "../types";
+import type { Encoding, SourceEventData, TypedArray } from "../types";
+
+type EncodingInfo = {
+	arrayType:
+		| Float32ArrayConstructor
+		| Int16ArrayConstructor
+		| Uint8ArrayConstructor;
+	bytesPerElement: number;
+};
+
+export const ENCODING_MAP: Record<Encoding, EncodingInfo> = {
+	pcm_f32le: { arrayType: Float32Array, bytesPerElement: 4 },
+	pcm_s16le: { arrayType: Int16Array, bytesPerElement: 2 },
+	pcm_alaw: { arrayType: Uint8Array, bytesPerElement: 1 },
+	pcm_mulaw: { arrayType: Uint8Array, bytesPerElement: 1 },
+};
 
 export default class Source {
 	#emitter = new Emittery<SourceEventData>();
@@ -57,7 +67,7 @@ export default class Source {
 	 * @returns The new buffer as a TypedArray based on the encoding.
 	 */
 	#createBuffer(size: number): TypedArray {
-		const { arrayType: ArrayType } = EncodingMap[this.#encoding];
+		const { arrayType: ArrayType } = ENCODING_MAP[this.#encoding];
 		return new ArrayType(size);
 	}
 

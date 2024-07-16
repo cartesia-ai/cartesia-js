@@ -5,7 +5,19 @@
 
 This client provides convenient access to [Cartesia's TTS models](https://cartesia.ai/). Sonic is the fastest text-to-speech model around—it can generate a second of audio in just 650ms, and it can stream out the first audio chunk in just 135ms. Alongside Sonic, we also offer an extensive prebuilt voice library for a variety of use cases.
 
-The full API documentation can be found on docs.cartesia.ai.
+The JavaScript client is a thin wrapper around the Cartesia API. You can view docs for the API at [docs.cartesia.ai](https://docs.cartesia.ai/).
+
+- [Cartesia JavaScript Client](#cartesia-javascript-client)
+	- [Installation](#installation)
+	- [Usage](#usage)
+		- [CRUD on Voices](#crud-on-voices)
+		- [TTS over WebSocket](#tts-over-websocket)
+			- [Input Streaming with Contexts](#input-streaming-with-contexts)
+			- [Timestamps](#timestamps)
+			- [Speed and emotion controls \[Alpha\]](#speed-and-emotion-controls-alpha)
+		- [Multilingual TTS \[Alpha\]](#multilingual-tts-alpha)
+		- [Playing audio in the browser](#playing-audio-in-the-browser)
+	- [React](#react)
 
 
 ## Installation
@@ -71,7 +83,7 @@ const cartesia = new Cartesia({
 });
 
 // Initialize the WebSocket. Make sure the output format you specify is supported.
-const websocket = cartesia.tts.websocket({ 
+const websocket = cartesia.tts.websocket({
 	container: "raw",
 	encoding: "pcm_f32le",
 	sampleRate: 44100
@@ -87,8 +99,8 @@ try {
 const response = await websocket.send({
 	model_id: "sonic-english",
 	voice: {
-		mode: "embedding",
-		embedding: Array(192).fill(1.0),
+		mode: "id",
+		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
 	},
 	transcript: "Hello, world!"
 	// The WebSocket sets output_format on your behalf.
@@ -107,13 +119,71 @@ for await (const message of response.events('message')) {
 }
 ```
 
-#### Multilingual TTS [Alpha]
+#### Input Streaming with Contexts
+
+You can perform input streaming with contexts as described in the [docs](https://docs.cartesia.ai/api-reference/endpoints/stream-speech-websocket#input-streaming-with-contexts). The WebSocket's `send` method is just a wrapper around sending a message on the WebSocket, so the request format specified the docs can be used directly.
+
+You should use the return from the first `send` call on a context to receive outputs and events for the entire context. You can ignore the return values of subsequent `send` calls.
+
+#### Timestamps
+
+To receive timestamps in responses, set the `add_timestamps` field in the request object to `true`.
+
+```js
+const response = await websocket.send({
+	model_id: "sonic-english",
+	voice: {
+		mode: "id",
+		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+	},
+	transcript: "Hello, world!",
+	add_timestamps: true,
+});
+```
+
+You can then listen for timestamps on the returned response object.
+
+```js
+response.on("timestamps", (timestamps) => {
+	console.log("Received timestamps for words:", timestamps.words);
+	console.log("Words start at:", timestamps.start);
+	console.log("Words end at:", timestamps.end);
+});
+
+// You can also access timestamps using a for-await-of loop.
+for (await const timestamps of response.events('timestamps')) {
+	console.log("Received timestamps for words:", timestamps.words);
+	console.log("Words start at:", timestamps.start);
+	console.log("Words end at:", timestamps.end);
+}
+```
+
+#### Speed and emotion controls [Alpha]
+
+The API has experimental support for speed and emotion controls that is not subject to semantic versioning and is subject to change without notice. You can control the speed and emotion of the synthesized speech by setting the `speed` and `emotion` fields under `voice.__experimental_controls` in the request object.
+
+```js
+const response = await websocket.send({
+	model_id: "sonic-english",
+	voice: {
+		mode: "id",
+		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+		__experimental_controls: {
+			speed: "fastest",
+			emotion: ["sadness", "surprise:high"],
+		},
+	},
+	transcript: "Hello, world!",
+});
+```
+
+### Multilingual TTS [Alpha]
 
 You can define the language of the text you want to synthesize by setting the `language` field in the request object. Make sure that you are using `model_id: "sonic-multilingual"` in the request object.
 
-Supported languages are available at [docs.cartesia.ai](https://docs.cartesia.ai/getting-started/available-models).
+Supported languages are listed at [docs.cartesia.ai](https://docs.cartesia.ai/getting-started/available-models).
 
-#### Playing audio in the browser
+### Playing audio in the browser
 
 (The `WebPlayer` class only supports playing audio in the browser and the raw PCM format with fp32le encoding.)
 
@@ -153,9 +223,9 @@ function TextToSpeech() {
 		const response = await tts.buffer({
 			model_id: "sonic-english",
 			voice: {
-				mode: "embedding",
-				embedding: Array(192).fill(1.0),
-			},
+        		mode: "id",
+        		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+        	},
 			transcript: text,
 		});
 

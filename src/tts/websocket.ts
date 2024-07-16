@@ -6,8 +6,10 @@ import { CARTESIA_VERSION, constructApiUrl } from "../lib/constants";
 import type {
 	ConnectionEventData,
 	EmitteryCallbacks,
+	StreamOptions,
 	StreamRequest,
 	WebSocketOptions,
+	WordTimestamps,
 } from "../types";
 import Source from "./source";
 import {
@@ -51,10 +53,7 @@ export default class WebSocket extends Client {
 	 * @returns An Emittery instance that emits messages from the WebSocket.
 	 * @returns An abort function that can be called to cancel the stream.
 	 */
-	send(
-		{ ...inputs }: StreamRequest,
-		{ timeout = 0 }: StreamRequest["options"] = {},
-	) {
+	send({ ...inputs }: StreamRequest, { timeout = 0 }: StreamOptions = {}) {
 		if (!this.#isConnected) {
 			throw new Error("Not connected to WebSocket. Call .connect() first.");
 		}
@@ -79,6 +78,7 @@ export default class WebSocket extends Client {
 
 		const emitter = new Emittery<{
 			message: string;
+			timestamps: WordTimestamps;
 		}>();
 		const source = new Source({
 			sampleRate: this.#sampleRate,
@@ -95,8 +95,15 @@ export default class WebSocket extends Client {
 		}
 		const handleMessage = createMessageHandlerForContextId(
 			inputs.context_id,
-			async ({ chunk, message }) => {
+			async ({ chunk, message, data }) => {
 				emitter.emit("message", message);
+				if (data.type === "timestamps") {
+					emitter.emit("timestamps", data.word_timestamps);
+					return;
+				}
+				if (!chunk) {
+					return;
+				}
 				if (isSentinel(chunk)) {
 					await source.close();
 					streamCompleteController.abort();

@@ -1,13 +1,14 @@
 import base64 from "base64-js";
 import type Emittery from "emittery";
-import {
-	type Chunk,
-	type EmitteryCallbacks,
-	type Encoding,
-	EncodingMap,
-	type Sentinel,
-	type TypedArray,
+import type {
+	Chunk,
+	EmitteryCallbacks,
+	Encoding,
+	Sentinel,
+	TypedArray,
+	WebSocketResponse,
 } from "../types";
+import { ENCODING_MAP } from "./source";
 
 /**
  * Convert base64-encoded audio buffer(s) to a TypedArray.
@@ -21,7 +22,7 @@ export function base64ToArray(b64: Chunk[], encoding: string): TypedArray {
 	const byteArrays = filterSentinel(b64).map((b) => base64.toByteArray(b));
 
 	const { arrayType: ArrayType, bytesPerElement } =
-		EncodingMap[encoding as Encoding];
+		ENCODING_MAP[encoding as Encoding];
 
 	const totalLength = byteArrays.reduce(
 		(acc, arr) => acc + arr.length / bytesPerElement,
@@ -82,26 +83,27 @@ export function createMessageHandlerForContextId(
 		chunk,
 		message,
 	}: {
-		chunk: Chunk;
+		chunk?: Chunk;
 		message: string;
+		data: WebSocketResponse;
 	}) => void,
 ) {
 	return (event: MessageEvent) => {
 		if (typeof event.data !== "string") {
 			return; // Ignore non-string messages.
 		}
-		const message = JSON.parse(event.data);
+		const message: WebSocketResponse = JSON.parse(event.data);
 		if (message.context_id !== contextId) {
 			return; // Ignore messages for other contexts.
 		}
-		let chunk: Chunk;
+		let chunk: Chunk | undefined;
 		if (message.done) {
 			// Convert the done message to a sentinel value.
 			chunk = getSentinel();
-		} else {
+		} else if (message.type === "chunk") {
 			chunk = message.data;
 		}
-		handler({ chunk, message: event.data });
+		handler({ chunk, message: event.data, data: message });
 	};
 }
 
