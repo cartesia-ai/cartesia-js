@@ -101,19 +101,19 @@ export default class WebSocket extends Client {
 					emitter.emit("timestamps", data.word_timestamps);
 					return;
 				}
-				if (!chunk) {
-					return;
-				}
 				if (isSentinel(chunk)) {
 					await source.close();
 					streamCompleteController.abort();
 					return;
 				}
-				await source.enqueue(base64ToArray([chunk], this.#encoding));
 				if (timeoutId) {
 					clearTimeout(timeoutId);
 					timeoutId = setTimeout(streamCompleteController.abort, timeout);
 				}
+				if (!chunk) {
+					return;
+				}
+				await source.enqueue(base64ToArray([chunk], this.#encoding));
 			},
 		);
 		this.socket?.addEventListener("message", handleMessage, {
