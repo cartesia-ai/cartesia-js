@@ -60,12 +60,6 @@ const newVoice = await cartesia.voices.create({
 });
 console.log(newVoice);
 
-// Clone a voice from a URL.
-const clonedVoice = await cartesia.voices.clone({
-	mode: "url",
-	url: "https://youtu.be/AdtLxlttrHg?si=07OLmDPg__0IN14f&t=6",
-});
-
 // Clone a voice from a file.
 const clonedVoice = await cartesia.voices.clone({
 	mode: "clip",
