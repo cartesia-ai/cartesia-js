@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 1.0.1
+
+### Patch Changes
+
+- cb7adc2: Introduces support for continuations, timestamps, voice control and multiple output formats. Improves typing and error handling for the package.
+
 ## 1.0.0
 
 ### Major Changes
