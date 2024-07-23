@@ -123,6 +123,10 @@ export type Voice = {
 export type CreateVoice = Pick<Voice, "name" | "description" | "embedding"> &
 	Partial<Omit<Voice, "name" | "description" | "embedding">>;
 
+export type UpdateVoice = Partial<
+	Pick<Voice, "name" | "description" | "embedding">
+>;
+
 export type CloneResponse = {
 	embedding: number[];
 };

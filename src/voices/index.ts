@@ -1,5 +1,11 @@
 import { Client } from "../lib/client";
-import type { CloneOptions, CloneResponse, CreateVoice, Voice } from "../types";
+import type {
+	CloneOptions,
+	CloneResponse,
+	CreateVoice,
+	UpdateVoice,
+	Voice,
+} from "../types";
 
 export default class Voices extends Client {
 	async list(): Promise<Voice[]> {
@@ -15,6 +21,14 @@ export default class Voices extends Client {
 	async create(voice: CreateVoice): Promise<Voice> {
 		const response = await this._fetch("/voices", {
 			method: "POST",
+			body: JSON.stringify(voice),
+		});
+		return response.json() as Promise<Voice>;
+	}
+
+	async update(id: string, voice: UpdateVoice): Promise<Voice> {
+		const response = await this._fetch(`/voices/${id}`, {
+			method: "PATCH",
 			body: JSON.stringify(voice),
 		});
 		return response.json() as Promise<Voice>;
