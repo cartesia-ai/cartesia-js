@@ -172,14 +172,16 @@ export default class WebSocket extends Client {
 	 * @returns A promise that resolves when the WebSocket is connected.
 	 * @throws {Error} If the WebSocket fails to connect.
 	 */
-	connect() {
-		const url = constructApiUrl(this.baseUrl, "/tts/websocket", {
-			websocket: true,
-		});
-		url.searchParams.set("api_key", this.apiKey);
-		url.searchParams.set("cartesia_version", CARTESIA_VERSION);
+	async connect() {
 		const emitter = new Emittery<ConnectionEventData>();
-		this.socket = new PartySocketWebSocket(url.toString());
+		this.socket = new PartySocketWebSocket(async () => {
+			const url = constructApiUrl(this.baseUrl, "/tts/websocket", {
+				websocket: true,
+			});
+			url.searchParams.set("api_key", await this.apiKey());
+			url.searchParams.set("cartesia_version", CARTESIA_VERSION);
+			return url.toString();
+		});
 		this.socket.onopen = () => {
 			this.#isConnected = true;
 			emitter.emit("open");

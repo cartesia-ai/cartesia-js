@@ -3,7 +3,7 @@ import type { ClientOptions } from "../types";
 import { BASE_URL, CARTESIA_VERSION, constructApiUrl } from "./constants";
 
 export class Client {
-	apiKey: string;
+	apiKey: () => Promise<string>;
 	baseUrl: string;
 
 	constructor(options: ClientOptions = {}) {
@@ -12,15 +12,15 @@ export class Client {
 			throw new Error("Missing Cartesia API key.");
 		}
 
-		this.apiKey = apiKey;
+		this.apiKey = typeof apiKey === "function" ? apiKey : async () => apiKey;
 		this.baseUrl = options.baseUrl || BASE_URL;
 	}
 
-	protected _fetch(path: string, options: RequestInit = {}) {
+	protected async _fetch(path: string, options: RequestInit = {}) {
 		const url = constructApiUrl(this.baseUrl, path);
 		const headers = new Headers(options.headers);
 
-		headers.set("X-API-Key", this.apiKey);
+		headers.set("X-API-Key", await this.apiKey());
 		headers.set("Cartesia-Version", CARTESIA_VERSION);
 
 		return fetch(url.toString(), {

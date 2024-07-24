@@ -8,7 +8,7 @@ import type { StreamRequest } from "../types";
 import { pingServer } from "./utils";
 
 export type UseTTSOptions = {
-	apiKey: string | null;
+	apiKey: string | (() => Promise<string>) | null;
 	baseUrl?: string;
 	sampleRate: number;
 	onError?: (error: Error) => void;

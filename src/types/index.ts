@@ -1,7 +1,7 @@
 import type Emittery from "emittery";
 
 export interface ClientOptions {
-	apiKey?: string;
+	apiKey?: string | (() => Promise<string>);
 	baseUrl?: string;
 }
 
