@@ -35,19 +35,12 @@ export default class Voices extends Client {
 	}
 
 	async clone(options: CloneOptions): Promise<CloneResponse> {
-		if (options.mode === "url") {
-			const response = await this._fetch(
-				`/voices/clone/url?link=${options.link}`,
-				{
-					method: "POST",
-				},
-			);
-			return response.json();
-		}
-
 		if (options.mode === "clip") {
 			const formData = new FormData();
 			formData.append("clip", options.clip);
+			if (options.enhance !== undefined) {
+				formData.append("enhance", options.enhance.toString());
+			}
 
 			const response = await this._fetch("/voices/clone/clip", {
 				method: "POST",

@@ -104,10 +104,12 @@ export type CloneOptions =
 	| {
 			mode: "url";
 			link: string;
+			enhance?: boolean;
 	  }
 	| {
 			mode: "clip";
 			clip: Blob;
+			enhance?: boolean;
 	  };
 
 export type Voice = {
@@ -118,6 +120,7 @@ export type Voice = {
 	is_public: boolean;
 	user_id: string;
 	created_at: string;
+	language: string;
 };
 
 export type CreateVoice = Pick<Voice, "name" | "description" | "embedding"> &
