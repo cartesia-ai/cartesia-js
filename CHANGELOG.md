@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 1.0.2
+
+### Patch Changes
+
+- Make voice creation and cloning fully compatible with API.
+
 ## 1.0.1
 
 ### Patch Changes
