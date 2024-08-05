@@ -35,7 +35,7 @@ export type EmotionControl = Emotion | `${Emotion}:${Intensity}`;
 
 export type VoiceOptions = VoiceSpecifier & {
 	__experimental_controls?: {
-		speed?: "slowest" | "slow" | "normal" | "fast" | "fastest";
+		speed?: "slowest" | "slow" | "normal" | "fast" | "fastest" | number;
 		emotion?: EmotionControl[];
 	};
 };
