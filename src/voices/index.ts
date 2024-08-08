@@ -3,6 +3,8 @@ import type {
 	CloneOptions,
 	CloneResponse,
 	CreateVoice,
+	MixVoicesOptions,
+	MixVoicesResponse,
 	UpdateVoice,
 	Voice,
 } from "../types";
@@ -50,5 +52,16 @@ export default class Voices extends Client {
 		}
 
 		throw new Error("Invalid mode for clone()");
+	}
+
+	async mix(options: MixVoicesOptions): Promise<MixVoicesResponse> {
+		const request: MixVoicesOptions = options;
+
+		const response = await this._fetch("/voices/mix", {
+			method: "POST",
+			body: JSON.stringify(request),
+		});
+
+		return response.json() as Promise<MixVoicesResponse>;
 	}
 }

@@ -52,6 +52,17 @@ console.log(voices);
 const voice = await cartesia.voices.get("<voice-id>");
 console.log(voice);
 
+// Clone a voice from a file.
+const clonedVoiceEmbedding = await cartesia.voices.clone({
+	mode: "clip",
+	clip: myFile, // Pass a File object or a Blob.
+});
+
+// Mix voices together.
+const mixedVoiceEmbedding = await cartesia.voices.mix({
+	voices: [{ id: "<voice-id-1>", weight: 0.6 }, { id: "<voice-id-2>", weight: 0.4 }],
+});
+
 // Create a voice.
 const newVoice = await cartesia.voices.create({
 	name: "Tim",
@@ -59,12 +70,6 @@ const newVoice = await cartesia.voices.create({
 	embedding: Array(192).fill(1.0),
 });
 console.log(newVoice);
-
-// Clone a voice from a file.
-const clonedVoice = await cartesia.voices.clone({
-	mode: "clip",
-	clip: myFile, // Pass a File object or a Blob.
-});
 ```
 
 ### TTS over WebSocket

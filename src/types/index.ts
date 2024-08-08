@@ -16,11 +16,11 @@ export type ConnectionEventData = {
 
 export type VoiceSpecifier =
 	| {
-			mode: "id";
+			mode?: "id";
 			id: string;
 	  }
 	| {
-			mode: "embedding";
+			mode?: "embedding";
 			embedding: number[];
 	  };
 
@@ -112,6 +112,16 @@ export type CloneOptions =
 			enhance?: boolean;
 	  };
 
+export interface VoiceToMix {
+	id?: string;
+	embedding?: number[];
+	weight: number;
+}
+
+export interface MixVoicesOptions {
+	voices: VoiceToMix[];
+}
+
 export type Voice = {
 	id: string;
 	name: string;
@@ -131,6 +141,10 @@ export type UpdateVoice = Partial<
 >;
 
 export type CloneResponse = {
+	embedding: number[];
+};
+
+export type MixVoicesResponse = {
 	embedding: number[];
 };
 
