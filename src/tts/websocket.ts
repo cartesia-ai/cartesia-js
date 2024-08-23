@@ -182,6 +182,15 @@ export default class WebSocket extends Client {
 			url.searchParams.set("cartesia_version", CARTESIA_VERSION);
 			return url.toString();
 		});
+		/**
+		* @summary Bun websocket binaryType has a bug where its native WebSocket implementation doesn't accept blob
+		* @summary This is a workaround that is recommended by partykit
+		* @summary you can track the issue here
+		* @link https://github.com/partykit/partykit/issues/774
+		*/
+	    	if (process?.versions?.bun) {
+		    this.socket.binaryType = 'arraybuffer';
+		}
 		this.socket.onopen = () => {
 			this.#isConnected = true;
 			emitter.emit("open");
