@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 1.0.3
+
+### Patch Changes
+
+- 9b157d6: Support Bun by adding socket binaryType
+
 ## 1.0.2
 
 ### Patch Changes
