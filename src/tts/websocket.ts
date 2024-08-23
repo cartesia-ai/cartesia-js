@@ -182,6 +182,8 @@ export default class WebSocket extends Client {
 			url.searchParams.set("cartesia_version", CARTESIA_VERSION);
 			return url.toString();
 		});
+		this.socket.binaryType = "arraybuffer";
+
 		this.socket.onopen = () => {
 			this.#isConnected = true;
 			emitter.emit("open");
