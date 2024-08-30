@@ -63,6 +63,13 @@ const mixedVoiceEmbedding = await cartesia.voices.mix({
 	voices: [{ id: "<voice-id-1>", weight: 0.6 }, { id: "<voice-id-2>", weight: 0.4 }],
 });
 
+// Localize a voice.
+const localizedVoiceEmbedding = await cartesia.voices.localize({
+	embedding: Array(192).fill(1.0),
+	original_speaker_gender: "female",
+	language: "es",
+});
+
 // Create a voice.
 const newVoice = await cartesia.voices.create({
 	name: "Tim",

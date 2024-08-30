@@ -3,6 +3,8 @@ import type {
 	CloneOptions,
 	CloneResponse,
 	CreateVoice,
+	LocalizeOptions,
+	LocalizeResponse,
 	MixVoicesOptions,
 	MixVoicesResponse,
 	UpdateVoice,
@@ -55,13 +57,20 @@ export default class Voices extends Client {
 	}
 
 	async mix(options: MixVoicesOptions): Promise<MixVoicesResponse> {
-		const request: MixVoicesOptions = options;
-
 		const response = await this._fetch("/voices/mix", {
 			method: "POST",
-			body: JSON.stringify(request),
+			body: JSON.stringify(options),
 		});
 
 		return response.json() as Promise<MixVoicesResponse>;
+	}
+
+	async localize(options: LocalizeOptions): Promise<LocalizeResponse> {
+		const response = await this._fetch("/voices/localize", {
+			method: "POST",
+			body: JSON.stringify(options),
+		});
+
+		return response.json() as Promise<LocalizeResponse>;
 	}
 }

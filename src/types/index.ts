@@ -52,9 +52,19 @@ export type StreamRequest = {
 	context_id?: string;
 	continue?: boolean;
 	duration?: number;
-	language?: string;
+	language?: Language;
 	add_timestamps?: boolean;
 };
+
+export type Language =
+	| "en"
+	| "es"
+	| "fr"
+	| "de"
+	| "ja"
+	| "zh"
+	| "pt"
+	| (string & {});
 
 export type StreamOptions = {
 	timeout?: number;
@@ -112,6 +122,14 @@ export type CloneOptions =
 			enhance?: boolean;
 	  };
 
+export type LocalizeOptions = {
+	mode: "embedding";
+	embedding: number[];
+} & {
+	language: Language;
+	original_speaker_gender: "male" | "female" | (string & {});
+};
+
 export interface VoiceToMix {
 	id?: string;
 	embedding?: number[];
@@ -130,7 +148,7 @@ export type Voice = {
 	is_public: boolean;
 	user_id: string;
 	created_at: string;
-	language: string;
+	language: Language;
 };
 
 export type CreateVoice = Pick<Voice, "name" | "description" | "embedding"> &
@@ -141,6 +159,10 @@ export type UpdateVoice = Partial<
 >;
 
 export type CloneResponse = {
+	embedding: number[];
+};
+
+export type LocalizeResponse = {
 	embedding: number[];
 };
 
