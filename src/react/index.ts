@@ -201,6 +201,10 @@ export function useTTS({
 				await player.current.stop();
 			}
 
+			if (playbackStatus === "finished") {
+				websocketReturn.current.source.seek(0, "start");
+			}
+
 			setPlaybackStatus("playing");
 
 			const unsubscribes = [];

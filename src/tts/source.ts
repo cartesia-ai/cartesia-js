@@ -125,6 +125,41 @@ export default class Source {
 	}
 
 	/**
+	 * Seek in the buffer.
+	 *
+	 * @param offset The offset to seek to.
+	 * @param whence The position to seek from.
+	 * @returns The new position in the buffer.
+	 * @throws {Error} If the seek is invalid.
+	 */
+	async seek(
+		offset: number,
+		whence: "start" | "current" | "end",
+	): Promise<number> {
+		let position = this.#readIndex;
+		switch (whence) {
+			case "start":
+				position = offset;
+				break;
+			case "current":
+				position += offset;
+				break;
+			case "end":
+				position = this.#writeIndex + offset;
+				break;
+			default:
+				throw new Error(`Invalid seek mode: ${whence}`);
+		}
+
+		if (position < 0 || position > this.#writeIndex) {
+			throw new Error("Seek out of bounds");
+		}
+
+		this.#readIndex = position;
+		return position;
+	}
+
+	/**
 	 * Get the number of samples in a given duration.
 	 *
 	 * @param durationSecs The duration in seconds.
