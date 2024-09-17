@@ -127,7 +127,7 @@ for await (const message of response.events('message')) {
 
 #### Input Streaming with Contexts
 
-You can perform input streaming with contexts as described in the [docs](https://docs.cartesia.ai/api-reference/endpoints/stream-speech-websocket#input-streaming-with-contexts). The WebSocket's `send` method is just a wrapper around sending a message on the WebSocket, so the request format specified the docs can be used directly.
+You can perform input streaming with contexts as described in the [docs](https://docs.cartesia.ai/reference/web-socket/stream-speech/working-with-web-sockets#input-streaming-with-contexts). The WebSocket's `send` method is just a wrapper around sending a message on the WebSocket, so the request format specified the docs can be used directly.
 
 You should use the return from the first `send` call on a context to receive outputs and events for the entire context. You can ignore the return values of subsequent `send` calls.
 
