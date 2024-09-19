@@ -127,6 +127,7 @@ export type LocalizeOptions = {
 	embedding: number[];
 } & {
 	language: Language;
+	dialect: string & {};
 	original_speaker_gender: "male" | "female" | (string & {});
 };
 
