@@ -1,7 +1,7 @@
 # Cartesia JavaScript Client
 
 ![NPM Version](https://img.shields.io/npm/v/%40cartesia%2Fcartesia-js?logo=npm)
-[![Discord](https://badgen.net/badge/black/Cartesia/icon?icon=discord&label)](https://discord.gg/ZVxavqHB9X)
+[![Discord](https://badgen.net/badge/black/Cartesia/icon?icon=discord&label)](https://discord.gg/cartesia)
 
 This client provides convenient access to [Cartesia's TTS models](https://cartesia.ai/). Sonic is the fastest text-to-speech model around—it can generate a second of audio in just 650ms, and it can stream out the first audio chunk in just 135ms. Alongside Sonic, we also offer an extensive prebuilt voice library for a variety of use cases.
 
