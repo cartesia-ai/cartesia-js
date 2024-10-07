@@ -5,6 +5,7 @@ import { Client } from "../lib/client";
 import { CARTESIA_VERSION, constructApiUrl } from "../lib/constants";
 import type {
 	ConnectionEventData,
+	ContinueRequest,
 	EmitteryCallbacks,
 	StreamOptions,
 	StreamRequest,
@@ -45,7 +46,7 @@ export default class WebSocket extends Client {
 	/**
 	 * Send a message over the WebSocket to start a stream.
 	 *
-	 * @param inputs - Stream options. Defined in the StreamRequest type.
+	 * @param inputs - Generation parameters. Defined in the StreamRequest type.
 	 * @param options - Options for the stream.
 	 * @param options.timeout - The maximum time to wait for a chunk before cancelling the stream.
 	 *                          If set to `0`, the stream will not time out.
@@ -53,7 +54,7 @@ export default class WebSocket extends Client {
 	 * @returns An Emittery instance that emits messages from the WebSocket.
 	 * @returns An abort function that can be called to cancel the stream.
 	 */
-	send({ ...inputs }: StreamRequest, { timeout = 0 }: StreamOptions = {}) {
+	send(inputs: StreamRequest, { timeout = 0 }: StreamOptions = {}) {
 		if (!this.#isConnected) {
 			throw new Error("Not connected to WebSocket. Call .connect() first.");
 		}
@@ -149,6 +150,36 @@ export default class WebSocket extends Client {
 			...getEmitteryCallbacks(emitter),
 			stop: streamCompleteController.abort.bind(streamCompleteController),
 		};
+	}
+
+	/**
+	 * Continue a stream.
+	 *
+	 * @param inputs - Generation parameters. Defined in the StreamRequest type, but must include a `context_id` field. `continue` is set to true by default.
+	 */
+	continue(inputs: ContinueRequest) {
+		if (!this.#isConnected) {
+			throw new Error("Not connected to WebSocket. Call .connect() first.");
+		}
+
+		if (!inputs.context_id) {
+			throw new Error("context_id is required to continue a context.");
+		}
+		if (!inputs.output_format) {
+			inputs.output_format = {
+				container: this.#container,
+				encoding: this.#encoding,
+				sample_rate: this.#sampleRate,
+			};
+		}
+
+		// Send continue request.
+		this.socket?.send(
+			JSON.stringify({
+				continue: true,
+				...inputs,
+			}),
+		);
 	}
 
 	/**

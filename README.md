@@ -127,9 +127,31 @@ for await (const message of response.events('message')) {
 
 #### Input Streaming with Contexts
 
-You can perform input streaming with contexts as described in the [docs](https://docs.cartesia.ai/reference/web-socket/stream-speech/working-with-web-sockets#input-streaming-with-contexts). The WebSocket's `send` method is just a wrapper around sending a message on the WebSocket, so the request format specified the docs can be used directly.
+```js
+const contextOptions = {
+	context_id: "my-context",
+	model_id: "sonic-english",
+	voice: {
+		mode: "id",
+		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+	},
+}
 
-You should use the return from the first `send` call on a context to receive outputs and events for the entire context. You can ignore the return values of subsequent `send` calls.
+// Initial request on the context uses websocket.send().
+// This response object will aggregate the results of all the inputs sent on the context.
+const response = await websocket.send({
+	...contextOptions,
+	transcript: "Hello, world!",
+});
+
+// Subsequent requests on the same context use websocket.continue().
+await websocket.continue({
+	...contextOptions,
+	transcript: " How are you today?",
+});
+```
+
+See the [input streaming docs](https://docs.cartesia.ai/reference/web-socket/stream-speech/working-with-web-sockets#input-streaming-with-contexts) for more information.
 
 #### Timestamps
 

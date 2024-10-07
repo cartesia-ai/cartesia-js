@@ -56,6 +56,10 @@ export type StreamRequest = {
 	add_timestamps?: boolean;
 };
 
+export type ContinueRequest = StreamRequest & {
+	context_id: string;
+};
+
 export type Language =
 	| "en"
 	| "es"
