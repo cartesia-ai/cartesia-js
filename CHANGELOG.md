@@ -1,5 +1,11 @@
 # @cartesia/cartesia-js
 
+## 1.1.0
+
+### Minor Changes
+
+- ed6be65: Add WebSocket continue method for input streaming with contexts
+
 ## 1.0.3
 
 ### Patch Changes
