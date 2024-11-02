@@ -26,6 +26,7 @@ export default class WebSocket extends Client {
 	#sampleRate: number;
 	#container: string;
 	#encoding: string;
+	#WebSocket?: any;
 
 	/**
 	 * Create a new WebSocket client.
@@ -33,7 +34,7 @@ export default class WebSocket extends Client {
 	 * @param args - Arguments to pass to the Client constructor.
 	 */
 	constructor(
-		{ sampleRate, container, encoding }: WebSocketOptions,
+		{ sampleRate, container, encoding, WebSocket }: WebSocketOptions,
 		...args: ConstructorParameters<typeof Client>
 	) {
 		super(...args);
@@ -41,6 +42,7 @@ export default class WebSocket extends Client {
 		this.#sampleRate = sampleRate;
 		this.#container = container ?? "raw"; // Default to raw audio for backwards compatibility.
 		this.#encoding = encoding ?? "pcm_f32le"; // Default to 32-bit floating point PCM for backwards compatibility.
+		this.#WebSocket = WebSocket; // WebSocket constructor to use. Needed for Node.js, optional for browsers.
 	}
 
 	/**
@@ -205,14 +207,21 @@ export default class WebSocket extends Client {
 	 */
 	async connect() {
 		const emitter = new Emittery<ConnectionEventData>();
-		this.socket = new PartySocketWebSocket(async () => {
-			const url = constructApiUrl(this.baseUrl, "/tts/websocket", {
-				websocket: true,
-			});
-			url.searchParams.set("api_key", await this.apiKey());
-			url.searchParams.set("cartesia_version", CARTESIA_VERSION);
-			return url.toString();
-		});
+		const socketOptions = this.#WebSocket
+			? { WebSocket: this.#WebSocket }
+			: undefined;
+		this.socket = new PartySocketWebSocket(
+			async () => {
+				const url = constructApiUrl(this.baseUrl, "/tts/websocket", {
+					websocket: true,
+				});
+				url.searchParams.set("api_key", await this.apiKey());
+				url.searchParams.set("cartesia_version", CARTESIA_VERSION);
+				return url.toString();
+			}, 
+			undefined, 
+			socketOptions
+		);
 		this.socket.binaryType = "arraybuffer";
 
 		this.socket.onopen = () => {
