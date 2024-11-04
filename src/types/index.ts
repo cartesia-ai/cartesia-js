@@ -131,6 +131,16 @@ export type CloneOptions =
 			enhance?: boolean;
 	  };
 
+export type HifiCloneOptions = {
+	name: string;
+	description: string;
+	language: Language;
+	model_id: string;
+	clip: Blob;
+	transcript?: string;
+	base_voice_id?: string;
+};
+
 export type VoiceChangerOptions = {
 	clip: File;
 	voice: { id: string }; // match VoiceSpecifier shape, but only id is supported for now

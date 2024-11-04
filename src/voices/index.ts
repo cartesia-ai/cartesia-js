@@ -3,6 +3,7 @@ import type {
 	CloneOptions,
 	CloneResponse,
 	CreateVoice,
+	HifiCloneOptions,
 	LocalizeOptions,
 	LocalizeResponse,
 	MixVoicesOptions,
@@ -54,6 +55,27 @@ export default class Voices extends Client {
 		}
 
 		throw new Error("Invalid mode for clone()");
+	}
+
+	async createHifiClone(options: HifiCloneOptions): Promise<Voice> {
+		const formData = new FormData();
+		formData.append("clip", options.clip);
+		formData.append("name", options.name);
+		formData.append("description", options.description);
+		formData.append("language", options.language);
+		formData.append("model_id", options.model_id);
+		if (options.transcript) {
+			formData.append("transcript", options.transcript);
+		}
+		if (options.base_voice_id) {
+			formData.append("base_voice_id", options.base_voice_id);
+		}
+
+		const response = await this._fetch("/voices/clone/hifi", {
+			method: "POST",
+			body: formData,
+		});
+		return response.json() as Promise<Voice>;
 	}
 
 	async mix(options: MixVoicesOptions): Promise<MixVoicesResponse> {
