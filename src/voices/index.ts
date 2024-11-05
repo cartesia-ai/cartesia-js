@@ -57,7 +57,7 @@ export default class Voices extends Client {
 		throw new Error("Invalid mode for clone()");
 	}
 
-	async createHifiClone(options: HifiCloneOptions): Promise<Voice> {
+	async hifiClone(options: HifiCloneOptions): Promise<Voice> {
 		const formData = new FormData();
 		formData.append("clip", options.clip);
 		formData.append("name", options.name);
