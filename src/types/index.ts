@@ -132,11 +132,11 @@ export type CloneOptions =
 	  };
 
 export type HifiCloneOptions = {
+	clone_options: CloneOptions;
 	name: string;
 	description: string;
 	language: Language;
 	model_id: string;
-	clip: Blob;
 	transcript?: string;
 	base_voice_id?: string;
 };
