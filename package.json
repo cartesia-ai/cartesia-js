@@ -4,7 +4,7 @@
 		"name": "Cartesia",
 		"url": "https://cartesia.ai"
 	},
-	"version": "1.2.2-0",
+	"version": "1.2.2-alpha.0",
 	"description": "Client for the Cartesia API.",
 	"type": "module",
 	"module": "./dist/index.js",
