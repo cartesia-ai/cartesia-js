@@ -131,8 +131,7 @@ export type CloneOptions =
 			enhance?: boolean;
 	  };
 
-export type HifiCloneOptions = {
-	clone_options: CloneOptions;
+export type HifiCloneOptions = CloneOptions & {
 	name: string;
 	description: string;
 	language: Language;

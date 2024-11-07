@@ -58,18 +58,18 @@ export default class Voices extends Client {
 	}
 
 	async hifiClone(options: HifiCloneOptions): Promise<Voice> {
-		if (options.clone_options.mode !== "clip") {
+		if (options.mode !== "clip") {
 			throw new Error("Invalid mode for hifiClone()");
 		}
 
 		const formData = new FormData();
-		formData.append("clip", options.clone_options.clip);
+		formData.append("clip", options.clip);
 		formData.append("name", options.name);
 		formData.append("description", options.description);
 		formData.append("language", options.language);
 		formData.append("model_id", options.model_id);
-		if (options.clone_options.enhance !== undefined) {
-			formData.append("enhance", options.clone_options.enhance.toString());
+		if (options.enhance !== undefined) {
+			formData.append("enhance", options.enhance.toString());
 		}
 		if (options.transcript) {
 			formData.append("transcript", options.transcript);
