@@ -1,9 +1,7 @@
 import { Client } from "../lib/client";
 import type {
 	CloneOptions,
-	CloneResponse,
 	CreateVoice,
-	HifiCloneOptions,
 	LocalizeOptions,
 	LocalizeResponse,
 	MixVoicesOptions,
@@ -39,46 +37,25 @@ export default class Voices extends Client {
 		return response.json() as Promise<Voice>;
 	}
 
-	async clone(options: CloneOptions): Promise<CloneResponse> {
-		if (options.mode === "clip") {
-			const formData = new FormData();
-			formData.append("clip", options.clip);
-			if (options.enhance !== undefined) {
-				formData.append("enhance", options.enhance.toString());
-			}
-
-			const response = await this._fetch("/voices/clone/clip", {
-				method: "POST",
-				body: formData,
-			});
-			return response.json();
-		}
-
-		throw new Error("Invalid mode for clone()");
-	}
-
-	async hifiClone(options: HifiCloneOptions): Promise<Voice> {
-		if (options.mode !== "clip") {
-			throw new Error("Invalid mode for hifiClone()");
-		}
-
+	async clone(options: CloneOptions): Promise<Voice> {
 		const formData = new FormData();
 		formData.append("clip", options.clip);
 		formData.append("name", options.name);
 		formData.append("description", options.description);
 		formData.append("language", options.language);
-		formData.append("model_id", options.model_id);
 		if (options.enhance !== undefined) {
 			formData.append("enhance", options.enhance.toString());
 		}
-		if (options.transcript) {
-			formData.append("transcript", options.transcript);
+		if (options.mode === "similarity") {
+			if (options.transcript) {
+				formData.append("transcript", options.transcript);
+			}
+			if (options.base_voice_id) {
+				formData.append("base_voice_id", options.base_voice_id);
+			}
 		}
-		if (options.base_voice_id) {
-			formData.append("base_voice_id", options.base_voice_id);
-		}
-
-		const response = await this._fetch("/voices/clone/hifi", {
+		
+		const response = await this._fetch("/voices/clone", {
 			method: "POST",
 			body: formData,
 		});
@@ -86,14 +63,13 @@ export default class Voices extends Client {
 		if (!response.ok) {
 			if (response.headers.get("content-type")?.includes("application/json")) {
 				const errorData = await response.json();
-				throw new Error(errorData.message || "HiFi clone failed");
+				throw new Error(errorData.message || "Clone voice failed");
 			}
 			const errorText = await response.text();
-			throw new Error(errorText || "HiFi clone failed");
+			throw new Error(errorText || "Clone voice failed");
 		}
 
-		const data = await response.json();
-		return data as Voice;
+		return response.json() as Promise<Voice>;
 	}
 
 	async mix(options: MixVoicesOptions): Promise<MixVoicesResponse> {
