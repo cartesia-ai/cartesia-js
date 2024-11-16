@@ -19,6 +19,7 @@ import {
   getEmitteryCallbacks,
   isSentinel,
 } from "./utils";
+import { Options } from "partysocket/ws";
 
 export default class WebSocket extends Client {
   socket?: PartySocketWebSocket;
@@ -214,9 +215,12 @@ export default class WebSocket extends Client {
     }
 
     const emitter = new Emittery<ConnectionEventData>();
-    const socketOptions = this.#WebSocket
-      ? { WebSocket: this.#WebSocket }
-      : undefined;
+    const socketOptions: Options = {
+      maxReconnectionDelay: 1000,
+    };
+    if (this.#WebSocket) {
+      socketOptions.WebSocket = this.#WebSocket;
+    }
     this.socket = new PartySocketWebSocket(
       async () => {
         const url = constructApiUrl(this.baseUrl, "/tts/websocket", {
