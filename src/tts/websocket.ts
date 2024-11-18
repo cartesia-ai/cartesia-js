@@ -21,13 +21,12 @@ import {
 } from "./utils";
 import type { Options } from "partysocket/ws";
 
-export default class WebSocket<WebSocketConstructor = null> extends Client {
+export default class WebSocket extends Client {
 	socket?: PartySocketWebSocket;
 	#isConnected = false;
 	#sampleRate: number;
 	#container: string;
 	#encoding: string;
-	#WebSocket?: WebSocketConstructor;
 
 	/**
 	 * Create a new WebSocket client.
@@ -35,12 +34,7 @@ export default class WebSocket<WebSocketConstructor = null> extends Client {
 	 * @param args - Arguments to pass to the Client constructor.
 	 */
 	constructor(
-		{
-			sampleRate,
-			container,
-			encoding,
-			WebSocket,
-		}: WebSocketOptions<WebSocketConstructor>,
+		{ sampleRate, container, encoding }: WebSocketOptions,
 		...args: ConstructorParameters<typeof Client>
 	) {
 		super(...args);
@@ -48,7 +42,6 @@ export default class WebSocket<WebSocketConstructor = null> extends Client {
 		this.#sampleRate = sampleRate;
 		this.#container = container ?? "raw"; // Default to raw audio for backwards compatibility.
 		this.#encoding = encoding ?? "pcm_f32le"; // Default to 32-bit floating point PCM for backwards compatibility.
-		this.#WebSocket = WebSocket; // WebSocket constructor to use. Needed for Node.js, optional for browsers.
 	}
 
 	/**
@@ -214,7 +207,7 @@ export default class WebSocket<WebSocketConstructor = null> extends Client {
 	 * @returns A promise that resolves when the WebSocket is connected.
 	 * @throws {Error} If the WebSocket fails to connect.
 	 */
-	async connect() {
+	async connect(options: Options = {}) {
 		if (this.#isConnected) {
 			throw new Error("WebSocket is already connected.");
 		}
@@ -230,11 +223,7 @@ export default class WebSocket<WebSocketConstructor = null> extends Client {
 				return url.toString();
 			},
 			undefined,
-			this.#WebSocket
-				? {
-						WebSocket: this.#WebSocket,
-					}
-				: undefined,
+			options,
 		);
 		this.socket.binaryType = "arraybuffer";
 
