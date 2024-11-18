@@ -1,48 +1,48 @@
 {
-  "name": "@fedejm/cartesia-js",
-  "author": {
-    "name": "Cartesia",
-    "url": "https://cartesia.ai"
-  },
-  "version": "1.2.1b",
-  "description": "Client for the Cartesia API.",
-  "type": "module",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./react": {
-      "import": "./dist/react/index.js",
-      "require": "./dist/react/index.cjs"
-    }
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "base64-js": "^1.5.1",
-    "cross-fetch": "^4.0.0",
-    "emittery": "^1.0.3",
-    "human-id": "^4.1.1",
-    "partysocket": "^1.0.1",
-    "react": "^18.3.1"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "build": "tsup src/ --format cjs,esm --dts",
-    "dev": "bun run build -- --watch",
-    "release": "rm -rf dist && bun run build && npm publish"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/node": "^22.7.9",
-    "@types/react": "^18.3.12",
-    "tsup": "^8.0.2",
-    "typescript": "^5.6.3"
-  }
+	"name": "@cartesia/cartesia-js",
+	"author": {
+		"name": "Cartesia",
+		"url": "https://cartesia.ai"
+	},
+	"version": "1.2.2",
+	"description": "Client for the Cartesia API.",
+	"type": "module",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		},
+		"./react": {
+			"import": "./dist/react/index.js",
+			"require": "./dist/react/index.cjs"
+		}
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"dependencies": {
+		"base64-js": "^1.5.1",
+		"cross-fetch": "^4.0.0",
+		"emittery": "^1.0.3",
+		"human-id": "^4.1.1",
+		"partysocket": "^1.0.1",
+		"react": "^18.3.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "tsup src/ --format cjs,esm --dts",
+		"dev": "bun run build -- --watch",
+		"release": "rm -rf dist && bun run build && npm publish"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/node": "^22.7.9",
+		"@types/react": "^18.3.12",
+		"tsup": "^8.0.2",
+		"typescript": "^5.6.3"
+	}
 }
