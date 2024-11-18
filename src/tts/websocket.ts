@@ -21,6 +21,8 @@ import {
 } from "./utils";
 import type { Options } from "partysocket/ws";
 
+type ConnectOptions = Pick<Options, "WebSocket">;
+
 export default class WebSocket extends Client {
 	socket?: PartySocketWebSocket;
 	#isConnected = false;
@@ -207,7 +209,7 @@ export default class WebSocket extends Client {
 	 * @returns A promise that resolves when the WebSocket is connected.
 	 * @throws {Error} If the WebSocket fails to connect.
 	 */
-	async connect(options: Options = {}) {
+	async connect(options: ConnectOptions = {}) {
 		if (this.#isConnected) {
 			throw new Error("WebSocket is already connected.");
 		}
