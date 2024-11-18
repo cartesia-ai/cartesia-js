@@ -5,6 +5,7 @@ import { Client } from "../lib/client";
 import { CARTESIA_VERSION, constructApiUrl } from "../lib/constants";
 import type {
 	ConnectionEventData,
+	ConnectOptions,
 	ContinueRequest,
 	EmitteryCallbacks,
 	StreamOptions,
@@ -19,9 +20,6 @@ import {
 	getEmitteryCallbacks,
 	isSentinel,
 } from "./utils";
-import type { Options } from "partysocket/ws";
-
-type ConnectOptions = Pick<Options, "WebSocket">;
 
 export default class WebSocket extends Client {
 	socket?: PartySocketWebSocket;
