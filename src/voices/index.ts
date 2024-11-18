@@ -74,7 +74,7 @@ export default class Voices extends Client {
 				formData.append("base_voice_id", options.base_voice_id);
 			}
 		}
-		
+
 		const response = await this._fetch("/voices/clone", {
 			method: "POST",
 			body: formData,
