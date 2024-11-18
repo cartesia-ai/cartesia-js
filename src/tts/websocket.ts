@@ -21,13 +21,13 @@ import {
 } from "./utils";
 import type { Options } from "partysocket/ws";
 
-export default class WebSocket extends Client {
+export default class WebSocket<WebSocketConstructor = null> extends Client {
 	socket?: PartySocketWebSocket;
 	#isConnected = false;
 	#sampleRate: number;
 	#container: string;
 	#encoding: string;
-	#WebSocket?: typeof globalThis.WebSocket;
+	#WebSocket?: WebSocketConstructor;
 
 	/**
 	 * Create a new WebSocket client.
@@ -35,7 +35,12 @@ export default class WebSocket extends Client {
 	 * @param args - Arguments to pass to the Client constructor.
 	 */
 	constructor(
-		{ sampleRate, container, encoding, WebSocket }: WebSocketOptions,
+		{
+			sampleRate,
+			container,
+			encoding,
+			WebSocket,
+		}: WebSocketOptions<WebSocketConstructor>,
 		...args: ConstructorParameters<typeof Client>
 	) {
 		super(...args);
@@ -215,12 +220,6 @@ export default class WebSocket extends Client {
 		}
 
 		const emitter = new Emittery<ConnectionEventData>();
-		const socketOptions: Options = {
-			maxReconnectionDelay: 1000,
-		};
-		if (this.#WebSocket) {
-			socketOptions.WebSocket = this.#WebSocket;
-		}
 		this.socket = new PartySocketWebSocket(
 			async () => {
 				const url = constructApiUrl(this.baseUrl, "/tts/websocket", {
@@ -231,7 +230,11 @@ export default class WebSocket extends Client {
 				return url.toString();
 			},
 			undefined,
-			socketOptions,
+			this.#WebSocket
+				? {
+						WebSocket: this.#WebSocket,
+					}
+				: undefined,
 		);
 		this.socket.binaryType = "arraybuffer";
 

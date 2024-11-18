@@ -206,11 +206,11 @@ export type MixVoicesResponse = {
 	embedding: number[];
 };
 
-export type WebSocketOptions = {
+export type WebSocketOptions<WebSocketConstructor = null> = {
 	container?: string;
 	encoding?: string;
 	sampleRate: number;
-	WebSocket?: any;
+	WebSocket?: WebSocketConstructor;
 };
 
 export type SourceEventData = {
