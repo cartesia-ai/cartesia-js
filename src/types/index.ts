@@ -210,6 +210,7 @@ export type WebSocketOptions = {
 	container?: string;
 	encoding?: string;
 	sampleRate: number;
+	WebSocket?: any;
 };
 
 export type SourceEventData = {
