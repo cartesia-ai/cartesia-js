@@ -92,11 +92,15 @@ const cartesia = new Cartesia({
 const websocket = cartesia.tts.websocket({
 	container: "raw",
 	encoding: "pcm_f32le",
-	sampleRate: 44100
+	sampleRate: 44100,
 });
 
 try {
-	await websocket.connect();
+	await websocket.connect({
+		// If using Node.js, you can pass a custom WebSocket constructor, such as from `ws`.
+		// This is not needed for browser usage, so you can call connect() without any arguments.
+		WebSocket: WS,
+	});
 } catch (error) {
 	console.error(`Failed to connect to Cartesia: ${error}`);
 }
