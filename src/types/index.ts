@@ -119,6 +119,22 @@ export type EmitteryCallbacks<T> = {
 	events: Emittery<T>["events"];
 };
 
+// deprecated
+export type CloneOptions =
+	| {
+			mode: "url";
+			link: string;
+			enhance?: boolean;
+	  }
+	| {
+			mode: "clip";
+			clip: Blob;
+			enhance?: boolean;
+	  };
+
+export type CloneResponse = {
+	embedding: number[];
+};
 export type BaseCloneOptions = {
 	clip: Blob;
 	enhance?: boolean;
@@ -127,7 +143,7 @@ export type BaseCloneOptions = {
 	language: Language;
 };
 
-export type CloneOptions =
+export type CreateCloneOptions =
 	| (BaseCloneOptions & {
 			mode: "stability";
 	  })
