@@ -141,9 +141,7 @@ export type CloneVoiceOptions =
 			name: string;
 			description: string;
 			language: Language;
-			model_id: string;
 			transcript?: string;
-			base_voice_id?: string;
 	  };
 
 export type CloneResponse = {
