@@ -132,25 +132,25 @@ export type CloneOptions =
 	  };
 
 export type CloneVoiceOptions =
-  | {
-		mode: "stability";
-		clip: Blob;
-		enhance?: boolean;
-		name: string;
-		description: string;
-		language: Language;
-	}
 	| {
-		mode: "similarity";
-		clip: Blob;
-		enhance?: boolean;
-		name: string;
-		description: string;
-		language: Language;
-		model_id: string;
-		transcript?: string;
-		base_voice_id?: string;
-	};
+			mode: "stability";
+			clip: Blob;
+			enhance?: boolean;
+			name: string;
+			description: string;
+			language: Language;
+	  }
+	| {
+			mode: "similarity";
+			clip: Blob;
+			enhance?: boolean;
+			name: string;
+			description: string;
+			language: Language;
+			model_id: string;
+			transcript?: string;
+			base_voice_id?: string;
+	  };
 
 export type CloneResponse = {
 	embedding: number[];
