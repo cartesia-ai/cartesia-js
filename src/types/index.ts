@@ -119,17 +119,11 @@ export type EmitteryCallbacks<T> = {
 	events: Emittery<T>["events"];
 };
 
-export type CloneOptions =
-	| {
-			mode: "url";
-			link: string;
-			enhance?: boolean;
-	  }
-	| {
-			mode: "clip";
-			clip: Blob;
-			enhance?: boolean;
-	  };
+export type CloneOptions ={
+	mode: "clip";
+	clip: Blob;
+	enhance?: boolean;
+};
 
 export type CloneVoiceOptions =
 	| {
@@ -149,8 +143,8 @@ export type CloneVoiceOptions =
 			language: Language;
 			model_id: string;
 			transcript?: string;
-			base_voice_id?: string;
-	  };
+		base_voice_id?: string;
+	};
 
 export type CloneResponse = {
 	embedding: number[];
