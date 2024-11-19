@@ -120,12 +120,19 @@ export type EmitteryCallbacks<T> = {
 };
 
 export type CloneOptions =
-	| { // deprecated:
-			mode: "clip";
-			clip: Blob;
+	| {
+			mode: "url";
+			link: string;
 			enhance?: boolean;
 	  }
 	| {
+			mode: "clip";
+			clip: Blob;
+			enhance?: boolean;
+	  };
+
+export type CloneVoiceOptions =
+  | {
 		mode: "stability";
 		clip: Blob;
 		enhance?: boolean;

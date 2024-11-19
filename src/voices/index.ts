@@ -2,6 +2,7 @@ import { Client } from "../lib/client";
 import type {
 	CloneOptions,
 	CloneResponse,
+	CloneVoiceOptions,
 	CreateVoice,
 	LocalizeOptions,
 	LocalizeResponse,
@@ -38,7 +39,9 @@ export default class Voices extends Client {
 		return response.json() as Promise<Voice>;
 	}
 
-	async clone(options: CloneOptions): Promise<CloneResponse | Voice> {
+	async clone(options: CloneOptions): Promise<CloneResponse>
+	async clone(options: CloneVoiceOptions): Promise<Voice>
+	async clone(options: CloneOptions | CloneVoiceOptions): Promise<CloneResponse | Voice> {
 		// First: handle old clip mode/endpoint
 		if (options.mode === "clip") {
 			const formData = new FormData();
