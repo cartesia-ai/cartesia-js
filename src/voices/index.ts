@@ -2,7 +2,6 @@ import { Client } from "../lib/client";
 import type {
 	CloneOptions,
 	CloneResponse,
-	CreateCloneOptions,
 	CreateVoice,
 	LocalizeOptions,
 	LocalizeResponse,
@@ -39,7 +38,8 @@ export default class Voices extends Client {
 		return response.json() as Promise<Voice>;
 	}
 
-	async clone(options: CloneOptions): Promise<CloneResponse> {
+	async clone(options: CloneOptions): Promise<CloneResponse | Voice> {
+		// First: handle old clip mode/endpoint
 		if (options.mode === "clip") {
 			const formData = new FormData();
 			formData.append("clip", options.clip);
@@ -54,12 +54,9 @@ export default class Voices extends Client {
 			return response.json();
 		}
 
-		throw new Error("Invalid mode for clone()");
-	}
-
-	async createClone(options: CreateCloneOptions): Promise<Voice> {
 		const formData = new FormData();
 		formData.append("clip", options.clip);
+		formData.append("mode", options.mode);
 		formData.append("name", options.name);
 		formData.append("description", options.description);
 		formData.append("language", options.language);
@@ -91,6 +88,7 @@ export default class Voices extends Client {
 
 		return response.json() as Promise<Voice>;
 	}
+
 
 	async mix(options: MixVoicesOptions): Promise<MixVoicesResponse> {
 		const response = await this._fetch("/voices/mix", {

@@ -119,40 +119,35 @@ export type EmitteryCallbacks<T> = {
 	events: Emittery<T>["events"];
 };
 
-// deprecated
 export type CloneOptions =
-	| {
-			mode: "url";
-			link: string;
-			enhance?: boolean;
-	  }
-	| {
+	| { // deprecated:
 			mode: "clip";
 			clip: Blob;
 			enhance?: boolean;
-	  };
+	  }
+	| {
+		mode: "stability";
+		clip: Blob;
+		enhance?: boolean;
+		name: string;
+		description: string;
+		language: Language;
+	}
+	| {
+		mode: "similarity";
+		clip: Blob;
+		enhance?: boolean;
+		name: string;
+		description: string;
+		language: Language;
+		model_id: string;
+		transcript?: string;
+		base_voice_id?: string;
+	};
 
 export type CloneResponse = {
 	embedding: number[];
 };
-export type BaseCloneOptions = {
-	clip: Blob;
-	enhance?: boolean;
-	name: string;
-	description: string;
-	language: Language;
-};
-
-export type CreateCloneOptions =
-	| (BaseCloneOptions & {
-			mode: "stability";
-	  })
-	| (BaseCloneOptions & {
-			mode: "similarity";
-			model_id: string;
-			transcript?: string;
-			base_voice_id?: string;
-	  });
 
 export type VoiceChangerOptions = {
 	clip: File;
