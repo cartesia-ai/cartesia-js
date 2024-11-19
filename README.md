@@ -1,279 +1,152 @@
-# Cartesia JavaScript Client
+# Cartesia TypeScript Library
 
-![NPM Version](https://img.shields.io/npm/v/%40cartesia%2Fcartesia-js?logo=npm)
-[![Discord](https://badgen.net/badge/black/Cartesia/icon?icon=discord&label)](https://discord.gg/cartesia)
+[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Fcartesia-ai%2Fcartesia-js)
+[![npm shield](https://img.shields.io/npm/v/@cartesia/cartesia-js)](https://www.npmjs.com/package/@cartesia/cartesia-js)
 
-This client provides convenient access to [Cartesia's TTS models](https://cartesia.ai/). Sonic is the fastest text-to-speech model around—it can generate a second of audio in just 650ms, and it can stream out the first audio chunk in just 135ms. Alongside Sonic, we also offer an extensive prebuilt voice library for a variety of use cases.
-
-The JavaScript client is a thin wrapper around the Cartesia API. You can view docs for the API at [docs.cartesia.ai](https://docs.cartesia.ai/).
-
-- [Cartesia JavaScript Client](#cartesia-javascript-client)
-	- [Installation](#installation)
-	- [Usage](#usage)
-		- [CRUD on Voices](#crud-on-voices)
-		- [TTS over WebSocket](#tts-over-websocket)
-			- [Input Streaming with Contexts](#input-streaming-with-contexts)
-			- [Timestamps](#timestamps)
-			- [Speed and emotion controls \[Alpha\]](#speed-and-emotion-controls-alpha)
-		- [Multilingual TTS \[Alpha\]](#multilingual-tts-alpha)
-		- [Playing audio in the browser](#playing-audio-in-the-browser)
-	- [React](#react)
-
+The Cartesia TypeScript library provides convenient access to the Cartesia API from TypeScript.
 
 ## Installation
 
-```bash
-# NPM
-npm install @cartesia/cartesia-js
-# Yarn
-yarn add @cartesia/cartesia-js
-# PNPM
-pnpm add @cartesia/cartesia-js
-# Bun
-bun add @cartesia/cartesia-js
+```sh
+npm i -s @cartesia/cartesia-js
 ```
+
+## Reference
+
+A full reference for this library is available [here](./reference.md).
 
 ## Usage
 
-### CRUD on Voices
+Instantiate and use the client with the following:
 
-```js
-import Cartesia from "@cartesia/cartesia-js";
+```typescript
+import { CartesiaClient } from "@cartesia/cartesia-js";
 
-const cartesia = new Cartesia({
-	apiKey: "your-api-key",
+const client = new CartesiaClient({ apiKeyHeader: "YOUR_API_KEY_HEADER" });
+await client.tts.bytes({
+    model_id: "sonic-english",
+    transcript: "Hello, world!",
+    voice: {
+        mode: "id",
+        id: "694f9389-aac1-45b6-b726-9d9369183238",
+    },
+    language: "en",
+    output_format: {
+        container: "raw",
+        sample_rate: 44100,
+        encoding: "pcm_f32le",
+    },
 });
-
-// List all voices.
-const voices = await cartesia.voices.list();
-console.log(voices);
-
-// Get a voice.
-const voice = await cartesia.voices.get("<voice-id>");
-console.log(voice);
-
-// Clone a voice from a file.
-const clonedVoiceEmbedding = await cartesia.voices.clone({
-	mode: "clip",
-	clip: myFile, // Pass a File object or a Blob.
-});
-
-// Mix voices together.
-const mixedVoiceEmbedding = await cartesia.voices.mix({
-	voices: [{ id: "<voice-id-1>", weight: 0.6 }, { id: "<voice-id-2>", weight: 0.4 }],
-});
-
-// Localize a voice.
-const localizedVoiceEmbedding = await cartesia.voices.localize({
-	embedding: Array(192).fill(1.0),
-	original_speaker_gender: "female",
-	language: "es",
-});
-
-// Create a voice.
-const newVoice = await cartesia.voices.create({
-	name: "Tim",
-	description: "A deep, resonant voice.",
-	embedding: Array(192).fill(1.0),
-});
-console.log(newVoice);
 ```
 
-### TTS over WebSocket
+## Request And Response Types
 
-```js
-import Cartesia from "@cartesia/cartesia-js";
+The SDK exports all request and response types as TypeScript interfaces. Simply import them with the
+following namespace:
 
-const cartesia = new Cartesia({
-	apiKey: "your-api-key",
-});
+```typescript
+import { Cartesia } from "@cartesia/cartesia-js";
 
-// Initialize the WebSocket. Make sure the output format you specify is supported.
-const websocket = cartesia.tts.websocket({
-	container: "raw",
-	encoding: "pcm_f32le",
-	sampleRate: 44100,
-});
+const request: Cartesia.VoiceChangerBytesRequest = {
+    ...
+};
+```
+
+## Exception Handling
+
+When the API returns a non-success status code (4xx or 5xx response), a subclass of the following error
+will be thrown.
+
+```typescript
+import { CartesiaError } from "@cartesia/cartesia-js";
 
 try {
-	await websocket.connect({
-		// If using Node.js, you can pass a custom WebSocket constructor, such as from `ws`.
-		// This is not needed for browser usage, so you can call connect() without any arguments.
-		WebSocket: WS,
-	});
-} catch (error) {
-	console.error(`Failed to connect to Cartesia: ${error}`);
-}
-
-// Create a stream.
-const response = await websocket.send({
-	model_id: "sonic-english",
-	voice: {
-		mode: "id",
-		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
-	},
-	transcript: "Hello, world!"
-	// The WebSocket sets output_format on your behalf.
-});
-
-// Access the raw messages from the WebSocket.
-response.on("message", (message) => {
-	// Raw message.
-	console.log("Received message:", message);
-});
-
-// You can also access messages using a for-await-of loop.
-for await (const message of response.events('message')) {
-	// Raw message.
-	console.log("Received message:", message);
+    await client.tts.bytes(...);
+} catch (err) {
+    if (err instanceof CartesiaError) {
+        console.log(err.statusCode);
+        console.log(err.message);
+        console.log(err.body);
+    }
 }
 ```
 
-#### Input Streaming with Contexts
+## Advanced
 
-```js
-const contextOptions = {
-	context_id: "my-context",
-	model_id: "sonic-english",
-	voice: {
-		mode: "id",
-		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
-	},
-}
+### Retries
 
-// Initial request on the context uses websocket.send().
-// This response object will aggregate the results of all the inputs sent on the context.
-const response = await websocket.send({
-	...contextOptions,
-	transcript: "Hello, world!",
-});
+The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long
+as the request is deemed retriable and the number of retry attempts has not grown larger than the configured
+retry limit (default: 2).
 
-// Subsequent requests on the same context use websocket.continue().
-await websocket.continue({
-	...contextOptions,
-	transcript: " How are you today?",
+A request is deemed retriable when any of the following HTTP status codes is returned:
+
+-   [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
+-   [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
+-   [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) (Internal Server Errors)
+
+Use the `maxRetries` request option to configure this behavior.
+
+```typescript
+const response = await client.tts.bytes(..., {
+    maxRetries: 0 // override maxRetries at the request level
 });
 ```
 
-See the [input streaming docs](https://docs.cartesia.ai/reference/web-socket/stream-speech/working-with-web-sockets#input-streaming-with-contexts) for more information.
+### Timeouts
 
-#### Timestamps
+The SDK defaults to a 60 second timeout. Use the `timeoutInSeconds` option to configure this behavior.
 
-To receive timestamps in responses, set the `add_timestamps` field in the request object to `true`.
-
-```js
-const response = await websocket.send({
-	model_id: "sonic-english",
-	voice: {
-		mode: "id",
-		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
-	},
-	transcript: "Hello, world!",
-	add_timestamps: true,
+```typescript
+const response = await client.tts.bytes(..., {
+    timeoutInSeconds: 30 // override timeout to 30s
 });
 ```
 
-You can then listen for timestamps on the returned response object.
+### Aborting Requests
 
-```js
-response.on("timestamps", (timestamps) => {
-	console.log("Received timestamps for words:", timestamps.words);
-	console.log("Words start at:", timestamps.start);
-	console.log("Words end at:", timestamps.end);
+The SDK allows users to abort requests at any point by passing in an abort signal.
+
+```typescript
+const controller = new AbortController();
+const response = await client.tts.bytes(..., {
+    abortSignal: controller.signal
 });
-
-// You can also access timestamps using a for-await-of loop.
-for (await const timestamps of response.events('timestamps')) {
-	console.log("Received timestamps for words:", timestamps.words);
-	console.log("Words start at:", timestamps.start);
-	console.log("Words end at:", timestamps.end);
-}
+controller.abort(); // aborts the request
 ```
 
-#### Speed and emotion controls [Alpha]
+### Runtime Compatibility
 
-The API has experimental support for speed and emotion controls that is not subject to semantic versioning and is subject to change without notice. You can control the speed and emotion of the synthesized speech by setting the `speed` and `emotion` fields under `voice.__experimental_controls` in the request object.
+The SDK defaults to `node-fetch` but will use the global fetch client if present. The SDK works in the following
+runtimes:
 
-```js
-const response = await websocket.send({
-	model_id: "sonic-english",
-	voice: {
-		mode: "id",
-		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
-		__experimental_controls: {
-			speed: "fastest",
-			emotion: ["sadness", "surprise:high"],
-		},
-	},
-	transcript: "Hello, world!",
+-   Node.js 18+
+-   Vercel
+-   Cloudflare Workers
+-   Deno v1.25+
+-   Bun 1.0+
+-   React Native
+
+### Customizing Fetch Client
+
+The SDK provides a way for your to customize the underlying HTTP client / Fetch function. If you're running in an
+unsupported environment, this provides a way for you to break glass and ensure the SDK works.
+
+```typescript
+import { CartesiaClient } from "@cartesia/cartesia-js";
+
+const client = new CartesiaClient({
+    ...
+    fetcher: // provide your implementation here
 });
 ```
 
-### Multilingual TTS [Alpha]
+## Contributing
 
-You can define the language of the text you want to synthesize by setting the `language` field in the request object. Make sure that you are using `model_id: "sonic-multilingual"` in the request object.
+While we value open-source contributions to this SDK, this library is generated programmatically.
+Additions made directly to this library would have to be moved over to our generation code,
+otherwise they would be overwritten upon the next generated release. Feel free to open a PR as
+a proof of concept, but know that we will not be able to merge it as-is. We suggest opening
+an issue first to discuss with us!
 
-Supported languages are listed at [docs.cartesia.ai](https://docs.cartesia.ai/getting-started/available-models).
-
-### Playing audio in the browser
-
-(The `WebPlayer` class only supports playing audio in the browser and the raw PCM format with fp32le encoding.)
-
-```js
-// If you're using the client in the browser, you can control audio playback using our WebPlayer:
-import { WebPlayer } from "@cartesia/cartesia-js";
-
-console.log("Playing stream...");
-
-// Create a Player object.
-const player = new WebPlayer();
-
-// Play the audio. (`response` includes a custom Source object that the Player can play.)
-// The call resolves when the audio finishes playing.
-await player.play(response.source);
-
-console.log("Done playing.");
-```
-
-## React
-
-We export a React hook that simplifies the process of using the TTS API. The hook manages the WebSocket connection and provides a simple interface for buffering, playing, pausing and restarting audio.
-
-```jsx
-import { useTTS } from '@cartesia/cartesia-js/react';
-
-function TextToSpeech() {
-	const tts = useTTS({
-		apiKey: "your-api-key",
-		sampleRate: 44100,
-	})
-
-	const [text, setText] = useState("");
-
-	const handlePlay = async () => {
-		// Begin buffering the audio.
-		const response = await tts.buffer({
-			model_id: "sonic-english",
-			voice: {
-        		mode: "id",
-        		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
-        	},
-			transcript: text,
-		});
-
-		// Immediately play the audio. (You can also buffer in advance and play later.)
-		await tts.play();
-	}
-
-	return (
-		<div>
-			<input type="text" value={text} onChange={(event) => setText(event.target.value)} />
-			<button onClick={handlePlay}>Play</button>
-
-			<div>
-				{tts.playbackStatus} | {tts.bufferStatus} | {tts.isWaiting}
-			</div>
-		</div>
-	);
-}
-```
+On the other hand, contributions to the README are always very welcome!
