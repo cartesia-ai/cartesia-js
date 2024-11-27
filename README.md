@@ -24,16 +24,16 @@ import { CartesiaClient } from "@cartesia/cartesia-js";
 
 const client = new CartesiaClient({ apiKeyHeader: "YOUR_API_KEY_HEADER" });
 await client.tts.bytes({
-    model_id: "sonic-english",
+    modelId: "sonic-english",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
         id: "694f9389-aac1-45b6-b726-9d9369183238",
     },
     language: "en",
-    output_format: {
+    outputFormat: {
         container: "raw",
-        sample_rate: 44100,
+        sampleRate: 44100,
         encoding: "pcm_f32le",
     },
 });
