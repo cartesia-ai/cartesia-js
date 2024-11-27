@@ -6,9 +6,9 @@ import * as environments from "../../../../environments";
 import * as core from "../../../../core";
 import * as Cartesia from "../../../index";
 import * as stream from "stream";
+import * as serializers from "../../../../serialization/index";
 import urlJoin from "url-join";
 import * as errors from "../../../../errors/index";
-import * as serializers from "../../../../serialization/index";
 
 export declare namespace Tts {
     interface Options {
@@ -53,7 +53,7 @@ export class Tts {
             },
             contentType: "application/json",
             requestType: "json",
-            body: request,
+            body: serializers.TtsRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
             responseType: "streaming",
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
@@ -107,7 +107,7 @@ export class Tts {
             },
             contentType: "application/json",
             requestType: "json",
-            body: request,
+            body: serializers.TtsRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
             responseType: "sse",
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,

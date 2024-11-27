@@ -3,6 +3,6 @@
  */
 
 export interface Mp3OutputFormat {
-    sample_rate: number;
-    bit_rate: number;
+    sampleRate: number;
+    bitRate: number;
 }

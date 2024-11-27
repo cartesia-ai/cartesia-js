@@ -5,7 +5,7 @@
 import * as Cartesia from "../../../index";
 
 export interface WebSocketTtsOutput {
-    word_timestamps?: Cartesia.WordTimestamps;
+    wordTimestamps?: Cartesia.WordTimestamps;
     audio?: unknown;
-    context_id?: Cartesia.ContextId;
+    contextId?: Cartesia.ContextId;
 }

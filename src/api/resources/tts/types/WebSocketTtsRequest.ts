@@ -6,12 +6,12 @@ import * as Cartesia from "../../../index";
 
 export interface WebSocketTtsRequest {
     /** The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models. */
-    model_id: string;
-    output_format: Cartesia.OutputFormat;
+    modelId: string;
+    outputFormat?: Cartesia.OutputFormat;
     transcript?: string;
     voice: Cartesia.TtsRequestVoiceSpecifier;
     duration?: number;
     language?: string;
-    add_timestamps: boolean;
-    context_id?: string;
+    addTimestamps?: boolean;
+    contextId?: string;
 }

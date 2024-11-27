@@ -7,5 +7,5 @@ import * as Cartesia from "../../../index";
 export interface TtsRequestEmbeddingSpecifier {
     mode: "embedding";
     embedding: Cartesia.Embedding;
-    __experimental_controls?: Cartesia.Controls;
+    experimentalControls?: Cartesia.Controls;
 }

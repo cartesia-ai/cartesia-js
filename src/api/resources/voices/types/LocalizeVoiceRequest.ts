@@ -7,6 +7,6 @@ import * as Cartesia from "../../../index";
 export interface LocalizeVoiceRequest {
     embedding: Cartesia.Embedding;
     language: Cartesia.LocalizeTargetLanguage;
-    original_speaker_gender: Cartesia.Gender;
-    dialect: Cartesia.LocalizeDialect;
+    originalSpeakerGender: Cartesia.Gender;
+    dialect?: Cartesia.LocalizeDialect;
 }

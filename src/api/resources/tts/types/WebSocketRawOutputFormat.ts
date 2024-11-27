@@ -7,5 +7,5 @@ import * as Cartesia from "../../../index";
 export interface WebSocketRawOutputFormat {
     container: "raw";
     encoding: Cartesia.RawEncoding;
-    sample_rate: number;
+    sampleRate: number;
 }
