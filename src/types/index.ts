@@ -120,17 +120,34 @@ export type EmitteryCallbacks<T> = {
 	events: Emittery<T>["events"];
 };
 
-export type CloneOptions =
+export type CloneOptions = {
+	mode: "clip";
+	clip: Blob;
+	enhance?: boolean;
+};
+
+export type CloneVoiceOptions =
 	| {
-			mode: "url";
-			link: string;
-			enhance?: boolean;
-	  }
-	| {
-			mode: "clip";
+			mode: "stability";
 			clip: Blob;
 			enhance?: boolean;
+			name: string;
+			description: string;
+			language: Language;
+	  }
+	| {
+			mode: "similarity";
+			clip: Blob;
+			enhance?: boolean;
+			name: string;
+			description: string;
+			language: Language;
+			transcript?: string;
 	  };
+
+export type CloneResponse = {
+	embedding: number[];
+};
 
 export type VoiceChangerOptions = {
 	clip: File;
@@ -190,10 +207,6 @@ export type CreateVoice = Pick<Voice, "name" | "description" | "embedding"> &
 export type UpdateVoice = Partial<
 	Pick<Voice, "name" | "description" | "embedding">
 >;
-
-export type CloneResponse = {
-	embedding: number[];
-};
 
 export type VoiceChangerBytesResponse = {
 	buffer: ArrayBuffer;

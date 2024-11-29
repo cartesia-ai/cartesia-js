@@ -2,6 +2,7 @@ import { Client } from "../lib/client";
 import type {
 	CloneOptions,
 	CloneResponse,
+	CloneVoiceOptions,
 	CreateVoice,
 	LocalizeOptions,
 	LocalizeResponse,
@@ -38,7 +39,10 @@ export default class Voices extends Client {
 		return response.json() as Promise<Voice>;
 	}
 
-	async clone(options: CloneOptions): Promise<CloneResponse> {
+	async clone(options: CloneOptions): Promise<CloneResponse>
+	async clone(options: CloneVoiceOptions): Promise<Voice>
+	async clone(options: CloneOptions | CloneVoiceOptions): Promise<CloneResponse | Voice> {
+		// First: handle old clip mode/endpoint
 		if (options.mode === "clip") {
 			const formData = new FormData();
 			formData.append("clip", options.clip);
@@ -53,7 +57,36 @@ export default class Voices extends Client {
 			return response.json();
 		}
 
-		throw new Error("Invalid mode for clone()");
+		const formData = new FormData();
+		formData.append("clip", options.clip);
+		formData.append("mode", options.mode);
+		formData.append("name", options.name);
+		formData.append("description", options.description);
+		formData.append("language", options.language);
+		if (options.enhance !== undefined) {
+			formData.append("enhance", options.enhance.toString());
+		}
+		if (options.mode === "similarity") {
+			if (options.transcript) {
+				formData.append("transcript", options.transcript);
+			}
+		}
+
+		const response = await this._fetch("/voices/clone", {
+			method: "POST",
+			body: formData,
+		});
+
+		if (!response.ok) {
+			if (response.headers.get("content-type")?.includes("application/json")) {
+				const errorData = await response.json();
+				throw new Error(errorData.message || "Clone voice failed");
+			}
+			const errorText = await response.text();
+			throw new Error(errorText || "Clone voice failed");
+		}
+
+		return response.json() as Promise<Voice>;
 	}
 
 	async mix(options: MixVoicesOptions): Promise<MixVoicesResponse> {
