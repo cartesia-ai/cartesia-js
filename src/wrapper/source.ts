@@ -3,180 +3,170 @@ import { RawEncoding } from "../api";
 import { ENCODING_MAP, SourceEventData, TypedArray } from "./utils";
 
 export default class Source {
-	#emitter = new Emittery<SourceEventData>();
-	#buffer: TypedArray;
-	#readIndex = 0;
-	#writeIndex = 0;
-	#closed = false;
-	#sampleRate: number;
-	#encoding: RawEncoding;
-	#container: string;
+    #emitter = new Emittery<SourceEventData>();
+    #buffer: TypedArray;
+    #readIndex = 0;
+    #writeIndex = 0;
+    #closed = false;
+    #sampleRate: number;
+    #encoding: RawEncoding;
+    #container: string;
 
-	on = this.#emitter.on.bind(this.#emitter);
-	once = this.#emitter.once.bind(this.#emitter);
-	events = this.#emitter.events.bind(this.#emitter);
-	off = this.#emitter.off.bind(this.#emitter);
+    on = this.#emitter.on.bind(this.#emitter);
+    once = this.#emitter.once.bind(this.#emitter);
+    events = this.#emitter.events.bind(this.#emitter);
+    off = this.#emitter.off.bind(this.#emitter);
 
-	/**
-	 * Create a new Source.
-	 *
-	 * @param options - Options for the Source.
-	 * @param options.sampleRate - The sample rate of the audio.
-	 */
-	constructor({
-		sampleRate,
-		encoding,
-		container,
-	}: { sampleRate: number; encoding: string; container: string }) {
-		this.#sampleRate = sampleRate;
-		this.#encoding = encoding as RawEncoding;
-		this.#container = container;
-		this.#buffer = this.#createBuffer(1024); // Initial size, can be adjusted
-	}
+    /**
+     * Create a new Source.
+     *
+     * @param options - Options for the Source.
+     * @param options.sampleRate - The sample rate of the audio.
+     */
+    constructor({ sampleRate, encoding, container }: { sampleRate: number; encoding: string; container: string }) {
+        this.#sampleRate = sampleRate;
+        this.#encoding = encoding as RawEncoding;
+        this.#container = container;
+        this.#buffer = this.#createBuffer(1024); // Initial size, can be adjusted
+    }
 
-	get sampleRate() {
-		return this.#sampleRate;
-	}
+    get sampleRate() {
+        return this.#sampleRate;
+    }
 
-	get encoding() {
-		return this.#encoding;
-	}
+    get encoding() {
+        return this.#encoding;
+    }
 
-	get container() {
-		return this.#container;
-	}
+    get container() {
+        return this.#container;
+    }
 
-	/**
-	 * Create a new buffer for the source.
-	 *
-	 * @param size - The size of the buffer to create.
-	 * @returns The new buffer as a TypedArray based on the encoding.
-	 */
-	#createBuffer(size: number): TypedArray {
-		const { arrayType: ArrayType } = ENCODING_MAP[this.#encoding];
-		return new ArrayType(size);
-	}
+    /**
+     * Create a new buffer for the source.
+     *
+     * @param size - The size of the buffer to create.
+     * @returns The new buffer as a TypedArray based on the encoding.
+     */
+    #createBuffer(size: number): TypedArray {
+        const { arrayType: ArrayType } = ENCODING_MAP[this.#encoding];
+        return new ArrayType(size);
+    }
 
-	/**
-	 * Append audio to the buffer.
-	 *
-	 * @param src The audio to append.
-	 */
-	async enqueue(src: TypedArray) {
-		const requiredCapacity = this.#writeIndex + src.length;
+    /**
+     * Append audio to the buffer.
+     *
+     * @param src The audio to append.
+     */
+    async enqueue(src: TypedArray) {
+        const requiredCapacity = this.#writeIndex + src.length;
 
-		// Resize buffer if necessary
-		if (requiredCapacity > this.#buffer.length) {
-			let newCapacity = this.#buffer.length;
-			while (newCapacity < requiredCapacity) {
-				newCapacity *= 2; // Double the buffer size
-			}
+        // Resize buffer if necessary
+        if (requiredCapacity > this.#buffer.length) {
+            let newCapacity = this.#buffer.length;
+            while (newCapacity < requiredCapacity) {
+                newCapacity *= 2; // Double the buffer size
+            }
 
-			const newBuffer = this.#createBuffer(newCapacity);
-			newBuffer.set(this.#buffer);
-			this.#buffer = newBuffer;
-		}
+            const newBuffer = this.#createBuffer(newCapacity);
+            newBuffer.set(this.#buffer);
+            this.#buffer = newBuffer;
+        }
 
-		// Append the audio to the buffer.
-		this.#buffer.set(src, this.#writeIndex);
-		this.#writeIndex += src.length;
-		await this.#emitter.emit("enqueue");
-	}
+        // Append the audio to the buffer.
+        this.#buffer.set(src, this.#writeIndex);
+        this.#writeIndex += src.length;
+        await this.#emitter.emit("enqueue");
+    }
 
-	/**
-	 * Read audio from the buffer.
-	 *
-	 * @param dst The buffer to read the audio into.
-	 * @returns The number of samples read. If the source is closed, this will be
-	 * less than the length of the provided buffer.
-	 */
-	async read(dst: TypedArray): Promise<number> {
-		// Read the buffer into the provided buffer.
-		const targetReadIndex = this.#readIndex + dst.length;
+    /**
+     * Read audio from the buffer.
+     *
+     * @param dst The buffer to read the audio into.
+     * @returns The number of samples read. If the source is closed, this will be
+     * less than the length of the provided buffer.
+     */
+    async read(dst: TypedArray): Promise<number> {
+        // Read the buffer into the provided buffer.
+        const targetReadIndex = this.#readIndex + dst.length;
 
-		while (!this.#closed && targetReadIndex > this.#writeIndex) {
-			// Wait for more audio to be enqueued.
-			await this.#emitter.emit("wait");
-			await Promise.race([
-				this.#emitter.once("enqueue"),
-				this.#emitter.once("close"),
-			]);
-			await this.#emitter.emit("read");
-		}
+        while (!this.#closed && targetReadIndex > this.#writeIndex) {
+            // Wait for more audio to be enqueued.
+            await this.#emitter.emit("wait");
+            await Promise.race([this.#emitter.once("enqueue"), this.#emitter.once("close")]);
+            await this.#emitter.emit("read");
+        }
 
-		const read = Math.min(dst.length, this.#writeIndex - this.#readIndex);
-		dst.set(this.#buffer.subarray(this.#readIndex, this.#readIndex + read));
-		this.#readIndex += read;
-		return read;
-	}
+        const read = Math.min(dst.length, this.#writeIndex - this.#readIndex);
+        dst.set(this.#buffer.subarray(this.#readIndex, this.#readIndex + read));
+        this.#readIndex += read;
+        return read;
+    }
 
-	/**
-	 * Seek in the buffer.
-	 *
-	 * @param offset The offset to seek to.
-	 * @param whence The position to seek from.
-	 * @returns The new position in the buffer.
-	 * @throws {Error} If the seek is invalid.
-	 */
-	async seek(
-		offset: number,
-		whence: "start" | "current" | "end",
-	): Promise<number> {
-		let position = this.#readIndex;
-		switch (whence) {
-			case "start":
-				position = offset;
-				break;
-			case "current":
-				position += offset;
-				break;
-			case "end":
-				position = this.#writeIndex + offset;
-				break;
-			default:
-				throw new Error(`Invalid seek mode: ${whence}`);
-		}
+    /**
+     * Seek in the buffer.
+     *
+     * @param offset The offset to seek to.
+     * @param whence The position to seek from.
+     * @returns The new position in the buffer.
+     * @throws {Error} If the seek is invalid.
+     */
+    async seek(offset: number, whence: "start" | "current" | "end"): Promise<number> {
+        let position = this.#readIndex;
+        switch (whence) {
+            case "start":
+                position = offset;
+                break;
+            case "current":
+                position += offset;
+                break;
+            case "end":
+                position = this.#writeIndex + offset;
+                break;
+            default:
+                throw new Error(`Invalid seek mode: ${whence}`);
+        }
 
-		if (position < 0 || position > this.#writeIndex) {
-			throw new Error("Seek out of bounds");
-		}
+        if (position < 0 || position > this.#writeIndex) {
+            throw new Error("Seek out of bounds");
+        }
 
-		this.#readIndex = position;
-		return position;
-	}
+        this.#readIndex = position;
+        return position;
+    }
 
-	/**
-	 * Get the number of samples in a given duration.
-	 *
-	 * @param durationSecs The duration in seconds.
-	 * @returns The number of samples.
-	 */
-	durationToSampleCount(durationSecs: number) {
-		return Math.trunc(durationSecs * this.#sampleRate);
-	}
+    /**
+     * Get the number of samples in a given duration.
+     *
+     * @param durationSecs The duration in seconds.
+     * @returns The number of samples.
+     */
+    durationToSampleCount(durationSecs: number) {
+        return Math.trunc(durationSecs * this.#sampleRate);
+    }
 
-	get buffer() {
-		return this.#buffer;
-	}
+    get buffer() {
+        return this.#buffer;
+    }
 
-	get readIndex() {
-		return this.#readIndex;
-	}
+    get readIndex() {
+        return this.#readIndex;
+    }
 
-	get writeIndex() {
-		return this.#writeIndex;
-	}
+    get writeIndex() {
+        return this.#writeIndex;
+    }
 
-	/**
-	 * Close the source. This signals that no more audio will be enqueued.
-	 *
-	 * This will emit a "close" event.
-	 *
-	 * @returns A promise that resolves when the source is closed.
-	 */
-	async close() {
-		this.#closed = true;
-		await this.#emitter.emit("close");
-		this.#emitter.clearListeners();
-	}
+    /**
+     * Close the source. This signals that no more audio will be enqueued.
+     *
+     * This will emit a "close" event.
+     *
+     * @returns A promise that resolves when the source is closed.
+     */
+    async close() {
+        this.#closed = true;
+        await this.#emitter.emit("close");
+        this.#emitter.clearListeners();
+    }
 }
