@@ -4,16 +4,4 @@
 
 import * as Cartesia from "../../../index";
 
-export type TtsRequestVoiceSpecifier =
-    | Cartesia.TtsRequestVoiceSpecifier.Id
-    | Cartesia.TtsRequestVoiceSpecifier.Embedding;
-
-export declare namespace TtsRequestVoiceSpecifier {
-    interface Id extends Cartesia.TtsRequestIdSpecifier {
-        mode: "id";
-    }
-
-    interface Embedding extends Cartesia.TtsRequestEmbeddingSpecifier {
-        mode: "embedding";
-    }
-}
+export type TtsRequestVoiceSpecifier = Cartesia.TtsRequestIdSpecifier | Cartesia.TtsRequestEmbeddingSpecifier;

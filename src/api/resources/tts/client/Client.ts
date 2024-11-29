@@ -5,10 +5,10 @@
 import * as environments from "../../../../environments";
 import * as core from "../../../../core";
 import * as Cartesia from "../../../index";
-import urlJoin from "url-join";
-import * as errors from "../../../../errors/index";
 import * as stream from "stream";
 import * as serializers from "../../../../serialization/index";
+import urlJoin from "url-join";
+import * as errors from "../../../../errors/index";
 
 export declare namespace Tts {
     interface Options {
@@ -34,60 +34,8 @@ export declare namespace Tts {
 export class Tts {
     constructor(protected readonly _options: Tts.Options = {}) {}
 
-    /**
-     * @param {Cartesia.TtsRequest} request
-     * @param {Tts.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @example
-     *     await client.tts.bytes({
-     *         model_id: "sonic-english",
-     *         transcript: "Hello, world!",
-     *         voice: {
-     *             mode: "id",
-     *             id: "694f9389-aac1-45b6-b726-9d9369183238"
-     *         },
-     *         language: "en",
-     *         output_format: {
-     *             container: "mp3",
-     *             sample_rate: 44100,
-     *             bit_rate: 128000
-     *         }
-     *     })
-     *
-     * @example
-     *     await client.tts.bytes({
-     *         model_id: "sonic-english",
-     *         transcript: "Hello, world!",
-     *         voice: {
-     *             mode: "id",
-     *             id: "694f9389-aac1-45b6-b726-9d9369183238"
-     *         },
-     *         language: "en",
-     *         output_format: {
-     *             container: "wav",
-     *             sample_rate: 44100,
-     *             encoding: "pcm_f32le"
-     *         }
-     *     })
-     *
-     * @example
-     *     await client.tts.bytes({
-     *         model_id: "sonic-english",
-     *         transcript: "Hello, world!",
-     *         voice: {
-     *             mode: "id",
-     *             id: "694f9389-aac1-45b6-b726-9d9369183238"
-     *         },
-     *         language: "en",
-     *         output_format: {
-     *             container: "raw",
-     *             sample_rate: 44100,
-     *             encoding: "pcm_f32le"
-     *         }
-     *     })
-     */
-    public async bytes(request: Cartesia.TtsRequest, requestOptions?: Tts.RequestOptions): Promise<void> {
-        const _response = await (this._options.fetcher ?? core.fetcher)({
+    public async bytes(request: Cartesia.TtsRequest, requestOptions?: Tts.RequestOptions): Promise<stream.Readable> {
+        const _response = await (this._options.fetcher ?? core.fetcher)<stream.Readable>({
             url: urlJoin(
                 (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
                 "/tts/bytes"
@@ -105,13 +53,14 @@ export class Tts {
             },
             contentType: "application/json",
             requestType: "json",
-            body: request,
+            body: serializers.TtsRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
+            responseType: "streaming",
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return;
+            return _response.body;
         }
 
         if (_response.error.reason === "status-code") {
@@ -158,7 +107,7 @@ export class Tts {
             },
             contentType: "application/json",
             requestType: "json",
-            body: request,
+            body: serializers.TtsRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
             responseType: "sse",
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
@@ -178,8 +127,8 @@ export class Tts {
                 },
                 signal: requestOptions?.abortSignal,
                 eventShape: {
-                    type: "json",
-                    messageTerminator: "\n",
+                    type: "sse",
+                    streamTerminator: "[DONE]",
                 },
             });
         }

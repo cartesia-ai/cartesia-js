@@ -6,5 +6,5 @@ import * as Cartesia from "../../../index";
 
 export interface RawOutputFormat {
     encoding: Cartesia.RawEncoding;
-    sample_rate: number;
+    sampleRate: number;
 }

@@ -44,7 +44,7 @@ await client.apiStatus.get();
 
 ## Tts
 
-<details><summary><code>client.tts.<a href="/src/api/resources/tts/client/Client.ts">bytes</a>({ ...params }) -> void</code></summary>
+<details><summary><code>client.tts.<a href="/src/api/resources/tts/client/Client.ts">bytes</a>({ ...params }) -> stream.Readable</code></summary>
 <dl>
 <dd>
 
@@ -58,17 +58,17 @@ await client.apiStatus.get();
 
 ```typescript
 await client.tts.bytes({
-    model_id: "sonic-english",
+    modelId: "sonic-english",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
         id: "694f9389-aac1-45b6-b726-9d9369183238",
     },
     language: "en",
-    output_format: {
+    outputFormat: {
         container: "mp3",
-        sample_rate: 44100,
-        bit_rate: 128000,
+        sampleRate: 44100,
+        bitRate: 128000,
     },
 });
 ```
@@ -119,13 +119,18 @@ await client.tts.bytes({
 
 ```typescript
 const response = await client.tts.sse({
-    model_id: "string",
+    modelId: "string",
     transcript: "string",
     voice: {
         mode: "id",
+        id: "string",
+        experimentalControls: {
+            speed: 1.1,
+            emotion: "anger:lowest",
+        },
     },
     language: "en",
-    output_format: {
+    outputFormat: {
         container: "raw",
     },
     duration: 1.1,
@@ -200,10 +205,10 @@ This endpoint is priced at 15 characters per second of input audio.
 
 ```typescript
 await client.voiceChanger.bytes(fs.createReadStream("/path/to/your/file"), {
-    "voice[id]": "694f9389-aac1-45b6-b726-9d9369183238",
-    "output_format[container]": "mp3",
-    "output_format[sample_rate]": 44100,
-    "output_format[bit_rate]": 128000,
+    voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
+    outputFormatContainer: "mp3",
+    outputFormatSampleRate: 44100,
+    outputFormatBitRate: 128000,
 });
 ```
 
@@ -261,10 +266,10 @@ await client.voiceChanger.bytes(fs.createReadStream("/path/to/your/file"), {
 
 ```typescript
 const response = await client.voiceChanger.sse(fs.createReadStream("/path/to/your/file"), {
-    "voice[id]": "694f9389-aac1-45b6-b726-9d9369183238",
-    "output_format[container]": "mp3",
-    "output_format[sample_rate]": 44100,
-    "output_format[bit_rate]": 128000,
+    voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
+    outputFormatContainer: "mp3",
+    outputFormatSampleRate: 44100,
+    outputFormatBitRate: 128000,
 });
 for await (const item of response) {
     console.log(item);
@@ -378,7 +383,7 @@ await client.voices.create({
         1, 1, 1, 1, 1, 1, 1,
     ],
     language: "en",
-    base_voice_id: "string",
+    baseVoiceId: "string",
 });
 ```
 
@@ -592,7 +597,7 @@ await client.voices.localize({
         1, 1, 1, 1, 1, 1, 1,
     ],
     language: "en",
-    original_speaker_gender: "male",
+    originalSpeakerGender: "male",
     dialect: "au",
 });
 ```

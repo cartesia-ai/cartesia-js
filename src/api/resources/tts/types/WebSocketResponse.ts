@@ -7,7 +7,7 @@ import * as Cartesia from "../../../index";
 export type WebSocketResponse =
     | Cartesia.WebSocketResponse.Chunk
     | Cartesia.WebSocketResponse.Done
-    | Cartesia.WebSocketResponse.Timestamp
+    | Cartesia.WebSocketResponse.Timestamps
     | Cartesia.WebSocketResponse.Error_;
 
 export declare namespace WebSocketResponse {
@@ -19,8 +19,8 @@ export declare namespace WebSocketResponse {
         type: "done";
     }
 
-    interface Timestamp extends Cartesia.WebSocketTimestampResponse {
-        type: "timestamp";
+    interface Timestamps extends Cartesia.WebSocketTimestampsResponse {
+        type: "timestamps";
     }
 
     interface Error_ extends Cartesia.WebSocketErrorResponse {
