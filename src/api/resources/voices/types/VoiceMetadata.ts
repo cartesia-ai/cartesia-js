@@ -4,7 +4,7 @@
 
 import * as Cartesia from "../../../index";
 
-export interface Voice {
+export interface VoiceMetadata {
     id: Cartesia.VoiceId;
     /** The ID of the user who owns the voice. */
     user_id: string;
@@ -16,7 +16,5 @@ export interface Voice {
     description: string;
     /** The date and time the voice was created. */
     created_at: string;
-    embedding: Cartesia.Embedding;
     language: Cartesia.SupportedLanguage;
-    base_voice_id?: Cartesia.BaseVoiceId;
 }

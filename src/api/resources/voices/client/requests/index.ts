@@ -1,1 +1,1 @@
-export { type CloneFromClipRequest } from "./CloneFromClipRequest";
+export { type CloneVoiceRequest } from "./CloneVoiceRequest";

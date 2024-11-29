@@ -44,7 +44,7 @@ await client.apiStatus.get();
 
 ## Tts
 
-<details><summary><code>client.tts.<a href="/src/api/resources/tts/client/Client.ts">bytes</a>({ ...params }) -> stream.Readable</code></summary>
+<details><summary><code>client.tts.<a href="/src/api/resources/tts/client/Client.ts">bytes</a>({ ...params }) -> void</code></summary>
 <dl>
 <dd>
 
@@ -58,17 +58,17 @@ await client.apiStatus.get();
 
 ```typescript
 await client.tts.bytes({
-    modelId: "sonic-english",
+    model_id: "sonic-english",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
         id: "694f9389-aac1-45b6-b726-9d9369183238",
     },
     language: "en",
-    outputFormat: {
+    output_format: {
         container: "mp3",
-        sampleRate: 44100,
-        bitRate: 128000,
+        sample_rate: 44100,
+        bit_rate: 128000,
     },
 });
 ```
@@ -119,18 +119,13 @@ await client.tts.bytes({
 
 ```typescript
 const response = await client.tts.sse({
-    modelId: "string",
+    model_id: "string",
     transcript: "string",
     voice: {
         mode: "id",
-        id: "string",
-        experimentalControls: {
-            speed: 1.1,
-            emotion: "anger:lowest",
-        },
     },
     language: "en",
-    outputFormat: {
+    output_format: {
         container: "raw",
     },
     duration: 1.1,
@@ -205,10 +200,10 @@ This endpoint is priced at 15 characters per second of input audio.
 
 ```typescript
 await client.voiceChanger.bytes(fs.createReadStream("/path/to/your/file"), {
-    voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
-    outputFormatContainer: "mp3",
-    outputFormatSampleRate: 44100,
-    outputFormatBitRate: 128000,
+    "voice[id]": "694f9389-aac1-45b6-b726-9d9369183238",
+    "output_format[container]": "mp3",
+    "output_format[sample_rate]": 44100,
+    "output_format[bit_rate]": 128000,
 });
 ```
 
@@ -266,10 +261,10 @@ await client.voiceChanger.bytes(fs.createReadStream("/path/to/your/file"), {
 
 ```typescript
 const response = await client.voiceChanger.sse(fs.createReadStream("/path/to/your/file"), {
-    voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
-    outputFormatContainer: "mp3",
-    outputFormatSampleRate: 44100,
-    outputFormatBitRate: 128000,
+    "voice[id]": "694f9389-aac1-45b6-b726-9d9369183238",
+    "output_format[container]": "mp3",
+    "output_format[sample_rate]": 44100,
+    "output_format[bit_rate]": 128000,
 });
 for await (const item of response) {
     console.log(item);
@@ -383,7 +378,7 @@ await client.voices.create({
         1, 1, 1, 1, 1, 1, 1,
     ],
     language: "en",
-    baseVoiceId: "string",
+    base_voice_id: "string",
 });
 ```
 
@@ -597,7 +592,7 @@ await client.voices.localize({
         1, 1, 1, 1, 1, 1, 1,
     ],
     language: "en",
-    originalSpeakerGender: "male",
+    original_speaker_gender: "male",
     dialect: "au",
 });
 ```
@@ -689,7 +684,7 @@ await client.voices.mix({
 </dl>
 </details>
 
-<details><summary><code>client.voices.<a href="/src/api/resources/voices/client/Client.ts">cloneFromClip</a>(clip, { ...params }) -> Cartesia.EmbeddingResponse</code></summary>
+<details><summary><code>client.voices.<a href="/src/api/resources/voices/client/Client.ts">clone</a>(clip, { ...params }) -> Cartesia.VoiceMetadata</code></summary>
 <dl>
 <dd>
 
@@ -701,9 +696,11 @@ await client.voices.mix({
 <dl>
 <dd>
 
-Clone a voice from a clip. The clip should be a 15-20 second recording of a person speaking with little to no background noise.
+Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
 
-The endpoint will return an embedding that can either be used directly with text-to-speech endpoints or used to create a new voice.
+Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
+
+Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
 
 </dd>
 </dl>
@@ -719,7 +716,13 @@ The endpoint will return an embedding that can either be used directly with text
 <dd>
 
 ```typescript
-await client.voices.cloneFromClip(fs.createReadStream("/path/to/your/file"), {});
+await client.voices.clone(fs.createReadStream("/path/to/your/file"), {
+    name: "A high-stability cloned voice",
+    description: "Copied from Cartesia docs",
+    mode: "stability",
+    language: "en",
+    enhance: true,
+});
 ```
 
 </dd>
@@ -743,7 +746,7 @@ await client.voices.cloneFromClip(fs.createReadStream("/path/to/your/file"), {})
 <dl>
 <dd>
 
-**request:** `Cartesia.CloneFromClipRequest`
+**request:** `Cartesia.CloneVoiceRequest`
 
 </dd>
 </dl>

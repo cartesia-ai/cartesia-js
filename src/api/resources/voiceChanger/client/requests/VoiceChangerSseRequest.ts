@@ -7,40 +7,40 @@ import * as Cartesia from "../../../../index";
 /**
  * @example
  *     {
- *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
- *         outputFormatContainer: "mp3",
- *         outputFormatSampleRate: 44100,
- *         outputFormatBitRate: 128000
+ *         "voice[id]": "694f9389-aac1-45b6-b726-9d9369183238",
+ *         "output_format[container]": "mp3",
+ *         "output_format[sample_rate]": 44100,
+ *         "output_format[bit_rate]": 128000
  *     }
  *
  * @example
  *     {
- *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
- *         outputFormatContainer: "wav",
- *         outputFormatSampleRate: 44100,
- *         outputFormatEncoding: "pcm_f32le"
+ *         "voice[id]": "694f9389-aac1-45b6-b726-9d9369183238",
+ *         "output_format[container]": "wav",
+ *         "output_format[sample_rate]": 44100,
+ *         "output_format[encoding]": "pcm_f32le"
  *     }
  *
  * @example
  *     {
- *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
- *         outputFormatContainer: "raw",
- *         outputFormatSampleRate: 44100,
- *         outputFormatEncoding: "pcm_f32le"
+ *         "voice[id]": "694f9389-aac1-45b6-b726-9d9369183238",
+ *         "output_format[container]": "raw",
+ *         "output_format[sample_rate]": 44100,
+ *         "output_format[encoding]": "pcm_f32le"
  *     }
  */
 export interface VoiceChangerSseRequest {
-    voiceId: string;
-    outputFormatContainer: Cartesia.OutputFormatContainer;
-    outputFormatSampleRate: number;
+    "voice[id]": string;
+    "output_format[container]": Cartesia.OutputFormatContainer;
+    "output_format[sample_rate]": number;
     /**
      * Required for `raw` and `wav` containers.
      *
      */
-    outputFormatEncoding?: Cartesia.RawEncoding;
+    "output_format[encoding]"?: Cartesia.RawEncoding;
     /**
      * Required for `mp3` containers.
      *
      */
-    outputFormatBitRate?: number;
+    "output_format[bit_rate]"?: number;
 }

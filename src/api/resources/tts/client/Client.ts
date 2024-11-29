@@ -5,10 +5,10 @@
 import * as environments from "../../../../environments";
 import * as core from "../../../../core";
 import * as Cartesia from "../../../index";
-import * as stream from "stream";
-import * as serializers from "../../../../serialization/index";
 import urlJoin from "url-join";
 import * as errors from "../../../../errors/index";
+import * as stream from "stream";
+import * as serializers from "../../../../serialization/index";
 
 export declare namespace Tts {
     interface Options {
@@ -34,8 +34,60 @@ export declare namespace Tts {
 export class Tts {
     constructor(protected readonly _options: Tts.Options = {}) {}
 
-    public async bytes(request: Cartesia.TtsRequest, requestOptions?: Tts.RequestOptions): Promise<stream.Readable> {
-        const _response = await (this._options.fetcher ?? core.fetcher)<stream.Readable>({
+    /**
+     * @param {Cartesia.TtsRequest} request
+     * @param {Tts.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.tts.bytes({
+     *         model_id: "sonic-english",
+     *         transcript: "Hello, world!",
+     *         voice: {
+     *             mode: "id",
+     *             id: "694f9389-aac1-45b6-b726-9d9369183238"
+     *         },
+     *         language: "en",
+     *         output_format: {
+     *             container: "mp3",
+     *             sample_rate: 44100,
+     *             bit_rate: 128000
+     *         }
+     *     })
+     *
+     * @example
+     *     await client.tts.bytes({
+     *         model_id: "sonic-english",
+     *         transcript: "Hello, world!",
+     *         voice: {
+     *             mode: "id",
+     *             id: "694f9389-aac1-45b6-b726-9d9369183238"
+     *         },
+     *         language: "en",
+     *         output_format: {
+     *             container: "wav",
+     *             sample_rate: 44100,
+     *             encoding: "pcm_f32le"
+     *         }
+     *     })
+     *
+     * @example
+     *     await client.tts.bytes({
+     *         model_id: "sonic-english",
+     *         transcript: "Hello, world!",
+     *         voice: {
+     *             mode: "id",
+     *             id: "694f9389-aac1-45b6-b726-9d9369183238"
+     *         },
+     *         language: "en",
+     *         output_format: {
+     *             container: "raw",
+     *             sample_rate: 44100,
+     *             encoding: "pcm_f32le"
+     *         }
+     *     })
+     */
+    public async bytes(request: Cartesia.TtsRequest, requestOptions?: Tts.RequestOptions): Promise<void> {
+        const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
                 (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
                 "/tts/bytes"
@@ -45,22 +97,21 @@ export class Tts {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "1.3.1",
-                "User-Agent": "@cartesia/cartesia-js/1.3.1",
+                "X-Fern-SDK-Version": "2.0.0-alpha0",
+                "User-Agent": "@cartesia/cartesia-js/2.0.0-alpha0",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
             },
             contentType: "application/json",
             requestType: "json",
-            body: serializers.TtsRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
-            responseType: "streaming",
+            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return _response.body;
+            return;
         }
 
         if (_response.error.reason === "status-code") {
@@ -99,15 +150,15 @@ export class Tts {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "1.3.1",
-                "User-Agent": "@cartesia/cartesia-js/1.3.1",
+                "X-Fern-SDK-Version": "2.0.0-alpha0",
+                "User-Agent": "@cartesia/cartesia-js/2.0.0-alpha0",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
             },
             contentType: "application/json",
             requestType: "json",
-            body: serializers.TtsRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
+            body: request,
             responseType: "sse",
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
@@ -127,8 +178,8 @@ export class Tts {
                 },
                 signal: requestOptions?.abortSignal,
                 eventShape: {
-                    type: "sse",
-                    streamTerminator: "[DONE]",
+                    type: "json",
+                    messageTerminator: "\n",
                 },
             });
         }

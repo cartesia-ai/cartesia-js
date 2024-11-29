@@ -48,15 +48,15 @@ export class VoiceChanger {
     ): Promise<stream.Readable> {
         const _request = await core.newFormData();
         await _request.appendFile("clip", clip);
-        await _request.append("voice[id]", request.voiceId);
-        await _request.append("output_format[container]", request.outputFormatContainer);
-        await _request.append("output_format[sample_rate]", request.outputFormatSampleRate.toString());
-        if (request.outputFormatEncoding != null) {
-            await _request.append("output_format[encoding]", request.outputFormatEncoding);
+        await _request.append("voice[id]", request.voice[id]);
+        await _request.append("output_format[container]", request.output_format[container]);
+        await _request.append("output_format[sample_rate]", request.output_format[sample_rate].toString());
+        if (request.output_format[encoding] != null) {
+            await _request.append("output_format[encoding]", request.output_format[encoding]);
         }
 
-        if (request.outputFormatBitRate != null) {
-            await _request.append("output_format[bit_rate]", request.outputFormatBitRate.toString());
+        if (request.output_format[bit_rate] != null) {
+            await _request.append("output_format[bit_rate]", request.output_format[bit_rate].toString());
         }
 
         const _maybeEncodedRequest = await _request.getRequest();
@@ -70,8 +70,8 @@ export class VoiceChanger {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "1.3.1",
-                "User-Agent": "@cartesia/cartesia-js/1.3.1",
+                "X-Fern-SDK-Version": "2.0.0-alpha0",
+                "User-Agent": "@cartesia/cartesia-js/2.0.0-alpha0",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -118,15 +118,15 @@ export class VoiceChanger {
     ): Promise<core.Stream<Cartesia.StreamingResponse>> {
         const _request = await core.newFormData();
         await _request.appendFile("clip", clip);
-        await _request.append("voice[id]", request.voiceId);
-        await _request.append("output_format[container]", request.outputFormatContainer);
-        await _request.append("output_format[sample_rate]", request.outputFormatSampleRate.toString());
-        if (request.outputFormatEncoding != null) {
-            await _request.append("output_format[encoding]", request.outputFormatEncoding);
+        await _request.append("voice[id]", request.voice[id]);
+        await _request.append("output_format[container]", request.output_format[container]);
+        await _request.append("output_format[sample_rate]", request.output_format[sample_rate].toString());
+        if (request.output_format[encoding] != null) {
+            await _request.append("output_format[encoding]", request.output_format[encoding]);
         }
 
-        if (request.outputFormatBitRate != null) {
-            await _request.append("output_format[bit_rate]", request.outputFormatBitRate.toString());
+        if (request.output_format[bit_rate] != null) {
+            await _request.append("output_format[bit_rate]", request.output_format[bit_rate].toString());
         }
 
         const _maybeEncodedRequest = await _request.getRequest();
@@ -140,8 +140,8 @@ export class VoiceChanger {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "1.3.1",
-                "User-Agent": "@cartesia/cartesia-js/1.3.1",
+                "X-Fern-SDK-Version": "2.0.0-alpha0",
+                "User-Agent": "@cartesia/cartesia-js/2.0.0-alpha0",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),

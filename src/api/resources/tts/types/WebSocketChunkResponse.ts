@@ -6,5 +6,5 @@ import * as Cartesia from "../../../index";
 
 export interface WebSocketChunkResponse extends Cartesia.WebSocketBaseResponse {
     data: string;
-    stepTime: number;
+    step_time: number;
 }

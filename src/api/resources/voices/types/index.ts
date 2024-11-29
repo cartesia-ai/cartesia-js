@@ -1,6 +1,7 @@
 export * from "./VoiceId";
 export * from "./BaseVoiceId";
 export * from "./Voice";
+export * from "./VoiceMetadata";
 export * from "./CreateVoiceRequest";
 export * from "./UpdateVoiceRequest";
 export * from "./LocalizeTargetLanguage";
@@ -13,3 +14,4 @@ export * from "./Weight";
 export * from "./IdSpecifier";
 export * from "./EmbeddingSpecifier";
 export * from "./MixVoiceSpecifier";
+export * from "./CloneMode";

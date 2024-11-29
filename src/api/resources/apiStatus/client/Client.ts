@@ -5,7 +5,6 @@
 import * as environments from "../../../../environments";
 import * as core from "../../../../core";
 import * as Cartesia from "../../../index";
-import * as serializers from "../../../../serialization/index";
 import * as errors from "../../../../errors/index";
 
 export declare namespace ApiStatus {
@@ -46,8 +45,8 @@ export class ApiStatus {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "1.3.1",
-                "User-Agent": "@cartesia/cartesia-js/1.3.1",
+                "X-Fern-SDK-Version": "2.0.0-alpha0",
+                "User-Agent": "@cartesia/cartesia-js/2.0.0-alpha0",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -59,13 +58,7 @@ export class ApiStatus {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return serializers.ApiInfo.parseOrThrow(_response.body, {
-                unrecognizedObjectKeys: "passthrough",
-                allowUnrecognizedUnionMembers: true,
-                allowUnrecognizedEnumValues: true,
-                skipValidation: true,
-                breadcrumbsPrefix: ["response"],
-            });
+            return _response.body as Cartesia.ApiInfo;
         }
 
         if (_response.error.reason === "status-code") {

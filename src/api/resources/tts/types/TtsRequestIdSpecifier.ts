@@ -5,7 +5,6 @@
 import * as Cartesia from "../../../index";
 
 export interface TtsRequestIdSpecifier {
-    mode: "id";
     id: Cartesia.VoiceId;
-    experimentalControls?: Cartesia.Controls;
+    __experimental_controls?: Cartesia.Controls;
 }

@@ -10,6 +10,6 @@ export interface CreateVoiceRequest {
     /** The description of the voice. */
     description: string;
     embedding: Cartesia.Embedding;
-    language?: Cartesia.SupportedLanguage;
-    baseVoiceId?: Cartesia.BaseVoiceId;
+    language: Cartesia.SupportedLanguage;
+    base_voice_id?: Cartesia.BaseVoiceId;
 }

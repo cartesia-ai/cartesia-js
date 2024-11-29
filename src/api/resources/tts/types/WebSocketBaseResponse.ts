@@ -5,7 +5,7 @@
 import * as Cartesia from "../../../index";
 
 export interface WebSocketBaseResponse {
-    contextId?: Cartesia.ContextId;
-    statusCode: number;
+    context_id: Cartesia.ContextId;
+    status_code: number;
     done: boolean;
 }
