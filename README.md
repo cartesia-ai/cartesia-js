@@ -17,6 +17,8 @@ A full reference for this library is available [here](./reference.md).
 
 ## Usage
 
+### Instantiation
+
 Instantiate and use the client with the following:
 
 ```typescript
@@ -37,6 +39,104 @@ await client.tts.bytes({
         encoding: "pcm_f32le",
     },
 });
+```
+
+### TTS over WebSocket
+
+```js
+import { CartesiaClient } from "@cartesia/cartesia-js";
+
+const cartesia = new CartesiaClient({
+    apiKeyHeader: "your-api-key",
+});
+
+// Initialize the WebSocket. Make sure the output format you specify is supported.
+const websocket = cartesia.tts.websocket({
+    container: "raw",
+    encoding: "pcm_f32le",
+    sampleRate: 44100,
+});
+
+try {
+    await websocket.connect({
+        // If using Node.js, you can pass a custom WebSocket constructor, such as from `ws`.
+        // This is not needed for browser usage, so you can call connect() without any arguments.
+        WebSocket: WS,
+    });
+} catch (error) {
+    console.error(`Failed to connect to Cartesia: ${error}`);
+}
+
+// Create a stream.
+const response = await websocket.send({
+    modelId: "sonic-english",
+    voice: {
+        mode: "id",
+        id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+    },
+    transcript: "Hello, world!",
+    // The WebSocket sets output_format on your behalf.
+});
+
+// Access the raw messages from the WebSocket.
+response.on("message", (message) => {
+    // Raw message.
+    console.log("Received message:", message);
+});
+
+// You can also access messages using a for-await-of loop.
+for await (const message of response.events("message")) {
+    // Raw message.
+    console.log("Received message:", message);
+}
+```
+
+#### Input Streaming with Contexts
+
+```js
+const contextOptions = {
+    contextId: "my-context",
+    modelId: "sonic-english",
+    voice: {
+        mode: "id",
+        id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+    },
+};
+
+// Initial request on the context uses websocket.send().
+// This response object will aggregate the results of all the inputs sent on the context.
+const response = await websocket.send({
+    ...contextOptions,
+    transcript: "Hello, world!",
+});
+
+// Subsequent requests on the same context use websocket.continue().
+await websocket.continue({
+    ...contextOptions,
+    transcript: " How are you today?",
+});
+```
+
+See the [input streaming docs](https://docs.cartesia.ai/reference/web-socket/stream-speech/working-with-web-sockets#input-streaming-with-contexts) for more information.
+
+### Playing audio in the browser
+
+(The `WebPlayer` class only supports playing audio in the browser and the raw PCM format with fp32le encoding.)
+
+```js
+// If you're using the client in the browser, you can control audio playback using our WebPlayer:
+import { WebPlayer } from "@cartesia/cartesia-js";
+
+console.log("Playing stream...");
+
+// Create a Player object.
+const player = new WebPlayer();
+
+// Play the audio. (`response` includes a custom Source object that the Player can play.)
+// The call resolves when the audio finishes playing.
+await player.play(response.source);
+
+console.log("Done playing.");
 ```
 
 ## Request And Response Types
