@@ -1,4 +1,5 @@
 import type Emittery from "emittery";
+import type { Options } from "partysocket/ws";
 
 export interface ClientOptions {
 	apiKey?: string | (() => Promise<string>);
@@ -224,6 +225,8 @@ export type WebSocketOptions = {
 	encoding?: string;
 	sampleRate: number;
 };
+
+export type ConnectOptions = Pick<Options, "WebSocket">;
 
 export type SourceEventData = {
 	enqueue: never;
