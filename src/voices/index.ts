@@ -89,7 +89,6 @@ export default class Voices extends Client {
 		return response.json() as Promise<Voice>;
 	}
 
-
 	async mix(options: MixVoicesOptions): Promise<MixVoicesResponse> {
 		const response = await this._fetch("/voices/mix", {
 			method: "POST",
