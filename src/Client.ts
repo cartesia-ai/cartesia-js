@@ -12,7 +12,7 @@ import { Voices } from "./api/resources/voices/client/Client";
 export declare namespace CartesiaClient {
     interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
-        apiKeyHeader?: core.Supplier<string | undefined>;
+        apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;

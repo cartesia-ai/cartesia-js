@@ -11,7 +11,7 @@ import * as errors from "../../../../errors/index";
 export declare namespace ApiStatus {
     interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
-        apiKeyHeader?: core.Supplier<string | undefined>;
+        apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;
@@ -46,8 +46,8 @@ export class ApiStatus {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.0.0-alpha",
-                "User-Agent": "@cartesia/cartesia-js/2.0.0-alpha",
+                "X-Fern-SDK-Version": "2.0.0-alpha2",
+                "User-Agent": "@cartesia/cartesia-js/2.0.0-alpha2",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -91,7 +91,7 @@ export class ApiStatus {
     }
 
     protected async _getCustomAuthorizationHeaders() {
-        const apiKeyHeaderValue = await core.Supplier.get(this._options.apiKeyHeader);
-        return { "X-API-Key": apiKeyHeaderValue };
+        const apiKeyValue = await core.Supplier.get(this._options.apiKey);
+        return { "X-API-Key": apiKeyValue };
     }
 }
