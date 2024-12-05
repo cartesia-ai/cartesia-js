@@ -7,5 +7,3 @@ src/index.ts
 
 src/core/websocket
 src/serialization/resources/tts/types/OutputFormat.ts
-
-.github/workflows/ci.yml
