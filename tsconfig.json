@@ -3,7 +3,7 @@
         "extendedDiagnostics": true,
         "strict": true,
         "target": "ES6",
-        "module": "CommonJS",
+        "module": "esnext",
         "moduleResolution": "node",
         "esModuleInterop": true,
         "skipLibCheck": true,
