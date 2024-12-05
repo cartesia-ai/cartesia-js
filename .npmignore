@@ -1,4 +1,9 @@
+node_modules
+src
+tests
 .gitignore
-biome.json
-bun.lockb
+.github
+.fernignore
+.prettierrc.yml
 tsconfig.json
+yarn.lock
