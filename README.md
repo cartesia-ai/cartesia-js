@@ -24,7 +24,7 @@ Instantiate and use the client with the following:
 ```typescript
 import { CartesiaClient } from "@cartesia/cartesia-js";
 
-const client = new CartesiaClient({ apiKeyHeader: "YOUR_API_KEY_HEADER" });
+const client = new CartesiaClient({ apiKey: "YOUR_API_KEY_HEADER" });
 await client.tts.bytes({
     modelId: "sonic-english",
     transcript: "Hello, world!",
@@ -47,7 +47,7 @@ await client.tts.bytes({
 import { CartesiaClient } from "@cartesia/cartesia-js";
 
 const cartesia = new CartesiaClient({
-    apiKeyHeader: "your-api-key",
+    apiKey: "your-api-key",
 });
 
 // Initialize the WebSocket. Make sure the output format you specify is supported.
