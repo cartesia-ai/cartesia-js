@@ -179,7 +179,7 @@ export default class Websocket {
                     (await core.Supplier.get(this.options.environment)) ?? environments.CartesiaEnvironment.Production
                 ).replace(/^https?:\/\//, "");
                 const params = {
-                    api_key: this.options.apiKeyHeader,
+                    api_key: this.options.apiKey,
                     cartesia_version: this.options.cartesiaVersion,
                 };
                 return `wss://${baseUrl}/tts/websocket${qs.stringify(params, { addQueryPrefix: true })}`;
