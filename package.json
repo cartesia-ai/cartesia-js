@@ -1,6 +1,6 @@
 {
     "name": "@cartesia/cartesia-js",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "private": false,
     "repository": "https://github.com/cartesia-ai/cartesia-js",
     "main": "./index.js",
@@ -20,7 +20,8 @@
         "readable-stream": "^4.5.2",
         "form-data-encoder": "^4.0.2",
         "emittery": "^1.0.3",
-        "human-id": "^4.1.1"
+        "human-id": "^4.1.1",
+        "ws": "^8.15.13"
     },
     "devDependencies": {
         "@types/url-join": "4.0.1",
