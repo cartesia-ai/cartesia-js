@@ -58,11 +58,7 @@ const websocket = cartesia.tts.websocket({
 });
 
 try {
-    await websocket.connect({
-        // If using Node.js, you can pass a custom WebSocket constructor, such as from `ws`.
-        // This is not needed for browser usage, so you can call connect() without any arguments.
-        WebSocket: WS,
-    });
+    await websocket.connect();
 } catch (error) {
     console.error(`Failed to connect to Cartesia: ${error}`);
 }
