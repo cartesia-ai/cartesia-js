@@ -12,10 +12,10 @@ export default class Source {
     #encoding: RawEncoding;
     #container: string;
 
-    on = this.#emitter.on.bind(this.#emitter);
-    once = this.#emitter.once.bind(this.#emitter);
-    events = this.#emitter.events.bind(this.#emitter);
-    off = this.#emitter.off.bind(this.#emitter);
+    on: Emittery<SourceEventData>["on"] = this.#emitter.on.bind(this.#emitter);
+    once: Emittery<SourceEventData>["once"] = this.#emitter.once.bind(this.#emitter);
+    events: Emittery<SourceEventData>["events"] = this.#emitter.events.bind(this.#emitter);
+    off: Emittery<SourceEventData>["off"] = this.#emitter.off.bind(this.#emitter.off);
 
     /**
      * Create a new Source.
