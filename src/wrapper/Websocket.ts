@@ -15,7 +15,7 @@ import {
     WebSocketOptions,
     EmitteryCallbacks,
 } from "./utils";
-import { Tts } from "api/resources/tts/client/Client";
+import { Tts } from "../api/resources/tts/client/Client";
 import Source from "./source";
 import qs from "qs";
 
@@ -41,9 +41,16 @@ export default class Websocket {
      *                          If set to `0`, the stream will not time out.
      * @returns A Source object that can be passed to a Player to play the audio.
      * @returns An Emittery instance that emits messages from the WebSocket.
-     * @returns An abort function that can be called to cancel the stream.
      */
-    send(inputs: WebSocketTtsRequest, { timeout = 0 }: WebSocketStreamOptions = {}) {
+    async send(
+        inputs: WebSocketTtsRequest,
+        { timeout = 0 }: WebSocketStreamOptions = {}
+    ): Promise<
+        EmitteryCallbacks<{
+            message: string;
+            timestamps: WordTimestamps;
+        }> & { source: Source; stop: unknown }
+    > {
         if (!this.#isConnected) {
             throw new Error("Not connected to WebSocket. Call .connect() first.");
         }
