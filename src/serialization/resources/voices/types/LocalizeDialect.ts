@@ -5,10 +5,11 @@
 import * as serializers from "../../../index";
 import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
+import { LocalizeEnglishDialect } from "./LocalizeEnglishDialect";
 
 export const LocalizeDialect: core.serialization.Schema<serializers.LocalizeDialect.Raw, Cartesia.LocalizeDialect> =
-    core.serialization.enum_(["au", "in", "so", "uk", "us"]);
+    core.serialization.undiscriminatedUnion([LocalizeEnglishDialect, core.serialization.stringLiteral("st")]);
 
 export declare namespace LocalizeDialect {
-    type Raw = "au" | "in" | "so" | "uk" | "us";
+    type Raw = LocalizeEnglishDialect.Raw | "st";
 }

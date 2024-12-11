@@ -5,6 +5,7 @@ export * from "./VoiceMetadata";
 export * from "./CreateVoiceRequest";
 export * from "./UpdateVoiceRequest";
 export * from "./LocalizeTargetLanguage";
+export * from "./LocalizeEnglishDialect";
 export * from "./LocalizeDialect";
 export * from "./Gender";
 export * from "./LocalizeVoiceRequest";
