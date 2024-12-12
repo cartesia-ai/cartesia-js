@@ -2,6 +2,7 @@
 
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Fcartesia-ai%2Fcartesia-js)
 [![npm shield](https://img.shields.io/npm/v/@cartesia/cartesia-js)](https://www.npmjs.com/package/@cartesia/cartesia-js)
+[![Discord](https://badgen.net/badge/black/Cartesia/icon?icon=discord&label)](https://discord.gg/cartesia)
 
 The Cartesia TypeScript library provides convenient access to the Cartesia API from TypeScript.
 
