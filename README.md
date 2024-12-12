@@ -54,9 +54,10 @@ fs.writeFileSync("sonic.wav", new Uint8Array(response));
 
 ```js
 import { CartesiaClient } from "@cartesia/cartesia-js";
+import process from "node:process"
 
 const cartesia = new CartesiaClient({
-    apiKey: "your-api-key",
+    apiKey: process.env.CARTESIA_API_KEY,
 });
 
 // Initialize the WebSocket. Make sure the output format you specify is supported.
