@@ -34,8 +34,8 @@ export declare namespace Tts {
 export class Tts {
     constructor(protected readonly _options: Tts.Options = {}) {}
 
-    public async bytes(request: Cartesia.TtsRequest, requestOptions?: Tts.RequestOptions): Promise<stream.Readable> {
-        const _response = await (this._options.fetcher ?? core.fetcher)<stream.Readable>({
+    public async bytes(request: Cartesia.TtsRequest, requestOptions?: Tts.RequestOptions): Promise<ArrayBuffer> {
+        const _response = await (this._options.fetcher ?? core.fetcher)<ArrayBuffer>({
             url: urlJoin(
                 (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
                 "/tts/bytes"
@@ -54,7 +54,7 @@ export class Tts {
             contentType: "application/json",
             requestType: "json",
             body: serializers.TtsRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
-            responseType: "streaming",
+            responseType: "arraybuffer",
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
