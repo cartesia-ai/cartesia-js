@@ -7,6 +7,8 @@ export async function getResponseBody(response: Response, responseType?: string)
         return response.body;
     } else if (response.body != null && responseType === "streaming") {
         return chooseStreamWrapper(response.body);
+    } else if (response.body != null && responseType === "arraybuffer") {
+        return await response.arrayBuffer();
     } else if (response.body != null && responseType === "text") {
         return await response.text();
     } else {

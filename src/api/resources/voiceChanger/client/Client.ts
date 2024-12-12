@@ -45,7 +45,7 @@ export class VoiceChanger {
         clip: File | fs.ReadStream | Blob,
         request: Cartesia.VoiceChangerBytesRequest,
         requestOptions?: VoiceChanger.RequestOptions
-    ): Promise<stream.Readable> {
+    ): Promise<ArrayBuffer> {
         const _request = await core.newFormData();
         await _request.appendFile("clip", clip);
         await _request.append("voice[id]", request.voiceId);
@@ -60,7 +60,7 @@ export class VoiceChanger {
         }
 
         const _maybeEncodedRequest = await _request.getRequest();
-        const _response = await (this._options.fetcher ?? core.fetcher)<stream.Readable>({
+        const _response = await (this._options.fetcher ?? core.fetcher)<ArrayBuffer>({
             url: urlJoin(
                 (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
                 "/voice-changer/bytes"
@@ -80,7 +80,7 @@ export class VoiceChanger {
             requestType: "file",
             duplex: _maybeEncodedRequest.duplex,
             body: _maybeEncodedRequest.body,
-            responseType: "streaming",
+            responseType: "arraybuffer",
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
