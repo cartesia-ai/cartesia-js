@@ -8,8 +8,8 @@ import * as core from "../../../../core";
 import { LocalizeEnglishDialect } from "./LocalizeEnglishDialect";
 
 export const LocalizeDialect: core.serialization.Schema<serializers.LocalizeDialect.Raw, Cartesia.LocalizeDialect> =
-    core.serialization.undiscriminatedUnion([LocalizeEnglishDialect, core.serialization.stringLiteral("st")]);
+    core.serialization.undiscriminatedUnion([LocalizeEnglishDialect]);
 
 export declare namespace LocalizeDialect {
-    type Raw = LocalizeEnglishDialect.Raw | "st";
+    type Raw = LocalizeEnglishDialect.Raw;
 }

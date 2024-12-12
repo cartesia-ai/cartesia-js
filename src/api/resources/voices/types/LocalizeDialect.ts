@@ -5,14 +5,10 @@
 import * as Cartesia from "../../../index";
 
 /**
- * The dialect to localize to.
+ * The dialect to localize to. Only supported for English (`en`).
  */
 export type LocalizeDialect =
     /**
      * Only available when language is set to English (`en`).
      *  */
-    | Cartesia.LocalizeEnglishDialect
-    /**
-     * The standard dialect for the language.
-     *  */
-    | "st";
+    Cartesia.LocalizeEnglishDialect;

@@ -1,6 +1,6 @@
 {
     "name": "@cartesia/cartesia-js",
-    "version": "2.1.0-alpha0",
+    "version": "2.1.0",
     "private": false,
     "repository": "https://github.com/cartesia-ai/cartesia-js",
     "main": "./index.js",
