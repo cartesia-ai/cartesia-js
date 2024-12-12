@@ -71,6 +71,7 @@ try {
     await websocket.connect();
 } catch (error) {
     console.error(`Failed to connect to Cartesia: ${error}`);
+    process.exit(1);
 }
 
 // Create a stream.
