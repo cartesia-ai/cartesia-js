@@ -1,6 +1,6 @@
 {
     "name": "@cartesia/cartesia-js",
-    "version": "2.0.4-alpha0",
+    "version": "2.1.0-alpha0",
     "private": false,
     "repository": "https://github.com/cartesia-ai/cartesia-js",
     "main": "./index.js",
@@ -16,7 +16,7 @@
         "form-data": "^4.0.0",
         "formdata-node": "^6.0.3",
         "node-fetch": "2.7.0",
-        "qs": "6.13.0",
+        "qs": "6.11.2",
         "readable-stream": "^4.5.2",
         "form-data-encoder": "^4.0.2",
         "emittery": "^0.13.1",
