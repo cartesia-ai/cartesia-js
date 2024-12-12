@@ -24,9 +24,11 @@ Instantiate and use the client with the following:
 
 ```typescript
 import { CartesiaClient } from "@cartesia/cartesia-js";
+import process from "node:process"
+import fs from "node:fs"
 
 // Set up the client.
-const client = new CartesiaClient({ apiKey: "YOUR_API_KEY" });
+const client = new CartesiaClient({ apiKey: process.env.CARTESIA_API_KEY });
 
 // Call the TTS API's bytes endpoint, which returns binary audio data as an ArrayBuffer.
 const response = await client.tts.bytes({
@@ -38,7 +40,7 @@ const response = await client.tts.bytes({
     },
     language: "en",
     outputFormat: {
-        container: "raw",
+        container: "wav",
         sampleRate: 44100,
         encoding: "pcm_f32le",
     },
