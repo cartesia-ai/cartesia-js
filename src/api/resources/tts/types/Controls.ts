@@ -6,5 +6,5 @@ import * as Cartesia from "../../../index";
 
 export interface Controls {
     speed: Cartesia.Speed;
-    emotion: Cartesia.Emotion;
+    emotion: Cartesia.Emotion[];
 }

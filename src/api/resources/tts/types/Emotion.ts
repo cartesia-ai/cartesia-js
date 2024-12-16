@@ -12,12 +12,10 @@
 export type Emotion =
     | "anger:lowest"
     | "anger:low"
-    | "anger"
     | "anger:high"
     | "anger:highest"
     | "positivity:lowest"
     | "positivity:low"
-    | "positivity"
     | "positivity:high"
     | "positivity:highest"
     | "surprise:lowest"
@@ -25,21 +23,17 @@ export type Emotion =
     | "surprise:highest"
     | "sadness:lowest"
     | "sadness:low"
-    | "sadness"
     | "curiosity:low"
-    | "curiosity"
     | "curiosity:high"
     | "curiosity:highest";
 
 export const Emotion = {
     AngerLowest: "anger:lowest",
     AngerLow: "anger:low",
-    AngerNormal: "anger",
     AngerHigh: "anger:high",
     AngerHighest: "anger:highest",
     PositivityLowest: "positivity:lowest",
     PositivityLow: "positivity:low",
-    PositivityNormal: "positivity",
     PositivityHigh: "positivity:high",
     PositivityHighest: "positivity:highest",
     SurpriseLowest: "surprise:lowest",
@@ -47,9 +41,7 @@ export const Emotion = {
     SurpriseHighest: "surprise:highest",
     SadnessLowest: "sadness:lowest",
     SadnessLow: "sadness:low",
-    SadnessNormal: "sadness",
     CuriosityLow: "curiosity:low",
-    CuriosityNormal: "curiosity",
     CuriosityHigh: "curiosity:high",
     CuriosityHighest: "curiosity:highest",
 } as const;

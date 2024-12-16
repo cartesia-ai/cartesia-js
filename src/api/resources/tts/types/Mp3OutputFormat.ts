@@ -4,5 +4,6 @@
 
 export interface Mp3OutputFormat {
     sampleRate: number;
+    /** The bit rate of the audio in bits per second. Supported bit rates are 32000, 64000, 96000, 128000, 192000. */
     bitRate: number;
 }

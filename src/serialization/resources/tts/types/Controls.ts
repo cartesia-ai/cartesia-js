@@ -11,12 +11,12 @@ import { Emotion } from "./Emotion";
 export const Controls: core.serialization.ObjectSchema<serializers.Controls.Raw, Cartesia.Controls> =
     core.serialization.object({
         speed: Speed,
-        emotion: Emotion,
+        emotion: core.serialization.list(Emotion),
     });
 
 export declare namespace Controls {
     interface Raw {
         speed: Speed.Raw;
-        emotion: Emotion.Raw;
+        emotion: Emotion.Raw[];
     }
 }

@@ -323,21 +323,18 @@ await client.tts.bytes({
 
 ```typescript
 const response = await client.tts.sse({
-    modelId: "string",
-    transcript: "string",
+    modelId: "sonic-english",
+    transcript: "Hello, world!",
     voice: {
         mode: "id",
-        id: "string",
-        experimentalControls: {
-            speed: 1.1,
-            emotion: "anger:lowest",
-        },
+        id: "694f9389-aac1-45b6-b726-9d9369183238",
     },
     language: "en",
     outputFormat: {
         container: "raw",
+        sampleRate: 44100,
+        encoding: "pcm_f32le",
     },
-    duration: 1.1,
 });
 for await (const item of response) {
     console.log(item);
