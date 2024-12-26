@@ -54,7 +54,6 @@ fs.writeFileSync("sonic.wav", new Uint8Array(response));
 
 ```js
 import { CartesiaClient } from "@cartesia/cartesia-js";
-import process from "node:process"
 
 const cartesia = new CartesiaClient({
     apiKey: process.env.CARTESIA_API_KEY,
@@ -71,7 +70,7 @@ try {
     await websocket.connect();
 } catch (error) {
     console.error(`Failed to connect to Cartesia: ${error}`);
-    process.exit(1);
+    throw error;
 }
 
 // Create a stream.
