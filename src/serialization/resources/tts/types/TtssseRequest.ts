@@ -7,25 +7,25 @@ import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
 import { TtsRequestVoiceSpecifier } from "./TtsRequestVoiceSpecifier";
 import { SupportedLanguage } from "./SupportedLanguage";
-import { OutputFormat } from "./OutputFormat";
+import { SseOutputFormat } from "./SseOutputFormat";
 
-export const TtsRequest: core.serialization.ObjectSchema<serializers.TtsRequest.Raw, Cartesia.TtsRequest> =
+export const TtssseRequest: core.serialization.ObjectSchema<serializers.TtssseRequest.Raw, Cartesia.TtssseRequest> =
     core.serialization.object({
         modelId: core.serialization.property("model_id", core.serialization.string()),
         transcript: core.serialization.string(),
         voice: TtsRequestVoiceSpecifier,
         language: SupportedLanguage.optional(),
-        outputFormat: core.serialization.property("output_format", OutputFormat),
+        outputFormat: core.serialization.property("output_format", SseOutputFormat),
         duration: core.serialization.number().optional(),
     });
 
-export declare namespace TtsRequest {
+export declare namespace TtssseRequest {
     interface Raw {
         model_id: string;
         transcript: string;
         voice: TtsRequestVoiceSpecifier.Raw;
         language?: SupportedLanguage.Raw | null;
-        output_format: OutputFormat.Raw;
+        output_format: SseOutputFormat.Raw;
         duration?: number | null;
     }
 }
