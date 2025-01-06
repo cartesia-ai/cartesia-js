@@ -45,9 +45,8 @@ export class ApiStatus {
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
-                "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.2",
-                "User-Agent": "@cartesia/cartesia-js/2.1.2",
+                "X-Fern-SDK-Name": "",
+                "X-Fern-SDK-Version": "0.0.103",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
