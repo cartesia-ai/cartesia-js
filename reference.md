@@ -273,7 +273,6 @@ await client.tts.bytes({
         container: "mp3",
         sampleRate: 44100,
         bitRate: 128000,
-        loudness: -17,
     },
 });
 ```
@@ -291,7 +290,7 @@ await client.tts.bytes({
 <dl>
 <dd>
 
-**request:** `Cartesia.TtsBytesRequest`
+**request:** `Cartesia.TtsRequest`
 
 </dd>
 </dl>
@@ -355,7 +354,7 @@ for await (const item of response) {
 <dl>
 <dd>
 
-**request:** `Cartesia.TtssseRequest`
+**request:** `Cartesia.TtsRequest`
 
 </dd>
 </dl>

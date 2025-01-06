@@ -12,13 +12,11 @@ export const Mp3OutputFormat: core.serialization.ObjectSchema<
 > = core.serialization.object({
     sampleRate: core.serialization.property("sample_rate", core.serialization.number()),
     bitRate: core.serialization.property("bit_rate", core.serialization.number()),
-    loudness: core.serialization.number().optional(),
 });
 
 export declare namespace Mp3OutputFormat {
     interface Raw {
         sample_rate: number;
         bit_rate: number;
-        loudness?: number | null;
     }
 }
