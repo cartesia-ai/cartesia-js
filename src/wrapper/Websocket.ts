@@ -18,6 +18,7 @@ import {
 import { Tts } from "../api/resources/tts/client/Client";
 import Source from "./source";
 import qs from "qs";
+import { RUNTIME } from "../core";
 
 export default class Websocket {
     socket?: ReconnectingWebSocket;
@@ -194,6 +195,12 @@ export default class Websocket {
             undefined,
             options
         );
+
+        // bun doesn't support the default `blob` binaryType
+        if (RUNTIME.type === "bun") {
+            this.socket.binaryType = "arraybuffer";
+        }
+
         this.socket!.reconnect();
 
         this.socket!.onopen = () => {
