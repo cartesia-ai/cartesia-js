@@ -6,6 +6,7 @@ import * as environments from "./environments";
 import * as core from "./core";
 import { ApiStatus } from "./api/resources/apiStatus/client/Client";
 import { Datasets } from "./api/resources/datasets/client/Client";
+import { Infill } from "./api/resources/infill/client/Client";
 import { Tts } from "./api/resources/tts/client/Client";
 import { VoiceChanger } from "./api/resources/voiceChanger/client/Client";
 import { Voices } from "./api/resources/voices/client/Client";
@@ -44,6 +45,12 @@ export class CartesiaClient {
 
     public get datasets(): Datasets {
         return (this._datasets ??= new Datasets(this._options));
+    }
+
+    protected _infill: Infill | undefined;
+
+    public get infill(): Infill {
+        return (this._infill ??= new Infill(this._options));
     }
 
     protected _tts: Tts | undefined;

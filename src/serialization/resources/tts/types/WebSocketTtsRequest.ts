@@ -19,6 +19,10 @@ export const WebSocketTtsRequest: core.serialization.ObjectSchema<
     duration: core.serialization.number().optional(),
     language: core.serialization.string().optional(),
     addTimestamps: core.serialization.property("add_timestamps", core.serialization.boolean().optional()),
+    addPhonemeTimestamps: core.serialization.property(
+        "add_phoneme_timestamps",
+        core.serialization.boolean().optional()
+    ),
     continue: core.serialization.boolean().optional(),
     contextId: core.serialization.property("context_id", core.serialization.string().optional()),
 });
@@ -32,6 +36,7 @@ export declare namespace WebSocketTtsRequest {
         duration?: number | null;
         language?: string | null;
         add_timestamps?: boolean | null;
+        add_phoneme_timestamps?: boolean | null;
         continue?: boolean | null;
         context_id?: string | null;
     }

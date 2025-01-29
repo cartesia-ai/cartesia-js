@@ -10,6 +10,8 @@ export * as voiceChanger from "./voiceChanger";
 export * from "./voiceChanger/types";
 export * as voices from "./voices";
 export * from "./voices/types";
+export * as infill from "./infill";
 export * from "./datasets/client/requests";
+export * from "./infill/client/requests";
 export * from "./voiceChanger/client/requests";
 export * from "./voices/client/requests";

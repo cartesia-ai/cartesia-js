@@ -16,10 +16,14 @@ export const Emotion: core.serialization.Schema<serializers.Emotion.Raw, Cartesi
     "positivity:high",
     "positivity:highest",
     "surprise:lowest",
+    "surprise:low",
     "surprise:high",
     "surprise:highest",
     "sadness:lowest",
     "sadness:low",
+    "sadness:high",
+    "sadness:highest",
+    "curiosity:lowest",
     "curiosity:low",
     "curiosity:high",
     "curiosity:highest",
@@ -36,10 +40,14 @@ export declare namespace Emotion {
         | "positivity:high"
         | "positivity:highest"
         | "surprise:lowest"
+        | "surprise:low"
         | "surprise:high"
         | "surprise:highest"
         | "sadness:lowest"
         | "sadness:low"
+        | "sadness:high"
+        | "sadness:highest"
+        | "curiosity:lowest"
         | "curiosity:low"
         | "curiosity:high"
         | "curiosity:highest";

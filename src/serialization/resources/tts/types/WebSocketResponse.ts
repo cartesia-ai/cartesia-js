@@ -9,6 +9,7 @@ import { WebSocketChunkResponse } from "./WebSocketChunkResponse";
 import { WebSocketDoneResponse } from "./WebSocketDoneResponse";
 import { WebSocketTimestampsResponse } from "./WebSocketTimestampsResponse";
 import { WebSocketErrorResponse } from "./WebSocketErrorResponse";
+import { WebSocketPhonemeTimestampsResponse } from "./WebSocketPhonemeTimestampsResponse";
 
 export const WebSocketResponse: core.serialization.Schema<
     serializers.WebSocketResponse.Raw,
@@ -19,6 +20,7 @@ export const WebSocketResponse: core.serialization.Schema<
         done: WebSocketDoneResponse,
         timestamps: WebSocketTimestampsResponse,
         error: WebSocketErrorResponse,
+        phoneme_timestamps: WebSocketPhonemeTimestampsResponse,
     })
     .transform<Cartesia.WebSocketResponse>({
         transform: (value) => value,
@@ -30,7 +32,8 @@ export declare namespace WebSocketResponse {
         | WebSocketResponse.Chunk
         | WebSocketResponse.Done
         | WebSocketResponse.Timestamps
-        | WebSocketResponse.Error;
+        | WebSocketResponse.Error
+        | WebSocketResponse.PhonemeTimestamps;
 
     interface Chunk extends WebSocketChunkResponse.Raw {
         type: "chunk";
@@ -46,5 +49,9 @@ export declare namespace WebSocketResponse {
 
     interface Error extends WebSocketErrorResponse.Raw {
         type: "error";
+    }
+
+    interface PhonemeTimestamps extends WebSocketPhonemeTimestampsResponse.Raw {
+        type: "phoneme_timestamps";
     }
 }

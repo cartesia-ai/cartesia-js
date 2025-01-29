@@ -13,6 +13,7 @@ export interface WebSocketTtsRequest {
     duration?: number;
     language?: string;
     addTimestamps?: boolean;
+    addPhonemeTimestamps?: boolean;
     continue?: boolean;
     contextId?: string;
 }

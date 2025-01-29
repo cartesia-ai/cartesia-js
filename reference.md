@@ -246,6 +246,99 @@ await client.datasets.uploadFile(fs.createReadStream("/path/to/your/file"), "str
 </dl>
 </details>
 
+## Infill
+
+<details><summary><code>client.infill.<a href="/src/api/resources/infill/client/Client.ts">bytes</a>(leftAudio, rightAudio, { ...params }) -> stream.Readable</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generate audio that smoothly connects two existing audio segments. This is useful for inserting new speech between existing speech segments while maintaining natural transitions.
+
+Only the `sonic-preview` model is supported for infill at this time.
+
+At least one of `left_audio` or `right_audio` must be provided.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.infill.bytes(fs.createReadStream("/path/to/your/file"), fs.createReadStream("/path/to/your/file"), {
+    modelId: "sonic-preview",
+    language: "en",
+    transcript: "middle segment",
+    voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
+    outputFormatContainer: "mp3",
+    outputFormatSampleRate: 44100,
+    outputFormatBitRate: 128000,
+});
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**leftAudio:** `File | fs.ReadStream | Blob`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**rightAudio:** `File | fs.ReadStream | Blob`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `Cartesia.InfillBytesRequest`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Infill.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 ## Tts
 
 <details><summary><code>client.tts.<a href="/src/api/resources/tts/client/Client.ts">bytes</a>({ ...params }) -> stream.Readable</code></summary>
@@ -584,7 +677,6 @@ await client.voices.create({
         1, 1, 1, 1, 1, 1, 1,
     ],
     language: "en",
-    baseVoiceId: "string",
 });
 ```
 

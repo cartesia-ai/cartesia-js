@@ -8,7 +8,8 @@ export type WebSocketResponse =
     | Cartesia.WebSocketResponse.Chunk
     | Cartesia.WebSocketResponse.Done
     | Cartesia.WebSocketResponse.Timestamps
-    | Cartesia.WebSocketResponse.Error_;
+    | Cartesia.WebSocketResponse.Error_
+    | Cartesia.WebSocketResponse.PhonemeTimestamps;
 
 export declare namespace WebSocketResponse {
     interface Chunk extends Cartesia.WebSocketChunkResponse {
@@ -25,5 +26,9 @@ export declare namespace WebSocketResponse {
 
     interface Error_ extends Cartesia.WebSocketErrorResponse {
         type: "error";
+    }
+
+    interface PhonemeTimestamps extends Cartesia.WebSocketPhonemeTimestampsResponse {
+        type: "phoneme_timestamps";
     }
 }

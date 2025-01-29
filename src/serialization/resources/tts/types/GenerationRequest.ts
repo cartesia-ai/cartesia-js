@@ -23,6 +23,10 @@ export const GenerationRequest: core.serialization.ObjectSchema<
     contextId: core.serialization.property("context_id", ContextId),
     continue: core.serialization.boolean().optional(),
     addTimestamps: core.serialization.property("add_timestamps", core.serialization.boolean().optional()),
+    addPhonemeTimestamps: core.serialization.property(
+        "add_phoneme_timestamps",
+        core.serialization.boolean().optional()
+    ),
 });
 
 export declare namespace GenerationRequest {
@@ -36,5 +40,6 @@ export declare namespace GenerationRequest {
         context_id: ContextId.Raw;
         continue?: boolean | null;
         add_timestamps?: boolean | null;
+        add_phoneme_timestamps?: boolean | null;
     }
 }

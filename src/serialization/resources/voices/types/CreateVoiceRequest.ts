@@ -7,7 +7,6 @@ import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
 import { Embedding } from "../../embedding/types/Embedding";
 import { SupportedLanguage } from "../../tts/types/SupportedLanguage";
-import { BaseVoiceId } from "./BaseVoiceId";
 
 export const CreateVoiceRequest: core.serialization.ObjectSchema<
     serializers.CreateVoiceRequest.Raw,
@@ -17,7 +16,6 @@ export const CreateVoiceRequest: core.serialization.ObjectSchema<
     description: core.serialization.string(),
     embedding: Embedding,
     language: SupportedLanguage.optional(),
-    baseVoiceId: core.serialization.property("base_voice_id", BaseVoiceId.optional()),
 });
 
 export declare namespace CreateVoiceRequest {
@@ -26,6 +24,5 @@ export declare namespace CreateVoiceRequest {
         description: string;
         embedding: Embedding.Raw;
         language?: SupportedLanguage.Raw | null;
-        base_voice_id?: BaseVoiceId.Raw | null;
     }
 }

@@ -6,6 +6,7 @@ import * as serializers from "../../../index";
 import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
 import { WordTimestamps } from "./WordTimestamps";
+import { PhonemeTimestamps } from "./PhonemeTimestamps";
 import { ContextId } from "./ContextId";
 
 export const WebSocketTtsOutput: core.serialization.ObjectSchema<
@@ -13,6 +14,7 @@ export const WebSocketTtsOutput: core.serialization.ObjectSchema<
     Cartesia.WebSocketTtsOutput
 > = core.serialization.object({
     wordTimestamps: core.serialization.property("word_timestamps", WordTimestamps.optional()),
+    phonemeTimestamps: core.serialization.property("phoneme_timestamps", PhonemeTimestamps.optional()),
     audio: core.serialization.unknown().optional(),
     contextId: core.serialization.property("context_id", ContextId.optional()),
 });
@@ -20,6 +22,7 @@ export const WebSocketTtsOutput: core.serialization.ObjectSchema<
 export declare namespace WebSocketTtsOutput {
     interface Raw {
         word_timestamps?: WordTimestamps.Raw | null;
+        phoneme_timestamps?: PhonemeTimestamps.Raw | null;
         audio?: unknown | null;
         context_id?: ContextId.Raw | null;
     }

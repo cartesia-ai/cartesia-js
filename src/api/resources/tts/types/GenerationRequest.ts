@@ -24,4 +24,6 @@ export interface GenerationRequest {
     continue?: boolean;
     /** Whether to return word-level timestamps. */
     addTimestamps?: boolean;
+    /** Whether to return phoneme-level timestamps. */
+    addPhonemeTimestamps?: boolean;
 }

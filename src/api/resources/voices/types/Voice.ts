@@ -18,5 +18,4 @@ export interface Voice {
     createdAt: Date;
     embedding: Cartesia.Embedding;
     language: Cartesia.SupportedLanguage;
-    baseVoiceId?: Cartesia.BaseVoiceId;
 }

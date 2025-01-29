@@ -4,9 +4,6 @@
 
 import * as Cartesia from "../../../index";
 
-export interface WebSocketTtsOutput {
-    wordTimestamps?: Cartesia.WordTimestamps;
+export interface WebSocketPhonemeTimestampsResponse extends Cartesia.WebSocketBaseResponse {
     phonemeTimestamps?: Cartesia.PhonemeTimestamps;
-    audio?: unknown;
-    contextId?: Cartesia.ContextId;
 }
