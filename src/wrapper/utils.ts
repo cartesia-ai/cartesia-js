@@ -1,6 +1,6 @@
 import base64 from "base64-js";
 import type Emittery from "emittery";
-import type { OutputFormat, RawEncoding, WebSocketResponse, WebSocketTtsRequest } from "../api";
+import type { RawEncoding, WebSocketRawOutputFormat, WebSocketResponse } from "../api";
 
 export type EmitteryCallbacks<T> = {
     on: Emittery<T>["on"];
@@ -56,33 +56,14 @@ export const ENCODING_MAP: Record<RawEncoding, EncodingInfo> = {
  * @returns The output format for the WebSocket request.
  */
 export function resolveOutputFormat(
-    container: "raw" | "wav" | "mp3",
     encoding: RawEncoding,
     sampleRate: number
-): OutputFormat {
-    switch (container) {
-        case "wav":
-            return {
-                container: "wav",
-                encoding,
-                sampleRate,
-            } as OutputFormat.Wav;
-        case "raw":
-            return {
-                container: "raw",
-                encoding,
-                sampleRate,
-            } as OutputFormat.Raw;
-        case "mp3":
-            return {
-                container: "mp3",
-                encoding,
-                sampleRate,
-                bitRate: 128,
-            } as OutputFormat.Mp3;
-        default:
-            throw new Error(`Unsupported container type: ${container}`);
-    }
+): WebSocketRawOutputFormat {
+    return {
+        container: "raw",
+        encoding,
+        sampleRate,
+    };
 }
 
 /**
