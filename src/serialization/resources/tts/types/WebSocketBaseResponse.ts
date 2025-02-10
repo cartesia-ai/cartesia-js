@@ -17,7 +17,7 @@ export const WebSocketBaseResponse: core.serialization.ObjectSchema<
 });
 
 export declare namespace WebSocketBaseResponse {
-    interface Raw {
+    export interface Raw {
         context_id?: ContextId.Raw | null;
         status_code: number;
         done: boolean;

@@ -21,7 +21,7 @@ export const Voice: core.serialization.ObjectSchema<serializers.Voice.Raw, Carte
 });
 
 export declare namespace Voice {
-    interface Raw {
+    export interface Raw {
         id: VoiceId.Raw;
         user_id?: string | null;
         is_public: boolean;

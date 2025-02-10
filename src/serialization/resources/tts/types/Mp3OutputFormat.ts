@@ -15,7 +15,7 @@ export const Mp3OutputFormat: core.serialization.ObjectSchema<
 });
 
 export declare namespace Mp3OutputFormat {
-    interface Raw {
+    export interface Raw {
         sample_rate: number;
         bit_rate: number;
     }

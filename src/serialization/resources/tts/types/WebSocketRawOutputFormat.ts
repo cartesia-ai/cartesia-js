@@ -17,7 +17,7 @@ export const WebSocketRawOutputFormat: core.serialization.ObjectSchema<
 });
 
 export declare namespace WebSocketRawOutputFormat {
-    interface Raw {
+    export interface Raw {
         container: "raw";
         encoding: RawEncoding.Raw;
         sample_rate: number;

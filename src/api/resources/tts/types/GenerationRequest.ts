@@ -7,7 +7,8 @@ import * as Cartesia from "../../../index";
 export interface GenerationRequest {
     /** The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models. */
     modelId: string;
-    transcript: string;
+    /** The transcript to generate speech for. This can be a string or an iterator over strings. */
+    transcript?: unknown;
     voice: Cartesia.TtsRequestVoiceSpecifier;
     language?: Cartesia.SupportedLanguage;
     outputFormat: Cartesia.WebSocketRawOutputFormat;
@@ -16,12 +17,14 @@ export interface GenerationRequest {
      * If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
      */
     duration?: number;
-    contextId: Cartesia.ContextId;
+    contextId?: Cartesia.ContextId;
     /**
      * Whether this input may be followed by more inputs.
      * If not specified, this defaults to `false`.
      */
     continue?: boolean;
+    /** Whether to flush the context. */
+    flush?: boolean;
     /** Whether to return word-level timestamps. */
     addTimestamps?: boolean;
     /** Whether to return phoneme-level timestamps. */

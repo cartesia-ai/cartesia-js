@@ -9,15 +9,17 @@ import * as serializers from "../../../../serialization/index";
 import * as errors from "../../../../errors/index";
 
 export declare namespace ApiStatus {
-    interface Options {
+    export interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
+        /** Specify a custom URL to connect the client to. */
+        baseUrl?: core.Supplier<string>;
         apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;
     }
 
-    interface RequestOptions {
+    export interface RequestOptions {
         /** The maximum time to wait for a response in seconds. */
         timeoutInSeconds?: number;
         /** The number of times to retry the request. Defaults to 2. */
@@ -26,6 +28,8 @@ export declare namespace ApiStatus {
         abortSignal?: AbortSignal;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
+        /** Additional headers to include in the request. */
+        headers?: Record<string, string>;
     }
 }
 
@@ -40,17 +44,21 @@ export class ApiStatus {
      */
     public async get(requestOptions?: ApiStatus.RequestOptions): Promise<Cartesia.ApiInfo> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
-            url: (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
+            url:
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                (await core.Supplier.get(this._options.environment)) ??
+                environments.CartesiaEnvironment.Production,
             method: "GET",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -82,7 +90,7 @@ export class ApiStatus {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling GET /.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,

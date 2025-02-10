@@ -3,7 +3,6 @@
  */
 
 export type RawEncoding = "pcm_f32le" | "pcm_s16le" | "pcm_mulaw" | "pcm_alaw";
-
 export const RawEncoding = {
     PcmF32Le: "pcm_f32le",
     PcmS16Le: "pcm_s16le",

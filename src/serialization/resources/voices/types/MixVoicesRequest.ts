@@ -15,7 +15,7 @@ export const MixVoicesRequest: core.serialization.ObjectSchema<
 });
 
 export declare namespace MixVoicesRequest {
-    interface Raw {
+    export interface Raw {
         voices: MixVoiceSpecifier.Raw[];
     }
 }

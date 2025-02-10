@@ -15,7 +15,7 @@ export const Controls: core.serialization.ObjectSchema<serializers.Controls.Raw,
     });
 
 export declare namespace Controls {
-    interface Raw {
+    export interface Raw {
         speed: Speed.Raw;
         emotion: Emotion.Raw[];
     }

@@ -12,15 +12,17 @@ import * as fs from "fs";
 import { Blob } from "buffer";
 
 export declare namespace Voices {
-    interface Options {
+    export interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
+        /** Specify a custom URL to connect the client to. */
+        baseUrl?: core.Supplier<string>;
         apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;
     }
 
-    interface RequestOptions {
+    export interface RequestOptions {
         /** The maximum time to wait for a response in seconds. */
         timeoutInSeconds?: number;
         /** The number of times to retry the request. Defaults to 2. */
@@ -29,6 +31,8 @@ export declare namespace Voices {
         abortSignal?: AbortSignal;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
+        /** Additional headers to include in the request. */
+        headers?: Record<string, string>;
     }
 }
 
@@ -44,19 +48,22 @@ export class Voices {
     public async list(requestOptions?: Voices.RequestOptions): Promise<Cartesia.Voice[]> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/voices/"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/voices/",
             ),
             method: "GET",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -88,7 +95,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling GET /voices/.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -110,23 +117,26 @@ export class Voices {
      */
     public async create(
         request: Cartesia.CreateVoiceRequest,
-        requestOptions?: Voices.RequestOptions
+        requestOptions?: Voices.RequestOptions,
     ): Promise<Cartesia.Voice> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/voices/"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/voices/",
             ),
             method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -159,7 +169,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /voices/.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -177,19 +187,22 @@ export class Voices {
     public async delete(id: Cartesia.VoiceId, requestOptions?: Voices.RequestOptions): Promise<void> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                `/voices/${encodeURIComponent(serializers.VoiceId.jsonOrThrow(id))}`
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                `/voices/${encodeURIComponent(serializers.VoiceId.jsonOrThrow(id))}`,
             ),
             method: "DELETE",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -215,7 +228,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling DELETE /voices/{id}.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -237,23 +250,26 @@ export class Voices {
     public async update(
         id: Cartesia.VoiceId,
         request: Cartesia.UpdateVoiceRequest,
-        requestOptions?: Voices.RequestOptions
+        requestOptions?: Voices.RequestOptions,
     ): Promise<Cartesia.Voice> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                `/voices/${encodeURIComponent(serializers.VoiceId.jsonOrThrow(id))}`
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                `/voices/${encodeURIComponent(serializers.VoiceId.jsonOrThrow(id))}`,
             ),
             method: "PATCH",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -286,7 +302,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling PATCH /voices/{id}.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -304,19 +320,22 @@ export class Voices {
     public async get(id: Cartesia.VoiceId, requestOptions?: Voices.RequestOptions): Promise<Cartesia.Voice> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                `/voices/${encodeURIComponent(serializers.VoiceId.jsonOrThrow(id))}`
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                `/voices/${encodeURIComponent(serializers.VoiceId.jsonOrThrow(id))}`,
             ),
             method: "GET",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -348,7 +367,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling GET /voices/{id}.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -370,23 +389,26 @@ export class Voices {
      */
     public async localize(
         request: Cartesia.LocalizeVoiceRequest,
-        requestOptions?: Voices.RequestOptions
+        requestOptions?: Voices.RequestOptions,
     ): Promise<Cartesia.EmbeddingResponse> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/voices/localize"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/voices/localize",
             ),
             method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -419,7 +441,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /voices/localize.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -441,23 +463,26 @@ export class Voices {
      */
     public async mix(
         request: Cartesia.MixVoicesRequest,
-        requestOptions?: Voices.RequestOptions
+        requestOptions?: Voices.RequestOptions,
     ): Promise<Cartesia.EmbeddingResponse> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/voices/mix"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/voices/mix",
             ),
             method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -490,7 +515,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /voices/mix.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -531,39 +556,45 @@ export class Voices {
     public async clone(
         clip: File | fs.ReadStream | Blob,
         request: Cartesia.CloneVoiceRequest,
-        requestOptions?: Voices.RequestOptions
+        requestOptions?: Voices.RequestOptions,
     ): Promise<Cartesia.VoiceMetadata> {
         const _request = await core.newFormData();
         await _request.appendFile("clip", clip);
-        await _request.append("name", request.name);
+        _request.append("name", request.name);
         if (request.description != null) {
-            await _request.append("description", request.description);
+            _request.append("description", request.description);
         }
 
-        await _request.append("language", request.language);
-        await _request.append("mode", request.mode);
-        await _request.append("enhance", request.enhance.toString());
+        _request.append(
+            "language",
+            serializers.SupportedLanguage.jsonOrThrow(request.language, { unrecognizedObjectKeys: "strip" }),
+        );
+        _request.append("mode", serializers.CloneMode.jsonOrThrow(request.mode, { unrecognizedObjectKeys: "strip" }));
+        _request.append("enhance", request.enhance.toString());
         if (request.transcript != null) {
-            await _request.append("transcript", request.transcript);
+            _request.append("transcript", request.transcript);
         }
 
         const _maybeEncodedRequest = await _request.getRequest();
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/voices/clone"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/voices/clone",
             ),
             method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
                 ..._maybeEncodedRequest.headers,
+                ...requestOptions?.headers,
             },
             requestType: "file",
             duplex: _maybeEncodedRequest.duplex,
@@ -596,7 +627,7 @@ export class Voices {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /voices/clone.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,

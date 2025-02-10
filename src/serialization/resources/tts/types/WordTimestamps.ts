@@ -14,7 +14,7 @@ export const WordTimestamps: core.serialization.ObjectSchema<serializers.WordTim
     });
 
 export declare namespace WordTimestamps {
-    interface Raw {
+    export interface Raw {
         words: string[];
         start: number[];
         end: number[];

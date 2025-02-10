@@ -10,5 +10,5 @@ export const ContextId: core.serialization.Schema<serializers.ContextId.Raw, Car
     core.serialization.string();
 
 export declare namespace ContextId {
-    type Raw = string;
+    export type Raw = string;
 }

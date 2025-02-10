@@ -23,7 +23,6 @@ export type LocalizeTargetLanguage =
     | "ru"
     | "sv"
     | "tr";
-
 export const LocalizeTargetLanguage = {
     En: "en",
     De: "de",

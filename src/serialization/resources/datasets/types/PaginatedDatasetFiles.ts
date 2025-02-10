@@ -16,7 +16,7 @@ export const PaginatedDatasetFiles: core.serialization.ObjectSchema<
 });
 
 export declare namespace PaginatedDatasetFiles {
-    interface Raw {
+    export interface Raw {
         data: DatasetFile.Raw[];
         has_more: boolean;
     }

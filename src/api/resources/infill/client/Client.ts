@@ -8,19 +8,23 @@ import * as fs from "fs";
 import { Blob } from "buffer";
 import * as Cartesia from "../../../index";
 import * as stream from "stream";
+import * as serializers from "../../../../serialization/index";
+import { toJson } from "../../../../core/json";
 import urlJoin from "url-join";
 import * as errors from "../../../../errors/index";
 
 export declare namespace Infill {
-    interface Options {
+    export interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
+        /** Specify a custom URL to connect the client to. */
+        baseUrl?: core.Supplier<string>;
         apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;
     }
 
-    interface RequestOptions {
+    export interface RequestOptions {
         /** The maximum time to wait for a response in seconds. */
         timeoutInSeconds?: number;
         /** The number of times to retry the request. Defaults to 2. */
@@ -29,6 +33,8 @@ export declare namespace Infill {
         abortSignal?: AbortSignal;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
+        /** Additional headers to include in the request. */
+        headers?: Record<string, string>;
     }
 }
 
@@ -46,58 +52,74 @@ export class Infill {
         leftAudio: File | fs.ReadStream | Blob,
         rightAudio: File | fs.ReadStream | Blob,
         request: Cartesia.InfillBytesRequest,
-        requestOptions?: Infill.RequestOptions
+        requestOptions?: Infill.RequestOptions,
     ): Promise<stream.Readable> {
         const _request = await core.newFormData();
         await _request.appendFile("left_audio", leftAudio);
         await _request.appendFile("right_audio", rightAudio);
-        await _request.append("model_id[]", request.modelId);
-        await _request.append("language[]", request.language);
-        await _request.append("transcript[]", request.transcript);
-        await _request.append("voice[id]", request.voiceId);
-        await _request.append("output_format[container]", request.outputFormatContainer);
-        await _request.append("output_format[sample_rate]", request.outputFormatSampleRate.toString());
+        _request.append("model_id[]", request.modelId);
+        _request.append("language[]", request.language);
+        _request.append("transcript[]", request.transcript);
+        _request.append("voice[id]", request.voiceId);
+        _request.append(
+            "output_format[container]",
+            serializers.OutputFormatContainer.jsonOrThrow(request.outputFormatContainer, {
+                unrecognizedObjectKeys: "strip",
+            }),
+        );
+        _request.append("output_format[sample_rate]", request.outputFormatSampleRate.toString());
         if (request.outputFormatEncoding != null) {
-            await _request.append("output_format[encoding]", request.outputFormatEncoding);
+            _request.append(
+                "output_format[encoding]",
+                serializers.RawEncoding.jsonOrThrow(request.outputFormatEncoding, { unrecognizedObjectKeys: "strip" }),
+            );
         }
 
         if (request.outputFormatBitRate != null) {
-            await _request.append("output_format[bit_rate]", request.outputFormatBitRate.toString());
+            _request.append("output_format[bit_rate]", request.outputFormatBitRate.toString());
         }
 
         if (request.voiceExperimentalControlsSpeed != null) {
-            await _request.append(
+            _request.append(
                 "voice[__experimental_controls][speed]",
-                typeof request.voiceExperimentalControlsSpeed === "string"
-                    ? request.voiceExperimentalControlsSpeed
-                    : JSON.stringify(request.voiceExperimentalControlsSpeed)
+                (() => {
+                    const mapped = serializers.Speed.jsonOrThrow(request.voiceExperimentalControlsSpeed, {
+                        unrecognizedObjectKeys: "strip",
+                    });
+                    return typeof mapped === "string" ? mapped : toJson(mapped);
+                })(),
             );
         }
 
         if (request.voiceExperimentalControlsEmotion != null) {
-            await _request.append(
+            _request.append(
                 "voice[__experimental_controls][emotion][]",
-                request.voiceExperimentalControlsEmotion
+                serializers.Emotion.jsonOrThrow(request.voiceExperimentalControlsEmotion, {
+                    unrecognizedObjectKeys: "strip",
+                }),
             );
         }
 
         const _maybeEncodedRequest = await _request.getRequest();
         const _response = await (this._options.fetcher ?? core.fetcher)<stream.Readable>({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/infill/bytes"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/infill/bytes",
             ),
             method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
                 ..._maybeEncodedRequest.headers,
+                ...requestOptions?.headers,
             },
             requestType: "file",
             duplex: _maybeEncodedRequest.duplex,
@@ -125,7 +147,7 @@ export class Infill {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /infill/bytes.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,

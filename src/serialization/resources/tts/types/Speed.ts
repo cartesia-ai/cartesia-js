@@ -12,5 +12,5 @@ export const Speed: core.serialization.Schema<serializers.Speed.Raw, Cartesia.Sp
     core.serialization.undiscriminatedUnion([NumericalSpecifier, NaturalSpecifier]);
 
 export declare namespace Speed {
-    type Raw = NumericalSpecifier.Raw | NaturalSpecifier.Raw;
+    export type Raw = NumericalSpecifier.Raw | NaturalSpecifier.Raw;
 }

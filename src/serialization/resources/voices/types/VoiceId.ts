@@ -10,5 +10,5 @@ export const VoiceId: core.serialization.Schema<serializers.VoiceId.Raw, Cartesi
     core.serialization.string();
 
 export declare namespace VoiceId {
-    type Raw = string;
+    export type Raw = string;
 }

@@ -3,7 +3,6 @@
  */
 
 export type OutputFormatContainer = "raw" | "wav" | "mp3";
-
 export const OutputFormatContainer = {
     Raw: "raw",
     Wav: "wav",

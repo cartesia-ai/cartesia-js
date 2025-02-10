@@ -20,7 +20,7 @@ export const VoiceMetadata: core.serialization.ObjectSchema<serializers.VoiceMet
     });
 
 export declare namespace VoiceMetadata {
-    interface Raw {
+    export interface Raw {
         id: VoiceId.Raw;
         user_id: string;
         is_public: boolean;

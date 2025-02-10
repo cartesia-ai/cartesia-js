@@ -3,7 +3,6 @@
  */
 
 export type FilePurpose = "fine_tune";
-
 export const FilePurpose = {
     FineTune: "fine_tune",
 } as const;

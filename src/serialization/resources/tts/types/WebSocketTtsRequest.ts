@@ -21,14 +21,14 @@ export const WebSocketTtsRequest: core.serialization.ObjectSchema<
     addTimestamps: core.serialization.property("add_timestamps", core.serialization.boolean().optional()),
     addPhonemeTimestamps: core.serialization.property(
         "add_phoneme_timestamps",
-        core.serialization.boolean().optional()
+        core.serialization.boolean().optional(),
     ),
     continue: core.serialization.boolean().optional(),
     contextId: core.serialization.property("context_id", core.serialization.string().optional()),
 });
 
 export declare namespace WebSocketTtsRequest {
-    interface Raw {
+    export interface Raw {
         model_id: string;
         output_format?: OutputFormat.Raw | null;
         transcript?: string | null;

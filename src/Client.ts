@@ -12,15 +12,17 @@ import { VoiceChanger } from "./api/resources/voiceChanger/client/Client";
 import { Voices } from "./api/resources/voices/client/Client";
 
 export declare namespace CartesiaClient {
-    interface Options {
+    export interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
+        /** Specify a custom URL to connect the client to. */
+        baseUrl?: core.Supplier<string>;
         apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;
     }
 
-    interface RequestOptions {
+    export interface RequestOptions {
         /** The maximum time to wait for a response in seconds. */
         timeoutInSeconds?: number;
         /** The number of times to retry the request. Defaults to 2. */
@@ -29,43 +31,40 @@ export declare namespace CartesiaClient {
         abortSignal?: AbortSignal;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
+        /** Additional headers to include in the request. */
+        headers?: Record<string, string>;
     }
 }
 
 export class CartesiaClient {
-    constructor(protected readonly _options: CartesiaClient.Options = {}) {}
-
     protected _apiStatus: ApiStatus | undefined;
+    protected _datasets: Datasets | undefined;
+    protected _infill: Infill | undefined;
+    protected _tts: Tts | undefined;
+    protected _voiceChanger: VoiceChanger | undefined;
+    protected _voices: Voices | undefined;
+
+    constructor(protected readonly _options: CartesiaClient.Options = {}) {}
 
     public get apiStatus(): ApiStatus {
         return (this._apiStatus ??= new ApiStatus(this._options));
     }
 
-    protected _datasets: Datasets | undefined;
-
     public get datasets(): Datasets {
         return (this._datasets ??= new Datasets(this._options));
     }
-
-    protected _infill: Infill | undefined;
 
     public get infill(): Infill {
         return (this._infill ??= new Infill(this._options));
     }
 
-    protected _tts: Tts | undefined;
-
     public get tts(): Tts {
         return (this._tts ??= new Tts(this._options));
     }
 
-    protected _voiceChanger: VoiceChanger | undefined;
-
     public get voiceChanger(): VoiceChanger {
         return (this._voiceChanger ??= new VoiceChanger(this._options));
     }
-
-    protected _voices: Voices | undefined;
 
     public get voices(): Voices {
         return (this._voices ??= new Voices(this._options));

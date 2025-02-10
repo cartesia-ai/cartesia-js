@@ -10,5 +10,5 @@ export const Embedding: core.serialization.Schema<serializers.Embedding.Raw, Car
     core.serialization.list(core.serialization.number());
 
 export declare namespace Embedding {
-    type Raw = number[];
+    export type Raw = number[];
 }

@@ -1,4 +1,5 @@
 export * from "./ContextId";
+export * from "./FlushId";
 export * from "./WebSocketBaseResponse";
 export * from "./WebSocketResponse";
 export * from "./WebSocketErrorResponse";
@@ -10,6 +11,7 @@ export * from "./WebSocketStreamOptions";
 export * from "./WordTimestamps";
 export * from "./PhonemeTimestamps";
 export * from "./WebSocketDoneResponse";
+export * from "./WebSocketFlushDoneResponse";
 export * from "./CancelContextRequest";
 export * from "./GenerationRequest";
 export * from "./WebSocketRawOutputFormat";

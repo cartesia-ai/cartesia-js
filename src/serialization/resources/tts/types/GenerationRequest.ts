@@ -15,30 +15,32 @@ export const GenerationRequest: core.serialization.ObjectSchema<
     Cartesia.GenerationRequest
 > = core.serialization.object({
     modelId: core.serialization.property("model_id", core.serialization.string()),
-    transcript: core.serialization.string(),
+    transcript: core.serialization.unknown(),
     voice: TtsRequestVoiceSpecifier,
     language: SupportedLanguage.optional(),
     outputFormat: core.serialization.property("output_format", WebSocketRawOutputFormat),
     duration: core.serialization.number().optional(),
-    contextId: core.serialization.property("context_id", ContextId),
+    contextId: core.serialization.property("context_id", ContextId.optional()),
     continue: core.serialization.boolean().optional(),
+    flush: core.serialization.boolean().optional(),
     addTimestamps: core.serialization.property("add_timestamps", core.serialization.boolean().optional()),
     addPhonemeTimestamps: core.serialization.property(
         "add_phoneme_timestamps",
-        core.serialization.boolean().optional()
+        core.serialization.boolean().optional(),
     ),
 });
 
 export declare namespace GenerationRequest {
-    interface Raw {
+    export interface Raw {
         model_id: string;
-        transcript: string;
+        transcript?: unknown;
         voice: TtsRequestVoiceSpecifier.Raw;
         language?: SupportedLanguage.Raw | null;
         output_format: WebSocketRawOutputFormat.Raw;
         duration?: number | null;
-        context_id: ContextId.Raw;
+        context_id?: ContextId.Raw | null;
         continue?: boolean | null;
+        flush?: boolean | null;
         add_timestamps?: boolean | null;
         add_phoneme_timestamps?: boolean | null;
     }

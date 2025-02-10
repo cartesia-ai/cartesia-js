@@ -17,7 +17,7 @@ export const EmbeddingSpecifier: core.serialization.ObjectSchema<
 });
 
 export declare namespace EmbeddingSpecifier {
-    interface Raw {
+    export interface Raw {
         embedding: Embedding.Raw;
         weight: Weight.Raw;
     }

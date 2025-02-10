@@ -20,7 +20,7 @@ export const TtsRequest: core.serialization.ObjectSchema<serializers.TtsRequest.
     });
 
 export declare namespace TtsRequest {
-    interface Raw {
+    export interface Raw {
         model_id: string;
         transcript: string;
         voice: TtsRequestVoiceSpecifier.Raw;

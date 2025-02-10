@@ -3,7 +3,6 @@
  */
 
 export type CloneMode = "similarity" | "stability";
-
 export const CloneMode = {
     Similarity: "similarity",
     Stability: "stability",

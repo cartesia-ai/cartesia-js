@@ -8,6 +8,7 @@ import * as core from "../../../../core";
 import { WordTimestamps } from "./WordTimestamps";
 import { PhonemeTimestamps } from "./PhonemeTimestamps";
 import { ContextId } from "./ContextId";
+import { FlushId } from "./FlushId";
 
 export const WebSocketTtsOutput: core.serialization.ObjectSchema<
     serializers.WebSocketTtsOutput.Raw,
@@ -17,13 +18,17 @@ export const WebSocketTtsOutput: core.serialization.ObjectSchema<
     phonemeTimestamps: core.serialization.property("phoneme_timestamps", PhonemeTimestamps.optional()),
     audio: core.serialization.unknown().optional(),
     contextId: core.serialization.property("context_id", ContextId.optional()),
+    flushId: core.serialization.property("flush_id", FlushId.optional()),
+    flushDone: core.serialization.property("flush_done", core.serialization.boolean().optional()),
 });
 
 export declare namespace WebSocketTtsOutput {
-    interface Raw {
+    export interface Raw {
         word_timestamps?: WordTimestamps.Raw | null;
         phoneme_timestamps?: PhonemeTimestamps.Raw | null;
         audio?: unknown | null;
         context_id?: ContextId.Raw | null;
+        flush_id?: FlushId.Raw | null;
+        flush_done?: boolean | null;
     }
 }

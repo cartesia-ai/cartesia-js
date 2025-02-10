@@ -9,4 +9,6 @@ export interface WebSocketTtsOutput {
     phonemeTimestamps?: Cartesia.PhonemeTimestamps;
     audio?: unknown;
     contextId?: Cartesia.ContextId;
+    flushId?: Cartesia.FlushId;
+    flushDone?: boolean;
 }

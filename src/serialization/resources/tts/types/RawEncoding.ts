@@ -10,5 +10,5 @@ export const RawEncoding: core.serialization.Schema<serializers.RawEncoding.Raw,
     core.serialization.enum_(["pcm_f32le", "pcm_s16le", "pcm_mulaw", "pcm_alaw"]);
 
 export declare namespace RawEncoding {
-    type Raw = "pcm_f32le" | "pcm_s16le" | "pcm_mulaw" | "pcm_alaw";
+    export type Raw = "pcm_f32le" | "pcm_s16le" | "pcm_mulaw" | "pcm_alaw";
 }

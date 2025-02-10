@@ -12,5 +12,5 @@ export const LocalizeEnglishDialect: core.serialization.Schema<
 > = core.serialization.enum_(["au", "in", "so", "uk", "us"]);
 
 export declare namespace LocalizeEnglishDialect {
-    type Raw = "au" | "in" | "so" | "uk" | "us";
+    export type Raw = "au" | "in" | "so" | "uk" | "us";
 }

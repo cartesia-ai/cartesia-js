@@ -12,5 +12,5 @@ export const WebSocketRequest: core.serialization.Schema<serializers.WebSocketRe
     core.serialization.undiscriminatedUnion([GenerationRequest, CancelContextRequest]);
 
 export declare namespace WebSocketRequest {
-    type Raw = GenerationRequest.Raw | CancelContextRequest.Raw;
+    export type Raw = GenerationRequest.Raw | CancelContextRequest.Raw;
 }

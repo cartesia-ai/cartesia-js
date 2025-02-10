@@ -13,7 +13,7 @@ export const ApiInfo: core.serialization.ObjectSchema<serializers.ApiInfo.Raw, C
     });
 
 export declare namespace ApiInfo {
-    interface Raw {
+    export interface Raw {
         ok: boolean;
         version: string;
     }

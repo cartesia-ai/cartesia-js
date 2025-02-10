@@ -14,7 +14,7 @@ export const WebSocketStreamOptions: core.serialization.ObjectSchema<
 });
 
 export declare namespace WebSocketStreamOptions {
-    interface Raw {
+    export interface Raw {
         timeout?: number | null;
     }
 }

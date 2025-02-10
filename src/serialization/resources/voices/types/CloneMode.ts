@@ -10,5 +10,5 @@ export const CloneMode: core.serialization.Schema<serializers.CloneMode.Raw, Car
     core.serialization.enum_(["similarity", "stability"]);
 
 export declare namespace CloneMode {
-    type Raw = "similarity" | "stability";
+    export type Raw = "similarity" | "stability";
 }

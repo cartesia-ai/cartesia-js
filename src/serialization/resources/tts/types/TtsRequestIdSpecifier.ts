@@ -18,7 +18,7 @@ export const TtsRequestIdSpecifier: core.serialization.ObjectSchema<
 });
 
 export declare namespace TtsRequestIdSpecifier {
-    interface Raw {
+    export interface Raw {
         mode: "id";
         id: VoiceId.Raw;
         __experimental_controls?: Controls.Raw | null;

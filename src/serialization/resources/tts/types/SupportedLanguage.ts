@@ -28,5 +28,20 @@ export const SupportedLanguage: core.serialization.Schema<
 ]);
 
 export declare namespace SupportedLanguage {
-    type Raw = "en" | "fr" | "de" | "es" | "pt" | "zh" | "ja" | "hi" | "it" | "ko" | "nl" | "pl" | "ru" | "sv" | "tr";
+    export type Raw =
+        | "en"
+        | "fr"
+        | "de"
+        | "es"
+        | "pt"
+        | "zh"
+        | "ja"
+        | "hi"
+        | "it"
+        | "ko"
+        | "nl"
+        | "pl"
+        | "ru"
+        | "sv"
+        | "tr";
 }

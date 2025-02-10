@@ -30,7 +30,7 @@ export const Emotion: core.serialization.Schema<serializers.Emotion.Raw, Cartesi
 ]);
 
 export declare namespace Emotion {
-    type Raw =
+    export type Raw =
         | "anger:lowest"
         | "anger:low"
         | "anger:high"

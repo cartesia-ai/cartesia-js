@@ -11,5 +11,5 @@ export const Response: core.serialization.Schema<serializers.voices.list.Respons
     core.serialization.list(Voice);
 
 export declare namespace Response {
-    type Raw = Voice.Raw[];
+    export type Raw = Voice.Raw[];
 }

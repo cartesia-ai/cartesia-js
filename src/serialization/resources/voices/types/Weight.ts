@@ -9,5 +9,5 @@ import * as core from "../../../../core";
 export const Weight: core.serialization.Schema<serializers.Weight.Raw, Cartesia.Weight> = core.serialization.number();
 
 export declare namespace Weight {
-    type Raw = number;
+    export type Raw = number;
 }

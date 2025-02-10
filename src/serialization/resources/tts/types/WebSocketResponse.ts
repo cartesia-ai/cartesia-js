@@ -6,6 +6,7 @@ import * as serializers from "../../../index";
 import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
 import { WebSocketChunkResponse } from "./WebSocketChunkResponse";
+import { WebSocketFlushDoneResponse } from "./WebSocketFlushDoneResponse";
 import { WebSocketDoneResponse } from "./WebSocketDoneResponse";
 import { WebSocketTimestampsResponse } from "./WebSocketTimestampsResponse";
 import { WebSocketErrorResponse } from "./WebSocketErrorResponse";
@@ -17,6 +18,7 @@ export const WebSocketResponse: core.serialization.Schema<
 > = core.serialization
     .union("type", {
         chunk: WebSocketChunkResponse,
+        flush_done: WebSocketFlushDoneResponse,
         done: WebSocketDoneResponse,
         timestamps: WebSocketTimestampsResponse,
         error: WebSocketErrorResponse,
@@ -28,30 +30,35 @@ export const WebSocketResponse: core.serialization.Schema<
     });
 
 export declare namespace WebSocketResponse {
-    type Raw =
+    export type Raw =
         | WebSocketResponse.Chunk
+        | WebSocketResponse.FlushDone
         | WebSocketResponse.Done
         | WebSocketResponse.Timestamps
         | WebSocketResponse.Error
         | WebSocketResponse.PhonemeTimestamps;
 
-    interface Chunk extends WebSocketChunkResponse.Raw {
+    export interface Chunk extends WebSocketChunkResponse.Raw {
         type: "chunk";
     }
 
-    interface Done extends WebSocketDoneResponse.Raw {
+    export interface FlushDone extends WebSocketFlushDoneResponse.Raw {
+        type: "flush_done";
+    }
+
+    export interface Done extends WebSocketDoneResponse.Raw {
         type: "done";
     }
 
-    interface Timestamps extends WebSocketTimestampsResponse.Raw {
+    export interface Timestamps extends WebSocketTimestampsResponse.Raw {
         type: "timestamps";
     }
 
-    interface Error extends WebSocketErrorResponse.Raw {
+    export interface Error extends WebSocketErrorResponse.Raw {
         type: "error";
     }
 
-    interface PhonemeTimestamps extends WebSocketPhonemeTimestampsResponse.Raw {
+    export interface PhonemeTimestamps extends WebSocketPhonemeTimestampsResponse.Raw {
         type: "phoneme_timestamps";
     }
 }

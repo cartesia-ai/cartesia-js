@@ -15,7 +15,7 @@ export const IdSpecifier: core.serialization.ObjectSchema<serializers.IdSpecifie
     });
 
 export declare namespace IdSpecifier {
-    interface Raw {
+    export interface Raw {
         id: VoiceId.Raw;
         weight: Weight.Raw;
     }

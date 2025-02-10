@@ -19,7 +19,7 @@ export const CreateVoiceRequest: core.serialization.ObjectSchema<
 });
 
 export declare namespace CreateVoiceRequest {
-    interface Raw {
+    export interface Raw {
         name: string;
         description: string;
         embedding: Embedding.Raw;

@@ -15,7 +15,7 @@ export const EmbeddingResponse: core.serialization.ObjectSchema<
 });
 
 export declare namespace EmbeddingResponse {
-    interface Raw {
+    export interface Raw {
         embedding: Embedding.Raw;
     }
 }

@@ -1,7 +1,7 @@
-import fetchMock from "fetch-mock-jest";
 import fs from "fs";
-import { Fetcher, fetcherImpl } from "../../../src/core/fetcher/Fetcher";
 import { join } from "path";
+
+import { Fetcher, fetcherImpl } from "../../../src/core/fetcher/Fetcher";
 
 describe("Test fetcherImpl", () => {
     it("should handle successful request", async () => {
@@ -14,8 +14,11 @@ describe("Test fetcherImpl", () => {
             requestType: "json",
         };
 
-        fetchMock.mock("https://httpbin.org/post", 200, {
-            response: JSON.stringify({ data: "test" }),
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            text: () => Promise.resolve(JSON.stringify({ data: "test" })),
+            json: () => ({ data: "test" }),
         });
 
         const result = await fetcherImpl(mockArgs);
@@ -23,6 +26,15 @@ describe("Test fetcherImpl", () => {
         if (result.ok) {
             expect(result.body).toEqual({ data: "test" });
         }
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            "https://httpbin.org/post",
+            expect.objectContaining({
+                method: "POST",
+                headers: expect.objectContaining({ "X-Test": "x-test-header" }),
+                body: JSON.stringify({ data: "test" }),
+            }),
+        );
     });
 
     it("should send octet stream", async () => {
@@ -37,16 +49,23 @@ describe("Test fetcherImpl", () => {
             body: fs.createReadStream(join(__dirname, "test-file.txt")),
         };
 
-        fetchMock.mock("https://httpbin.org/post/file", 200, {
-            response: JSON.stringify({ data: "test" }),
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            text: () => Promise.resolve(JSON.stringify({ data: "test" })),
+            json: () => Promise.resolve({ data: "test" }),
         });
 
         const result = await fetcherImpl(mockArgs);
 
-        expect(fetchMock).toHaveFetched(url, {
-            method: "POST",
-            body: fs.createReadStream(join(__dirname, "test-file.txt")).read(),
-        });
+        expect(global.fetch).toHaveBeenCalledWith(
+            url,
+            expect.objectContaining({
+                method: "POST",
+                headers: expect.objectContaining({ "X-Test": "x-test-header" }),
+                body: expect.any(fs.ReadStream),
+            }),
+        );
         expect(result.ok).toBe(true);
         if (result.ok) {
             expect(result.body).toEqual({ data: "test" });

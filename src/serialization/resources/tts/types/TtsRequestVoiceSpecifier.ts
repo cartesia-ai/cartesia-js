@@ -14,5 +14,5 @@ export const TtsRequestVoiceSpecifier: core.serialization.Schema<
 > = core.serialization.undiscriminatedUnion([TtsRequestIdSpecifier, TtsRequestEmbeddingSpecifier]);
 
 export declare namespace TtsRequestVoiceSpecifier {
-    type Raw = TtsRequestIdSpecifier.Raw | TtsRequestEmbeddingSpecifier.Raw;
+    export type Raw = TtsRequestIdSpecifier.Raw | TtsRequestEmbeddingSpecifier.Raw;
 }

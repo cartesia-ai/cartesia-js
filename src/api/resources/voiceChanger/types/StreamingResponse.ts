@@ -9,16 +9,16 @@ export type StreamingResponse =
     | Cartesia.StreamingResponse.Done
     | Cartesia.StreamingResponse.Error_;
 
-export declare namespace StreamingResponse {
-    interface Chunk extends Cartesia.WebSocketChunkResponse {
+export namespace StreamingResponse {
+    export interface Chunk extends Cartesia.WebSocketChunkResponse {
         type: "chunk";
     }
 
-    interface Done extends Cartesia.WebSocketDoneResponse {
+    export interface Done extends Cartesia.WebSocketDoneResponse {
         type: "done";
     }
 
-    interface Error_ extends Cartesia.WebSocketErrorResponse {
+    export interface Error_ extends Cartesia.WebSocketErrorResponse {
         type: "error";
     }
 }

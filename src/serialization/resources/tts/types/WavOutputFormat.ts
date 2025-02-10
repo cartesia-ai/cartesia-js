@@ -13,5 +13,5 @@ export const WavOutputFormat: core.serialization.ObjectSchema<
 > = core.serialization.object({}).extend(RawOutputFormat);
 
 export declare namespace WavOutputFormat {
-    interface Raw extends RawOutputFormat.Raw {}
+    export interface Raw extends RawOutputFormat.Raw {}
 }

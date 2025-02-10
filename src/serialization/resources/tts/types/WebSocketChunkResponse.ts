@@ -18,7 +18,7 @@ export const WebSocketChunkResponse: core.serialization.ObjectSchema<
     .extend(WebSocketBaseResponse);
 
 export declare namespace WebSocketChunkResponse {
-    interface Raw extends WebSocketBaseResponse.Raw {
+    export interface Raw extends WebSocketBaseResponse.Raw {
         data: string;
         step_time: number;
     }

@@ -18,7 +18,7 @@ export const WebSocketTimestampsResponse: core.serialization.ObjectSchema<
     .extend(WebSocketBaseResponse);
 
 export declare namespace WebSocketTimestampsResponse {
-    interface Raw extends WebSocketBaseResponse.Raw {
+    export interface Raw extends WebSocketBaseResponse.Raw {
         word_timestamps?: WordTimestamps.Raw | null;
     }
 }

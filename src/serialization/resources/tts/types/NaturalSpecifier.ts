@@ -10,5 +10,5 @@ export const NaturalSpecifier: core.serialization.Schema<serializers.NaturalSpec
     core.serialization.enum_(["slowest", "slow", "normal", "fast", "fastest"]);
 
 export declare namespace NaturalSpecifier {
-    type Raw = "slowest" | "slow" | "normal" | "fast" | "fastest";
+    export type Raw = "slowest" | "slow" | "normal" | "fast" | "fastest";
 }

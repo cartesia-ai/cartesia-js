@@ -28,5 +28,20 @@ export const LocalizeTargetLanguage: core.serialization.Schema<
 ]);
 
 export declare namespace LocalizeTargetLanguage {
-    type Raw = "en" | "de" | "es" | "fr" | "ja" | "pt" | "zh" | "hi" | "it" | "ko" | "nl" | "pl" | "ru" | "sv" | "tr";
+    export type Raw =
+        | "en"
+        | "de"
+        | "es"
+        | "fr"
+        | "ja"
+        | "pt"
+        | "zh"
+        | "hi"
+        | "it"
+        | "ko"
+        | "nl"
+        | "pl"
+        | "ru"
+        | "sv"
+        | "tr";
 }

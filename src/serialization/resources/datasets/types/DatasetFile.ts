@@ -14,7 +14,7 @@ export const DatasetFile: core.serialization.ObjectSchema<serializers.DatasetFil
     });
 
 export declare namespace DatasetFile {
-    interface Raw {
+    export interface Raw {
         id: string;
         filename: string;
         created_at: string;

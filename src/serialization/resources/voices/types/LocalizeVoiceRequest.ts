@@ -21,7 +21,7 @@ export const LocalizeVoiceRequest: core.serialization.ObjectSchema<
 });
 
 export declare namespace LocalizeVoiceRequest {
-    interface Raw {
+    export interface Raw {
         embedding: Embedding.Raw;
         language: LocalizeTargetLanguage.Raw;
         original_speaker_gender: Gender.Raw;

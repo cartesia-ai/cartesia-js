@@ -24,17 +24,17 @@ export const StreamingResponse: core.serialization.Schema<
     });
 
 export declare namespace StreamingResponse {
-    type Raw = StreamingResponse.Chunk | StreamingResponse.Done | StreamingResponse.Error;
+    export type Raw = StreamingResponse.Chunk | StreamingResponse.Done | StreamingResponse.Error;
 
-    interface Chunk extends WebSocketChunkResponse.Raw {
+    export interface Chunk extends WebSocketChunkResponse.Raw {
         type: "chunk";
     }
 
-    interface Done extends WebSocketDoneResponse.Raw {
+    export interface Done extends WebSocketDoneResponse.Raw {
         type: "done";
     }
 
-    interface Error extends WebSocketErrorResponse.Raw {
+    export interface Error extends WebSocketErrorResponse.Raw {
         type: "error";
     }
 }

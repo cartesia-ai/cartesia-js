@@ -23,7 +23,6 @@ export type SupportedLanguage =
     | "ru"
     | "sv"
     | "tr";
-
 export const SupportedLanguage = {
     En: "en",
     Fr: "fr",

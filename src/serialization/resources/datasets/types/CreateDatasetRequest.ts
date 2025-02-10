@@ -14,7 +14,7 @@ export const CreateDatasetRequest: core.serialization.ObjectSchema<
 });
 
 export declare namespace CreateDatasetRequest {
-    interface Raw {
+    export interface Raw {
         name: string;
     }
 }

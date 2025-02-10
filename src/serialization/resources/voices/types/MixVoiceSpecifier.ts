@@ -14,5 +14,5 @@ export const MixVoiceSpecifier: core.serialization.Schema<
 > = core.serialization.undiscriminatedUnion([IdSpecifier, EmbeddingSpecifier]);
 
 export declare namespace MixVoiceSpecifier {
-    type Raw = IdSpecifier.Raw | EmbeddingSpecifier.Raw;
+    export type Raw = IdSpecifier.Raw | EmbeddingSpecifier.Raw;
 }

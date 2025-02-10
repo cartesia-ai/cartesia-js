@@ -6,29 +6,34 @@ import * as Cartesia from "../../../index";
 
 export type WebSocketResponse =
     | Cartesia.WebSocketResponse.Chunk
+    | Cartesia.WebSocketResponse.FlushDone
     | Cartesia.WebSocketResponse.Done
     | Cartesia.WebSocketResponse.Timestamps
     | Cartesia.WebSocketResponse.Error_
     | Cartesia.WebSocketResponse.PhonemeTimestamps;
 
-export declare namespace WebSocketResponse {
-    interface Chunk extends Cartesia.WebSocketChunkResponse {
+export namespace WebSocketResponse {
+    export interface Chunk extends Cartesia.WebSocketChunkResponse {
         type: "chunk";
     }
 
-    interface Done extends Cartesia.WebSocketDoneResponse {
+    export interface FlushDone extends Cartesia.WebSocketFlushDoneResponse {
+        type: "flush_done";
+    }
+
+    export interface Done extends Cartesia.WebSocketDoneResponse {
         type: "done";
     }
 
-    interface Timestamps extends Cartesia.WebSocketTimestampsResponse {
+    export interface Timestamps extends Cartesia.WebSocketTimestampsResponse {
         type: "timestamps";
     }
 
-    interface Error_ extends Cartesia.WebSocketErrorResponse {
+    export interface Error_ extends Cartesia.WebSocketErrorResponse {
         type: "error";
     }
 
-    interface PhonemeTimestamps extends Cartesia.WebSocketPhonemeTimestampsResponse {
+    export interface PhonemeTimestamps extends Cartesia.WebSocketPhonemeTimestampsResponse {
         type: "phoneme_timestamps";
     }
 }

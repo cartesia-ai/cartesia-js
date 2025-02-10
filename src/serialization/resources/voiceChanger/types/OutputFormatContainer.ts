@@ -12,5 +12,5 @@ export const OutputFormatContainer: core.serialization.Schema<
 > = core.serialization.enum_(["raw", "wav", "mp3"]);
 
 export declare namespace OutputFormatContainer {
-    type Raw = "raw" | "wav" | "mp3";
+    export type Raw = "raw" | "wav" | "mp3";
 }

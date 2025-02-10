@@ -11,5 +11,5 @@ export const LocalizeDialect: core.serialization.Schema<serializers.LocalizeDial
     core.serialization.undiscriminatedUnion([LocalizeEnglishDialect]);
 
 export declare namespace LocalizeDialect {
-    type Raw = LocalizeEnglishDialect.Raw;
+    export type Raw = LocalizeEnglishDialect.Raw;
 }

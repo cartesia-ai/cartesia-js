@@ -18,7 +18,7 @@ export const TtsRequestEmbeddingSpecifier: core.serialization.ObjectSchema<
 });
 
 export declare namespace TtsRequestEmbeddingSpecifier {
-    interface Raw {
+    export interface Raw {
         mode: "embedding";
         embedding: Embedding.Raw;
         __experimental_controls?: Controls.Raw | null;

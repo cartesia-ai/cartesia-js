@@ -30,7 +30,6 @@ export type Emotion =
     | "curiosity:low"
     | "curiosity:high"
     | "curiosity:highest";
-
 export const Emotion = {
     AngerLowest: "anger:lowest",
     AngerLow: "anger:low",

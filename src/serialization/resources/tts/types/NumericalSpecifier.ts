@@ -12,5 +12,5 @@ export const NumericalSpecifier: core.serialization.Schema<
 > = core.serialization.number();
 
 export declare namespace NumericalSpecifier {
-    type Raw = number;
+    export type Raw = number;
 }

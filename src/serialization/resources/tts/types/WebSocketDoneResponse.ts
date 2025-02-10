@@ -13,5 +13,5 @@ export const WebSocketDoneResponse: core.serialization.ObjectSchema<
 > = core.serialization.object({}).extend(WebSocketBaseResponse);
 
 export declare namespace WebSocketDoneResponse {
-    interface Raw extends WebSocketBaseResponse.Raw {}
+    export interface Raw extends WebSocketBaseResponse.Raw {}
 }

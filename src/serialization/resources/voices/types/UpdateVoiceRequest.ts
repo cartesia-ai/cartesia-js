@@ -15,7 +15,7 @@ export const UpdateVoiceRequest: core.serialization.ObjectSchema<
 });
 
 export declare namespace UpdateVoiceRequest {
-    interface Raw {
+    export interface Raw {
         name: string;
         description: string;
     }

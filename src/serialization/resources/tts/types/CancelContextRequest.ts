@@ -16,7 +16,7 @@ export const CancelContextRequest: core.serialization.ObjectSchema<
 });
 
 export declare namespace CancelContextRequest {
-    interface Raw {
+    export interface Raw {
         context_id: ContextId.Raw;
         cancel: true;
     }

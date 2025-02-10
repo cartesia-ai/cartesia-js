@@ -10,5 +10,5 @@ import { VoiceId } from "./VoiceId";
 export const BaseVoiceId: core.serialization.Schema<serializers.BaseVoiceId.Raw, Cartesia.BaseVoiceId> = VoiceId;
 
 export declare namespace BaseVoiceId {
-    type Raw = VoiceId.Raw;
+    export type Raw = VoiceId.Raw;
 }

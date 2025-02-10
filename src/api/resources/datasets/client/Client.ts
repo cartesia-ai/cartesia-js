@@ -12,15 +12,17 @@ import * as fs from "fs";
 import { Blob } from "buffer";
 
 export declare namespace Datasets {
-    interface Options {
+    export interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
+        /** Specify a custom URL to connect the client to. */
+        baseUrl?: core.Supplier<string>;
         apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;
     }
 
-    interface RequestOptions {
+    export interface RequestOptions {
         /** The maximum time to wait for a response in seconds. */
         timeoutInSeconds?: number;
         /** The number of times to retry the request. Defaults to 2. */
@@ -29,6 +31,8 @@ export declare namespace Datasets {
         abortSignal?: AbortSignal;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
+        /** Additional headers to include in the request. */
+        headers?: Record<string, string>;
     }
 }
 
@@ -44,19 +48,22 @@ export class Datasets {
     public async list(requestOptions?: Datasets.RequestOptions): Promise<Cartesia.PaginatedDatasets> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/datasets/"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/datasets/",
             ),
             method: "GET",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -88,7 +95,7 @@ export class Datasets {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling GET /datasets/.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -107,23 +114,26 @@ export class Datasets {
      */
     public async create(
         request: Cartesia.CreateDatasetRequest,
-        requestOptions?: Datasets.RequestOptions
+        requestOptions?: Datasets.RequestOptions,
     ): Promise<Cartesia.Dataset> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                "/datasets/"
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "/datasets/",
             ),
             method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -156,7 +166,7 @@ export class Datasets {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /datasets/.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -173,23 +183,26 @@ export class Datasets {
      */
     public async listFiles(
         id: string,
-        requestOptions?: Datasets.RequestOptions
+        requestOptions?: Datasets.RequestOptions,
     ): Promise<Cartesia.PaginatedDatasetFiles> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                `/datasets/${encodeURIComponent(id)}/files`
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                `/datasets/${encodeURIComponent(id)}/files`,
             ),
             method: "GET",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
+                ...requestOptions?.headers,
             },
             contentType: "application/json",
             requestType: "json",
@@ -221,7 +234,7 @@ export class Datasets {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling GET /datasets/{id}/files.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -242,28 +255,34 @@ export class Datasets {
         file: File | fs.ReadStream | Blob,
         id: string,
         request: Cartesia.UploadDatasetFileRequest,
-        requestOptions?: Datasets.RequestOptions
+        requestOptions?: Datasets.RequestOptions,
     ): Promise<void> {
         const _request = await core.newFormData();
         await _request.appendFile("file", file);
-        await _request.append("purpose", request.purpose);
+        _request.append(
+            "purpose",
+            serializers.FilePurpose.jsonOrThrow(request.purpose, { unrecognizedObjectKeys: "strip" }),
+        );
         const _maybeEncodedRequest = await _request.getRequest();
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
-                (await core.Supplier.get(this._options.environment)) ?? environments.CartesiaEnvironment.Production,
-                `/datasets/${encodeURIComponent(id)}/files`
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                `/datasets/${encodeURIComponent(id)}/files`,
             ),
             method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.4",
-                "User-Agent": "@cartesia/cartesia-js/2.1.4",
+                "X-Fern-SDK-Version": "2.1.5",
+                "User-Agent": "@cartesia/cartesia-js/2.1.5",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
                 ..._maybeEncodedRequest.headers,
+                ...requestOptions?.headers,
             },
             requestType: "file",
             duplex: _maybeEncodedRequest.duplex,
@@ -290,7 +309,7 @@ export class Datasets {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /datasets/{id}/files.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,

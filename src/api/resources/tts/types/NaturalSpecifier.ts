@@ -3,7 +3,6 @@
  */
 
 export type NaturalSpecifier = "slowest" | "slow" | "normal" | "fast" | "fastest";
-
 export const NaturalSpecifier = {
     Slowest: "slowest",
     Slow: "slow",

@@ -16,7 +16,7 @@ export const PhonemeTimestamps: core.serialization.ObjectSchema<
 });
 
 export declare namespace PhonemeTimestamps {
-    interface Raw {
+    export interface Raw {
         phonemes: string[];
         start: number[];
         end: number[];

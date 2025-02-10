@@ -13,11 +13,13 @@ export const RawOutputFormat: core.serialization.ObjectSchema<
 > = core.serialization.object({
     encoding: RawEncoding,
     sampleRate: core.serialization.property("sample_rate", core.serialization.number()),
+    bitRate: core.serialization.property("bit_rate", core.serialization.number().optional()),
 });
 
 export declare namespace RawOutputFormat {
-    interface Raw {
+    export interface Raw {
         encoding: RawEncoding.Raw;
         sample_rate: number;
+        bit_rate?: number | null;
     }
 }

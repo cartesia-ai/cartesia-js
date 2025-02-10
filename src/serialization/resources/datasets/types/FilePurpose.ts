@@ -10,5 +10,5 @@ export const FilePurpose: core.serialization.Schema<serializers.FilePurpose.Raw,
     core.serialization.enum_(["fine_tune"]);
 
 export declare namespace FilePurpose {
-    type Raw = "fine_tune";
+    export type Raw = "fine_tune";
 }

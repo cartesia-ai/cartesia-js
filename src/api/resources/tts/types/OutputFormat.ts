@@ -6,16 +6,16 @@ import * as Cartesia from "../../../index";
 
 export type OutputFormat = Cartesia.OutputFormat.Raw | Cartesia.OutputFormat.Wav | Cartesia.OutputFormat.Mp3;
 
-export declare namespace OutputFormat {
-    interface Raw extends Cartesia.RawOutputFormat {
+export namespace OutputFormat {
+    export interface Raw extends Cartesia.RawOutputFormat {
         container: "raw";
     }
 
-    interface Wav extends Cartesia.WavOutputFormat {
+    export interface Wav extends Cartesia.WavOutputFormat {
         container: "wav";
     }
 
-    interface Mp3 extends Cartesia.Mp3OutputFormat {
+    export interface Mp3 extends Cartesia.Mp3OutputFormat {
         container: "mp3";
     }
 }

@@ -17,7 +17,7 @@ export const WebSocketErrorResponse: core.serialization.ObjectSchema<
     .extend(WebSocketBaseResponse);
 
 export declare namespace WebSocketErrorResponse {
-    interface Raw extends WebSocketBaseResponse.Raw {
+    export interface Raw extends WebSocketBaseResponse.Raw {
         error: string;
     }
 }
