@@ -44,6 +44,8 @@ export class Infill {
     /**
      * Generate audio that smoothly connects two existing audio segments. This is useful for inserting new speech between existing speech segments while maintaining natural transitions.
      *
+     * The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.
+     *
      * Only the `sonic-preview` model is supported for infill at this time.
      *
      * At least one of `left_audio` or `right_audio` must be provided.
@@ -57,10 +59,10 @@ export class Infill {
         const _request = await core.newFormData();
         await _request.appendFile("left_audio", leftAudio);
         await _request.appendFile("right_audio", rightAudio);
-        _request.append("model_id[]", request.modelId);
-        _request.append("language[]", request.language);
-        _request.append("transcript[]", request.transcript);
-        _request.append("voice[id]", request.voiceId);
+        _request.append("model_id", request.modelId);
+        _request.append("language", request.language);
+        _request.append("transcript", request.transcript);
+        _request.append("voice_id", request.voiceId);
         _request.append(
             "output_format[container]",
             serializers.OutputFormatContainer.jsonOrThrow(request.outputFormatContainer, {
@@ -92,12 +94,12 @@ export class Infill {
         }
 
         if (request.voiceExperimentalControlsEmotion != null) {
-            _request.append(
-                "voice[__experimental_controls][emotion][]",
-                serializers.Emotion.jsonOrThrow(request.voiceExperimentalControlsEmotion, {
-                    unrecognizedObjectKeys: "strip",
-                }),
-            );
+            for (const _item of request.voiceExperimentalControlsEmotion) {
+                _request.append(
+                    "voice[__experimental_controls][emotion][]",
+                    serializers.Emotion.jsonOrThrow(_item, { unrecognizedObjectKeys: "strip" }),
+                );
+            }
         }
 
         const _maybeEncodedRequest = await _request.getRequest();

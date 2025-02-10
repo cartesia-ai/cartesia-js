@@ -13,7 +13,9 @@ import * as Cartesia from "../../../../index";
  *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
  *         outputFormatContainer: "mp3",
  *         outputFormatSampleRate: 44100,
- *         outputFormatBitRate: 128000
+ *         outputFormatBitRate: 128000,
+ *         voiceExperimentalControlsSpeed: "slowest",
+ *         voiceExperimentalControlsEmotion: ["surprise:high", "curiosity:high"]
  *     }
  *
  * @example
@@ -24,7 +26,9 @@ import * as Cartesia from "../../../../index";
  *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
  *         outputFormatContainer: "wav",
  *         outputFormatSampleRate: 44100,
- *         outputFormatEncoding: "pcm_f32le"
+ *         outputFormatEncoding: "pcm_f32le",
+ *         voiceExperimentalControlsSpeed: "slowest",
+ *         voiceExperimentalControlsEmotion: ["surprise:high", "curiosity:high"]
  *     }
  */
 export interface InfillBytesRequest {
@@ -65,5 +69,5 @@ export interface InfillBytesRequest {
      * Supported levels are: lowest, low, (omit), high, highest.
      *
      */
-    voiceExperimentalControlsEmotion?: Cartesia.Emotion;
+    voiceExperimentalControlsEmotion?: Cartesia.Emotion[];
 }

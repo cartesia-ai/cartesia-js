@@ -6,10 +6,16 @@ import * as serializers from "../../../index";
 import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
 import { LocalizeEnglishDialect } from "./LocalizeEnglishDialect";
+import { LocalizeSpanishDialect } from "./LocalizeSpanishDialect";
+import { LocalizePortugueseDialect } from "./LocalizePortugueseDialect";
 
 export const LocalizeDialect: core.serialization.Schema<serializers.LocalizeDialect.Raw, Cartesia.LocalizeDialect> =
-    core.serialization.undiscriminatedUnion([LocalizeEnglishDialect]);
+    core.serialization.undiscriminatedUnion([
+        LocalizeEnglishDialect,
+        LocalizeSpanishDialect,
+        LocalizePortugueseDialect,
+    ]);
 
 export declare namespace LocalizeDialect {
-    export type Raw = LocalizeEnglishDialect.Raw;
+    export type Raw = LocalizeEnglishDialect.Raw | LocalizeSpanishDialect.Raw | LocalizePortugueseDialect.Raw;
 }

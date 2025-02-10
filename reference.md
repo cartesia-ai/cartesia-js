@@ -262,6 +262,8 @@ await client.datasets.uploadFile(fs.createReadStream("/path/to/your/file"), "str
 
 Generate audio that smoothly connects two existing audio segments. This is useful for inserting new speech between existing speech segments while maintaining natural transitions.
 
+The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.
+
 Only the `sonic-preview` model is supported for infill at this time.
 
 At least one of `left_audio` or `right_audio` must be provided.
@@ -288,6 +290,8 @@ await client.infill.bytes(fs.createReadStream("/path/to/your/file"), fs.createRe
     outputFormatContainer: "mp3",
     outputFormatSampleRate: 44100,
     outputFormatBitRate: 128000,
+    voiceExperimentalControlsSpeed: "slowest",
+    voiceExperimentalControlsEmotion: ["surprise:high", "curiosity:high"],
 });
 ```
 
