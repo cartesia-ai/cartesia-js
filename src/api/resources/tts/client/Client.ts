@@ -77,7 +77,7 @@ export class Tts {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /tts/bytes.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
@@ -147,7 +147,7 @@ export class Tts {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError();
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /tts/sse.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,
