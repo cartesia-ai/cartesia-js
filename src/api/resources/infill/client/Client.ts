@@ -44,11 +44,19 @@ export class Infill {
     /**
      * Generate audio that smoothly connects two existing audio segments. This is useful for inserting new speech between existing speech segments while maintaining natural transitions.
      *
-     * The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.
+     * **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
      *
      * Only the `sonic-preview` model is supported for infill at this time.
      *
      * At least one of `left_audio` or `right_audio` must be provided.
+     *
+     * As with all generative models, there's some inherent variability, but here's some tips we recommend to get the best results from infill:
+     * - Use longer infill transcripts
+     *   - This gives the model more flexibility to adapt to the rest of the audio
+     * - Target natural pauses in the audio when deciding where to clip
+     *   - This means you don't need word-level timestamps to be as precise
+     * - Clip right up to the start and end of the audio segment you want infilled, keeping as much silence in the left/right audio segments as possible
+     *   - This helps the model generate more natural transitions
      */
     public async bytes(
         leftAudio: File | fs.ReadStream | Blob,
@@ -115,8 +123,8 @@ export class Infill {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.5",
-                "User-Agent": "@cartesia/cartesia-js/2.1.5",
+                "X-Fern-SDK-Version": "2.1.6",
+                "User-Agent": "@cartesia/cartesia-js/2.1.6",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),

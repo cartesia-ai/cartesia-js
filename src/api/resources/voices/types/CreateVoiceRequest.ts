@@ -11,4 +11,5 @@ export interface CreateVoiceRequest {
     description: string;
     embedding: Cartesia.Embedding;
     language?: Cartesia.SupportedLanguage;
+    baseVoiceId?: Cartesia.BaseVoiceId;
 }

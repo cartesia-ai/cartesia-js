@@ -58,8 +58,8 @@ export class Datasets {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.5",
-                "User-Agent": "@cartesia/cartesia-js/2.1.5",
+                "X-Fern-SDK-Version": "2.1.6",
+                "User-Agent": "@cartesia/cartesia-js/2.1.6",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -109,7 +109,7 @@ export class Datasets {
      *
      * @example
      *     await client.datasets.create({
-     *         name: "string"
+     *         name: "name"
      *     })
      */
     public async create(
@@ -128,8 +128,8 @@ export class Datasets {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.5",
-                "User-Agent": "@cartesia/cartesia-js/2.1.5",
+                "X-Fern-SDK-Version": "2.1.6",
+                "User-Agent": "@cartesia/cartesia-js/2.1.6",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -179,7 +179,7 @@ export class Datasets {
      * @param {Datasets.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.datasets.listFiles("string")
+     *     await client.datasets.listFiles("id")
      */
     public async listFiles(
         id: string,
@@ -197,8 +197,8 @@ export class Datasets {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.5",
-                "User-Agent": "@cartesia/cartesia-js/2.1.5",
+                "X-Fern-SDK-Version": "2.1.6",
+                "User-Agent": "@cartesia/cartesia-js/2.1.6",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -247,9 +247,6 @@ export class Datasets {
      * @param {string} id
      * @param {Cartesia.UploadDatasetFileRequest} request
      * @param {Datasets.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @example
-     *     await client.datasets.uploadFile(fs.createReadStream("/path/to/your/file"), "string", {})
      */
     public async uploadFile(
         file: File | fs.ReadStream | Blob,
@@ -276,8 +273,8 @@ export class Datasets {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.5",
-                "User-Agent": "@cartesia/cartesia-js/2.1.5",
+                "X-Fern-SDK-Version": "2.1.6",
+                "User-Agent": "@cartesia/cartesia-js/2.1.6",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),

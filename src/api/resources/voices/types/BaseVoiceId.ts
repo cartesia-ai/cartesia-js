@@ -5,6 +5,6 @@
 import * as Cartesia from "../../../index";
 
 /**
- * The ID of the base voice associated with the voice, used for features like voice mixing.
+ * Pull in features from a base voice, used for features like voice mixing.
  */
 export type BaseVoiceId = Cartesia.VoiceId;

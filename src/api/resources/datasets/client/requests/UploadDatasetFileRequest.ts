@@ -4,10 +4,6 @@
 
 import * as Cartesia from "../../../../index";
 
-/**
- * @example
- *     {}
- */
 export interface UploadDatasetFileRequest {
     purpose: Cartesia.FilePurpose;
 }
