@@ -58,8 +58,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -168,8 +168,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -235,8 +235,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -302,8 +302,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -368,8 +368,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -414,21 +414,25 @@ export class Voices {
     }
 
     /**
+     * Create a new voice from an existing voice localized to a new language and dialect.
+     *
      * @param {Cartesia.LocalizeVoiceRequest} request
      * @param {Voices.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
      *     await client.voices.localize({
-     *         embedding: [1.1, 1.1],
-     *         language: "en",
-     *         originalSpeakerGender: "male",
-     *         dialect: undefined
+     *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
+     *         name: "Sarah Peninsular Spanish",
+     *         description: "Sarah Voice in Peninsular Spanish",
+     *         language: "es",
+     *         originalSpeakerGender: "female",
+     *         dialect: "pe"
      *     })
      */
     public async localize(
         request: Cartesia.LocalizeVoiceRequest,
         requestOptions?: Voices.RequestOptions,
-    ): Promise<Cartesia.EmbeddingResponse> {
+    ): Promise<Cartesia.VoiceMetadata> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -441,8 +445,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -456,7 +460,7 @@ export class Voices {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return serializers.EmbeddingResponse.parseOrThrow(_response.body, {
+            return serializers.VoiceMetadata.parseOrThrow(_response.body, {
                 unrecognizedObjectKeys: "passthrough",
                 allowUnrecognizedUnionMembers: true,
                 allowUnrecognizedEnumValues: true,
@@ -518,8 +522,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -582,7 +586,7 @@ export class Voices {
     public async create(
         request: Cartesia.CreateVoiceRequest,
         requestOptions?: Voices.RequestOptions,
-    ): Promise<Cartesia.Voice> {
+    ): Promise<Cartesia.VoiceMetadata> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -595,8 +599,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.6",
-                "User-Agent": "@cartesia/cartesia-js/2.1.6",
+                "X-Fern-SDK-Version": "2.1.7",
+                "User-Agent": "@cartesia/cartesia-js/2.1.7",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -610,7 +614,7 @@ export class Voices {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return serializers.Voice.parseOrThrow(_response.body, {
+            return serializers.VoiceMetadata.parseOrThrow(_response.body, {
                 unrecognizedObjectKeys: "passthrough",
                 allowUnrecognizedUnionMembers: true,
                 allowUnrecognizedEnumValues: true,

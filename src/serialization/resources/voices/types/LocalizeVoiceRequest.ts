@@ -5,7 +5,6 @@
 import * as serializers from "../../../index";
 import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
-import { Embedding } from "../../embedding/types/Embedding";
 import { LocalizeTargetLanguage } from "./LocalizeTargetLanguage";
 import { Gender } from "./Gender";
 import { LocalizeDialect } from "./LocalizeDialect";
@@ -14,7 +13,9 @@ export const LocalizeVoiceRequest: core.serialization.ObjectSchema<
     serializers.LocalizeVoiceRequest.Raw,
     Cartesia.LocalizeVoiceRequest
 > = core.serialization.object({
-    embedding: Embedding,
+    voiceId: core.serialization.property("voice_id", core.serialization.string()),
+    name: core.serialization.string(),
+    description: core.serialization.string(),
     language: LocalizeTargetLanguage,
     originalSpeakerGender: core.serialization.property("original_speaker_gender", Gender),
     dialect: LocalizeDialect.optional(),
@@ -22,7 +23,9 @@ export const LocalizeVoiceRequest: core.serialization.ObjectSchema<
 
 export declare namespace LocalizeVoiceRequest {
     export interface Raw {
-        embedding: Embedding.Raw;
+        voice_id: string;
+        name: string;
+        description: string;
         language: LocalizeTargetLanguage.Raw;
         original_speaker_gender: Gender.Raw;
         dialect?: LocalizeDialect.Raw | null;

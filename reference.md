@@ -303,7 +303,7 @@ await client.infill.bytes(fs.createReadStream("/path/to/your/file"), fs.createRe
 
 ```typescript
 await client.tts.bytes({
-    modelId: "sonic-english",
+    modelId: "sonic",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
@@ -364,7 +364,7 @@ await client.tts.bytes({
 
 ```typescript
 const response = await client.tts.sse({
-    modelId: "sonic-english",
+    modelId: "sonic",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
@@ -836,9 +836,24 @@ await client.voices.get("id");
 </dl>
 </details>
 
-<details><summary><code>client.voices.<a href="/src/api/resources/voices/client/Client.ts">localize</a>({ ...params }) -> Cartesia.EmbeddingResponse</code></summary>
+<details><summary><code>client.voices.<a href="/src/api/resources/voices/client/Client.ts">localize</a>({ ...params }) -> Cartesia.VoiceMetadata</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new voice from an existing voice localized to a new language and dialect.
+
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -850,10 +865,12 @@ await client.voices.get("id");
 
 ```typescript
 await client.voices.localize({
-    embedding: [1.1, 1.1],
-    language: "en",
-    originalSpeakerGender: "male",
-    dialect: undefined,
+    voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
+    name: "Sarah Peninsular Spanish",
+    description: "Sarah Voice in Peninsular Spanish",
+    language: "es",
+    originalSpeakerGender: "female",
+    dialect: "pe",
 });
 ```
 
@@ -948,7 +965,7 @@ await client.voices.mix({
 </dl>
 </details>
 
-<details><summary><code>client.voices.<a href="/src/api/resources/voices/client/Client.ts">create</a>({ ...params }) -> Cartesia.Voice</code></summary>
+<details><summary><code>client.voices.<a href="/src/api/resources/voices/client/Client.ts">create</a>({ ...params }) -> Cartesia.VoiceMetadata</code></summary>
 <dl>
 <dd>
 

@@ -5,7 +5,12 @@
 import * as Cartesia from "../../../index";
 
 export interface LocalizeVoiceRequest {
-    embedding: Cartesia.Embedding;
+    /** The ID of the voice to localize. */
+    voiceId: string;
+    /** The name of the new localized voice. */
+    name: string;
+    /** The description of the new localized voice. */
+    description: string;
     language: Cartesia.LocalizeTargetLanguage;
     originalSpeakerGender: Cartesia.Gender;
     dialect?: Cartesia.LocalizeDialect;
