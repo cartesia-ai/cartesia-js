@@ -6,6 +6,7 @@ export * from "./CreateVoiceRequest";
 export * from "./UpdateVoiceRequest";
 export * from "./LocalizeTargetLanguage";
 export * from "./LocalizeEnglishDialect";
+export * from "./LocalizeFrenchDialect";
 export * from "./LocalizeSpanishDialect";
 export * from "./LocalizePortugueseDialect";
 export * from "./LocalizeDialect";

@@ -5,7 +5,7 @@
 import * as Cartesia from "../../../index";
 
 /**
- * The dialect to localize to. Only supported for English (`en`), Spanish (`es`), and Portuguese (`pt`).
+ * The dialect to localize to. Only supported for English (`en`), Spanish (`es`), Portuguese (`pt`), and French (`fr`).
  */
 export type LocalizeDialect =
     /**
@@ -13,10 +13,14 @@ export type LocalizeDialect =
      *  */
     | Cartesia.LocalizeEnglishDialect
     /**
-     * Only available when language is set to Spanish (`es`). Options: Mexican (`mx`) and Peninsular (`pe`).
+     * Only available when language is set to Spanish (`es`). Options: Latin American (`mx`) and Peninsular (`pe`).
      *  */
     | Cartesia.LocalizeSpanishDialect
     /**
      * Only available when language is set to Portuguese (`pt`). Options: Brazilian (`br`) and European Portuguese (`eu`).
      *  */
-    | Cartesia.LocalizePortugueseDialect;
+    | Cartesia.LocalizePortugueseDialect
+    /**
+     * Only available when language is set to French (`fr`). Options: Standard Parisian/Metropolitan (`eu`) and Canadian (`ca`).
+     *  */
+    | Cartesia.LocalizeFrenchDialect;
