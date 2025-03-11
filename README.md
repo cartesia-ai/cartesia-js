@@ -32,7 +32,7 @@ const client = new CartesiaClient({ apiKey: process.env.CARTESIA_API_KEY });
 
 // Call the TTS API's bytes endpoint, which returns binary audio data as an ArrayBuffer.
 const response = await client.tts.bytes({
-    modelId: "sonic-english",
+    modelId: "sonic-2",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
@@ -75,7 +75,7 @@ try {
 
 // Create a stream.
 const response = await websocket.send({
-    modelId: "sonic-english",
+    modelId: "sonic-2",
     voice: {
         mode: "id",
         id: "a0e99841-438c-4a64-b679-ae501e7d6091",
@@ -102,7 +102,7 @@ for await (const message of response.events("message")) {
 ```js
 const contextOptions = {
     contextId: "my-context",
-    modelId: "sonic-english",
+    modelId: "sonic-2",
     voice: {
         mode: "id",
         id: "a0e99841-438c-4a64-b679-ae501e7d6091",
