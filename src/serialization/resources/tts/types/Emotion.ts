@@ -9,22 +9,27 @@ import * as core from "../../../../core";
 export const Emotion: core.serialization.Schema<serializers.Emotion.Raw, Cartesia.Emotion> = core.serialization.enum_([
     "anger:lowest",
     "anger:low",
+    "anger",
     "anger:high",
     "anger:highest",
     "positivity:lowest",
     "positivity:low",
+    "positivity",
     "positivity:high",
     "positivity:highest",
     "surprise:lowest",
     "surprise:low",
+    "surprise",
     "surprise:high",
     "surprise:highest",
     "sadness:lowest",
     "sadness:low",
+    "sadness",
     "sadness:high",
     "sadness:highest",
     "curiosity:lowest",
     "curiosity:low",
+    "curiosity",
     "curiosity:high",
     "curiosity:highest",
 ]);
@@ -33,22 +38,27 @@ export declare namespace Emotion {
     export type Raw =
         | "anger:lowest"
         | "anger:low"
+        | "anger"
         | "anger:high"
         | "anger:highest"
         | "positivity:lowest"
         | "positivity:low"
+        | "positivity"
         | "positivity:high"
         | "positivity:highest"
         | "surprise:lowest"
         | "surprise:low"
+        | "surprise"
         | "surprise:high"
         | "surprise:highest"
         | "sadness:lowest"
         | "sadness:low"
+        | "sadness"
         | "sadness:high"
         | "sadness:highest"
         | "curiosity:lowest"
         | "curiosity:low"
+        | "curiosity"
         | "curiosity:high"
         | "curiosity:highest";
 }

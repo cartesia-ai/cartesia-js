@@ -7,7 +7,7 @@ import * as Cartesia from "../../../../index";
 /**
  * @example
  *     {
- *         modelId: "sonic-preview",
+ *         modelId: "sonic-2",
  *         language: "en",
  *         transcript: "middle segment",
  *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
@@ -20,7 +20,7 @@ import * as Cartesia from "../../../../index";
  *
  * @example
  *     {
- *         modelId: "sonic-preview",
+ *         modelId: "sonic-2",
  *         language: "en",
  *         transcript: "middle segment",
  *         voiceId: "694f9389-aac1-45b6-b726-9d9369183238",

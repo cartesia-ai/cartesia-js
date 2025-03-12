@@ -46,7 +46,7 @@ export class Infill {
      *
      * **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
      *
-     * Only the `sonic-preview` model is supported for infill at this time.
+     * Infilling is only available on `sonic-2` at this time.
      *
      * At least one of `left_audio` or `right_audio` must be provided.
      *
@@ -123,8 +123,8 @@ export class Infill {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.1.9",
-                "User-Agent": "@cartesia/cartesia-js/2.1.9",
+                "X-Fern-SDK-Version": "2.1.10",
+                "User-Agent": "@cartesia/cartesia-js/2.1.10",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),

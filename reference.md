@@ -200,7 +200,7 @@ Generate audio that smoothly connects two existing audio segments. This is usefu
 
 **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
 
-Only the `sonic-preview` model is supported for infill at this time.
+Infilling is only available on `sonic-2` at this time.
 
 At least one of `left_audio` or `right_audio` must be provided.
 
@@ -227,7 +227,7 @@ As with all generative models, there's some inherent variability, but here's som
 
 ```typescript
 await client.infill.bytes(fs.createReadStream("/path/to/your/file"), fs.createReadStream("/path/to/your/file"), {
-    modelId: "sonic-preview",
+    modelId: "sonic-2",
     language: "en",
     transcript: "middle segment",
     voiceId: "694f9389-aac1-45b6-b726-9d9369183238",
@@ -303,7 +303,7 @@ await client.infill.bytes(fs.createReadStream("/path/to/your/file"), fs.createRe
 
 ```typescript
 await client.tts.bytes({
-    modelId: "sonic",
+    modelId: "sonic-2",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
@@ -364,7 +364,7 @@ await client.tts.bytes({
 
 ```typescript
 const response = await client.tts.sse({
-    modelId: "sonic",
+    modelId: "sonic-2",
     transcript: "Hello, world!",
     voice: {
         mode: "id",
