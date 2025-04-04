@@ -2,7 +2,6 @@
 
 README.md
 
-src/wrapper
 src/index.ts
 
 src/core/websocket
