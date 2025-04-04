@@ -3,6 +3,4 @@
 README.md
 
 src/index.ts
-
 src/core/websocket
-src/serialization/resources/tts/types/OutputFormat.ts
