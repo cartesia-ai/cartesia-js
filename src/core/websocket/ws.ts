@@ -6,7 +6,8 @@ const getGlobalWebSocket = (): WebSocket | undefined => {
     if (typeof WebSocket !== "undefined") {
         // @ts-ignore
         return WebSocket;
-    } else if (RUNTIME.type === "node") {
+    }
+    if (RUNTIME.type === "node") {
         return NodeWebSocket as unknown as WebSocket;
     }
     return undefined;

@@ -174,7 +174,7 @@ export default class Websocket {
      * @returns A promise that resolves when the WebSocket is connected.
      * @throws {Error} If the WebSocket fails to connect.
      */
-    async connect(options: Options = {}) {
+    async connect(options: Options & { accessToken?: string } = {}) {
         if (this.#isConnected) {
             throw new Error("WebSocket is already connected.");
         }
@@ -185,10 +185,16 @@ export default class Websocket {
                 const baseUrl = (
                     (await core.Supplier.get(this.options.environment)) ?? environments.CartesiaEnvironment.Production
                 ).replace(/^https?:\/\//, "");
-                const params = {
-                    api_key: await core.Supplier.get(this.options.apiKey),
-                    cartesia_version: this.options.cartesiaVersion,
+                const params: Record<string, string> = {
+                    cartesia_version: this.options.cartesiaVersion || "2024-06-10",
                 };
+                const apiKey = await core.Supplier.get(this.options.apiKey);
+                if (apiKey) {
+                    params.api_key = apiKey;
+                }
+                if (options.accessToken) {
+                    params.access_token = options.accessToken;
+                }
                 return `wss://${baseUrl}/tts/websocket${qs.stringify(params, { addQueryPrefix: true })}`;
             },
             undefined,

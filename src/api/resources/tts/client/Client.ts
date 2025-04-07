@@ -14,6 +14,7 @@ export declare namespace Tts {
     interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
         apiKey?: core.Supplier<string | undefined>;
+        accessToken?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
         cartesiaVersion?: "2024-06-10";
         fetcher?: core.FetchFunction;
