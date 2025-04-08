@@ -174,7 +174,7 @@ export default class Websocket {
      * @returns A promise that resolves when the WebSocket is connected.
      * @throws {Error} If the WebSocket fails to connect.
      */
-    async connect(options: Options & { accessToken?: string } = {}) {
+    async connect(options: Options = {}) {
         if (this.#isConnected) {
             throw new Error("WebSocket is already connected.");
         }

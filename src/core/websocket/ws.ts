@@ -23,6 +23,7 @@ export type ErrorEvent = Events.ErrorEvent;
 export type CloseEvent = Events.CloseEvent;
 
 export type Options = {
+    accessToken?: string;
     WebSocket?: any;
     maxReconnectionDelay?: number;
     minReconnectionDelay?: number;
