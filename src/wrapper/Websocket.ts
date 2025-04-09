@@ -185,10 +185,15 @@ export default class Websocket {
                 const baseUrl = (
                     (await core.Supplier.get(this.options.environment)) ?? environments.CartesiaEnvironment.Production
                 ).replace(/^https?:\/\//, "");
-                const params = {
-                    api_key: await core.Supplier.get(this.options.apiKey),
-                    cartesia_version: this.options.cartesiaVersion,
+                const params: Record<string, string> = {
+                    cartesia_version: this.options.cartesiaVersion || "2024-06-10",
                 };
+                const apiKey = await core.Supplier.get(this.options.apiKey);
+                if (apiKey) {
+                    params.api_key = apiKey;
+                } else if (options.accessToken) {
+                    params.access_token = options.accessToken;
+                }
                 return `wss://${baseUrl}/tts/websocket${qs.stringify(params, { addQueryPrefix: true })}`;
             },
             undefined,

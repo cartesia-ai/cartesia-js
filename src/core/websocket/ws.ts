@@ -6,7 +6,8 @@ const getGlobalWebSocket = (): WebSocket | undefined => {
     if (typeof WebSocket !== "undefined") {
         // @ts-ignore
         return WebSocket;
-    } else if (RUNTIME.type === "node") {
+    }
+    if (RUNTIME.type === "node") {
         return NodeWebSocket as unknown as WebSocket;
     }
     return undefined;
@@ -22,6 +23,9 @@ export type ErrorEvent = Events.ErrorEvent;
 export type CloseEvent = Events.CloseEvent;
 
 export type Options = {
+    // NB: this is the only place in TS SDK v2.2.0 that uses Access Tokens,
+    // which will be more broadly available in TS SDK v3.x
+    accessToken?: string;
     WebSocket?: any;
     maxReconnectionDelay?: number;
     minReconnectionDelay?: number;
