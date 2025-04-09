@@ -1,7 +1,7 @@
 export * as apiStatus from "./apiStatus";
 export * from "./apiStatus/types";
-export * as datasets from "./datasets";
-export * from "./datasets/types";
+export * as auth from "./auth";
+export * from "./auth/types";
 export * as embedding from "./embedding";
 export * from "./embedding/types";
 export * as tts from "./tts";
@@ -11,7 +11,6 @@ export * from "./voiceChanger/types";
 export * as voices from "./voices";
 export * from "./voices/types";
 export * as infill from "./infill";
-export * from "./datasets/client/requests";
 export * from "./infill/client/requests";
 export * from "./voiceChanger/client/requests";
 export * from "./voices/client/requests";

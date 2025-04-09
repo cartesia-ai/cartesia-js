@@ -42,11 +42,26 @@ await client.apiStatus.get();
 </dl>
 </details>
 
-## Datasets
+## Auth
 
-<details><summary><code>client.datasets.<a href="/src/api/resources/datasets/client/Client.ts">list</a>() -> Cartesia.PaginatedDatasets</code></summary>
+<details><summary><code>client.auth.<a href="/src/api/resources/auth/client/Client.ts">accessToken</a>({ ...params }) -> Cartesia.TokenResponse</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a new Access Token for the client. These tokens are short-lived and should be used to make requests to the API from authenticated clients.
+
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -57,48 +72,11 @@ await client.apiStatus.get();
 <dd>
 
 ```typescript
-await client.datasets.list();
-```
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**requestOptions:** `Datasets.RequestOptions`
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.datasets.<a href="/src/api/resources/datasets/client/Client.ts">create</a>({ ...params }) -> Cartesia.Dataset</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```typescript
-await client.datasets.create({
-    name: "name",
+await client.auth.accessToken({
+    grants: {
+        tts: true,
+    },
+    expiresIn: 60,
 });
 ```
 
@@ -115,7 +93,7 @@ await client.datasets.create({
 <dl>
 <dd>
 
-**request:** `Cartesia.CreateDatasetRequest`
+**request:** `Cartesia.TokenRequest`
 
 </dd>
 </dl>
@@ -123,55 +101,7 @@ await client.datasets.create({
 <dl>
 <dd>
 
-**requestOptions:** `Datasets.RequestOptions`
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.datasets.<a href="/src/api/resources/datasets/client/Client.ts">listFiles</a>(id) -> Cartesia.PaginatedDatasetFiles</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```typescript
-await client.datasets.listFiles("id");
-```
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `string`
-
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**requestOptions:** `Datasets.RequestOptions`
+**requestOptions:** `Auth.RequestOptions`
 
 </dd>
 </dl>

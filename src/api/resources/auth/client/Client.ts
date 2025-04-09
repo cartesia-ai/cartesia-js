@@ -6,9 +6,10 @@ import * as environments from "../../../../environments";
 import * as core from "../../../../core";
 import * as Cartesia from "../../../index";
 import * as serializers from "../../../../serialization/index";
+import urlJoin from "url-join";
 import * as errors from "../../../../errors/index";
 
-export declare namespace ApiStatus {
+export declare namespace Auth {
     export interface Options {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
@@ -33,22 +34,35 @@ export declare namespace ApiStatus {
     }
 }
 
-export class ApiStatus {
-    constructor(protected readonly _options: ApiStatus.Options = {}) {}
+export class Auth {
+    constructor(protected readonly _options: Auth.Options = {}) {}
 
     /**
-     * @param {ApiStatus.RequestOptions} requestOptions - Request-specific configuration.
+     * Generates a new Access Token for the client. These tokens are short-lived and should be used to make requests to the API from authenticated clients.
+     *
+     * @param {Cartesia.TokenRequest} request
+     * @param {Auth.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.apiStatus.get()
+     *     await client.auth.accessToken({
+     *         grants: {
+     *             tts: true
+     *         },
+     *         expiresIn: 60
+     *     })
      */
-    public async get(requestOptions?: ApiStatus.RequestOptions): Promise<Cartesia.ApiInfo> {
+    public async accessToken(
+        request: Cartesia.TokenRequest,
+        requestOptions?: Auth.RequestOptions,
+    ): Promise<Cartesia.TokenResponse> {
         const _response = await (this._options.fetcher ?? core.fetcher)({
-            url:
+            url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
-                (await core.Supplier.get(this._options.environment)) ??
-                environments.CartesiaEnvironment.Production,
-            method: "GET",
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.CartesiaEnvironment.Production,
+                "access-token",
+            ),
+            method: "POST",
             headers: {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
@@ -62,12 +76,13 @@ export class ApiStatus {
             },
             contentType: "application/json",
             requestType: "json",
+            body: serializers.TokenRequest.jsonOrThrow(request, { unrecognizedObjectKeys: "strip" }),
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return serializers.ApiInfo.parseOrThrow(_response.body, {
+            return serializers.TokenResponse.parseOrThrow(_response.body, {
                 unrecognizedObjectKeys: "passthrough",
                 allowUnrecognizedUnionMembers: true,
                 allowUnrecognizedEnumValues: true,
@@ -90,7 +105,7 @@ export class ApiStatus {
                     body: _response.error.rawBody,
                 });
             case "timeout":
-                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling GET /.");
+                throw new errors.CartesiaTimeoutError("Timeout exceeded when calling POST /access-token.");
             case "unknown":
                 throw new errors.CartesiaError({
                     message: _response.error.errorMessage,

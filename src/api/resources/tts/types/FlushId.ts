@@ -3,8 +3,8 @@
  */
 
 /**
- * A unique identifier for the flush. You can use any unique identifier, like a UUID or human ID.
+ * An identifier corresponding to the number of flush commands that have been sent for this context. Starts at 1.
  *
- * Some customers use unique identifiers from their own systems (such as conversation IDs) as flush IDs.
+ * This can be used to map chunks of audio to certain transcript submissions.
  */
 export type FlushId = number;

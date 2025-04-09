@@ -5,7 +5,7 @@
 import * as environments from "./environments";
 import * as core from "./core";
 import { ApiStatus } from "./api/resources/apiStatus/client/Client";
-import { Datasets } from "./api/resources/datasets/client/Client";
+import { Auth } from "./api/resources/auth/client/Client";
 import { Infill } from "./api/resources/infill/client/Client";
 import { Tts } from "./api/resources/tts/client/Client";
 import { VoiceChanger } from "./api/resources/voiceChanger/client/Client";
@@ -38,7 +38,7 @@ export declare namespace CartesiaClient {
 
 export class CartesiaClient {
     protected _apiStatus: ApiStatus | undefined;
-    protected _datasets: Datasets | undefined;
+    protected _auth: Auth | undefined;
     protected _infill: Infill | undefined;
     protected _tts: Tts | undefined;
     protected _voiceChanger: VoiceChanger | undefined;
@@ -50,8 +50,8 @@ export class CartesiaClient {
         return (this._apiStatus ??= new ApiStatus(this._options));
     }
 
-    public get datasets(): Datasets {
-        return (this._datasets ??= new Datasets(this._options));
+    public get auth(): Auth {
+        return (this._auth ??= new Auth(this._options));
     }
 
     public get infill(): Infill {

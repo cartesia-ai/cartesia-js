@@ -1,7 +1,7 @@
 export * as apiStatus from "./apiStatus";
 export * from "./apiStatus/types";
-export * as datasets from "./datasets";
-export * from "./datasets/types";
+export * as auth from "./auth";
+export * from "./auth/types";
 export * as embedding from "./embedding";
 export * from "./embedding/types";
 export * as tts from "./tts";

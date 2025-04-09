@@ -5,7 +5,7 @@
 import * as Cartesia from "../../../index";
 
 export interface GenerationRequest {
-    /** The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models. */
+    /** The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models. */
     modelId: string;
     /** The transcript to generate speech for. This can be a string or an iterator over strings. */
     transcript?: unknown;
@@ -29,4 +29,6 @@ export interface GenerationRequest {
     addTimestamps?: boolean;
     /** Whether to return phoneme-level timestamps. */
     addPhonemeTimestamps?: boolean;
+    /** Whether to use the original transcript for timestamps. */
+    useOriginalTimestamps?: boolean;
 }

@@ -5,7 +5,7 @@
 import * as Cartesia from "../../../index";
 
 export interface TtsRequest {
-    /** The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models. */
+    /** The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models. */
     modelId: string;
     transcript: string;
     voice: Cartesia.TtsRequestVoiceSpecifier;
