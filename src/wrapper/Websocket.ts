@@ -188,13 +188,11 @@ export default class Websocket {
                 const params: Record<string, string> = {
                     cartesia_version: this.options.cartesiaVersion || "2024-06-10",
                 };
-                if (options.accessToken) {
+                const apiKey = await core.Supplier.get(this.options.apiKey);
+                if (apiKey) {
+                    params.api_key = apiKey;
+                } else if (options.accessToken) {
                     params.access_token = options.accessToken;
-                } else {
-                    const apiKey = await core.Supplier.get(this.options.apiKey);
-                    if (apiKey) {
-                        params.api_key = apiKey;
-                    }
                 }
                 return `wss://${baseUrl}/tts/websocket${qs.stringify(params, { addQueryPrefix: true })}`;
             },
