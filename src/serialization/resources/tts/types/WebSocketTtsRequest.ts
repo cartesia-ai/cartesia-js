@@ -29,6 +29,7 @@ export const WebSocketTtsRequest: core.serialization.ObjectSchema<
     ),
     continue: core.serialization.boolean().optional(),
     contextId: core.serialization.property("context_id", core.serialization.string().optional()),
+    textCfg: core.serialization.property("text_cfg", core.serialization.number().optional()),
 });
 
 export declare namespace WebSocketTtsRequest {
@@ -44,5 +45,6 @@ export declare namespace WebSocketTtsRequest {
         use_original_timestamps?: boolean | null;
         continue?: boolean | null;
         context_id?: string | null;
+        text_cfg?: number | null;
     }
 }

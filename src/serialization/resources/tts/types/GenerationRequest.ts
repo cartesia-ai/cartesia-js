@@ -20,6 +20,7 @@ export const GenerationRequest: core.serialization.ObjectSchema<
     language: SupportedLanguage.optional(),
     outputFormat: core.serialization.property("output_format", WebSocketRawOutputFormat),
     duration: core.serialization.number().optional(),
+    textCfg: core.serialization.property("text_cfg", core.serialization.number().optional()),
     contextId: core.serialization.property("context_id", ContextId.optional()),
     continue: core.serialization.boolean().optional(),
     flush: core.serialization.boolean().optional(),
@@ -42,6 +43,7 @@ export declare namespace GenerationRequest {
         language?: SupportedLanguage.Raw | null;
         output_format: WebSocketRawOutputFormat.Raw;
         duration?: number | null;
+        text_cfg?: number | null;
         context_id?: ContextId.Raw | null;
         continue?: boolean | null;
         flush?: boolean | null;

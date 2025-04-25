@@ -49,7 +49,7 @@ export interface CloneVoiceRequest {
      * Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
      *
      */
-    enhance: boolean;
+    enhance?: boolean;
     /**
      * Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
      *
