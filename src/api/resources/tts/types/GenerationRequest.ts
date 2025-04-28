@@ -31,6 +31,14 @@ export interface GenerationRequest {
      * If not specified, this defaults to `false`.
      */
     continue?: boolean;
+    /**
+     * The maximum time in milliseconds to buffer text before starting generation. Values between [0, 1000]ms are supported. Defaults to 0 (no buffering).
+     *
+     * When set, the model will buffer incoming text chunks until it's confident it has enough context to generate high-quality speech, or the buffer delay elapses, whichever comes first. Without this option set, the model will kick off generations immediately, ceding control of buffering to the user.
+     *
+     * Use this to balance responsiveness with higher quality speech generation, which often benefits from having more context.
+     */
+    maxBufferDelayMs?: number;
     /** Whether to flush the context. */
     flush?: boolean;
     /** Whether to return word-level timestamps. */

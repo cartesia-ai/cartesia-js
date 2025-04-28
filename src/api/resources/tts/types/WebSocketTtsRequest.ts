@@ -17,5 +17,6 @@ export interface WebSocketTtsRequest {
     useOriginalTimestamps?: boolean;
     continue?: boolean;
     contextId?: string;
+    maxBufferDelayMs?: number;
     textCfg?: number;
 }

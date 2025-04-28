@@ -23,6 +23,7 @@ export const GenerationRequest: core.serialization.ObjectSchema<
     textCfg: core.serialization.property("text_cfg", core.serialization.number().optional()),
     contextId: core.serialization.property("context_id", ContextId.optional()),
     continue: core.serialization.boolean().optional(),
+    maxBufferDelayMs: core.serialization.property("max_buffer_delay_ms", core.serialization.number().optional()),
     flush: core.serialization.boolean().optional(),
     addTimestamps: core.serialization.property("add_timestamps", core.serialization.boolean().optional()),
     addPhonemeTimestamps: core.serialization.property(
@@ -46,6 +47,7 @@ export declare namespace GenerationRequest {
         text_cfg?: number | null;
         context_id?: ContextId.Raw | null;
         continue?: boolean | null;
+        max_buffer_delay_ms?: number | null;
         flush?: boolean | null;
         add_timestamps?: boolean | null;
         add_phoneme_timestamps?: boolean | null;
