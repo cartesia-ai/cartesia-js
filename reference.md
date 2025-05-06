@@ -567,7 +567,6 @@ await client.voices.clone(fs.createReadStream("/path/to/your/file"), {
     description: "Copied from Cartesia docs",
     mode: "stability",
     language: "en",
-    enhance: true,
 });
 ```
 

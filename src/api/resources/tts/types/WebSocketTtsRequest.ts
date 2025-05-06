@@ -18,5 +18,5 @@ export interface WebSocketTtsRequest {
     continue?: boolean;
     contextId?: string;
     maxBufferDelayMs?: number;
-    textCfg?: number;
+    speed?: Cartesia.ModelSpeed;
 }

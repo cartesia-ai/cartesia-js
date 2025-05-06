@@ -8,6 +8,7 @@ import * as core from "../../../../core";
 import { TtsRequestVoiceSpecifier } from "./TtsRequestVoiceSpecifier";
 import { SupportedLanguage } from "./SupportedLanguage";
 import { OutputFormat } from "./OutputFormat";
+import { ModelSpeed } from "./ModelSpeed";
 
 export const TtsRequest: core.serialization.ObjectSchema<serializers.TtsRequest.Raw, Cartesia.TtsRequest> =
     core.serialization.object({
@@ -17,7 +18,7 @@ export const TtsRequest: core.serialization.ObjectSchema<serializers.TtsRequest.
         language: SupportedLanguage.optional(),
         outputFormat: core.serialization.property("output_format", OutputFormat),
         duration: core.serialization.number().optional(),
-        textCfg: core.serialization.property("text_cfg", core.serialization.number().optional()),
+        speed: ModelSpeed.optional(),
     });
 
 export declare namespace TtsRequest {
@@ -28,6 +29,6 @@ export declare namespace TtsRequest {
         language?: SupportedLanguage.Raw | null;
         output_format: OutputFormat.Raw;
         duration?: number | null;
-        text_cfg?: number | null;
+        speed?: ModelSpeed.Raw | null;
     }
 }

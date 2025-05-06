@@ -7,6 +7,7 @@ import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
 import { OutputFormat } from "./OutputFormat";
 import { TtsRequestVoiceSpecifier } from "./TtsRequestVoiceSpecifier";
+import { ModelSpeed } from "./ModelSpeed";
 
 export const WebSocketTtsRequest: core.serialization.ObjectSchema<
     serializers.WebSocketTtsRequest.Raw,
@@ -30,7 +31,7 @@ export const WebSocketTtsRequest: core.serialization.ObjectSchema<
     continue: core.serialization.boolean().optional(),
     contextId: core.serialization.property("context_id", core.serialization.string().optional()),
     maxBufferDelayMs: core.serialization.property("max_buffer_delay_ms", core.serialization.number().optional()),
-    textCfg: core.serialization.property("text_cfg", core.serialization.number().optional()),
+    speed: ModelSpeed.optional(),
 });
 
 export declare namespace WebSocketTtsRequest {
@@ -47,6 +48,6 @@ export declare namespace WebSocketTtsRequest {
         continue?: boolean | null;
         context_id?: string | null;
         max_buffer_delay_ms?: number | null;
-        text_cfg?: number | null;
+        speed?: ModelSpeed.Raw | null;
     }
 }

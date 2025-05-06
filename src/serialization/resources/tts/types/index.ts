@@ -1,5 +1,6 @@
 export * from "./ContextId";
 export * from "./FlushId";
+export * from "./ModelSpeed";
 export * from "./WebSocketBaseResponse";
 export * from "./WebSocketResponse";
 export * from "./WebSocketErrorResponse";

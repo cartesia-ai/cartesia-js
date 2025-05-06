@@ -10,8 +10,7 @@ import * as Cartesia from "../../../../index";
  *         name: "A high-stability cloned voice",
  *         description: "Copied from Cartesia docs",
  *         mode: "stability",
- *         language: "en",
- *         enhance: true
+ *         language: "en"
  *     }
  *
  * @example
@@ -19,9 +18,7 @@ import * as Cartesia from "../../../../index";
  *         name: "A high-similarity cloned voice",
  *         description: "Copied from Cartesia docs",
  *         mode: "similarity",
- *         language: "en",
- *         transcript: "A transcript of the words spoken in the audio clip.",
- *         enhance: false
+ *         language: "en"
  *     }
  */
 export interface CloneVoiceRequest {
@@ -46,13 +43,13 @@ export interface CloneVoiceRequest {
      */
     mode: Cartesia.CloneMode;
     /**
-     * Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+     * Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
      *
      */
     enhance?: boolean;
     /**
-     * Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
+     * Optional base voice ID that the cloned voice is derived from.
      *
      */
-    transcript?: string;
+    baseVoiceId?: Cartesia.VoiceId;
 }

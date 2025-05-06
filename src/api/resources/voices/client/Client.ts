@@ -58,8 +58,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -119,8 +119,7 @@ export class Voices {
      *         name: "A high-stability cloned voice",
      *         description: "Copied from Cartesia docs",
      *         mode: "stability",
-     *         language: "en",
-     *         enhance: true
+     *         language: "en"
      *     })
      *
      * @example
@@ -128,9 +127,7 @@ export class Voices {
      *         name: "A high-similarity cloned voice",
      *         description: "Copied from Cartesia docs",
      *         mode: "similarity",
-     *         language: "en",
-     *         transcript: "A transcript of the words spoken in the audio clip.",
-     *         enhance: false
+     *         language: "en"
      *     })
      */
     public async clone(
@@ -154,8 +151,11 @@ export class Voices {
             _request.append("enhance", request.enhance.toString());
         }
 
-        if (request.transcript != null) {
-            _request.append("transcript", request.transcript);
+        if (request.baseVoiceId != null) {
+            _request.append(
+                "base_voice_id",
+                serializers.VoiceId.jsonOrThrow(request.baseVoiceId, { unrecognizedObjectKeys: "strip" }),
+            );
         }
 
         const _maybeEncodedRequest = await _request.getRequest();
@@ -171,8 +171,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -238,8 +238,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -305,8 +305,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -371,8 +371,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -448,8 +448,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -525,8 +525,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),
@@ -602,8 +602,8 @@ export class Voices {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.2",
-                "User-Agent": "@cartesia/cartesia-js/2.2.2",
+                "X-Fern-SDK-Version": "2.1.9",
+                "User-Agent": "@cartesia/cartesia-js/2.1.9",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),

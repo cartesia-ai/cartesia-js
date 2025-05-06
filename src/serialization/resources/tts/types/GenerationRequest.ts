@@ -8,6 +8,7 @@ import * as core from "../../../../core";
 import { TtsRequestVoiceSpecifier } from "./TtsRequestVoiceSpecifier";
 import { SupportedLanguage } from "./SupportedLanguage";
 import { WebSocketRawOutputFormat } from "./WebSocketRawOutputFormat";
+import { ModelSpeed } from "./ModelSpeed";
 import { ContextId } from "./ContextId";
 
 export const GenerationRequest: core.serialization.ObjectSchema<
@@ -20,7 +21,7 @@ export const GenerationRequest: core.serialization.ObjectSchema<
     language: SupportedLanguage.optional(),
     outputFormat: core.serialization.property("output_format", WebSocketRawOutputFormat),
     duration: core.serialization.number().optional(),
-    textCfg: core.serialization.property("text_cfg", core.serialization.number().optional()),
+    speed: ModelSpeed.optional(),
     contextId: core.serialization.property("context_id", ContextId.optional()),
     continue: core.serialization.boolean().optional(),
     maxBufferDelayMs: core.serialization.property("max_buffer_delay_ms", core.serialization.number().optional()),
@@ -44,7 +45,7 @@ export declare namespace GenerationRequest {
         language?: SupportedLanguage.Raw | null;
         output_format: WebSocketRawOutputFormat.Raw;
         duration?: number | null;
-        text_cfg?: number | null;
+        speed?: ModelSpeed.Raw | null;
         context_id?: ContextId.Raw | null;
         continue?: boolean | null;
         max_buffer_delay_ms?: number | null;
