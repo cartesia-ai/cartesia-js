@@ -154,9 +154,9 @@ async function streamingSTTExample() {
 
     const sttWs = client.stt.websocket({
         model: "ink-whisper",
-        language: "en",
-        encoding: "pcm_s16le",
-        sampleRate: 16000,
+        language: "en",           // Must match the language of your audio
+        encoding: "pcm_s16le",    // Must match your audio's encoding format
+        sampleRate: 16000,        // Must match your audio's sample rate
     });
 
     // Concurrent audio sending
