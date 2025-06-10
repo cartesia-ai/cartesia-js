@@ -25,11 +25,22 @@ export default class Websocket {
     #sampleRate: number;
     #container: string;
     #encoding: string;
+    #connectionPromise?: Promise<EmitteryCallbacks<ConnectionEventData>>;
 
     constructor({ sampleRate, container, encoding }: WebSocketOptions, private readonly options: Tts.Options) {
         this.#sampleRate = sampleRate;
         this.#container = container ?? "raw";
         this.#encoding = encoding ?? "pcm_f32le";
+    }
+
+    async #ensureConnected(): Promise<void> {
+        if (this.#isConnected) return;
+        
+        if (!this.#connectionPromise) {
+            this.#connectionPromise = this.connect();
+        }
+        
+        await this.#connectionPromise;
     }
 
     /**
@@ -51,9 +62,7 @@ export default class Websocket {
             timestamps: WordTimestamps;
         }> & { source: Source; stop: unknown }
     > {
-        if (!this.#isConnected) {
-            throw new Error("Not connected to WebSocket. Call .connect() first.");
-        }
+        await this.#ensureConnected();
 
         if (!inputs.contextId) {
             inputs.contextId = this.#generateId();
@@ -129,10 +138,8 @@ export default class Websocket {
         };
     }
 
-    continue(inputs: WebSocketTtsRequest) {
-        if (!this.#isConnected) {
-            throw new Error("Not connected to WebSocket. Call .connect() first.");
-        }
+    async continue(inputs: WebSocketTtsRequest): Promise<void> {
+        await this.#ensureConnected();
 
         if (!inputs.contextId) {
             throw new Error("context_id is required to continue a context.");

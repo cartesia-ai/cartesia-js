@@ -69,13 +69,6 @@ const websocket = cartesia.tts.websocket({
     sampleRate: 44100,
 });
 
-try {
-    await websocket.connect();
-} catch (error) {
-    console.error(`Failed to connect to Cartesia: ${error}`);
-    throw error;
-}
-
 // Create a stream.
 const response = await websocket.send({
     modelId: "sonic-2",
@@ -146,6 +139,64 @@ const player = new WebPlayer();
 await player.play(response.source);
 
 console.log("Done playing.");
+```
+
+## Speech-to-Text (STT)
+
+```typescript
+import { CartesiaClient } from "@cartesia/cartesia-js";
+import fs from "fs";
+
+const client = new CartesiaClient({
+    apiKey: process.env.CARTESIA_API_KEY,
+});
+
+// Create STT WebSocket connection
+const sttWs = client.stt.websocket({
+    model: "ink-whisper",
+    language: "en",
+    encoding: "pcm_s16le",
+    sampleRate: 16000,
+});
+
+// Set up message handler
+await sttWs.onMessage((result) => {
+    if (result.type === "transcript") {
+        const status = result.isFinal ? "FINAL" : "INTERIM";
+        console.log(`[${status}] ${result.text}`);
+        if (result.duration) {
+            console.log(`Duration: ${result.duration.toFixed(2)}s`);
+        }
+    } else if (result.type === "flush_done") {
+        console.log("Flush completed");
+        await sttWs.done(); // Send done command
+    } else if (result.type === "done") {
+        console.log("Session complete");
+    } else if (result.type === "error") {
+        console.error(`Error: ${result.message}`);
+    }
+});
+
+// Load and send audio data
+const audioBuffer = fs.readFileSync("audio.wav");
+const chunkSize = 1600; // ~100ms at 16kHz
+const audioChunks = [];
+
+for (let i = 0; i < audioBuffer.length; i += chunkSize) {
+    const chunk = audioBuffer.slice(i, i + chunkSize);
+    audioChunks.push(chunk.buffer);
+}
+
+// Send audio chunks
+for (const chunk of audioChunks) {
+    await sttWs.send(chunk);
+}
+
+// Finalize transcription
+await sttWs.finalize();
+
+// Disconnect when done
+sttWs.disconnect();
 ```
 
 ## Request And Response Types

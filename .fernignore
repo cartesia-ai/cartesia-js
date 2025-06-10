@@ -13,3 +13,6 @@ src/api/resources/tts/client/Client.ts
 src/api/resources/voiceChanger/client/Client.ts
 src/core/fetcher/Fetcher.ts
 src/core/fetcher/getResponseBody.ts
+
+# Custom STT client implementation
+src/api/resources/stt/client
