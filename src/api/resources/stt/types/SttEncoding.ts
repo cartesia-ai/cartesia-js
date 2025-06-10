@@ -8,7 +8,7 @@
  * Currently supported:
  * - `pcm_s16le` - 16-bit signed integer PCM, little-endian
  *
- * Future formats may include pcm_f32le, pcm_mulaw, etc.
+ * Support for other formats will be added in the future.
  */
 export type SttEncoding = "pcm_s16le";
 export const SttEncoding = {

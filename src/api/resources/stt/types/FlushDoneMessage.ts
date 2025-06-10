@@ -3,7 +3,7 @@
  */
 
 /**
- * Acknowledgment message sent in response to a "finalize" command, indicating that all buffered audio has been flushed and processed.
+ * Acknowledgment message sent in response to a `finalize` command, indicating that all buffered audio has been flushed and processed.
  */
 export interface FlushDoneMessage {
     /** Unique identifier for this transcription session. */
