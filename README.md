@@ -145,58 +145,100 @@ console.log("Done playing.");
 
 ```typescript
 import { CartesiaClient } from "@cartesia/cartesia-js";
-import fs from "fs";
+import fs from "node:fs";
 
-const client = new CartesiaClient({
-    apiKey: process.env.CARTESIA_API_KEY,
-});
+async function streamingSTTExample() {
+    const client = new CartesiaClient({
+        apiKey: process.env.CARTESIA_API_KEY,
+    });
 
-// Create STT WebSocket connection
-const sttWs = client.stt.websocket({
-    model: "ink-whisper",
-    language: "en",
-    encoding: "pcm_s16le",
-    sampleRate: 16000,
-});
+    const sttWs = client.stt.websocket({
+        model: "ink-whisper",
+        language: "en",           // Must match the language of your audio
+        encoding: "pcm_s16le",    // Must match your audio's encoding format (only pcm_s16le is supported currently)
+        sampleRate: 16000,        // Must match your audio's sample rate (only 16000 is supported currently)
+    });
 
-// Set up message handler
-await sttWs.onMessage((result) => {
-    if (result.type === "transcript") {
-        const status = result.isFinal ? "FINAL" : "INTERIM";
-        console.log(`[${status}] ${result.text}`);
-        if (result.duration) {
-            console.log(`Duration: ${result.duration.toFixed(2)}s`);
+    // Concurrent audio sending
+    async function sendAudio() {
+        try {
+            const audioBuffer = fs.readFileSync("audio.wav");
+            const chunkSize = 3200; // ~200ms chunks for more realistic streaming
+
+            console.log("Starting audio stream...");
+
+            for (let i = 0; i < audioBuffer.length; i += chunkSize) {
+                const chunk = audioBuffer.subarray(i, i + chunkSize);
+                const arrayBuffer = chunk.buffer.slice(
+                    chunk.byteOffset,
+                    chunk.byteOffset + chunk.byteLength,
+                );
+
+                await sttWs.send(arrayBuffer);
+                console.log(`Sent chunk ${Math.floor(i / chunkSize) + 1}`);
+
+                // Simulate real-time audio capture delay
+                await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+
+            await sttWs.finalize();
+            console.log("Audio streaming completed");
+        } catch (error) {
+            console.error("Error sending audio:", error);
         }
-    } else if (result.type === "flush_done") {
-        console.log("Flush completed");
-        await sttWs.done(); // Send done command
-    } else if (result.type === "done") {
-        console.log("Session complete");
-    } else if (result.type === "error") {
-        console.error(`Error: ${result.message}`);
     }
-});
 
-// Load and send audio data
-const audioBuffer = fs.readFileSync("audio.wav");
-const chunkSize = 1600; // ~100ms at 16kHz
-const audioChunks = [];
+    // Concurrent transcript receiving
+    async function receiveTranscripts(): Promise<string> {
+        return new Promise((resolve) => {
+            let fullTranscript = "";
 
-for (let i = 0; i < audioBuffer.length; i += chunkSize) {
-    const chunk = audioBuffer.slice(i, i + chunkSize);
-    audioChunks.push(chunk.buffer);
+            sttWs.onMessage((result) => {
+                if (result.type === "transcript") {
+                    const status = result.isFinal ? "FINAL" : "INTERIM";
+                    console.log(`[${status}] "${result.text}"`);
+
+                    if (result.isFinal) {
+                        fullTranscript += `${result.text} `;
+                    }
+                } else if (result.type === "flush_done") {
+                    console.log("Flush completed - sending done command");
+                    sttWs.done().catch(console.error);
+                } else if (result.type === "done") {
+                    console.log("Transcription completed");
+                    resolve(fullTranscript.trim());
+                } else if (result.type === "error") {
+                    console.error(`Error: ${result.message}`);
+                    resolve("");
+                }
+            });
+        });
+    }
+
+    try {
+        console.log("Starting STT processing...");
+
+        // Run audio sending and transcript receiving concurrently
+        const [, finalTranscript] = await Promise.all([
+            sendAudio(),
+            receiveTranscripts(),
+        ]);
+
+        console.log(`\nFinal transcript: ${finalTranscript}`);
+
+        // Clean up
+        sttWs.disconnect();
+
+        return finalTranscript;
+    } catch (error) {
+        console.error("STT processing error:", error);
+        sttWs.disconnect();
+        throw error;
+    }
 }
 
-// Send audio chunks
-for (const chunk of audioChunks) {
-    await sttWs.send(chunk);
-}
-
-// Finalize transcription
-await sttWs.finalize();
-
-// Disconnect when done
-sttWs.disconnect();
+// Run the example
+streamingSTTExample().catch(console.error);
 ```
 
 ## Request And Response Types
