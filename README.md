@@ -145,7 +145,7 @@ console.log("Done playing.");
 
 ```typescript
 import { CartesiaClient } from "@cartesia/cartesia-js";
-import fs from "fs";
+import fs from "node:fs";
 
 async function streamingSTTExample() {
     const client = new CartesiaClient({
@@ -155,8 +155,8 @@ async function streamingSTTExample() {
     const sttWs = client.stt.websocket({
         model: "ink-whisper",
         language: "en",           // Must match the language of your audio
-        encoding: "pcm_s16le",    // Must match your audio's encoding format
-        sampleRate: 16000,        // Must match your audio's sample rate
+        encoding: "pcm_s16le",    // Must match your audio's encoding format (only pcm_s16le is supported currently)
+        sampleRate: 16000,        // Must match your audio's sample rate (only 16000 is supported currently)
     });
 
     // Concurrent audio sending
@@ -164,20 +164,23 @@ async function streamingSTTExample() {
         try {
             const audioBuffer = fs.readFileSync("audio.wav");
             const chunkSize = 3200; // ~200ms chunks for more realistic streaming
-            
+
             console.log("Starting audio stream...");
-            
+
             for (let i = 0; i < audioBuffer.length; i += chunkSize) {
-                const chunk = audioBuffer.slice(i, i + chunkSize);
-                const arrayBuffer = chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength);
-                
+                const chunk = audioBuffer.subarray(i, i + chunkSize);
+                const arrayBuffer = chunk.buffer.slice(
+                    chunk.byteOffset,
+                    chunk.byteOffset + chunk.byteLength,
+                );
+
                 await sttWs.send(arrayBuffer);
                 console.log(`Sent chunk ${Math.floor(i / chunkSize) + 1}`);
-                
+
                 // Simulate real-time audio capture delay
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise((resolve) => setTimeout(resolve, 100));
             }
-            
+
             await sttWs.finalize();
             console.log("Audio streaming completed");
         } catch (error) {
@@ -189,14 +192,14 @@ async function streamingSTTExample() {
     async function receiveTranscripts(): Promise<string> {
         return new Promise((resolve) => {
             let fullTranscript = "";
-            
+
             sttWs.onMessage((result) => {
                 if (result.type === "transcript") {
                     const status = result.isFinal ? "FINAL" : "INTERIM";
                     console.log(`[${status}] "${result.text}"`);
-                    
+
                     if (result.isFinal) {
-                        fullTranscript += result.text + " ";
+                        fullTranscript += `${result.text} `;
                     }
                 } else if (result.type === "flush_done") {
                     console.log("Flush completed - sending done command");
@@ -214,18 +217,18 @@ async function streamingSTTExample() {
 
     try {
         console.log("Starting STT processing...");
-        
+
         // Run audio sending and transcript receiving concurrently
         const [, finalTranscript] = await Promise.all([
             sendAudio(),
-            receiveTranscripts()
+            receiveTranscripts(),
         ]);
-        
+
         console.log(`\nFinal transcript: ${finalTranscript}`);
-        
+
         // Clean up
         sttWs.disconnect();
-        
+
         return finalTranscript;
     } catch (error) {
         console.error("STT processing error:", error);
