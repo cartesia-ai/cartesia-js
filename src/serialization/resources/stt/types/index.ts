@@ -1,3 +1,4 @@
+export * from "./TranscriptionWord";
 export * from "./TranscriptionResponse";
 export * from "./StreamingTranscriptionResponse";
 export * from "./TranscriptMessage";

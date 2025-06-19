@@ -7,8 +7,8 @@ import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
 
 export const SttEncoding: core.serialization.Schema<serializers.SttEncoding.Raw, Cartesia.SttEncoding> =
-    core.serialization.enum_(["pcm_s16le"]);
+    core.serialization.enum_(["pcm_s16le", "pcm_s32le", "pcm_f16le", "pcm_f32le", "pcm_mulaw", "pcm_alaw"]);
 
 export declare namespace SttEncoding {
-    export type Raw = "pcm_s16le";
+    export type Raw = "pcm_s16le" | "pcm_s32le" | "pcm_f16le" | "pcm_f32le" | "pcm_mulaw" | "pcm_alaw";
 }
