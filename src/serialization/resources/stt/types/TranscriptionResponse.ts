@@ -5,6 +5,7 @@
 import * as serializers from "../../../index";
 import * as Cartesia from "../../../../api/index";
 import * as core from "../../../../core";
+import { TranscriptionWord } from "./TranscriptionWord";
 
 export const TranscriptionResponse: core.serialization.ObjectSchema<
     serializers.TranscriptionResponse.Raw,
@@ -13,6 +14,7 @@ export const TranscriptionResponse: core.serialization.ObjectSchema<
     text: core.serialization.string(),
     language: core.serialization.string().optional(),
     duration: core.serialization.number().optional(),
+    words: core.serialization.list(TranscriptionWord).optional(),
 });
 
 export declare namespace TranscriptionResponse {
@@ -20,5 +22,6 @@ export declare namespace TranscriptionResponse {
         text: string;
         language?: string | null;
         duration?: number | null;
+        words?: TranscriptionWord.Raw[] | null;
     }
 }

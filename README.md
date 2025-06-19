@@ -152,11 +152,14 @@ async function streamingSTTExample() {
         apiKey: process.env.CARTESIA_API_KEY,
     });
 
+    // Create websocket connection with endpointing parameters
     const sttWs = client.stt.websocket({
         model: "ink-whisper",
-        language: "en",           // Must match the language of your audio
-        encoding: "pcm_s16le",    // Must match your audio's encoding format (only pcm_s16le is supported currently)
-        sampleRate: 16000,        // Must match your audio's sample rate (only 16000 is supported currently)
+        language: "en",                     // Language of your audio
+        encoding: "pcm_s16le",              // Audio encoding format (required)
+        sampleRate: 16000,                  // Audio sample rate (required)
+        minVolume: 0.1,                     // Volume threshold for voice activity detection (0.0-1.0)
+        maxSilenceDurationSecs: 2.0,        // Maximum silence duration before endpointing
     });
 
     // Concurrent audio sending
@@ -188,7 +191,7 @@ async function streamingSTTExample() {
         }
     }
 
-    // Concurrent transcript receiving
+    // Concurrent transcript receiving with word-level timestamps
     async function receiveTranscripts(): Promise<string> {
         return new Promise((resolve) => {
             let fullTranscript = "";
@@ -197,6 +200,16 @@ async function streamingSTTExample() {
                 if (result.type === "transcript") {
                     const status = result.isFinal ? "FINAL" : "INTERIM";
                     console.log(`[${status}] "${result.text}"`);
+
+                    // Handle word-level timestamps if available
+                    if (result.words && result.words.length > 0) {
+                        console.log("Word-level timestamps:");
+                        result.words.forEach((word) => {
+                            console.log(
+                                `  "${word.word}": ${word.start.toFixed(2)}s - ${word.end.toFixed(2)}s`
+                            );
+                        });
+                    }
 
                     if (result.isFinal) {
                         fullTranscript += `${result.text} `;
