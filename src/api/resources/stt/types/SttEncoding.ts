@@ -4,13 +4,13 @@
 
 /**
  * The encoding format for audio data sent to the STT WebSocket.
- *
- * Currently supported:
- * - `pcm_s16le` - 16-bit signed integer PCM, little-endian
- *
- * Support for other formats will be added in the future.
  */
-export type SttEncoding = "pcm_s16le";
+export type SttEncoding = "pcm_s16le" | "pcm_s32le" | "pcm_f16le" | "pcm_f32le" | "pcm_mulaw" | "pcm_alaw";
 export const SttEncoding = {
     PcmS16Le: "pcm_s16le",
+    PcmS32Le: "pcm_s32le",
+    PcmF16Le: "pcm_f16le",
+    PcmF32Le: "pcm_f32le",
+    PcmMulaw: "pcm_mulaw",
+    PcmAlaw: "pcm_alaw",
 } as const;
