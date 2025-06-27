@@ -10,9 +10,9 @@ export class StreamingSTTClient extends Stt {
      * Create a WebSocket connection for real-time speech transcription.
      *
      * @param options - Configuration options for the STT WebSocket
-     * @param options.model - ID of the model to use for transcription (default: "ink-whisper")
-     * @param options.language - The language of the input audio in ISO-639-1 format (default: "en")
-     * @param options.encoding - The encoding format of the audio data (required)
+     * @param options.model - ID of the model to use for transcription (required)
+     * @param options.language - The language of the input audio in ISO-639-1 format (defaults to "en")
+     * @param options.encoding - The encoding format of the audio data (required). Must be one of: "pcm_s16le", "pcm_s32le", "pcm_f16le", "pcm_f32le", "pcm_mulaw", "pcm_alaw"
      * @param options.sampleRate - The sample rate of the audio in Hz (required)
      * @param options.minVolume - Volume threshold for voice activity detection (0.0-1.0)
      * @param options.maxSilenceDurationSecs - Maximum duration of silence before endpointing

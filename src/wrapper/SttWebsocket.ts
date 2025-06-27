@@ -3,11 +3,12 @@ import * as environments from "../environments";
 import { ReconnectingWebSocket, Options } from "../core/websocket";
 import { Stt } from "../api/resources/stt/client/Client";
 import * as Cartesia from "../api/index";
+import { SttEncoding } from "../api/resources/stt/types/SttEncoding";
 
 export interface SttWebSocketOptions {
     model?: string;
     language?: string;
-    encoding: string;
+    encoding: SttEncoding;
     sampleRate: number;
     minVolume?: number;
     maxSilenceDurationSecs?: number;
@@ -29,7 +30,7 @@ export default class SttWebsocket {
     #isConnected = false;
     #model: string;
     #language?: string;
-    #encoding: string;
+    #encoding: SttEncoding;
     #sampleRate: number;
     #minVolume?: number;
     #maxSilenceDurationSecs?: number;
@@ -46,6 +47,9 @@ export default class SttWebsocket {
         }: SttWebSocketOptions,
         private readonly options: Stt.Options
     ) {
+        if (!model) {
+            throw new Error("model parameter is required");
+        }
         if (!encoding) {
             throw new Error("encoding parameter is required");
         }
