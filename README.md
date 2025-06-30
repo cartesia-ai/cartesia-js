@@ -132,7 +132,8 @@ import { WebPlayer } from "@cartesia/cartesia-js";
 console.log("Playing stream...");
 
 // Create a Player object.
-const player = new WebPlayer();
+const player = new WebPlayer({ bufferDuration: 200 }); // Set buffer duration (in milliseconds) as needed.
+
 
 // Play the audio. (`response` includes a custom Source object that the Player can play.)
 // The call resolves when the audio finishes playing.
