@@ -6,15 +6,26 @@ export class WebPlayer {
     #startNextPlaybackAt = 0;
     #bufferDuration: number;
 
-    /**
-     * Create a new Player.
-     *
-     * @param options - Options for the Player.
-     * @param options.bufferDuration - The duration of the audio buffer to play.
-     */
-    constructor({ bufferDuration }: { bufferDuration: number }) {
+    #onStateChange?: (state: "running" | "suspended" | "closed") => void;
+
+      /**
+       * Create a new Player.
+       *
+       * @param options - Options for the Player.
+       * @param options.bufferDuration - The size of each chunk (in samples or seconds)
+       *   to be read from the source.
+       * @param options.onStateChange - An optional callback for when the audio context state changes.
+       */
+      constructor({
+        bufferDuration,
+        onStateChange,
+      }: {
+        bufferDuration: number;
+        onStateChange?: (state: "running" | "suspended" | "closed") => void;
+      }) {
         this.#bufferDuration = bufferDuration;
-    }
+        this.#onStateChange = onStateChange;
+      }
 
     async #playBuffer(buf: Float32Array, sampleRate: number) {
         if (!this.#context) {
@@ -31,6 +42,20 @@ export class WebPlayer {
         await playAudioBuffer(buf, this.#context, startAt, sampleRate);
     }
 
+      /**
+       * Initialize the AudioContext if not already created,
+       * or resume it if it was closed.
+       */
+      #initContext(sampleRate: number) {
+        if (!this.context || this.context.state === "closed") {
+          this.context = new AudioContext({ sampleRate });
+          if (this.#onStateChange) {
+            this.context.addEventListener("statechange", () => {
+              this.#onStateChange?.(this.context!.state);
+            });
+          }
+        }
+      }
     /**
      * Play audio from a source.
      *
@@ -39,7 +64,7 @@ export class WebPlayer {
      */
     async play(source: Source) {
         this.#startNextPlaybackAt = 0;
-        this.#context = new AudioContext({ sampleRate: source.sampleRate });
+        this.#initContext(source.sampleRate);
         const buffer = new Float32Array(source.durationToSampleCount(this.#bufferDuration));
 
         const plays: Promise<void>[] = [];
