@@ -2,12 +2,16 @@ import * as core from "../core";
 import * as environments from "../environments";
 import { ReconnectingWebSocket, Options } from "../core/websocket";
 import { Stt } from "../api/resources/stt/client/Client";
+import * as Cartesia from "../api/index";
+import { SttEncoding } from "../api/resources/stt/types/SttEncoding";
 
 export interface SttWebSocketOptions {
     model?: string;
     language?: string;
-    encoding?: string;
-    sampleRate?: number;
+    encoding: SttEncoding;
+    sampleRate: number;
+    minVolume?: number;
+    maxSilenceDurationSecs?: number;
 }
 
 export interface TranscriptionResult {
@@ -17,6 +21,7 @@ export interface TranscriptionResult {
     isFinal?: boolean;
     duration?: number;
     language?: string;
+    words?: Cartesia.TranscriptionWord[];
     message?: string;
 }
 
@@ -25,23 +30,39 @@ export default class SttWebsocket {
     #isConnected = false;
     #model: string;
     #language?: string;
-    #encoding: string;
+    #encoding: SttEncoding;
     #sampleRate: number;
+    #minVolume?: number;
+    #maxSilenceDurationSecs?: number;
     #connectionPromise?: Promise<void>;
 
     constructor(
         {
             model = "ink-whisper",
             language = "en",
-            encoding = "pcm_s16le",
-            sampleRate = 16000,
+            encoding,
+            sampleRate,
+            minVolume,
+            maxSilenceDurationSecs,
         }: SttWebSocketOptions,
         private readonly options: Stt.Options
     ) {
+        if (!model) {
+            throw new Error("model parameter is required");
+        }
+        if (!encoding) {
+            throw new Error("encoding parameter is required");
+        }
+        if (!sampleRate) {
+            throw new Error("sampleRate parameter is required");
+        }
+        
         this.#model = model;
         this.#language = language;
         this.#encoding = encoding;
         this.#sampleRate = sampleRate;
+        this.#minVolume = minVolume;
+        this.#maxSilenceDurationSecs = maxSilenceDurationSecs;
     }
 
     async #ensureConnected(): Promise<void> {
@@ -90,6 +111,10 @@ export default class SttWebsocket {
                     result.isFinal = data.is_final || false;
                     result.duration = data.duration;
                     result.language = data.language;
+                    // Include word-level timestamps if available
+                    if (data.words) {
+                        result.words = data.words;
+                    }
                 } else if (data.type === "flush_done") {
                     // Acknowledgment for finalize command
                     // Only requestId is needed for flush_done
@@ -130,6 +155,8 @@ export default class SttWebsocket {
                 };
 
                 if (this.#language) params.language = this.#language;
+                if (this.#minVolume !== undefined) params.min_volume = this.#minVolume.toString();
+                if (this.#maxSilenceDurationSecs !== undefined) params.max_silence_duration_secs = this.#maxSilenceDurationSecs.toString();
 
                 const apiKey = await core.Supplier.get(this.options.apiKey);
                 if (apiKey) {

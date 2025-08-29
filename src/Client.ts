@@ -7,6 +7,7 @@ import * as core from "./core";
 import { ApiStatus } from "./api/resources/apiStatus/client/Client";
 import { Auth } from "./api/resources/auth/client/Client";
 import { Infill } from "./api/resources/infill/client/Client";
+import { Stt } from "./api/resources/stt/client/Client";
 import { Tts } from "./api/resources/tts/client/Client";
 import { VoiceChanger } from "./api/resources/voiceChanger/client/Client";
 import { Voices } from "./api/resources/voices/client/Client";
@@ -40,6 +41,7 @@ export class CartesiaClient {
     protected _apiStatus: ApiStatus | undefined;
     protected _auth: Auth | undefined;
     protected _infill: Infill | undefined;
+    protected _stt: Stt | undefined;
     protected _tts: Tts | undefined;
     protected _voiceChanger: VoiceChanger | undefined;
     protected _voices: Voices | undefined;
@@ -56,6 +58,10 @@ export class CartesiaClient {
 
     public get infill(): Infill {
         return (this._infill ??= new Infill(this._options));
+    }
+
+    public get stt(): Stt {
+        return (this._stt ??= new Stt(this._options));
     }
 
     public get tts(): Tts {
