@@ -75,6 +75,7 @@ Generates a new Access Token for the client. These tokens are short-lived and sh
 await client.auth.accessToken({
     grants: {
         tts: true,
+        stt: true,
     },
     expiresIn: 60,
 });
@@ -217,6 +218,93 @@ await client.infill.bytes(fs.createReadStream("/path/to/your/file"), fs.createRe
 </dl>
 </details>
 
+## Stt
+
+<details><summary><code>client.stt.<a href="/src/api/resources/stt/client/Client.ts">transcribe</a>(file, { ...params }) -> Cartesia.TranscriptionResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Transcribes audio files into text using Cartesia's Speech-to-Text API.
+
+Upload an audio file and receive a complete transcription response. Supports arbitrarily long audio files with automatic intelligent chunking for longer audio.
+
+**Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm
+
+**Response format:** Returns JSON with transcribed text, duration, and language. Include `timestamp_granularities: ["word"]` to get word-level timestamps.
+
+**Pricing:** Batch transcription is priced at **1 credit per 2 seconds** of audio processed.
+
+<Note>
+For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](/api-reference/stt/migrate-from-open-ai).
+</Note>
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.stt.transcribe(fs.createReadStream("/path/to/your/file"), {
+    model: "ink-whisper",
+    language: "en",
+});
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**file:** `File | fs.ReadStream | Blob`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `Cartesia.TranscriptionRequest`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Stt.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 ## Tts
 
 <details><summary><code>client.tts.<a href="/src/api/resources/tts/client/Client.ts">bytes</a>({ ...params }) -> stream.Readable</code></summary>
@@ -325,7 +413,7 @@ for await (const item of response) {
 <dl>
 <dd>
 
-**request:** `Cartesia.TtsRequest`
+**request:** `Cartesia.TtssseRequest`
 
 </dd>
 </dl>

@@ -46,7 +46,24 @@ export class Auth {
      * @example
      *     await client.auth.accessToken({
      *         grants: {
+     *             tts: true,
+     *             stt: true
+     *         },
+     *         expiresIn: 60
+     *     })
+     *
+     * @example
+     *     await client.auth.accessToken({
+     *         grants: {
      *             tts: true
+     *         },
+     *         expiresIn: 60
+     *     })
+     *
+     * @example
+     *     await client.auth.accessToken({
+     *         grants: {
+     *             stt: true
      *         },
      *         expiresIn: 60
      *     })
@@ -67,8 +84,8 @@ export class Auth {
                 "Cartesia-Version": requestOptions?.cartesiaVersion ?? this._options?.cartesiaVersion ?? "2024-06-10",
                 "X-Fern-Language": "JavaScript",
                 "X-Fern-SDK-Name": "@cartesia/cartesia-js",
-                "X-Fern-SDK-Version": "2.2.5",
-                "User-Agent": "@cartesia/cartesia-js/2.2.5",
+                "X-Fern-SDK-Version": "2.2.6",
+                "User-Agent": "@cartesia/cartesia-js/2.2.6",
                 "X-Fern-Runtime": core.RUNTIME.type,
                 "X-Fern-Runtime-Version": core.RUNTIME.version,
                 ...(await this._getCustomAuthorizationHeaders()),

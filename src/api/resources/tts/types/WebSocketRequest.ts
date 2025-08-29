@@ -6,10 +6,8 @@ import * as Cartesia from "../../../index";
 
 export type WebSocketRequest =
     /**
-     * Use this to generate speech for a transcript.
-     *  */
+     * Use this to generate speech for a transcript. */
     | Cartesia.GenerationRequest
     /**
-     * Use this to cancel a context, so that no more messages are generated for that context.
-     *  */
+     * Use this to cancel a context, so that no more messages are generated for that context. */
     | Cartesia.CancelContextRequest;

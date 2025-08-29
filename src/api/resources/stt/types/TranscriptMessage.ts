@@ -17,7 +17,7 @@ export interface TranscriptMessage {
     isFinal: boolean;
     /** The duration of the audio transcribed so far, in seconds. */
     duration?: number;
-    /** The detected or specified language of the input audio. */
+    /** The specified language of the input audio. */
     language?: string;
     /** Word-level timestamps showing the start and end time of each word in seconds. Always included in streaming responses. */
     words?: Cartesia.TranscriptionWord[];

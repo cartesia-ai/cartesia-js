@@ -31,8 +31,8 @@ export const GenerationRequest: core.serialization.ObjectSchema<
         "add_phoneme_timestamps",
         core.serialization.boolean().optional(),
     ),
-    useOriginalTimestamps: core.serialization.property(
-        "use_original_timestamps",
+    useNormalizedTimestamps: core.serialization.property(
+        "use_normalized_timestamps",
         core.serialization.boolean().optional(),
     ),
 });
@@ -52,6 +52,6 @@ export declare namespace GenerationRequest {
         flush?: boolean | null;
         add_timestamps?: boolean | null;
         add_phoneme_timestamps?: boolean | null;
-        use_original_timestamps?: boolean | null;
+        use_normalized_timestamps?: boolean | null;
     }
 }

@@ -4,5 +4,7 @@
 
 export interface TokenGrant {
     /** The `tts` grant allows the token to be used to access any TTS endpoint. */
-    tts: boolean;
+    tts?: boolean;
+    /** The `stt` grant allows the token to be used to access any STT endpoint. */
+    stt?: boolean;
 }

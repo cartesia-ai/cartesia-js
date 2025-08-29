@@ -4,21 +4,25 @@
 
 import * as Cartesia from "../../../index";
 
-export interface WebSocketTtsRequest {
+export interface TtssseRequest {
     /** The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models. */
     modelId: string;
-    outputFormat?: Cartesia.OutputFormat;
-    transcript?: string;
+    transcript: string;
     voice: Cartesia.TtsRequestVoiceSpecifier;
+    language?: Cartesia.SupportedLanguage;
+    outputFormat: Cartesia.SseOutputFormat;
+    /**
+     * The maximum duration of the audio in seconds. You do not usually need to specify this.
+     * If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
+     */
     duration?: number;
-    language?: string;
+    speed?: Cartesia.ModelSpeed;
     /** Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information. */
     addTimestamps?: boolean;
     /** Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information. */
     addPhonemeTimestamps?: boolean;
+    /** Whether to use normalized timestamps (True) or original timestamps (False). */
     useNormalizedTimestamps?: boolean;
-    continue?: boolean;
-    contextId?: string;
-    maxBufferDelayMs?: number;
-    speed?: Cartesia.ModelSpeed;
+    /** Optional context ID for this request. */
+    contextId?: Cartesia.ContextId;
 }

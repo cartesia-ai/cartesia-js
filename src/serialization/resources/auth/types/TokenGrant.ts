@@ -8,11 +8,13 @@ import * as core from "../../../../core";
 
 export const TokenGrant: core.serialization.ObjectSchema<serializers.TokenGrant.Raw, Cartesia.TokenGrant> =
     core.serialization.object({
-        tts: core.serialization.boolean(),
+        tts: core.serialization.boolean().optional(),
+        stt: core.serialization.boolean().optional(),
     });
 
 export declare namespace TokenGrant {
     export interface Raw {
-        tts: boolean;
+        tts?: boolean | null;
+        stt?: boolean | null;
     }
 }

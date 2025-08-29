@@ -7,10 +7,10 @@ import * as Cartesia from "../../../index";
 export interface TranscriptionResponse {
     /** The transcribed text. */
     text: string;
-    /** The detected or specified language of the input audio. */
+    /** The specified language of the input audio. */
     language?: string;
     /** The duration of the input audio in seconds. */
     duration?: number;
-    /** Word-level timestamps for batch transcription responses. */
+    /** Word-level timestamps showing the start and end time of each word. Only included when `[word]` is passed into `timestamp_granularities[]`. */
     words?: Cartesia.TranscriptionWord[];
 }

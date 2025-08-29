@@ -14,5 +14,6 @@ export * as voices from "./voices";
 export * from "./voices/types";
 export * as infill from "./infill";
 export * from "./infill/client/requests";
+export * from "./stt/client/requests";
 export * from "./voiceChanger/client/requests";
 export * from "./voices/client/requests";

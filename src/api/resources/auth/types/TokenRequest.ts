@@ -5,8 +5,8 @@
 import * as Cartesia from "../../../index";
 
 export interface TokenRequest {
-    /** The permissions to be granted via the token. */
-    grants: Cartesia.TokenGrant;
+    /** The permissions to be granted via the token. Both TTS and STT grants are optional - specify only the capabilities you need. */
+    grants?: Cartesia.TokenGrant;
     /** The number of seconds the token will be valid for since the time of generation. The maximum is 1 hour (3600 seconds). */
     expiresIn?: number;
 }

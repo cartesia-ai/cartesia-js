@@ -24,8 +24,8 @@ export const WebSocketTtsRequest: core.serialization.ObjectSchema<
         "add_phoneme_timestamps",
         core.serialization.boolean().optional(),
     ),
-    useOriginalTimestamps: core.serialization.property(
-        "use_original_timestamps",
+    useNormalizedTimestamps: core.serialization.property(
+        "use_normalized_timestamps",
         core.serialization.boolean().optional(),
     ),
     continue: core.serialization.boolean().optional(),
@@ -44,7 +44,7 @@ export declare namespace WebSocketTtsRequest {
         language?: string | null;
         add_timestamps?: boolean | null;
         add_phoneme_timestamps?: boolean | null;
-        use_original_timestamps?: boolean | null;
+        use_normalized_timestamps?: boolean | null;
         continue?: boolean | null;
         context_id?: string | null;
         max_buffer_delay_ms?: number | null;

@@ -44,21 +44,14 @@ export interface InfillBytesRequest {
     outputFormatContainer: Cartesia.OutputFormatContainer;
     /** The sample rate of the output audio */
     outputFormatSampleRate: number;
-    /**
-     * Required for `raw` and `wav` containers.
-     *
-     */
+    /** Required for `raw` and `wav` containers. */
     outputFormatEncoding?: Cartesia.RawEncoding;
-    /**
-     * Required for `mp3` containers.
-     *
-     */
+    /** Required for `mp3` containers. */
     outputFormatBitRate?: number;
     /**
      * Either a number between -1.0 and 1.0 or a natural language description of speed.
      *
      * If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
-     *
      */
     voiceExperimentalControlsSpeed?: Cartesia.Speed;
     /**
@@ -67,7 +60,6 @@ export interface InfillBytesRequest {
      * Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
      *
      * Supported levels are: lowest, low, (omit), high, highest.
-     *
      */
     voiceExperimentalControlsEmotion?: Cartesia.Emotion[];
 }

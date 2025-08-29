@@ -34,10 +34,10 @@ export interface GenerationRequest {
     maxBufferDelayMs?: number;
     /** Whether to flush the context. */
     flush?: boolean;
-    /** Whether to return word-level timestamps. */
+    /** Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information. */
     addTimestamps?: boolean;
-    /** Whether to return phoneme-level timestamps. */
+    /** Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information. */
     addPhonemeTimestamps?: boolean;
-    /** Whether to use the original transcript for timestamps. */
-    useOriginalTimestamps?: boolean;
+    /** Whether to use normalized timestamps (True) or original timestamps (False). */
+    useNormalizedTimestamps?: boolean;
 }

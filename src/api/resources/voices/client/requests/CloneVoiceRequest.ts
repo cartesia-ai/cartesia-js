@@ -22,34 +22,16 @@ import * as Cartesia from "../../../../index";
  *     }
  */
 export interface CloneVoiceRequest {
-    /**
-     * The name of the voice.
-     *
-     */
+    /** The name of the voice. */
     name: string;
-    /**
-     * A description for the voice.
-     *
-     */
+    /** A description for the voice. */
     description?: string;
-    /**
-     * The language of the voice.
-     *
-     */
+    /** The language of the voice. */
     language: Cartesia.SupportedLanguage;
-    /**
-     * Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
-     *
-     */
+    /** Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip. */
     mode: Cartesia.CloneMode;
-    /**
-     * Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
-     *
-     */
+    /** Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip. */
     enhance?: boolean;
-    /**
-     * Optional base voice ID that the cloned voice is derived from.
-     *
-     */
+    /** Optional base voice ID that the cloned voice is derived from. */
     baseVoiceId?: Cartesia.VoiceId;
 }

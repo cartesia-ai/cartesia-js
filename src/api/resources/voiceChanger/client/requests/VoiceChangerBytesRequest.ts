@@ -33,14 +33,8 @@ export interface VoiceChangerBytesRequest {
     voiceId: string;
     outputFormatContainer: Cartesia.OutputFormatContainer;
     outputFormatSampleRate: number;
-    /**
-     * Required for `raw` and `wav` containers.
-     *
-     */
+    /** Required for `raw` and `wav` containers. */
     outputFormatEncoding?: Cartesia.RawEncoding;
-    /**
-     * Required for `mp3` containers.
-     *
-     */
+    /** Required for `mp3` containers. */
     outputFormatBitRate?: number;
 }

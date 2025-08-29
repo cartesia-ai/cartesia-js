@@ -1,3 +1,4 @@
+export * from "./TimestampGranularity";
 export * from "./TranscriptionWord";
 export * from "./TranscriptionResponse";
 export * from "./StreamingTranscriptionResponse";

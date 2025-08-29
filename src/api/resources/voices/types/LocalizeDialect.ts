@@ -9,18 +9,14 @@ import * as Cartesia from "../../../index";
  */
 export type LocalizeDialect =
     /**
-     * Only available when language is set to English (`en`). Options: Australian (`au`), Indian (`in`), Southern (`so`), British (`uk`), or American (`us`).
-     *  */
+     * Only available when language is set to English (`en`). Options: Australian (`au`), Indian (`in`), Southern (`so`), British (`uk`), or American (`us`). */
     | Cartesia.LocalizeEnglishDialect
     /**
-     * Only available when language is set to Spanish (`es`). Options: Latin American (`mx`) and Peninsular (`pe`).
-     *  */
+     * Only available when language is set to Spanish (`es`). Options: Latin American (`mx`) and Peninsular (`pe`). */
     | Cartesia.LocalizeSpanishDialect
     /**
-     * Only available when language is set to Portuguese (`pt`). Options: Brazilian (`br`) and European Portuguese (`eu`).
-     *  */
+     * Only available when language is set to Portuguese (`pt`). Options: Brazilian (`br`) and European Portuguese (`eu`). */
     | Cartesia.LocalizePortugueseDialect
     /**
-     * Only available when language is set to French (`fr`). Options: Standard Parisian/Metropolitan (`eu`) and Canadian (`ca`).
-     *  */
+     * Only available when language is set to French (`fr`). Options: Standard Parisian/Metropolitan (`eu`) and Canadian (`ca`). */
     | Cartesia.LocalizeFrenchDialect;

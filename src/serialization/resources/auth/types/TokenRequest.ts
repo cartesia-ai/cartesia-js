@@ -9,13 +9,13 @@ import { TokenGrant } from "./TokenGrant";
 
 export const TokenRequest: core.serialization.ObjectSchema<serializers.TokenRequest.Raw, Cartesia.TokenRequest> =
     core.serialization.object({
-        grants: TokenGrant,
+        grants: TokenGrant.optional(),
         expiresIn: core.serialization.property("expires_in", core.serialization.number().optional()),
     });
 
 export declare namespace TokenRequest {
     export interface Raw {
-        grants: TokenGrant.Raw;
+        grants?: TokenGrant.Raw | null;
         expires_in?: number | null;
     }
 }
