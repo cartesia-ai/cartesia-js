@@ -9,7 +9,7 @@ export declare namespace Stt {
         environment?: core.Supplier<environments.CartesiaEnvironment | string>;
         apiKey?: core.Supplier<string | undefined>;
         /** Override the Cartesia-Version header */
-        cartesiaVersion?: "2024-06-10";
+        cartesiaVersion?: "2025-04-16";
         fetcher?: core.FetchFunction;
     }
 
@@ -21,7 +21,7 @@ export declare namespace Stt {
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
         /** Override the Cartesia-Version header */
-        cartesiaVersion?: "2024-06-10";
+        cartesiaVersion?: "2025-04-16";
     }
 }
 

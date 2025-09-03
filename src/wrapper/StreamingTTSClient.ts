@@ -21,6 +21,6 @@ export class StreamingTTSClient extends Tts {
         container?: string;
         encoding?: string;
     }): Websocket {
-        return new Websocket({ sampleRate, container, encoding }, { cartesiaVersion: "2024-06-10", ...this._options });
+        return new Websocket({ sampleRate, container, encoding }, { cartesiaVersion: "2025-04-16", ...this._options });
     }
 }
