@@ -158,7 +158,7 @@ export default class SttWebsocket {
                 if (this.#minVolume !== undefined) params.min_volume = this.#minVolume.toString();
                 if (this.#maxSilenceDurationSecs !== undefined) params.max_silence_duration_secs = this.#maxSilenceDurationSecs.toString();
 
-                const apiKey = await core.Supplier.get(this.options.apiKey);
+                const apiKey = await core.Supplier.get(this.options.token);
                 if (apiKey) {
                     params.api_key = apiKey;
                 } else if (connectOptions.accessToken) {
