@@ -23,10 +23,20 @@ Instantiate and use the client with the following:
 import { CartesiaClient } from "@cartesia/cartesia-js";
 
 const client = new CartesiaClient({ token: "YOUR_TOKEN" });
-await client.agents.createMetric({
-    name: "evaluate-user-satisfaction",
-    displayName: "Evaluate User Satisfaction",
-    prompt: "Task:\nEvaluate how engaged and satisfied the user is with the conversation. Engagement may be shown through active interest in the agent\u2019s products/services, expressing that the agent was helpful, or indicating they would want to interact again.\n\nDecision Logic:\n- If the user shows strong engagement (asks detailed follow-up questions, expresses high interest, compliments the agent, or states they would use the service/agent again) \u2192 classify as HIGH_SATISFACTION\n- If the user shows some engagement (asks a few relevant questions, shows mild interest, or gives neutral feedback) \u2192 classify as MEDIUM_SATISFACTION\n- If the user shows little or no engagement (short answers, off-topic responses, disinterest, no signs of satisfaction) \u2192 classify as LOW_SATISFACTION\n\nNotes:\n- Engagement can be verbal (explicit statements of interest) or behavioral (asking more about features, prices, benefits, or next steps).\n- Expressions of satisfaction, gratitude, or willingness to call again count as positive engagement.\n- Ignore scripted greetings or polite closings unless they contain genuine feedback.\n\nReturn:\nOnly output the exact category name as a string: HIGH_SATISFACTION, MEDIUM_SATISFACTION, or LOW_SATISFACTION.\n",
+await client.tts.bytes({
+    modelId: "sonic-2",
+    transcript: "Hello, world!",
+    voice: {
+        mode: "id",
+        id: "694f9389-aac1-45b6-b726-9d9369183238",
+    },
+    language: "en",
+    outputFormat: {
+        container: "wav",
+        sampleRate: 44100,
+        encoding: "pcm_f32le",
+    },
+    save: true,
 });
 ```
 
@@ -157,7 +167,7 @@ will be thrown.
 import { CartesiaError } from "@cartesia/cartesia-js";
 
 try {
-    await client.agents.createMetric(...);
+    await client.tts.bytes(...);
 } catch (err) {
     if (err instanceof CartesiaError) {
         console.log(err.statusCode);
@@ -589,7 +599,7 @@ while (page.hasNextPage()) {
 If you would like to send additional headers as part of the request, use the `headers` request option.
 
 ```typescript
-const response = await client.agents.createMetric(..., {
+const response = await client.tts.bytes(..., {
     headers: {
         'X-Custom-Header': 'custom value'
     }
@@ -601,7 +611,7 @@ const response = await client.agents.createMetric(..., {
 If you would like to send additional query string parameters as part of the request, use the `queryParams` request option.
 
 ```typescript
-const response = await client.agents.createMetric(..., {
+const response = await client.tts.bytes(..., {
     queryParams: {
         'customQueryParamKey': 'custom query param value'
     }
@@ -623,7 +633,7 @@ A request is deemed retryable when any of the following HTTP status codes is ret
 Use the `maxRetries` request option to configure this behavior.
 
 ```typescript
-const response = await client.agents.createMetric(..., {
+const response = await client.tts.bytes(..., {
     maxRetries: 0 // override maxRetries at the request level
 });
 ```
@@ -633,7 +643,7 @@ const response = await client.agents.createMetric(..., {
 The SDK defaults to a 60 second timeout. Use the `timeoutInSeconds` option to configure this behavior.
 
 ```typescript
-const response = await client.agents.createMetric(..., {
+const response = await client.tts.bytes(..., {
     timeoutInSeconds: 30 // override timeout to 30s
 });
 ```
@@ -644,7 +654,7 @@ The SDK allows users to abort requests at any point by passing in an abort signa
 
 ```typescript
 const controller = new AbortController();
-const response = await client.agents.createMetric(..., {
+const response = await client.tts.bytes(..., {
     abortSignal: controller.signal
 });
 controller.abort(); // aborts the request
@@ -656,7 +666,7 @@ The SDK provides access to raw response data, including headers, through the `.w
 The `.withRawResponse()` method returns a promise that results to an object with a `data` and a `rawResponse` property.
 
 ```typescript
-const { data, rawResponse } = await client.agents.createMetric(...).withRawResponse();
+const { data, rawResponse } = await client.tts.bytes(...).withRawResponse();
 
 console.log(data);
 console.log(rawResponse.headers['X-My-Header']);
@@ -696,3 +706,7 @@ a proof of concept, but know that we will not be able to merge it as-is. We sugg
 an issue first to discuss with us!
 
 On the other hand, contributions to the README are always very welcome!
+
+## Documentation
+
+API reference documentation is available [here](https://docs.cartesia.ai/).
