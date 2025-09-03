@@ -53,7 +53,8 @@
     "dependencies": {
         "emittery": "^0.13.1",
         "human-id": "^4.1.1",
-        "ws": "^8.15.13"
+        "ws": "^8.15.13",
+        "base64-js": "^1.5.1"
     },
     "devDependencies": {
         "webpack": "^5.97.1",
