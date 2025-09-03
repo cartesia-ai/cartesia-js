@@ -6,5 +6,3 @@ src/index.ts
 src/core/websocket
 src/serialization/resources/tts/types/OutputFormat.ts
 
-# Custom STT client implementation
-src/api/resources/stt/client
