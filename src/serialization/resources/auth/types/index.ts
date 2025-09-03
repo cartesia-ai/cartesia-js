@@ -1,3 +1,3 @@
-export * from "./TokenGrant";
-export * from "./TokenRequest";
-export * from "./TokenResponse";
+export * from "./TokenGrant.js";
+export * from "./TokenRequest.js";
+export * from "./TokenResponse.js";
