@@ -1,2 +1,2 @@
-export { CartesiaError } from "./CartesiaError";
-export { CartesiaTimeoutError } from "./CartesiaTimeoutError";
+export { CartesiaError } from "./CartesiaError.js";
+export { CartesiaTimeoutError } from "./CartesiaTimeoutError.js";

@@ -1,1 +1,1 @@
-export { type InfillBytesRequest } from "./InfillBytesRequest";
+export { type InfillBytesRequest } from "./InfillBytesRequest.js";
