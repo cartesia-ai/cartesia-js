@@ -193,9 +193,9 @@ export default class Websocket {
                     (await core.Supplier.get(this.options.environment)) ?? environments.CartesiaEnvironment.Production
                 ).replace(/^https?:\/\//, "");
                 const params: Record<string, string> = {
-                    cartesia_version: this.options.cartesiaVersion || "2024-06-10",
+                    cartesia_version: this.options.cartesiaVersion || "2025-04-16",
                 };
-                const apiKey = await core.Supplier.get(this.options.apiKey);
+                const apiKey = await core.Supplier.get(this.options.token);
                 if (apiKey) {
                     params.api_key = apiKey;
                 } else if (options.accessToken) {

@@ -19,7 +19,7 @@ export class StreamingSTTClient extends Stt {
      * @returns SttWebsocket instance for STT operations
      */
     websocket(options: SttWebSocketOptions): SttWebsocket {
-        return new SttWebsocket(options, { cartesiaVersion: "2024-06-10", ...this._options });
+        return new SttWebsocket(options, { cartesiaVersion: "2025-04-16", ...this._options });
     }
 
     /**
