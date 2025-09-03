@@ -29,7 +29,7 @@ export class StreamingSTTClient extends Stt {
      * @param options - Configuration options for the STT WebSocket
      * @returns AsyncGenerator yielding transcription results
      */
-    async* transcribe(
+    async* transcribeChunks(
         audioChunks: AsyncIterable<ArrayBuffer>,
         options: SttWebSocketOptions
     ): AsyncGenerator<TranscriptionResult, void, unknown> {

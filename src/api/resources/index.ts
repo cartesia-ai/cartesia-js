@@ -24,5 +24,6 @@ export * from "./datasets/client/requests/index.js";
 export * from "./fineTunes/client/requests/index.js";
 export * from "./infill/client/requests/index.js";
 export * from "./pronunciationDicts/client/requests/index.js";
+export * from "./stt/client/requests/index.js";
 export * from "./voiceChanger/client/requests/index.js";
 export * from "./voices/client/requests/index.js";
