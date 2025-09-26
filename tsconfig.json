@@ -7,10 +7,9 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "baseUrl": "./",
     "paths": {
-      "noah-testing/*": ["src/*"],
-      "noah-testing": ["src/index.ts"]
+      "noah-testing/*": ["./src/*"],
+      "noah-testing": ["./src/index.ts"]
     },
     "noEmit": true,
 
