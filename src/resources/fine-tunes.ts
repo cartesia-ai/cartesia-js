@@ -2,7 +2,9 @@
 
 import { APIResource } from '../core/resource';
 import * as VoicesAPI from './voices';
+import { VoicesCursorIDPage } from './voices';
 import { APIPromise } from '../core/api-promise';
+import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../core/pagination';
 import { buildHeaders } from '../internal/headers';
 import { RequestOptions } from '../internal/request-options';
 import { path } from '../internal/utils/path';
@@ -28,8 +30,8 @@ export class FineTunes extends APIResource {
   list(
     query: FineTuneListParams | null | undefined = {},
     options?: RequestOptions,
-  ): APIPromise<FineTuneListResponse> {
-    return this._client.get('/fine-tunes/', { query, ...options });
+  ): PagePromise<FineTunesCursorIDPage, FineTune> {
+    return this._client.getAPIList('/fine-tunes/', CursorIDPage<FineTune>, { query, ...options });
   }
 
   /**
@@ -49,10 +51,15 @@ export class FineTunes extends APIResource {
     id: string,
     query: FineTuneListVoicesParams | null | undefined = {},
     options?: RequestOptions,
-  ): APIPromise<FineTuneListVoicesResponse> {
-    return this._client.get(path`/fine-tunes/${id}/voices`, { query, ...options });
+  ): PagePromise<VoicesCursorIDPage, VoicesAPI.Voice> {
+    return this._client.getAPIList(path`/fine-tunes/${id}/voices`, CursorIDPage<VoicesAPI.Voice>, {
+      query,
+      ...options,
+    });
   }
 }
+
+export type FineTunesCursorIDPage = CursorIDPage<FineTune>;
 
 /**
  * Information about a fine-tune
@@ -94,36 +101,6 @@ export interface FineTune {
   status: 'created' | 'training' | 'completed' | 'failed';
 }
 
-/**
- * Paginated list of fine-tunes
- */
-export interface FineTuneListResponse {
-  /**
-   * List of fine-tune objects
-   */
-  data: Array<FineTune>;
-
-  /**
-   * Whether there are more fine-tunes available
-   */
-  has_more: boolean;
-}
-
-/**
- * Paginated list of voices created from a fine-tune
- */
-export interface FineTuneListVoicesResponse {
-  /**
-   * List of voice objects
-   */
-  data: Array<VoicesAPI.Voice>;
-
-  /**
-   * Whether there are more voices available
-   */
-  has_more: boolean;
-}
-
 export interface FineTuneCreateParams {
   /**
    * Dataset ID containing training files
@@ -151,59 +128,28 @@ export interface FineTuneCreateParams {
   name: string;
 }
 
-export interface FineTuneListParams {
-  /**
-   * A cursor to use in pagination. `ending_before` is a fine-tune ID that defines
-   * your place in the list. For example, if you make a /fine-tunes request and
-   * receive 20 objects, starting with `fine_tune_abc123`, your subsequent call can
-   * include `ending_before=fine_tune_abc123` to fetch the previous page of the list.
-   */
-  ending_before?: string | null;
-
+export interface FineTuneListParams extends CursorIDPageParams {
   /**
    * The number of fine-tunes to return per page, ranging between 1 and 100.
    */
   limit?: number | null;
-
-  /**
-   * A cursor to use in pagination. `starting_after` is a fine-tune ID that defines
-   * your place in the list. For example, if you make a /fine-tunes request and
-   * receive 20 objects, ending with `fine_tune_abc123`, your subsequent call can
-   * include `starting_after=fine_tune_abc123` to fetch the next page of the list.
-   */
-  starting_after?: string | null;
 }
 
-export interface FineTuneListVoicesParams {
-  /**
-   * A cursor to use in pagination. `ending_before` is a voice ID that defines your
-   * place in the list. For example, if you make a fine-tune voices request and
-   * receive 20 objects, starting with `voice_abc123`, your subsequent call can
-   * include `ending_before=voice_abc123` to fetch the previous page of the list.
-   */
-  ending_before?: string | null;
-
+export interface FineTuneListVoicesParams extends CursorIDPageParams {
   /**
    * The number of voices to return per page, ranging between 1 and 100.
    */
   limit?: number | null;
-
-  /**
-   * A cursor to use in pagination. `starting_after` is a voice ID that defines your
-   * place in the list. For example, if you make a fine-tune voices request and
-   * receive 20 objects, ending with `voice_abc123`, your subsequent call can include
-   * `starting_after=voice_abc123` to fetch the next page of the list.
-   */
-  starting_after?: string | null;
 }
 
 export declare namespace FineTunes {
   export {
     type FineTune as FineTune,
-    type FineTuneListResponse as FineTuneListResponse,
-    type FineTuneListVoicesResponse as FineTuneListVoicesResponse,
+    type FineTunesCursorIDPage as FineTunesCursorIDPage,
     type FineTuneCreateParams as FineTuneCreateParams,
     type FineTuneListParams as FineTuneListParams,
     type FineTuneListVoicesParams as FineTuneListVoicesParams,
   };
 }
+
+export { type VoicesCursorIDPage };

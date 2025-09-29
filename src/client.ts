@@ -14,6 +14,8 @@ import * as Opts from './internal/request-options';
 import * as qs from './internal/qs';
 import { VERSION } from './version';
 import * as Errors from './core/error';
+import * as Pagination from './core/pagination';
+import { AbstractPage, type CursorIDPageParams, CursorIDPageResponse } from './core/pagination';
 import * as Uploads from './core/uploads';
 import * as API from './resources/index';
 import * as TopLevelAPI from './resources/top-level';
@@ -24,10 +26,9 @@ import {
   FineTune,
   FineTuneCreateParams,
   FineTuneListParams,
-  FineTuneListResponse,
   FineTuneListVoicesParams,
-  FineTuneListVoicesResponse,
   FineTunes,
+  FineTunesCursorIDPage,
 } from './resources/fine-tunes';
 import { Infill, InfillCreateParams, OutputFormatContainer, RawEncoding } from './resources/infill';
 import {
@@ -35,9 +36,9 @@ import {
   PronunciationDictCreateParams,
   PronunciationDictItem,
   PronunciationDictListParams,
-  PronunciationDictListResponse,
   PronunciationDictUpdateParams,
   PronunciationDicts,
+  PronunciationDictsCursorIDPage,
 } from './resources/pronunciation-dicts';
 import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt';
 import {
@@ -59,11 +60,11 @@ import {
   Voice,
   VoiceCloneParams,
   VoiceListParams,
-  VoiceListResponse,
   VoiceLocalizeParams,
   VoiceMetadata,
   VoiceUpdateParams,
   Voices,
+  VoicesCursorIDPage,
 } from './resources/voices';
 import {
   AgentListPhoneNumbersResponse,
@@ -77,9 +78,9 @@ import {
   Dataset,
   DatasetCreateParams,
   DatasetListParams,
-  DatasetListResponse,
   DatasetUpdateParams,
   Datasets,
+  DatasetsCursorIDPage,
 } from './resources/datasets/datasets';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
@@ -537,6 +538,25 @@ export class NoahTesting {
     return { response, options, controller, requestLogID, retryOfRequestLogID, startTime };
   }
 
+  getAPIList<Item, PageClass extends Pagination.AbstractPage<Item> = Pagination.AbstractPage<Item>>(
+    path: string,
+    Page: new (...args: any[]) => PageClass,
+    opts?: RequestOptions,
+  ): Pagination.PagePromise<PageClass, Item> {
+    return this.requestAPIList(Page, { method: 'get', path, ...opts });
+  }
+
+  requestAPIList<
+    Item = unknown,
+    PageClass extends Pagination.AbstractPage<Item> = Pagination.AbstractPage<Item>,
+  >(
+    Page: new (...args: ConstructorParameters<typeof Pagination.AbstractPage>) => PageClass,
+    options: FinalRequestOptions,
+  ): Pagination.PagePromise<PageClass, Item> {
+    const request = this.makeRequest(options, null, undefined);
+    return new Pagination.PagePromise<PageClass, Item>(this as any as NoahTesting, request, Page);
+  }
+
   async fetchWithTimeout(
     url: RequestInfo,
     init: RequestInit | undefined,
@@ -795,6 +815,9 @@ NoahTesting.Voices = Voices;
 export declare namespace NoahTesting {
   export type RequestOptions = Opts.RequestOptions;
 
+  export import CursorIDPage = Pagination.CursorIDPage;
+  export { type CursorIDPageParams as CursorIDPageParams, type CursorIDPageResponse as CursorIDPageResponse };
+
   export { type GetStatusResponse as GetStatusResponse };
 
   export {
@@ -815,7 +838,7 @@ export declare namespace NoahTesting {
   export {
     Datasets as Datasets,
     type Dataset as Dataset,
-    type DatasetListResponse as DatasetListResponse,
+    type DatasetsCursorIDPage as DatasetsCursorIDPage,
     type DatasetCreateParams as DatasetCreateParams,
     type DatasetUpdateParams as DatasetUpdateParams,
     type DatasetListParams as DatasetListParams,
@@ -824,8 +847,7 @@ export declare namespace NoahTesting {
   export {
     FineTunes as FineTunes,
     type FineTune as FineTune,
-    type FineTuneListResponse as FineTuneListResponse,
-    type FineTuneListVoicesResponse as FineTuneListVoicesResponse,
+    type FineTunesCursorIDPage as FineTunesCursorIDPage,
     type FineTuneCreateParams as FineTuneCreateParams,
     type FineTuneListParams as FineTuneListParams,
     type FineTuneListVoicesParams as FineTuneListVoicesParams,
@@ -842,7 +864,7 @@ export declare namespace NoahTesting {
     PronunciationDicts as PronunciationDicts,
     type PronunciationDict as PronunciationDict,
     type PronunciationDictItem as PronunciationDictItem,
-    type PronunciationDictListResponse as PronunciationDictListResponse,
+    type PronunciationDictsCursorIDPage as PronunciationDictsCursorIDPage,
     type PronunciationDictCreateParams as PronunciationDictCreateParams,
     type PronunciationDictUpdateParams as PronunciationDictUpdateParams,
     type PronunciationDictListParams as PronunciationDictListParams,
@@ -875,7 +897,7 @@ export declare namespace NoahTesting {
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
     type VoiceMetadata as VoiceMetadata,
-    type VoiceListResponse as VoiceListResponse,
+    type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,
     type VoiceListParams as VoiceListParams,
     type VoiceCloneParams as VoiceCloneParams,

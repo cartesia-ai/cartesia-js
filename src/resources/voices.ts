@@ -2,6 +2,7 @@
 
 import { APIResource } from '../core/resource';
 import { APIPromise } from '../core/api-promise';
+import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../core/pagination';
 import { type Uploadable } from '../core/uploads';
 import { buildHeaders } from '../internal/headers';
 import { RequestOptions } from '../internal/request-options';
@@ -28,8 +29,8 @@ export class Voices extends APIResource {
   /**
    * List Voices
    */
-  list(query: VoiceListParams, options?: RequestOptions): APIPromise<VoiceListResponse> {
-    return this._client.get('/voices/', { query, ...options });
+  list(query: VoiceListParams, options?: RequestOptions): PagePromise<VoicesCursorIDPage, Voice> {
+    return this._client.getAPIList('/voices/', CursorIDPage<Voice>, { query, ...options });
   }
 
   /**
@@ -62,6 +63,8 @@ export class Voices extends APIResource {
     return this._client.post('/voices/localize', { body, ...options });
   }
 }
+
+export type VoicesCursorIDPage = CursorIDPage<Voice>;
 
 export type GenderPresentation = 'masculine' | 'feminine' | 'gender_neutral';
 
@@ -182,25 +185,6 @@ export interface VoiceMetadata {
   user_id: string;
 }
 
-export interface VoiceListResponse {
-  /**
-   * The paginated list of Voices.
-   */
-  data: Array<Voice>;
-
-  /**
-   * Whether there are more Voices to fetch (using `starting_after=id`, where id is
-   * the ID of the last Voice in the current response).
-   */
-  has_more: boolean;
-
-  /**
-   * (Deprecated - use the id of the last Voice in the current response instead.) An
-   * ID that can be passed as `starting_after` to get the next page of Voices.
-   */
-  next_page?: string | null;
-}
-
 export interface VoiceUpdateParams {
   /**
    * The description of the voice.
@@ -215,19 +199,11 @@ export interface VoiceUpdateParams {
   gender?: GenderPresentation | null;
 }
 
-export interface VoiceListParams {
+export interface VoiceListParams extends CursorIDPageParams {
   /**
    * The gender presentation of the voices to return.
    */
   gender: GenderPresentation | null;
-
-  /**
-   * A cursor to use in pagination. `ending_before` is a Voice ID that defines your
-   * place in the list. For example, if you make a /voices request and receive 100
-   * objects, starting with `voice_abc123`, your subsequent call can include
-   * `ending_before=voice_abc123` to fetch the previous page of the list.
-   */
-  ending_before?: string | null;
 
   /**
    * Additional fields to include in the response.
@@ -248,14 +224,6 @@ export interface VoiceListParams {
    * The number of Voices to return per page, ranging between 1 and 100.
    */
   limit?: number | null;
-
-  /**
-   * A cursor to use in pagination. `starting_after` is a Voice ID that defines your
-   * place in the list. For example, if you make a /voices request and receive 100
-   * objects, ending with `voice_abc123`, your subsequent call can include
-   * `starting_after=voice_abc123` to fetch the next page of the list.
-   */
-  starting_after?: string | null;
 }
 
 export interface VoiceCloneParams {
@@ -343,7 +311,7 @@ export declare namespace Voices {
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
     type VoiceMetadata as VoiceMetadata,
-    type VoiceListResponse as VoiceListResponse,
+    type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,
     type VoiceListParams as VoiceListParams,
     type VoiceCloneParams as VoiceCloneParams,
