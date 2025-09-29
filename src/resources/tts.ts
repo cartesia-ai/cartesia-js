@@ -65,9 +65,9 @@ export interface TtSynthesizeBytesParams {
   model_id: string;
 
   output_format:
-    | TtSynthesizeBytesParams.UnionMember0
-    | TtSynthesizeBytesParams.UnionMember1
-    | TtSynthesizeBytesParams.UnionMember2;
+    | TtSynthesizeBytesParams.RawOutputFormat
+    | TtSynthesizeBytesParams.WavOutputFormat
+    | TtSynthesizeBytesParams.MP3OutputFormat;
 
   transcript: string;
 
@@ -121,15 +121,15 @@ export interface TtSynthesizeBytesParams {
 }
 
 export namespace TtSynthesizeBytesParams {
-  export interface UnionMember0 extends TtsAPI.RawOutputFormat {
+  export interface RawOutputFormat extends TtsAPI.RawOutputFormat {
     container?: 'raw';
   }
 
-  export interface UnionMember1 extends TtsAPI.RawOutputFormat {
+  export interface WavOutputFormat extends TtsAPI.RawOutputFormat {
     container?: 'wav';
   }
 
-  export interface UnionMember2 {
+  export interface MP3OutputFormat {
     /**
      * The bit rate of the audio in bits per second. Supported bit rates are 32000,
      * 64000, 96000, 128000, 192000.
