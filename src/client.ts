@@ -278,6 +278,10 @@ export class NoahTesting {
     return;
   }
 
+  protected async authHeaders(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
+    return buildHeaders([{ Authorization: `Bearer ${this.bearerAuth}` }]);
+  }
+
   protected stringifyQuery(query: Record<string, unknown>): string {
     return qs.stringify(query, { arrayFormat: 'comma' });
   }
@@ -718,6 +722,7 @@ export class NoahTesting {
         ...(options.timeout ? { 'X-Stainless-Timeout': String(Math.trunc(options.timeout / 1000)) } : {}),
         ...getPlatformHeaders(),
       },
+      await this.authHeaders(options),
       this._options.defaultHeaders,
       bodyHeaders,
       options.headers,
