@@ -26,7 +26,7 @@ The full API of this library can be found in [api.md](api.md).
 import NoahTesting from 'noah-testing';
 
 const client = new NoahTesting({
-  accessToken: 'My Access Token',
+  myAccessToken: 'My My Access Token',
 });
 
 const agents = await client.agents.list();
@@ -43,7 +43,7 @@ This library includes TypeScript definitions for all request params and response
 import NoahTesting from 'noah-testing';
 
 const client = new NoahTesting({
-  accessToken: 'My Access Token',
+  myAccessToken: 'My My Access Token',
 });
 
 const agents: NoahTesting.AgentListResponse = await client.agents.list();
