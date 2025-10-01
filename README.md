@@ -26,7 +26,7 @@ The full API of this library can be found in [api.md](api.md).
 import NoahTesting from 'noah-testing';
 
 const client = new NoahTesting({
-  bearerAuth: process.env['CARTESIA_API_KEY'], // This is the default and can be omitted
+  apiKey: process.env['CARTESIA_API_KEY'], // This is the default and can be omitted
 });
 
 const agents = await client.agents.list();
@@ -43,7 +43,7 @@ This library includes TypeScript definitions for all request params and response
 import NoahTesting from 'noah-testing';
 
 const client = new NoahTesting({
-  bearerAuth: process.env['CARTESIA_API_KEY'], // This is the default and can be omitted
+  apiKey: process.env['CARTESIA_API_KEY'], // This is the default and can be omitted
 });
 
 const agents: NoahTesting.AgentListResponse = await client.agents.list();
