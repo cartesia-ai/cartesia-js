@@ -96,10 +96,12 @@ import {
 import { isEmptyObj } from './internal/utils/values';
 
 export interface ClientOptions {
+  accessToken?: string | null | undefined;
+
   /**
    * Defaults to process.env['CARTESIA_API_KEY'].
    */
-  apiKey?: string | undefined;
+  apiKey?: string | null | undefined;
 
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
@@ -174,7 +176,8 @@ export interface ClientOptions {
  * API Client for interfacing with the Noah Testing API.
  */
 export class NoahTesting {
-  apiKey: string;
+  accessToken: string | null;
+  apiKey: string | null;
 
   baseURL: string;
   maxRetries: number;
@@ -191,7 +194,8 @@ export class NoahTesting {
   /**
    * API Client for interfacing with the Noah Testing API.
    *
-   * @param {string | undefined} [opts.apiKey=process.env['CARTESIA_API_KEY'] ?? undefined]
+   * @param {string | null | undefined} [opts.accessToken]
+   * @param {string | null | undefined} [opts.apiKey=process.env['CARTESIA_API_KEY'] ?? null]
    * @param {string} [opts.baseURL=process.env['NOAH_TESTING_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {MergedRequestInit} [opts.fetchOptions] - Additional `RequestInit` options to be passed to `fetch` calls.
@@ -202,16 +206,12 @@ export class NoahTesting {
    */
   constructor({
     baseURL = readEnv('NOAH_TESTING_BASE_URL'),
-    apiKey = readEnv('CARTESIA_API_KEY'),
+    accessToken = null,
+    apiKey = readEnv('CARTESIA_API_KEY') ?? null,
     ...opts
   }: ClientOptions = {}) {
-    if (apiKey === undefined) {
-      throw new Errors.NoahTestingError(
-        "The CARTESIA_API_KEY environment variable is missing or empty; either provide it, or instantiate the NoahTesting client with an apiKey option, like new NoahTesting({ apiKey: 'My API Key' }).",
-      );
-    }
-
     const options: ClientOptions = {
+      accessToken,
       apiKey,
       ...opts,
       baseURL: baseURL || `https://api.cartesia.ai`,
@@ -234,6 +234,7 @@ export class NoahTesting {
 
     this._options = options;
 
+    this.accessToken = accessToken;
     this.apiKey = apiKey;
   }
 
@@ -250,6 +251,7 @@ export class NoahTesting {
       logLevel: this.logLevel,
       fetch: this.fetch,
       fetchOptions: this.fetchOptions,
+      accessToken: this.accessToken,
       apiKey: this.apiKey,
       ...options,
     });
@@ -275,11 +277,41 @@ export class NoahTesting {
   }
 
   protected validateHeaders({ values, nulls }: NullableHeaders) {
-    return;
+    if (this.accessToken && values.get('authorization')) {
+      return;
+    }
+    if (nulls.has('authorization')) {
+      return;
+    }
+
+    if (this.apiKey && values.get('x-api-key')) {
+      return;
+    }
+    if (nulls.has('x-api-key')) {
+      return;
+    }
+
+    throw new Error(
+      'Could not resolve authentication method. Expected either accessToken or apiKey to be set. Or for one of the "Authorization" or "X-API-Key" headers to be explicitly omitted',
+    );
   }
 
   protected async authHeaders(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
-    return buildHeaders([{ Authorization: `Bearer ${this.apiKey}` }]);
+    return buildHeaders([await this.bearerAuth(opts), await this.apiKeyAuth(opts)]);
+  }
+
+  protected async bearerAuth(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
+    if (this.accessToken == null) {
+      return undefined;
+    }
+    return buildHeaders([{ Authorization: `Bearer ${this.accessToken}` }]);
+  }
+
+  protected async apiKeyAuth(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
+    if (this.apiKey == null) {
+      return undefined;
+    }
+    return buildHeaders([{ 'X-API-Key': this.apiKey }]);
   }
 
   protected stringifyQuery(query: Record<string, unknown>): string {
