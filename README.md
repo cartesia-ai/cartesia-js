@@ -25,9 +25,7 @@ The full API of this library can be found in [api.md](api.md).
 ```js
 import NoahTesting from 'noah-testing';
 
-const client = new NoahTesting({
-  apiKey: process.env['NOAH_TESTING_API_KEY'], // This is the default and can be omitted
-});
+const client = new NoahTesting();
 
 const agents = await client.agents.list();
 
@@ -42,9 +40,7 @@ This library includes TypeScript definitions for all request params and response
 ```ts
 import NoahTesting from 'noah-testing';
 
-const client = new NoahTesting({
-  apiKey: process.env['NOAH_TESTING_API_KEY'], // This is the default and can be omitted
-});
+const client = new NoahTesting();
 
 const agents: NoahTesting.AgentListResponse = await client.agents.list();
 ```
@@ -124,6 +120,7 @@ You can use the `maxRetries` option to configure or disable this:
 ```js
 // Configure the default for all requests:
 const client = new NoahTesting({
+  apiKeyAuth: 'My API Key Auth',
   maxRetries: 0, // default is 2
 });
 
@@ -141,6 +138,7 @@ Requests time out after 1 minute by default. You can configure this with a `time
 ```ts
 // Configure the default for all requests:
 const client = new NoahTesting({
+  apiKeyAuth: 'My API Key Auth',
   timeout: 20 * 1000, // 20 seconds (default is 1 minute)
 });
 

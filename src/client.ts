@@ -97,9 +97,9 @@ import { isEmptyObj } from './internal/utils/values';
 
 export interface ClientOptions {
   /**
-   * Defaults to process.env['NOAH_TESTING_API_KEY'].
+   * Defaults to process.env['CARTESIA_API_KEY'].
    */
-  apiKey?: string | undefined;
+  apiKeyAuth?: string | undefined;
 
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
@@ -174,7 +174,7 @@ export interface ClientOptions {
  * API Client for interfacing with the Noah Testing API.
  */
 export class NoahTesting {
-  apiKey: string;
+  apiKeyAuth: string;
 
   baseURL: string;
   maxRetries: number;
@@ -191,7 +191,7 @@ export class NoahTesting {
   /**
    * API Client for interfacing with the Noah Testing API.
    *
-   * @param {string | undefined} [opts.apiKey=process.env['NOAH_TESTING_API_KEY'] ?? undefined]
+   * @param {string | undefined} [opts.apiKeyAuth=process.env['CARTESIA_API_KEY'] ?? undefined]
    * @param {string} [opts.baseURL=process.env['NOAH_TESTING_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {MergedRequestInit} [opts.fetchOptions] - Additional `RequestInit` options to be passed to `fetch` calls.
@@ -202,17 +202,17 @@ export class NoahTesting {
    */
   constructor({
     baseURL = readEnv('NOAH_TESTING_BASE_URL'),
-    apiKey = readEnv('NOAH_TESTING_API_KEY'),
+    apiKeyAuth = readEnv('CARTESIA_API_KEY'),
     ...opts
   }: ClientOptions = {}) {
-    if (apiKey === undefined) {
+    if (apiKeyAuth === undefined) {
       throw new Errors.NoahTestingError(
-        "The NOAH_TESTING_API_KEY environment variable is missing or empty; either provide it, or instantiate the NoahTesting client with an apiKey option, like new NoahTesting({ apiKey: 'My API Key' }).",
+        "The CARTESIA_API_KEY environment variable is missing or empty; either provide it, or instantiate the NoahTesting client with an apiKeyAuth option, like new NoahTesting({ apiKeyAuth: 'My API Key Auth' }).",
       );
     }
 
     const options: ClientOptions = {
-      apiKey,
+      apiKeyAuth,
       ...opts,
       baseURL: baseURL || `https://api.cartesia.ai`,
     };
@@ -234,7 +234,7 @@ export class NoahTesting {
 
     this._options = options;
 
-    this.apiKey = apiKey;
+    this.apiKeyAuth = apiKeyAuth;
   }
 
   /**
@@ -250,7 +250,7 @@ export class NoahTesting {
       logLevel: this.logLevel,
       fetch: this.fetch,
       fetchOptions: this.fetchOptions,
-      apiKey: this.apiKey,
+      apiKeyAuth: this.apiKeyAuth,
       ...options,
     });
     return client;
@@ -276,10 +276,6 @@ export class NoahTesting {
 
   protected validateHeaders({ values, nulls }: NullableHeaders) {
     return;
-  }
-
-  protected async authHeaders(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
-    return buildHeaders([{ Authorization: `Bearer ${this.apiKey}` }]);
   }
 
   protected stringifyQuery(query: Record<string, unknown>): string {
@@ -722,7 +718,6 @@ export class NoahTesting {
         ...(options.timeout ? { 'X-Stainless-Timeout': String(Math.trunc(options.timeout / 1000)) } : {}),
         ...getPlatformHeaders(),
       },
-      await this.authHeaders(options),
       this._options.defaultHeaders,
       bodyHeaders,
       options.headers,
