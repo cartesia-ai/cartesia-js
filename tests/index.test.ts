@@ -23,7 +23,7 @@ describe('instantiate client', () => {
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
       defaultHeaders: { 'X-My-Default-Header': '2' },
-      apiKeyAuth: 'My API Key Auth',
+      bearerAuth: 'My Bearer Auth',
     });
 
     test('they are used in the request', async () => {
@@ -87,14 +87,14 @@ describe('instantiate client', () => {
         error: jest.fn(),
       };
 
-      const client = new NoahTesting({ logger: logger, logLevel: 'debug', apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'debug', bearerAuth: 'My Bearer Auth' });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).toHaveBeenCalled();
     });
 
     test('default logLevel is warn', async () => {
-      const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
       expect(client.logLevel).toBe('warn');
     });
 
@@ -107,7 +107,7 @@ describe('instantiate client', () => {
         error: jest.fn(),
       };
 
-      const client = new NoahTesting({ logger: logger, logLevel: 'info', apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'info', bearerAuth: 'My Bearer Auth' });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).not.toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'debug';
-      const client = new NoahTesting({ logger: logger, apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ logger: logger, bearerAuth: 'My Bearer Auth' });
       expect(client.logLevel).toBe('debug');
 
       await forceAPIResponseForClient(client);
@@ -140,7 +140,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'not a log level';
-      const client = new NoahTesting({ logger: logger, apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ logger: logger, bearerAuth: 'My Bearer Auth' });
       expect(client.logLevel).toBe('warn');
       expect(warnMock).toHaveBeenCalledWith(
         'process.env[\'NOAH_TESTING_LOG\'] was set to "not a log level", expected one of ["off","error","warn","info","debug"]',
@@ -157,7 +157,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'debug';
-      const client = new NoahTesting({ logger: logger, logLevel: 'off', apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'off', bearerAuth: 'My Bearer Auth' });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'not a log level';
-      const client = new NoahTesting({ logger: logger, logLevel: 'debug', apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'debug', bearerAuth: 'My Bearer Auth' });
       expect(client.logLevel).toBe('debug');
       expect(warnMock).not.toHaveBeenCalled();
     });
@@ -184,7 +184,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         defaultQuery: { apiVersion: 'foo' },
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/foo?apiVersion=foo');
     });
@@ -193,7 +193,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         defaultQuery: { apiVersion: 'foo', hello: 'world' },
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/foo?apiVersion=foo&hello=world');
     });
@@ -202,7 +202,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         defaultQuery: { hello: 'world' },
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
       expect(client.buildURL('/foo', { hello: undefined })).toEqual('http://localhost:5000/foo');
     });
@@ -211,7 +211,7 @@ describe('instantiate client', () => {
   test('custom fetch', async () => {
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
-      apiKeyAuth: 'My API Key Auth',
+      bearerAuth: 'My Bearer Auth',
       fetch: (url) => {
         return Promise.resolve(
           new Response(JSON.stringify({ url, custom: true }), {
@@ -229,7 +229,7 @@ describe('instantiate client', () => {
     // make sure the global fetch type is assignable to our Fetch type
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
-      apiKeyAuth: 'My API Key Auth',
+      bearerAuth: 'My Bearer Auth',
       fetch: defaultFetch,
     });
   });
@@ -237,7 +237,7 @@ describe('instantiate client', () => {
   test('custom signal', async () => {
     const client = new NoahTesting({
       baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
-      apiKeyAuth: 'My API Key Auth',
+      bearerAuth: 'My Bearer Auth',
       fetch: (...args) => {
         return new Promise((resolve, reject) =>
           setTimeout(
@@ -269,7 +269,7 @@ describe('instantiate client', () => {
 
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
-      apiKeyAuth: 'My API Key Auth',
+      bearerAuth: 'My Bearer Auth',
       fetch: testFetch,
     });
 
@@ -281,7 +281,7 @@ describe('instantiate client', () => {
     test('trailing slash', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/custom/path/',
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/custom/path/foo');
     });
@@ -289,7 +289,7 @@ describe('instantiate client', () => {
     test('no trailing slash', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/custom/path',
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/custom/path/foo');
     });
@@ -299,30 +299,30 @@ describe('instantiate client', () => {
     });
 
     test('explicit option', () => {
-      const client = new NoahTesting({ baseURL: 'https://example.com', apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ baseURL: 'https://example.com', bearerAuth: 'My Bearer Auth' });
       expect(client.baseURL).toEqual('https://example.com');
     });
 
     test('env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = 'https://example.com/from_env';
-      const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
       expect(client.baseURL).toEqual('https://example.com/from_env');
     });
 
     test('empty env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = ''; // empty
-      const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
       expect(client.baseURL).toEqual('https://api.cartesia.ai');
     });
 
     test('blank env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = '  '; // blank
-      const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
       expect(client.baseURL).toEqual('https://api.cartesia.ai');
     });
 
     test('in request options', () => {
-      const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
       expect(client.buildURL('/foo', null, 'http://localhost:5000/option')).toEqual(
         'http://localhost:5000/option/foo',
       );
@@ -330,7 +330,7 @@ describe('instantiate client', () => {
 
     test('in request options overridden by client options', () => {
       const client = new NoahTesting({
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
         baseURL: 'http://localhost:5000/client',
       });
       expect(client.buildURL('/foo', null, 'http://localhost:5000/option')).toEqual(
@@ -340,7 +340,7 @@ describe('instantiate client', () => {
 
     test('in request options overridden by env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = 'http://localhost:5000/env';
-      const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+      const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
       expect(client.buildURL('/foo', null, 'http://localhost:5000/option')).toEqual(
         'http://localhost:5000/env/foo',
       );
@@ -348,11 +348,11 @@ describe('instantiate client', () => {
   });
 
   test('maxRetries option is correctly set', () => {
-    const client = new NoahTesting({ maxRetries: 4, apiKeyAuth: 'My API Key Auth' });
+    const client = new NoahTesting({ maxRetries: 4, bearerAuth: 'My Bearer Auth' });
     expect(client.maxRetries).toEqual(4);
 
     // default
-    const client2 = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+    const client2 = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
     expect(client2.maxRetries).toEqual(2);
   });
 
@@ -361,7 +361,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         maxRetries: 3,
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
 
       const newClient = client.withOptions({
@@ -387,7 +387,7 @@ describe('instantiate client', () => {
         baseURL: 'http://localhost:5000/',
         defaultHeaders: { 'X-Test-Header': 'test-value' },
         defaultQuery: { 'test-param': 'test-value' },
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
 
       const newClient = client.withOptions({
@@ -405,7 +405,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         timeout: 1000,
-        apiKeyAuth: 'My API Key Auth',
+        bearerAuth: 'My Bearer Auth',
       });
 
       // Modify the client properties directly after creation
@@ -434,21 +434,21 @@ describe('instantiate client', () => {
 
   test('with environment variable arguments', () => {
     // set options via env var
-    process.env['CARTESIA_API_KEY'] = 'My API Key Auth';
+    process.env['CARTESIA_API_KEY'] = 'My Bearer Auth';
     const client = new NoahTesting();
-    expect(client.apiKeyAuth).toBe('My API Key Auth');
+    expect(client.bearerAuth).toBe('My Bearer Auth');
   });
 
   test('with overridden environment variable arguments', () => {
     // set options via env var
-    process.env['CARTESIA_API_KEY'] = 'another My API Key Auth';
-    const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
-    expect(client.apiKeyAuth).toBe('My API Key Auth');
+    process.env['CARTESIA_API_KEY'] = 'another My Bearer Auth';
+    const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
+    expect(client.bearerAuth).toBe('My Bearer Auth');
   });
 });
 
 describe('request building', () => {
-  const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+  const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
 
   describe('custom headers', () => {
     test('handles undefined', async () => {
@@ -467,7 +467,7 @@ describe('request building', () => {
 });
 
 describe('default encoder', () => {
-  const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth' });
+  const client = new NoahTesting({ bearerAuth: 'My Bearer Auth' });
 
   class Serializable {
     toJSON() {
@@ -552,7 +552,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth', timeout: 10, fetch: testFetch });
+    const client = new NoahTesting({ bearerAuth: 'My Bearer Auth', timeout: 10, fetch: testFetch });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
     expect(count).toEqual(2);
@@ -582,7 +582,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth', fetch: testFetch, maxRetries: 4 });
+    const client = new NoahTesting({ bearerAuth: 'My Bearer Auth', fetch: testFetch, maxRetries: 4 });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
 
@@ -606,7 +606,7 @@ describe('retries', () => {
       capturedRequest = init;
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
-    const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth', fetch: testFetch, maxRetries: 4 });
+    const client = new NoahTesting({ bearerAuth: 'My Bearer Auth', fetch: testFetch, maxRetries: 4 });
 
     expect(
       await client.request({
@@ -636,7 +636,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
     const client = new NoahTesting({
-      apiKeyAuth: 'My API Key Auth',
+      bearerAuth: 'My Bearer Auth',
       fetch: testFetch,
       maxRetries: 4,
       defaultHeaders: { 'X-Stainless-Retry-Count': null },
@@ -668,7 +668,7 @@ describe('retries', () => {
       capturedRequest = init;
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
-    const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth', fetch: testFetch, maxRetries: 4 });
+    const client = new NoahTesting({ bearerAuth: 'My Bearer Auth', fetch: testFetch, maxRetries: 4 });
 
     expect(
       await client.request({
@@ -698,7 +698,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth', fetch: testFetch });
+    const client = new NoahTesting({ bearerAuth: 'My Bearer Auth', fetch: testFetch });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
     expect(count).toEqual(2);
@@ -728,7 +728,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ apiKeyAuth: 'My API Key Auth', fetch: testFetch });
+    const client = new NoahTesting({ bearerAuth: 'My Bearer Auth', fetch: testFetch });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
     expect(count).toEqual(2);

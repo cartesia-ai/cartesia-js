@@ -99,7 +99,7 @@ export interface ClientOptions {
   /**
    * Defaults to process.env['CARTESIA_API_KEY'].
    */
-  apiKeyAuth?: string | undefined;
+  bearerAuth?: string | undefined;
 
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
@@ -174,7 +174,7 @@ export interface ClientOptions {
  * API Client for interfacing with the Noah Testing API.
  */
 export class NoahTesting {
-  apiKeyAuth: string;
+  bearerAuth: string;
 
   baseURL: string;
   maxRetries: number;
@@ -191,7 +191,7 @@ export class NoahTesting {
   /**
    * API Client for interfacing with the Noah Testing API.
    *
-   * @param {string | undefined} [opts.apiKeyAuth=process.env['CARTESIA_API_KEY'] ?? undefined]
+   * @param {string | undefined} [opts.bearerAuth=process.env['CARTESIA_API_KEY'] ?? undefined]
    * @param {string} [opts.baseURL=process.env['NOAH_TESTING_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {MergedRequestInit} [opts.fetchOptions] - Additional `RequestInit` options to be passed to `fetch` calls.
@@ -202,17 +202,17 @@ export class NoahTesting {
    */
   constructor({
     baseURL = readEnv('NOAH_TESTING_BASE_URL'),
-    apiKeyAuth = readEnv('CARTESIA_API_KEY'),
+    bearerAuth = readEnv('CARTESIA_API_KEY'),
     ...opts
   }: ClientOptions = {}) {
-    if (apiKeyAuth === undefined) {
+    if (bearerAuth === undefined) {
       throw new Errors.NoahTestingError(
-        "The CARTESIA_API_KEY environment variable is missing or empty; either provide it, or instantiate the NoahTesting client with an apiKeyAuth option, like new NoahTesting({ apiKeyAuth: 'My API Key Auth' }).",
+        "The CARTESIA_API_KEY environment variable is missing or empty; either provide it, or instantiate the NoahTesting client with an bearerAuth option, like new NoahTesting({ bearerAuth: 'My Bearer Auth' }).",
       );
     }
 
     const options: ClientOptions = {
-      apiKeyAuth,
+      bearerAuth,
       ...opts,
       baseURL: baseURL || `https://api.cartesia.ai`,
     };
@@ -234,7 +234,7 @@ export class NoahTesting {
 
     this._options = options;
 
-    this.apiKeyAuth = apiKeyAuth;
+    this.bearerAuth = bearerAuth;
   }
 
   /**
@@ -250,7 +250,7 @@ export class NoahTesting {
       logLevel: this.logLevel,
       fetch: this.fetch,
       fetchOptions: this.fetchOptions,
-      apiKeyAuth: this.apiKeyAuth,
+      bearerAuth: this.bearerAuth,
       ...options,
     });
     return client;
