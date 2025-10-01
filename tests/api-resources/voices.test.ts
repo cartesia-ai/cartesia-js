@@ -42,8 +42,8 @@ describe('resource voices', () => {
   });
 
   // Prism tests are disabled
-  test.skip('list: only required params', async () => {
-    const responsePromise = client.voices.list({ gender: 'masculine' });
+  test.skip('list', async () => {
+    const responsePromise = client.voices.list();
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -54,16 +54,22 @@ describe('resource voices', () => {
   });
 
   // Prism tests are disabled
-  test.skip('list: required and optional params', async () => {
-    const response = await client.voices.list({
-      gender: 'masculine',
-      ending_before: 'ending_before',
-      expand: ['is_starred'],
-      is_owner: true,
-      is_starred: true,
-      limit: 0,
-      starting_after: 'starting_after',
-    });
+  test.skip('list: request options and params are passed correctly', async () => {
+    // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
+    await expect(
+      client.voices.list(
+        {
+          ending_before: 'ending_before',
+          expand: ['is_starred'],
+          gender: 'masculine',
+          is_owner: true,
+          is_starred: true,
+          limit: 0,
+          starting_after: 'starting_after',
+        },
+        { path: '/_stainless_unknown_path' },
+      ),
+    ).rejects.toThrow(NoahTesting.NotFoundError);
   });
 
   // Prism tests are disabled

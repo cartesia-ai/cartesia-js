@@ -29,7 +29,10 @@ export class Voices extends APIResource {
   /**
    * List Voices
    */
-  list(query: VoiceListParams, options?: RequestOptions): PagePromise<VoicesCursorIDPage, Voice> {
+  list(
+    query: VoiceListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): PagePromise<VoicesCursorIDPage, Voice> {
     return this._client.getAPIList('/voices/', CursorIDPage<Voice>, { query, ...options });
   }
 
@@ -201,14 +204,14 @@ export interface VoiceUpdateParams {
 
 export interface VoiceListParams extends CursorIDPageParams {
   /**
-   * The gender presentation of the voices to return.
-   */
-  gender: GenderPresentation | null;
-
-  /**
    * Additional fields to include in the response.
    */
   expand?: Array<'is_starred'> | null;
+
+  /**
+   * The gender presentation of the voices to return.
+   */
+  gender?: GenderPresentation | null;
 
   /**
    * Whether to only return voices owned by the current user.
