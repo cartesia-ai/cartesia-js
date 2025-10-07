@@ -187,9 +187,14 @@ while (page.hasNextPage()) {
 
 ## Default Headers
 
-We automatically send the `cartesia-version` header set to `2025-04-16`.
+We automatically send the following headers with all requests.
 
-If you need to, you can override it by setting default headers on a per-request basis.
+| Header             | Value        |
+| ------------------ | ------------ |
+| `cartesia-version` | `2025-04-16` |
+| `foo`              | `bar`        |
+
+If you need to, you can override these headers by setting default headers on a per-request basis.
 
 ```ts
 import NoahTesting from 'noah-testing';
