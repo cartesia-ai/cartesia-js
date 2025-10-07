@@ -185,25 +185,6 @@ while (page.hasNextPage()) {
 }
 ```
 
-## Default Headers
-
-We automatically send the following headers with all requests.
-
-| Header             | Value        |
-| ------------------ | ------------ |
-| `cartesia-version` | `2025-04-16` |
-| `foo`              | `bar`        |
-
-If you need to, you can override these headers by setting default headers on a per-request basis.
-
-```ts
-import NoahTesting from 'noah-testing';
-
-const client = new NoahTesting();
-
-const agents = await client.agents.list({ headers: { 'cartesia-version': 'My-Custom-Value' } });
-```
-
 ## Advanced Usage
 
 ### Accessing raw Response data (e.g., headers)

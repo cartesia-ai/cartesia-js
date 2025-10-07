@@ -720,8 +720,6 @@ export class NoahTesting {
         'X-Stainless-Retry-Count': String(retryCount),
         ...(options.timeout ? { 'X-Stainless-Timeout': String(Math.trunc(options.timeout / 1000)) } : {}),
         ...getPlatformHeaders(),
-        'cartesia-version': '2025-04-16',
-        foo: 'bar',
       },
       await this.authHeaders(options),
       this._options.defaultHeaders,
