@@ -175,7 +175,7 @@ Types:
 
 Methods:
 
-- <code title="post /tts/bytes">client.tts.<a href="./src/resources/tts.ts">synthesizeBytes</a>({ ...params }) -> void</code>
+- <code title="post /tts/bytes">client.tts.<a href="./src/resources/tts.ts">synthesizeBytes</a>({ ...params }) -> Response</code>
 - <code title="post /tts/sse">client.tts.<a href="./src/resources/tts.ts">synthesizeSse</a>({ ...params }) -> void</code>
 
 # VoiceChanger

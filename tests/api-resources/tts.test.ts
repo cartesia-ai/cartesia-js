@@ -8,25 +8,7 @@ const client = new NoahTesting({
 });
 
 describe('resource tts', () => {
-  // Prism tests are disabled
-  test.skip('synthesizeBytes: only required params', async () => {
-    const responsePromise = client.tts.synthesizeBytes({
-      model_id: 'model_id',
-      output_format: { encoding: 'pcm_f32le', sample_rate: 0 },
-      transcript: 'transcript',
-      voice: { id: 'id', mode: 'id' },
-    });
-    const rawResponse = await responsePromise.asResponse();
-    expect(rawResponse).toBeInstanceOf(Response);
-    const response = await responsePromise;
-    expect(response).not.toBeInstanceOf(Response);
-    const dataAndResponse = await responsePromise.withResponse();
-    expect(dataAndResponse.data).toBe(response);
-    expect(dataAndResponse.response).toBe(rawResponse);
-  });
-
-  // Prism tests are disabled
-  test.skip('synthesizeBytes: required and optional params', async () => {
+  test('synthesizeBytes: required and optional params', async () => {
     const response = await client.tts.synthesizeBytes({
       model_id: 'model_id',
       output_format: { encoding: 'pcm_f32le', sample_rate: 0, container: 'raw' },

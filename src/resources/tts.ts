@@ -12,11 +12,12 @@ export class Tts extends APIResource {
   /**
    * Text to Speech (Bytes)
    */
-  synthesizeBytes(body: TtSynthesizeBytesParams, options?: RequestOptions): APIPromise<void> {
+  synthesizeBytes(body: TtSynthesizeBytesParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post('/tts/bytes', {
       body,
       ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+      headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
+      __binaryResponse: true,
     });
   }
 
