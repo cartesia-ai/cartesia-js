@@ -282,7 +282,7 @@ export class NoahTesting {
   }
 
   protected stringifyQuery(query: Record<string, unknown>): string {
-    return qs.stringify(query, { arrayFormat: 'repeat' });
+    return qs.stringify(query, { arrayFormat: 'brackets' });
   }
 
   private getUserAgent(): string {
