@@ -2,7 +2,7 @@
 
 import { APIResource } from '../../core/resource';
 import * as CallsAPI from './calls';
-import { AgentCall, AgentCallsCursorIDPage, AgentTranscript, CallListParams, Calls } from './calls';
+import { AgentCall, AgentTranscript, CallListParams, CallListResponse, Calls } from './calls';
 import * as DeploymentsAPI from './deployments';
 import { Deployment, DeploymentListResponse, Deployments } from './deployments';
 import * as MetricsAPI from './metrics/metrics';
@@ -329,7 +329,7 @@ export declare namespace Agents {
     Calls as Calls,
     type AgentCall as AgentCall,
     type AgentTranscript as AgentTranscript,
-    type AgentCallsCursorIDPage as AgentCallsCursorIDPage,
+    type CallListResponse as CallListResponse,
     type CallListParams as CallListParams,
   };
 

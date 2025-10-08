@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../core/resource';
 import { APIPromise } from '../../core/api-promise';
-import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../../core/pagination';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { path } from '../../internal/utils/path';
@@ -20,8 +19,8 @@ export class Calls extends APIResource {
    * `agent_id` is required and if you want to include `transcript` in the response,
    * add `expand=transcript` to the request. This endpoint is paginated.
    */
-  list(query: CallListParams, options?: RequestOptions): PagePromise<AgentCallsCursorIDPage, AgentCall> {
-    return this._client.getAPIList('/agents/calls', CursorIDPage<AgentCall>, { query, ...options });
+  list(query: CallListParams, options?: RequestOptions): APIPromise<CallListResponse> {
+    return this._client.get('/agents/calls', { query, ...options });
   }
 
   /**
@@ -35,8 +34,6 @@ export class Calls extends APIResource {
     });
   }
 }
-
-export type AgentCallsCursorIDPage = CursorIDPage<AgentCall>;
 
 export interface AgentCall {
   /**
@@ -244,11 +241,28 @@ export namespace AgentTranscript {
   }
 }
 
-export interface CallListParams extends CursorIDPageParams {
+export interface CallListResponse {
+  /**
+   * The list of agent calls.
+   */
+  data: Array<AgentCall>;
+
+  /**
+   * The cursor for the next page of results.
+   */
+  next_page?: string | null;
+}
+
+export interface CallListParams {
   /**
    * The ID of the agent.
    */
   agent_id: string;
+
+  /**
+   * (Pagination option) The ID of the call to end before.
+   */
+  ending_before?: string | null;
 
   /**
    * The fields to expand in the response. Currently, the only supported value is
@@ -261,13 +275,18 @@ export interface CallListParams extends CursorIDPageParams {
    * and 100.
    */
   limit?: number | null;
+
+  /**
+   * (Pagination option)The ID of the call to start after.
+   */
+  starting_after?: string | null;
 }
 
 export declare namespace Calls {
   export {
     type AgentCall as AgentCall,
     type AgentTranscript as AgentTranscript,
-    type AgentCallsCursorIDPage as AgentCallsCursorIDPage,
+    type CallListResponse as CallListResponse,
     type CallListParams as CallListParams,
   };
 }

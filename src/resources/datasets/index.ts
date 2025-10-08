@@ -3,10 +3,10 @@
 export {
   Datasets,
   type Dataset,
+  type DatasetListResponse,
   type DatasetCreateParams,
   type DatasetUpdateParams,
   type DatasetListParams,
-  type DatasetsCursorIDPage,
 } from './datasets';
 export {
   Files,
@@ -14,5 +14,4 @@ export {
   type FileListParams,
   type FileDeleteParams,
   type FileUploadParams,
-  type FileListResponsesCursorIDPage,
 } from './files';

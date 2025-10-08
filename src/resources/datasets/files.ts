@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../core/resource';
 import { APIPromise } from '../../core/api-promise';
-import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../../core/pagination';
 import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
@@ -17,11 +16,8 @@ export class Files extends APIResource {
     id: string,
     query: FileListParams | null | undefined = {},
     options?: RequestOptions,
-  ): PagePromise<FileListResponsesCursorIDPage, FileListResponse> {
-    return this._client.getAPIList(path`/datasets/${id}/files`, CursorIDPage<FileListResponse>, {
-      query,
-      ...options,
-    });
+  ): APIPromise<FileListResponse> {
+    return this._client.get(path`/datasets/${id}/files`, { query, ...options });
   }
 
   /**
@@ -49,38 +45,69 @@ export class Files extends APIResource {
   }
 }
 
-export type FileListResponsesCursorIDPage = CursorIDPage<FileListResponse>;
-
 /**
- * File stored in a dataset
+ * Paginated list of files in a dataset
  */
 export interface FileListResponse {
   /**
-   * Unique identifier for the file
+   * List of file objects
    */
-  id: string;
+  data: Array<FileListResponse.Data>;
 
   /**
-   * Timestamp when the file was created
+   * Whether there are more files available
    */
-  created_at: string;
-
-  /**
-   * Original filename
-   */
-  filename: string;
-
-  /**
-   * Size of the file in bytes
-   */
-  size: number;
+  has_more: boolean;
 }
 
-export interface FileListParams extends CursorIDPageParams {
+export namespace FileListResponse {
+  /**
+   * File stored in a dataset
+   */
+  export interface Data {
+    /**
+     * Unique identifier for the file
+     */
+    id: string;
+
+    /**
+     * Timestamp when the file was created
+     */
+    created_at: string;
+
+    /**
+     * Original filename
+     */
+    filename: string;
+
+    /**
+     * Size of the file in bytes
+     */
+    size: number;
+  }
+}
+
+export interface FileListParams {
+  /**
+   * A cursor to use in pagination. `ending_before` is a file ID that defines your
+   * place in the list. For example, if you make a dataset files request and receive
+   * 20 objects, starting with `file_abc123`, your subsequent call can include
+   * `ending_before=file_abc123` to fetch the previous page of the list.
+   */
+  ending_before?: string | null;
+
   /**
    * The number of files to return per page, ranging between 1 and 100.
    */
   limit?: number | null;
+
+  /**
+   * A cursor to use in pagination. `starting_after` is a file ID that defines your
+   * place in the list. For example, if you make a dataset files request and receive
+   * 20 objects, ending with `file_abc123`, your subsequent call can include
+   * `starting_after=file_abc123` to fetch the next page of the list.
+   */
+  starting_after?: string | null;
 }
 
 export interface FileDeleteParams {
@@ -102,7 +129,6 @@ export interface FileUploadParams {
 export declare namespace Files {
   export {
     type FileListResponse as FileListResponse,
-    type FileListResponsesCursorIDPage as FileListResponsesCursorIDPage,
     type FileListParams as FileListParams,
     type FileDeleteParams as FileDeleteParams,
     type FileUploadParams as FileUploadParams,

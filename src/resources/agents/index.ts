@@ -12,8 +12,8 @@ export {
   Calls,
   type AgentCall,
   type AgentTranscript,
+  type CallListResponse,
   type CallListParams,
-  type AgentCallsCursorIDPage,
 } from './calls';
 export { Deployments, type Deployment, type DeploymentListResponse } from './deployments';
 export {

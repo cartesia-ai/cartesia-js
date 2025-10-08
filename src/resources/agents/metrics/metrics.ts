@@ -2,13 +2,7 @@
 
 import { APIResource } from '../../../core/resource';
 import * as ResultsAPI from './results';
-import {
-  ResultExportParams,
-  ResultListParams,
-  ResultListResponse,
-  ResultListResponsesCursorIDPage,
-  Results,
-} from './results';
+import { ResultExportParams, ResultListParams, ResultListResponse, Results } from './results';
 import { APIPromise } from '../../../core/api-promise';
 import { buildHeaders } from '../../../internal/headers';
 import { RequestOptions } from '../../../internal/request-options';
@@ -179,7 +173,6 @@ export declare namespace Metrics {
   export {
     Results as Results,
     type ResultListResponse as ResultListResponse,
-    type ResultListResponsesCursorIDPage as ResultListResponsesCursorIDPage,
     type ResultListParams as ResultListParams,
     type ResultExportParams as ResultExportParams,
   };
