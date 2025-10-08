@@ -3,7 +3,7 @@
 import NoahTesting from 'noah-testing';
 
 const client = new NoahTesting({
-  authToken: 'My Auth Token',
+  accessToken: 'My Access Token',
   baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
 });
 

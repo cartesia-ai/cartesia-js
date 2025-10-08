@@ -25,9 +25,7 @@ The full API of this library can be found in [api.md](api.md).
 ```js
 import NoahTesting from 'noah-testing';
 
-const client = new NoahTesting({
-  authToken: 'My Auth Token',
-});
+const client = new NoahTesting();
 
 const agents = await client.agents.list();
 
@@ -42,9 +40,7 @@ This library includes TypeScript definitions for all request params and response
 ```ts
 import NoahTesting from 'noah-testing';
 
-const client = new NoahTesting({
-  authToken: 'My Auth Token',
-});
+const client = new NoahTesting();
 
 const agents: NoahTesting.AgentListResponse = await client.agents.list();
 ```

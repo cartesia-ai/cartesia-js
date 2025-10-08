@@ -95,7 +95,9 @@ import {
 import { isEmptyObj } from './internal/utils/values';
 
 export interface ClientOptions {
-  authToken?: string | null | undefined;
+  accessToken?: string | null | undefined;
+
+  apiKey?: string | null | undefined;
 
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
@@ -170,7 +172,8 @@ export interface ClientOptions {
  * API Client for interfacing with the Noah Testing API.
  */
 export class NoahTesting {
-  authToken: string | null;
+  accessToken: string | null;
+  apiKey: string | null;
 
   baseURL: string;
   maxRetries: number;
@@ -187,7 +190,8 @@ export class NoahTesting {
   /**
    * API Client for interfacing with the Noah Testing API.
    *
-   * @param {string | null | undefined} [opts.authToken]
+   * @param {string | null | undefined} [opts.accessToken]
+   * @param {string | null | undefined} [opts.apiKey]
    * @param {string} [opts.baseURL=process.env['NOAH_TESTING_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {MergedRequestInit} [opts.fetchOptions] - Additional `RequestInit` options to be passed to `fetch` calls.
@@ -196,9 +200,15 @@ export class NoahTesting {
    * @param {HeadersLike} opts.defaultHeaders - Default headers to include with every request to the API.
    * @param {Record<string, string | undefined>} opts.defaultQuery - Default query parameters to include with every request to the API.
    */
-  constructor({ baseURL = readEnv('NOAH_TESTING_BASE_URL'), authToken = null, ...opts }: ClientOptions = {}) {
+  constructor({
+    baseURL = readEnv('NOAH_TESTING_BASE_URL'),
+    accessToken = null,
+    apiKey = null,
+    ...opts
+  }: ClientOptions = {}) {
     const options: ClientOptions = {
-      authToken,
+      accessToken,
+      apiKey,
       ...opts,
       baseURL: baseURL || `https://api.cartesia.ai`,
     };
@@ -220,7 +230,8 @@ export class NoahTesting {
 
     this._options = options;
 
-    this.authToken = authToken;
+    this.accessToken = accessToken;
+    this.apiKey = apiKey;
   }
 
   /**
@@ -236,7 +247,8 @@ export class NoahTesting {
       logLevel: this.logLevel,
       fetch: this.fetch,
       fetchOptions: this.fetchOptions,
-      authToken: this.authToken,
+      accessToken: this.accessToken,
+      apiKey: this.apiKey,
       ...options,
     });
     return client;
@@ -261,7 +273,14 @@ export class NoahTesting {
   }
 
   protected validateHeaders({ values, nulls }: NullableHeaders) {
-    if (this.authToken && values.get('authorization')) {
+    if (this.accessToken && values.get('authorization')) {
+      return;
+    }
+    if (nulls.has('authorization')) {
+      return;
+    }
+
+    if (this.apiKey && values.get('authorization')) {
       return;
     }
     if (nulls.has('authorization')) {
@@ -269,15 +288,26 @@ export class NoahTesting {
     }
 
     throw new Error(
-      'Could not resolve authentication method. Expected the authToken to be set. Or for the "Authorization" headers to be explicitly omitted',
+      'Could not resolve authentication method. Expected either accessToken or apiKey to be set. Or for one of the "Authorization" or "Authorization" headers to be explicitly omitted',
     );
   }
 
   protected async authHeaders(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
-    if (this.authToken == null) {
+    return buildHeaders([await this.tokenAuth(opts), await this.apiKeyAuth(opts)]);
+  }
+
+  protected async tokenAuth(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
+    if (this.accessToken == null) {
       return undefined;
     }
-    return buildHeaders([{ Authorization: `Bearer ${this.authToken}` }]);
+    return buildHeaders([{ Authorization: `Bearer ${this.accessToken}` }]);
+  }
+
+  protected async apiKeyAuth(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
+    if (this.apiKey == null) {
+      return undefined;
+    }
+    return buildHeaders([{ Authorization: `Bearer ${this.apiKey}` }]);
   }
 
   protected stringifyQuery(query: Record<string, unknown>): string {
