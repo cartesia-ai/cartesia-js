@@ -2,8 +2,16 @@
 
 import { APIResource } from '../../core/resource';
 import * as FilesAPI from './files';
-import { FileDeleteParams, FileListParams, FileListResponse, FileUploadParams, Files } from './files';
+import {
+  FileDeleteParams,
+  FileListParams,
+  FileListResponse,
+  FileListResponsesCursorIDPage,
+  FileUploadParams,
+  Files,
+} from './files';
 import { APIPromise } from '../../core/api-promise';
+import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../../core/pagination';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { path } from '../../internal/utils/path';
@@ -42,8 +50,8 @@ export class Datasets extends APIResource {
   list(
     query: DatasetListParams | null | undefined = {},
     options?: RequestOptions,
-  ): APIPromise<DatasetListResponse> {
-    return this._client.get('/datasets/', { query, ...options });
+  ): PagePromise<DatasetsCursorIDPage, Dataset> {
+    return this._client.getAPIList('/datasets/', CursorIDPage<Dataset>, { query, ...options });
   }
 
   /**
@@ -56,6 +64,8 @@ export class Datasets extends APIResource {
     });
   }
 }
+
+export type DatasetsCursorIDPage = CursorIDPage<Dataset>;
 
 /**
  * A collection of files used for fine-tuning models
@@ -82,21 +92,6 @@ export interface Dataset {
   name: string;
 }
 
-/**
- * Paginated list of datasets
- */
-export interface DatasetListResponse {
-  /**
-   * List of dataset objects
-   */
-  data: Array<Dataset>;
-
-  /**
-   * Whether there are more datasets available
-   */
-  has_more: boolean;
-}
-
 export interface DatasetCreateParams {
   /**
    * Optional description for the dataset
@@ -121,27 +116,11 @@ export interface DatasetUpdateParams {
   name: string;
 }
 
-export interface DatasetListParams {
-  /**
-   * A cursor to use in pagination. `ending_before` is a Dataset ID that defines your
-   * place in the list. For example, if you make a /datasets request and receive 20
-   * objects, starting with `dataset_abc123`, your subsequent call can include
-   * `ending_before=dataset_abc123` to fetch the previous page of the list.
-   */
-  ending_before?: string | null;
-
+export interface DatasetListParams extends CursorIDPageParams {
   /**
    * The number of Datasets to return per page, ranging between 1 and 100.
    */
   limit?: number | null;
-
-  /**
-   * A cursor to use in pagination. `starting_after` is a Dataset ID that defines
-   * your place in the list. For example, if you make a /datasets request and receive
-   * 20 objects, ending with `dataset_abc123`, your subsequent call can include
-   * `starting_after=dataset_abc123` to fetch the next page of the list.
-   */
-  starting_after?: string | null;
 }
 
 Datasets.Files = Files;
@@ -149,7 +128,7 @@ Datasets.Files = Files;
 export declare namespace Datasets {
   export {
     type Dataset as Dataset,
-    type DatasetListResponse as DatasetListResponse,
+    type DatasetsCursorIDPage as DatasetsCursorIDPage,
     type DatasetCreateParams as DatasetCreateParams,
     type DatasetUpdateParams as DatasetUpdateParams,
     type DatasetListParams as DatasetListParams,
@@ -158,6 +137,7 @@ export declare namespace Datasets {
   export {
     Files as Files,
     type FileListResponse as FileListResponse,
+    type FileListResponsesCursorIDPage as FileListResponsesCursorIDPage,
     type FileListParams as FileListParams,
     type FileDeleteParams as FileDeleteParams,
     type FileUploadParams as FileUploadParams,

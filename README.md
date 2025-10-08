@@ -154,6 +154,37 @@ On timeout, an `APIConnectionTimeoutError` is thrown.
 
 Note that requests which time out will be [retried twice by default](#retries).
 
+## Auto-pagination
+
+List methods in the NoahTesting API are paginated.
+You can use the `for await … of` syntax to iterate through items across all pages:
+
+```ts
+async function fetchAllVoices(params) {
+  const allVoices = [];
+  // Automatically fetches more pages as needed.
+  for await (const voice of client.voices.list()) {
+    allVoices.push(voice);
+  }
+  return allVoices;
+}
+```
+
+Alternatively, you can request a single page at a time:
+
+```ts
+let page = await client.voices.list();
+for (const voice of page.data) {
+  console.log(voice);
+}
+
+// Convenience methods are provided for manually paginating:
+while (page.hasNextPage()) {
+  page = await page.getNextPage();
+  // ...
+}
+```
+
 ## Default Headers
 
 We automatically send the `cartesia-version` header set to `2025-04-16`.

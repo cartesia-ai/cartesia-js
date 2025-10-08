@@ -12,29 +12,28 @@ export {
 export {
   Datasets,
   type Dataset,
-  type DatasetListResponse,
   type DatasetCreateParams,
   type DatasetUpdateParams,
   type DatasetListParams,
+  type DatasetsCursorIDPage,
 } from './datasets/datasets';
 export {
   FineTunes,
   type FineTune,
-  type FineTuneListResponse,
-  type FineTuneListVoicesResponse,
   type FineTuneCreateParams,
   type FineTuneListParams,
   type FineTuneListVoicesParams,
+  type FineTunesCursorIDPage,
 } from './fine-tunes';
 export { Infill, type OutputFormatContainer, type RawEncoding, type InfillCreateParams } from './infill';
 export {
   PronunciationDicts,
   type PronunciationDict,
   type PronunciationDictItem,
-  type PronunciationDictListResponse,
   type PronunciationDictCreateParams,
   type PronunciationDictUpdateParams,
   type PronunciationDictListParams,
+  type PronunciationDictsCursorIDPage,
 } from './pronunciation-dicts';
 export { Stt, type SttTranscribeResponse, type SttTranscribeParams } from './stt';
 export {
@@ -56,10 +55,10 @@ export {
   type SupportedLanguage,
   type Voice,
   type VoiceMetadata,
-  type VoiceListResponse,
   type VoiceUpdateParams,
   type VoiceListParams,
   type VoiceCloneParams,
   type VoiceLocalizeParams,
+  type VoicesCursorIDPage,
 } from './voices';
 export { type GetStatusResponse } from './top-level';

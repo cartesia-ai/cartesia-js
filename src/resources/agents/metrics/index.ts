@@ -9,4 +9,10 @@ export {
   type MetricAddToAgentParams,
   type MetricRemoveFromAgentParams,
 } from './metrics';
-export { Results, type ResultListResponse, type ResultListParams, type ResultExportParams } from './results';
+export {
+  Results,
+  type ResultListResponse,
+  type ResultListParams,
+  type ResultExportParams,
+  type ResultListResponsesCursorIDPage,
+} from './results';
