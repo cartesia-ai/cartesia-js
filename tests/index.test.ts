@@ -23,7 +23,7 @@ describe('instantiate client', () => {
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
       defaultHeaders: { 'X-My-Default-Header': '2' },
-      accessToken: 'My Access Token',
+      token: 'My Token',
     });
 
     test('they are used in the request', async () => {
@@ -87,14 +87,14 @@ describe('instantiate client', () => {
         error: jest.fn(),
       };
 
-      const client = new NoahTesting({ logger: logger, logLevel: 'debug', accessToken: 'My Access Token' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'debug', token: 'My Token' });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).toHaveBeenCalled();
     });
 
     test('default logLevel is warn', async () => {
-      const client = new NoahTesting({ accessToken: 'My Access Token' });
+      const client = new NoahTesting({ token: 'My Token' });
       expect(client.logLevel).toBe('warn');
     });
 
@@ -107,7 +107,7 @@ describe('instantiate client', () => {
         error: jest.fn(),
       };
 
-      const client = new NoahTesting({ logger: logger, logLevel: 'info', accessToken: 'My Access Token' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'info', token: 'My Token' });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).not.toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'debug';
-      const client = new NoahTesting({ logger: logger, accessToken: 'My Access Token' });
+      const client = new NoahTesting({ logger: logger, token: 'My Token' });
       expect(client.logLevel).toBe('debug');
 
       await forceAPIResponseForClient(client);
@@ -140,7 +140,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'not a log level';
-      const client = new NoahTesting({ logger: logger, accessToken: 'My Access Token' });
+      const client = new NoahTesting({ logger: logger, token: 'My Token' });
       expect(client.logLevel).toBe('warn');
       expect(warnMock).toHaveBeenCalledWith(
         'process.env[\'NOAH_TESTING_LOG\'] was set to "not a log level", expected one of ["off","error","warn","info","debug"]',
@@ -157,7 +157,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'debug';
-      const client = new NoahTesting({ logger: logger, logLevel: 'off', accessToken: 'My Access Token' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'off', token: 'My Token' });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('instantiate client', () => {
       };
 
       process.env['NOAH_TESTING_LOG'] = 'not a log level';
-      const client = new NoahTesting({ logger: logger, logLevel: 'debug', accessToken: 'My Access Token' });
+      const client = new NoahTesting({ logger: logger, logLevel: 'debug', token: 'My Token' });
       expect(client.logLevel).toBe('debug');
       expect(warnMock).not.toHaveBeenCalled();
     });
@@ -184,7 +184,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         defaultQuery: { apiVersion: 'foo' },
-        accessToken: 'My Access Token',
+        token: 'My Token',
       });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/foo?apiVersion=foo');
     });
@@ -193,7 +193,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         defaultQuery: { apiVersion: 'foo', hello: 'world' },
-        accessToken: 'My Access Token',
+        token: 'My Token',
       });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/foo?apiVersion=foo&hello=world');
     });
@@ -202,7 +202,7 @@ describe('instantiate client', () => {
       const client = new NoahTesting({
         baseURL: 'http://localhost:5000/',
         defaultQuery: { hello: 'world' },
-        accessToken: 'My Access Token',
+        token: 'My Token',
       });
       expect(client.buildURL('/foo', { hello: undefined })).toEqual('http://localhost:5000/foo');
     });
@@ -211,7 +211,7 @@ describe('instantiate client', () => {
   test('custom fetch', async () => {
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
-      accessToken: 'My Access Token',
+      token: 'My Token',
       fetch: (url) => {
         return Promise.resolve(
           new Response(JSON.stringify({ url, custom: true }), {
@@ -229,7 +229,7 @@ describe('instantiate client', () => {
     // make sure the global fetch type is assignable to our Fetch type
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
-      accessToken: 'My Access Token',
+      token: 'My Token',
       fetch: defaultFetch,
     });
   });
@@ -237,7 +237,7 @@ describe('instantiate client', () => {
   test('custom signal', async () => {
     const client = new NoahTesting({
       baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
-      accessToken: 'My Access Token',
+      token: 'My Token',
       fetch: (...args) => {
         return new Promise((resolve, reject) =>
           setTimeout(
@@ -269,7 +269,7 @@ describe('instantiate client', () => {
 
     const client = new NoahTesting({
       baseURL: 'http://localhost:5000/',
-      accessToken: 'My Access Token',
+      token: 'My Token',
       fetch: testFetch,
     });
 
@@ -279,18 +279,12 @@ describe('instantiate client', () => {
 
   describe('baseUrl', () => {
     test('trailing slash', () => {
-      const client = new NoahTesting({
-        baseURL: 'http://localhost:5000/custom/path/',
-        accessToken: 'My Access Token',
-      });
+      const client = new NoahTesting({ baseURL: 'http://localhost:5000/custom/path/', token: 'My Token' });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/custom/path/foo');
     });
 
     test('no trailing slash', () => {
-      const client = new NoahTesting({
-        baseURL: 'http://localhost:5000/custom/path',
-        accessToken: 'My Access Token',
-      });
+      const client = new NoahTesting({ baseURL: 'http://localhost:5000/custom/path', token: 'My Token' });
       expect(client.buildURL('/foo', null)).toEqual('http://localhost:5000/custom/path/foo');
     });
 
@@ -299,40 +293,37 @@ describe('instantiate client', () => {
     });
 
     test('explicit option', () => {
-      const client = new NoahTesting({ baseURL: 'https://example.com', accessToken: 'My Access Token' });
+      const client = new NoahTesting({ baseURL: 'https://example.com', token: 'My Token' });
       expect(client.baseURL).toEqual('https://example.com');
     });
 
     test('env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = 'https://example.com/from_env';
-      const client = new NoahTesting({ accessToken: 'My Access Token' });
+      const client = new NoahTesting({ token: 'My Token' });
       expect(client.baseURL).toEqual('https://example.com/from_env');
     });
 
     test('empty env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = ''; // empty
-      const client = new NoahTesting({ accessToken: 'My Access Token' });
+      const client = new NoahTesting({ token: 'My Token' });
       expect(client.baseURL).toEqual('https://api.cartesia.ai');
     });
 
     test('blank env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = '  '; // blank
-      const client = new NoahTesting({ accessToken: 'My Access Token' });
+      const client = new NoahTesting({ token: 'My Token' });
       expect(client.baseURL).toEqual('https://api.cartesia.ai');
     });
 
     test('in request options', () => {
-      const client = new NoahTesting({ accessToken: 'My Access Token' });
+      const client = new NoahTesting({ token: 'My Token' });
       expect(client.buildURL('/foo', null, 'http://localhost:5000/option')).toEqual(
         'http://localhost:5000/option/foo',
       );
     });
 
     test('in request options overridden by client options', () => {
-      const client = new NoahTesting({
-        accessToken: 'My Access Token',
-        baseURL: 'http://localhost:5000/client',
-      });
+      const client = new NoahTesting({ token: 'My Token', baseURL: 'http://localhost:5000/client' });
       expect(client.buildURL('/foo', null, 'http://localhost:5000/option')).toEqual(
         'http://localhost:5000/client/foo',
       );
@@ -340,7 +331,7 @@ describe('instantiate client', () => {
 
     test('in request options overridden by env variable', () => {
       process.env['NOAH_TESTING_BASE_URL'] = 'http://localhost:5000/env';
-      const client = new NoahTesting({ accessToken: 'My Access Token' });
+      const client = new NoahTesting({ token: 'My Token' });
       expect(client.buildURL('/foo', null, 'http://localhost:5000/option')).toEqual(
         'http://localhost:5000/env/foo',
       );
@@ -348,21 +339,17 @@ describe('instantiate client', () => {
   });
 
   test('maxRetries option is correctly set', () => {
-    const client = new NoahTesting({ maxRetries: 4, accessToken: 'My Access Token' });
+    const client = new NoahTesting({ maxRetries: 4, token: 'My Token' });
     expect(client.maxRetries).toEqual(4);
 
     // default
-    const client2 = new NoahTesting({ accessToken: 'My Access Token' });
+    const client2 = new NoahTesting({ token: 'My Token' });
     expect(client2.maxRetries).toEqual(2);
   });
 
   describe('withOptions', () => {
     test('creates a new client with overridden options', async () => {
-      const client = new NoahTesting({
-        baseURL: 'http://localhost:5000/',
-        maxRetries: 3,
-        accessToken: 'My Access Token',
-      });
+      const client = new NoahTesting({ baseURL: 'http://localhost:5000/', maxRetries: 3, token: 'My Token' });
 
       const newClient = client.withOptions({
         maxRetries: 5,
@@ -387,7 +374,7 @@ describe('instantiate client', () => {
         baseURL: 'http://localhost:5000/',
         defaultHeaders: { 'X-Test-Header': 'test-value' },
         defaultQuery: { 'test-param': 'test-value' },
-        accessToken: 'My Access Token',
+        token: 'My Token',
       });
 
       const newClient = client.withOptions({
@@ -402,11 +389,7 @@ describe('instantiate client', () => {
     });
 
     test('respects runtime property changes when creating new client', () => {
-      const client = new NoahTesting({
-        baseURL: 'http://localhost:5000/',
-        timeout: 1000,
-        accessToken: 'My Access Token',
-      });
+      const client = new NoahTesting({ baseURL: 'http://localhost:5000/', timeout: 1000, token: 'My Token' });
 
       // Modify the client properties directly after creation
       client.baseURL = 'http://localhost:6000/';
@@ -434,7 +417,7 @@ describe('instantiate client', () => {
 });
 
 describe('request building', () => {
-  const client = new NoahTesting({ accessToken: 'My Access Token' });
+  const client = new NoahTesting({ token: 'My Token' });
 
   describe('custom headers', () => {
     test('handles undefined', async () => {
@@ -453,7 +436,7 @@ describe('request building', () => {
 });
 
 describe('default encoder', () => {
-  const client = new NoahTesting({ accessToken: 'My Access Token' });
+  const client = new NoahTesting({ token: 'My Token' });
 
   class Serializable {
     toJSON() {
@@ -538,7 +521,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ accessToken: 'My Access Token', timeout: 10, fetch: testFetch });
+    const client = new NoahTesting({ token: 'My Token', timeout: 10, fetch: testFetch });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
     expect(count).toEqual(2);
@@ -568,7 +551,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ accessToken: 'My Access Token', fetch: testFetch, maxRetries: 4 });
+    const client = new NoahTesting({ token: 'My Token', fetch: testFetch, maxRetries: 4 });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
 
@@ -592,7 +575,7 @@ describe('retries', () => {
       capturedRequest = init;
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
-    const client = new NoahTesting({ accessToken: 'My Access Token', fetch: testFetch, maxRetries: 4 });
+    const client = new NoahTesting({ token: 'My Token', fetch: testFetch, maxRetries: 4 });
 
     expect(
       await client.request({
@@ -622,7 +605,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
     const client = new NoahTesting({
-      accessToken: 'My Access Token',
+      token: 'My Token',
       fetch: testFetch,
       maxRetries: 4,
       defaultHeaders: { 'X-Stainless-Retry-Count': null },
@@ -654,7 +637,7 @@ describe('retries', () => {
       capturedRequest = init;
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
-    const client = new NoahTesting({ accessToken: 'My Access Token', fetch: testFetch, maxRetries: 4 });
+    const client = new NoahTesting({ token: 'My Token', fetch: testFetch, maxRetries: 4 });
 
     expect(
       await client.request({
@@ -684,7 +667,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ accessToken: 'My Access Token', fetch: testFetch });
+    const client = new NoahTesting({ token: 'My Token', fetch: testFetch });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
     expect(count).toEqual(2);
@@ -714,7 +697,7 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new NoahTesting({ accessToken: 'My Access Token', fetch: testFetch });
+    const client = new NoahTesting({ token: 'My Token', fetch: testFetch });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
     expect(count).toEqual(2);
