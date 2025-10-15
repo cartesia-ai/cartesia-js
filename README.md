@@ -163,7 +163,7 @@ You can use the `for await … of` syntax to iterate through items across all pa
 async function fetchAllVoices(params) {
   const allVoices = [];
   // Automatically fetches more pages as needed.
-  for await (const voice of client.voices.list()) {
+  for await (const voice of client.voices.list({ language: 'en' })) {
     allVoices.push(voice);
   }
   return allVoices;
@@ -173,7 +173,7 @@ async function fetchAllVoices(params) {
 Alternatively, you can request a single page at a time:
 
 ```ts
-let page = await client.voices.list();
+let page = await client.voices.list({ language: 'en' });
 for (const voice of page.data) {
   console.log(voice);
 }
