@@ -224,11 +224,6 @@ export interface VoiceListParams extends CursorIDPageParams {
   is_starred?: boolean | null;
 
   /**
-   * The language of the voice.
-   */
-  language?: string | null;
-
-  /**
    * The number of Voices to return per page, ranging between 1 and 100.
    */
   limit?: number | null;

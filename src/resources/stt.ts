@@ -19,7 +19,6 @@ export class Stt extends APIResource {
    *
    * **Response format:** Returns JSON with transcribed text, duration, and language.
    * Include `timestamp_granularities: ["word"]` to get word-level timestamps.
-   *
    * **Pricing:** Batch transcription is priced at **1 credit per 2 seconds** of
    * audio processed.
    *

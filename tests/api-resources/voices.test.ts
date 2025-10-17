@@ -64,7 +64,6 @@ describe('resource voices', () => {
           gender: 'masculine',
           is_owner: true,
           is_starred: true,
-          language: 'language',
           limit: 0,
           starting_after: 'starting_after',
         },
