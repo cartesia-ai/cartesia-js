@@ -26,7 +26,6 @@ export {
   type FineTunesCursorIDPage,
 } from './fine-tunes';
 export { Infill, type OutputFormatContainer, type RawEncoding, type InfillCreateParams } from './infill';
-export { MyWebSocket } from './my-web-socket';
 export {
   PronunciationDicts,
   type PronunciationDict,
