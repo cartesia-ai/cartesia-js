@@ -202,3 +202,5 @@ Methods:
 - <code title="delete /voices/{id}">client.voices.<a href="./src/resources/voices.ts">delete</a>(id) -> void</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/resources/voices.ts">clone</a>({ ...params }) -> VoiceMetadata</code>
 - <code title="post /voices/localize">client.voices.<a href="./src/resources/voices.ts">localize</a>({ ...params }) -> VoiceMetadata</code>
+
+# MyWebSocket
