@@ -56,7 +56,7 @@ export default class SttWebsocket {
         if (!sampleRate) {
             throw new Error("sampleRate parameter is required");
         }
-        
+
         this.#model = model;
         this.#language = language;
         this.#encoding = encoding;
@@ -67,11 +67,11 @@ export default class SttWebsocket {
 
     async #ensureConnected(): Promise<void> {
         if (this.#isConnected) return;
-        
+
         if (!this.#connectionPromise) {
             this.#connectionPromise = this.connect();
         }
-        
+
         await this.#connectionPromise;
     }
 
@@ -158,7 +158,7 @@ export default class SttWebsocket {
                 if (this.#minVolume !== undefined) params.min_volume = this.#minVolume.toString();
                 if (this.#maxSilenceDurationSecs !== undefined) params.max_silence_duration_secs = this.#maxSilenceDurationSecs.toString();
 
-                const apiKey = await core.Supplier.get(this.options.token);
+                const apiKey = await core.Supplier.get(this.options.apiKey);
                 if (apiKey) {
                     params.api_key = apiKey;
                 } else if (connectOptions.accessToken) {
@@ -197,4 +197,4 @@ export default class SttWebsocket {
         this.socket?.close();
         this.#isConnected = false;
     }
-} 
+}

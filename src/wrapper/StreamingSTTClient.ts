@@ -19,7 +19,7 @@ export class StreamingSTTClient extends Stt {
      * @returns SttWebsocket instance for STT operations
      */
     websocket(options: SttWebSocketOptions): SttWebsocket {
-        return new SttWebsocket(options, { cartesiaVersion: "2025-04-16", ...this._options });
+        return new SttWebsocket(options, { cartesiaVersion: "2024-06-10", ...this._options });
     }
 
     /**
@@ -34,7 +34,7 @@ export class StreamingSTTClient extends Stt {
         options: SttWebSocketOptions
     ): AsyncGenerator<TranscriptionResult, void, unknown> {
         const ws = this.websocket(options);
-        
+
         try {
             // Set up message handling
             const resultQueue: TranscriptionResult[] = [];
@@ -72,7 +72,7 @@ export class StreamingSTTClient extends Stt {
                 if (resultQueue.length > 0) {
                     const result = resultQueue.shift()!;
                     yield result;
-                    
+
                     if (result.type === "done") {
                         break;
                     }
@@ -84,7 +84,7 @@ export class StreamingSTTClient extends Stt {
 
             // Wait for sending to complete and handle any errors
             await sendPromise;
-            
+
             if (error) {
                 throw error;
             }
