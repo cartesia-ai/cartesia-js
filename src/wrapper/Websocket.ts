@@ -35,11 +35,11 @@ export default class Websocket {
 
     async #ensureConnected(): Promise<void> {
         if (this.#isConnected) return;
-        
+
         if (!this.#connectionPromise) {
             this.#connectionPromise = this.connect();
         }
-        
+
         await this.#connectionPromise;
     }
 
@@ -195,7 +195,7 @@ export default class Websocket {
                 const params: Record<string, string> = {
                     cartesia_version: this.options.cartesiaVersion || "2025-04-16",
                 };
-                const apiKey = await core.Supplier.get(this.options.token);
+                const apiKey = await core.Supplier.get(this.options.apiKey);
                 if (apiKey) {
                     params.api_key = apiKey;
                 } else if (options.accessToken) {
