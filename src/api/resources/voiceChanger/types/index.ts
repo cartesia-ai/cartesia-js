@@ -1,2 +1,2 @@
-export * from "./OutputFormatContainer.js";
-export * from "./StreamingResponse.js";
+export * from "./OutputFormatContainer";
+export * from "./StreamingResponse";

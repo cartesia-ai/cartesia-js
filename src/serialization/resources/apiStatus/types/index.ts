@@ -1,1 +1,1 @@
-export * from "./ApiInfo.js";
+export * from "./ApiInfo";

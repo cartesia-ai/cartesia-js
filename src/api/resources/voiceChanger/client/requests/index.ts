@@ -1,2 +1,2 @@
-export { type VoiceChangerBytesRequest } from "./VoiceChangerBytesRequest.js";
-export { type VoiceChangerSseRequest } from "./VoiceChangerSseRequest.js";
+export { type VoiceChangerBytesRequest } from "./VoiceChangerBytesRequest";
+export { type VoiceChangerSseRequest } from "./VoiceChangerSseRequest";

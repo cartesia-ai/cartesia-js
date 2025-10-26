@@ -1,1 +1,1 @@
-export { type TranscriptionRequest } from "./TranscriptionRequest.js";
+export { type TranscriptionRequest } from "./TranscriptionRequest";
