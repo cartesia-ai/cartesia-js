@@ -31,7 +31,7 @@ import {
   FineTunesCursorIDPage,
 } from './resources/fine-tunes';
 import { Infill, InfillCreateParams, OutputFormatContainer, RawEncoding } from './resources/infill';
-import { MyWebSocket } from './resources/my-web-socket';
+import { MyWebsocket, WebsocketClientEvent, WebsocketResponse } from './resources/my-websocket';
 import {
   PronunciationDict,
   PronunciationDictCreateParams,
@@ -830,7 +830,7 @@ export class NoahTesting {
   tts: API.Tts = new API.Tts(this);
   voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
   voices: API.Voices = new API.Voices(this);
-  myWebSocket: API.MyWebSocket = new API.MyWebSocket(this);
+  myWebsocket: API.MyWebsocket = new API.MyWebsocket(this);
 }
 
 NoahTesting.Agents = Agents;
@@ -843,7 +843,7 @@ NoahTesting.Stt = Stt;
 NoahTesting.Tts = Tts;
 NoahTesting.VoiceChanger = VoiceChanger;
 NoahTesting.Voices = Voices;
-NoahTesting.MyWebSocket = MyWebSocket;
+NoahTesting.MyWebsocket = MyWebsocket;
 
 export declare namespace NoahTesting {
   export type RequestOptions = Opts.RequestOptions;
@@ -937,5 +937,9 @@ export declare namespace NoahTesting {
     type VoiceLocalizeParams as VoiceLocalizeParams,
   };
 
-  export { MyWebSocket as MyWebSocket };
+  export {
+    MyWebsocket as MyWebsocket,
+    type WebsocketClientEvent as WebsocketClientEvent,
+    type WebsocketResponse as WebsocketResponse,
+  };
 }
