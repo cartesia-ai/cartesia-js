@@ -21,6 +21,10 @@ export const TtsRequest: core.serialization.ObjectSchema<serializers.TtsRequest.
         generationConfig: core.serialization.property("generation_config", GenerationConfig.optional()),
         duration: core.serialization.number().optional(),
         speed: ModelSpeed.optional(),
+        pronunciationDictId: core.serialization.property(
+            "pronunciation_dict_id",
+            core.serialization.string().optional(),
+        ),
     });
 
 export declare namespace TtsRequest {
@@ -33,5 +37,6 @@ export declare namespace TtsRequest {
         generation_config?: GenerationConfig.Raw | null;
         duration?: number | null;
         speed?: ModelSpeed.Raw | null;
+        pronunciation_dict_id?: string | null;
     }
 }

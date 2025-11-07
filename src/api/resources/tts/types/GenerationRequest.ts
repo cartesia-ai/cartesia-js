@@ -41,4 +41,6 @@ export interface GenerationRequest {
     addPhonemeTimestamps?: boolean;
     /** Whether to use normalized timestamps (True) or original timestamps (False). */
     useNormalizedTimestamps?: boolean;
+    /** A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only. */
+    pronunciationDictId?: string;
 }

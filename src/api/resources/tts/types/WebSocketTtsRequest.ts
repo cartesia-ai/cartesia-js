@@ -22,4 +22,6 @@ export interface WebSocketTtsRequest {
     contextId?: string;
     maxBufferDelayMs?: number;
     speed?: Cartesia.ModelSpeed;
+    /** A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only. */
+    pronunciationDictId?: string;
 }

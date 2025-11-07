@@ -37,6 +37,7 @@ export const GenerationRequest: core.serialization.ObjectSchema<
         "use_normalized_timestamps",
         core.serialization.boolean().optional(),
     ),
+    pronunciationDictId: core.serialization.property("pronunciation_dict_id", core.serialization.string().optional()),
 });
 
 export declare namespace GenerationRequest {
@@ -56,5 +57,6 @@ export declare namespace GenerationRequest {
         add_timestamps?: boolean | null;
         add_phoneme_timestamps?: boolean | null;
         use_normalized_timestamps?: boolean | null;
+        pronunciation_dict_id?: string | null;
     }
 }

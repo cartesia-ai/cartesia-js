@@ -32,6 +32,10 @@ export const TtssseRequest: core.serialization.ObjectSchema<serializers.TtssseRe
             core.serialization.boolean().optional(),
         ),
         contextId: core.serialization.property("context_id", ContextId.optional()),
+        pronunciationDictId: core.serialization.property(
+            "pronunciation_dict_id",
+            core.serialization.string().optional(),
+        ),
     });
 
 export declare namespace TtssseRequest {
@@ -48,5 +52,6 @@ export declare namespace TtssseRequest {
         add_phoneme_timestamps?: boolean | null;
         use_normalized_timestamps?: boolean | null;
         context_id?: ContextId.Raw | null;
+        pronunciation_dict_id?: string | null;
     }
 }

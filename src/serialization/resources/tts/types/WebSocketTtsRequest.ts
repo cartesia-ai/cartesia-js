@@ -34,6 +34,7 @@ export const WebSocketTtsRequest: core.serialization.ObjectSchema<
     contextId: core.serialization.property("context_id", core.serialization.string().optional()),
     maxBufferDelayMs: core.serialization.property("max_buffer_delay_ms", core.serialization.number().optional()),
     speed: ModelSpeed.optional(),
+    pronunciationDictId: core.serialization.property("pronunciation_dict_id", core.serialization.string().optional()),
 });
 
 export declare namespace WebSocketTtsRequest {
@@ -52,5 +53,6 @@ export declare namespace WebSocketTtsRequest {
         context_id?: string | null;
         max_buffer_delay_ms?: number | null;
         speed?: ModelSpeed.Raw | null;
+        pronunciation_dict_id?: string | null;
     }
 }

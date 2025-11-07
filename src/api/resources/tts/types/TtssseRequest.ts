@@ -26,4 +26,6 @@ export interface TtssseRequest {
     useNormalizedTimestamps?: boolean;
     /** Optional context ID for this request. */
     contextId?: Cartesia.ContextId;
+    /** A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only. */
+    pronunciationDictId?: string;
 }
