@@ -42,8 +42,8 @@ export {
   type ModelSpeed,
   type RawOutputFormat,
   type VoiceSpecifier,
-  type TtSynthesizeBytesParams,
-  type TtSynthesizeSseParams,
+  type TtGenerateParams,
+  type TtGenerateSseParams,
 } from './tts';
 export {
   VoiceChanger,

@@ -45,8 +45,8 @@ import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt
 import {
   ModelSpeed,
   RawOutputFormat,
-  TtSynthesizeBytesParams,
-  TtSynthesizeSseParams,
+  TtGenerateParams,
+  TtGenerateSseParams,
   Tts,
   VoiceSpecifier,
 } from './resources/tts';
@@ -914,8 +914,8 @@ export declare namespace NoahTesting {
     type ModelSpeed as ModelSpeed,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
-    type TtSynthesizeBytesParams as TtSynthesizeBytesParams,
-    type TtSynthesizeSseParams as TtSynthesizeSseParams,
+    type TtGenerateParams as TtGenerateParams,
+    type TtGenerateSseParams as TtGenerateSseParams,
   };
 
   export {

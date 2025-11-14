@@ -12,7 +12,7 @@ export class Tts extends APIResource {
   /**
    * Text to Speech (Bytes)
    */
-  synthesizeBytes(body: TtSynthesizeBytesParams, options?: RequestOptions): APIPromise<Response> {
+  generate(body: TtGenerateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post('/tts/bytes', {
       body,
       ...options,
@@ -24,7 +24,7 @@ export class Tts extends APIResource {
   /**
    * Text to Speech (SSE)
    */
-  synthesizeSse(body: TtSynthesizeSseParams, options?: RequestOptions): APIPromise<void> {
+  generateSse(body: TtGenerateSseParams, options?: RequestOptions): APIPromise<void> {
     return this._client.post('/tts/sse', {
       body,
       ...options,
@@ -58,7 +58,7 @@ export interface VoiceSpecifier {
   mode: 'id';
 }
 
-export interface TtSynthesizeBytesParams {
+export interface TtGenerateParams {
   /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
@@ -66,9 +66,9 @@ export interface TtSynthesizeBytesParams {
   model_id: string;
 
   output_format:
-    | TtSynthesizeBytesParams.RawOutputFormat
-    | TtSynthesizeBytesParams.WavOutputFormat
-    | TtSynthesizeBytesParams.MP3OutputFormat;
+    | TtGenerateParams.RawOutputFormat
+    | TtGenerateParams.WavOutputFormat
+    | TtGenerateParams.MP3OutputFormat;
 
   transcript: string;
 
@@ -85,7 +85,7 @@ export interface TtSynthesizeBytesParams {
    * Configure the various attributes of the generated speech. These controls are
    * only available for `sonic-3-preview` and will have no effect on earlier models.
    */
-  generation_config?: TtSynthesizeBytesParams.GenerationConfig | null;
+  generation_config?: TtGenerateParams.GenerationConfig | null;
 
   /**
    * The language that the given voice should speak the transcript in.
@@ -121,7 +121,7 @@ export interface TtSynthesizeBytesParams {
   speed?: ModelSpeed | null;
 }
 
-export namespace TtSynthesizeBytesParams {
+export namespace TtGenerateParams {
   export interface RawOutputFormat extends TtsAPI.RawOutputFormat {
     container?: 'raw';
   }
@@ -182,14 +182,14 @@ export namespace TtSynthesizeBytesParams {
   }
 }
 
-export interface TtSynthesizeSseParams {
+export interface TtGenerateSseParams {
   /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
   model_id: string;
 
-  output_format: TtSynthesizeSseParams.OutputFormat;
+  output_format: TtGenerateSseParams.OutputFormat;
 
   transcript: string;
 
@@ -254,7 +254,7 @@ export interface TtSynthesizeSseParams {
   use_normalized_timestamps?: boolean | null;
 }
 
-export namespace TtSynthesizeSseParams {
+export namespace TtGenerateSseParams {
   export interface OutputFormat {
     container: 'raw';
 
@@ -269,7 +269,7 @@ export declare namespace Tts {
     type ModelSpeed as ModelSpeed,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
-    type TtSynthesizeBytesParams as TtSynthesizeBytesParams,
-    type TtSynthesizeSseParams as TtSynthesizeSseParams,
+    type TtGenerateParams as TtGenerateParams,
+    type TtGenerateSseParams as TtGenerateSseParams,
   };
 }

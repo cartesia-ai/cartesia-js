@@ -8,8 +8,8 @@ const client = new NoahTesting({
 });
 
 describe('resource tts', () => {
-  test('synthesizeBytes: required and optional params', async () => {
-    const response = await client.tts.synthesizeBytes({
+  test('generate: required and optional params', async () => {
+    const response = await client.tts.generate({
       model_id: 'model_id',
       output_format: { encoding: 'pcm_f32le', sample_rate: 0, container: 'raw' },
       transcript: 'transcript',
@@ -24,8 +24,8 @@ describe('resource tts', () => {
   });
 
   // Prism tests are disabled
-  test.skip('synthesizeSse: only required params', async () => {
-    const responsePromise = client.tts.synthesizeSse({
+  test.skip('generateSse: only required params', async () => {
+    const responsePromise = client.tts.generateSse({
       model_id: 'model_id',
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 0 },
       transcript: 'transcript',
@@ -41,8 +41,8 @@ describe('resource tts', () => {
   });
 
   // Prism tests are disabled
-  test.skip('synthesizeSse: required and optional params', async () => {
-    const response = await client.tts.synthesizeSse({
+  test.skip('generateSse: required and optional params', async () => {
+    const response = await client.tts.generateSse({
       model_id: 'model_id',
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 0 },
       transcript: 'transcript',
