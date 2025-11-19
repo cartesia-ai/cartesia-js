@@ -104,7 +104,7 @@ export interface ClientOptions {
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
    *
-   * Defaults to process.env['NOAH_TESTING_BASE_URL'].
+   * Defaults to process.env['CARTESIA_BASE_URL'].
    */
   baseURL?: string | null | undefined;
 
@@ -158,7 +158,7 @@ export interface ClientOptions {
   /**
    * Set the log level.
    *
-   * Defaults to process.env['NOAH_TESTING_LOG'] or 'warn' if it isn't set.
+   * Defaults to process.env['CARTESIA_LOG'] or 'warn' if it isn't set.
    */
   logLevel?: LogLevel | undefined;
 
@@ -171,9 +171,9 @@ export interface ClientOptions {
 }
 
 /**
- * API Client for interfacing with the Noah Testing API.
+ * API Client for interfacing with the Cartesia API.
  */
-export class NoahTesting {
+export class Cartesia {
   token: string | null;
   apiKey: string | null;
 
@@ -190,11 +190,11 @@ export class NoahTesting {
   private _options: ClientOptions;
 
   /**
-   * API Client for interfacing with the Noah Testing API.
+   * API Client for interfacing with the Cartesia API.
    *
    * @param {string | null | undefined} [opts.token]
    * @param {string | null | undefined} [opts.apiKey]
-   * @param {string} [opts.baseURL=process.env['NOAH_TESTING_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
+   * @param {string} [opts.baseURL=process.env['CARTESIA_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {MergedRequestInit} [opts.fetchOptions] - Additional `RequestInit` options to be passed to `fetch` calls.
    * @param {Fetch} [opts.fetch] - Specify a custom `fetch` function implementation.
@@ -203,7 +203,7 @@ export class NoahTesting {
    * @param {Record<string, string | undefined>} opts.defaultQuery - Default query parameters to include with every request to the API.
    */
   constructor({
-    baseURL = readEnv('NOAH_TESTING_BASE_URL'),
+    baseURL = readEnv('CARTESIA_BASE_URL'),
     token = null,
     apiKey = null,
     ...opts
@@ -216,14 +216,14 @@ export class NoahTesting {
     };
 
     this.baseURL = options.baseURL!;
-    this.timeout = options.timeout ?? NoahTesting.DEFAULT_TIMEOUT /* 1 minute */;
+    this.timeout = options.timeout ?? Cartesia.DEFAULT_TIMEOUT /* 1 minute */;
     this.logger = options.logger ?? console;
     const defaultLogLevel = 'warn';
     // Set default logLevel early so that we can log a warning in parseLogLevel.
     this.logLevel = defaultLogLevel;
     this.logLevel =
       parseLogLevel(options.logLevel, 'ClientOptions.logLevel', this) ??
-      parseLogLevel(readEnv('NOAH_TESTING_LOG'), "process.env['NOAH_TESTING_LOG']", this) ??
+      parseLogLevel(readEnv('CARTESIA_LOG'), "process.env['CARTESIA_LOG']", this) ??
       defaultLogLevel;
     this.fetchOptions = options.fetchOptions;
     this.maxRetries = options.maxRetries ?? 2;
@@ -584,7 +584,7 @@ export class NoahTesting {
     options: FinalRequestOptions,
   ): Pagination.PagePromise<PageClass, Item> {
     const request = this.makeRequest(options, null, undefined);
-    return new Pagination.PagePromise<PageClass, Item>(this as any as NoahTesting, request, Page);
+    return new Pagination.PagePromise<PageClass, Item>(this as any as Cartesia, request, Page);
   }
 
   async fetchWithTimeout(
@@ -801,10 +801,10 @@ export class NoahTesting {
     }
   }
 
-  static NoahTesting = this;
+  static Cartesia = this;
   static DEFAULT_TIMEOUT = 60000; // 1 minute
 
-  static NoahTestingError = Errors.NoahTestingError;
+  static CartesiaError = Errors.CartesiaError;
   static APIError = Errors.APIError;
   static APIConnectionError = Errors.APIConnectionError;
   static APIConnectionTimeoutError = Errors.APIConnectionTimeoutError;
@@ -833,19 +833,19 @@ export class NoahTesting {
   websocket: API.Websocket = new API.Websocket(this);
 }
 
-NoahTesting.Agents = Agents;
-NoahTesting.AccessToken = AccessToken;
-NoahTesting.Datasets = Datasets;
-NoahTesting.FineTunes = FineTunes;
-NoahTesting.Infill = Infill;
-NoahTesting.PronunciationDicts = PronunciationDicts;
-NoahTesting.Stt = Stt;
-NoahTesting.TTS = TTS;
-NoahTesting.VoiceChanger = VoiceChanger;
-NoahTesting.Voices = Voices;
-NoahTesting.Websocket = Websocket;
+Cartesia.Agents = Agents;
+Cartesia.AccessToken = AccessToken;
+Cartesia.Datasets = Datasets;
+Cartesia.FineTunes = FineTunes;
+Cartesia.Infill = Infill;
+Cartesia.PronunciationDicts = PronunciationDicts;
+Cartesia.Stt = Stt;
+Cartesia.TTS = TTS;
+Cartesia.VoiceChanger = VoiceChanger;
+Cartesia.Voices = Voices;
+Cartesia.Websocket = Websocket;
 
-export declare namespace NoahTesting {
+export declare namespace Cartesia {
   export type RequestOptions = Opts.RequestOptions;
 
   export import CursorIDPage = Pagination.CursorIDPage;

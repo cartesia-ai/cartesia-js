@@ -25,7 +25,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              regex: '^noah-testing(/.*)?',
+              regex: '^@cartesia/cartesia-js(/.*)?',
               message: 'Use a relative import, not a package import.',
             },
           ],

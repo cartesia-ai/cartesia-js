@@ -1,8 +1,8 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import NoahTesting from 'noah-testing';
+import Cartesia from '@cartesia/cartesia-js';
 
-const client = new NoahTesting({
+const client = new Cartesia({
   token: 'My Token',
   baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
 });
@@ -72,7 +72,7 @@ describe('resource pronunciationDicts', () => {
         { ending_before: 'ending_before', limit: 0, starting_after: 'starting_after' },
         { path: '/_stainless_unknown_path' },
       ),
-    ).rejects.toThrow(NoahTesting.NotFoundError);
+    ).rejects.toThrow(Cartesia.NotFoundError);
   });
 
   // Prism tests are disabled

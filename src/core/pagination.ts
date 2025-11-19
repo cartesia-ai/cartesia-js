@@ -1,9 +1,9 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { NoahTestingError } from './error';
+import { CartesiaError } from './error';
 import { FinalRequestOptions } from '../internal/request-options';
 import { defaultParseResponse } from '../internal/parse';
-import { type NoahTesting } from '../client';
+import { type Cartesia } from '../client';
 import { APIPromise } from './api-promise';
 import { type APIResponseProps } from '../internal/parse';
 import { maybeObj } from '../internal/utils/values';
@@ -11,13 +11,13 @@ import { maybeObj } from '../internal/utils/values';
 export type PageRequestOptions = Pick<FinalRequestOptions, 'query' | 'headers' | 'body' | 'path' | 'method'>;
 
 export abstract class AbstractPage<Item> implements AsyncIterable<Item> {
-  #client: NoahTesting;
+  #client: Cartesia;
   protected options: FinalRequestOptions;
 
   protected response: Response;
   protected body: unknown;
 
-  constructor(client: NoahTesting, response: Response, body: unknown, options: FinalRequestOptions) {
+  constructor(client: Cartesia, response: Response, body: unknown, options: FinalRequestOptions) {
     this.#client = client;
     this.options = options;
     this.response = response;
@@ -37,7 +37,7 @@ export abstract class AbstractPage<Item> implements AsyncIterable<Item> {
   async getNextPage(): Promise<this> {
     const nextOptions = this.nextPageRequestOptions();
     if (!nextOptions) {
-      throw new NoahTestingError(
+      throw new CartesiaError(
         'No next page expected; please check `.hasNextPage()` before calling `.getNextPage()`.',
       );
     }
@@ -80,7 +80,7 @@ export class PagePromise<
   implements AsyncIterable<Item>
 {
   constructor(
-    client: NoahTesting,
+    client: Cartesia,
     request: Promise<APIResponseProps>,
     Page: new (...args: ConstructorParameters<typeof AbstractPage>) => PageClass,
   ) {
@@ -124,7 +124,7 @@ export class CursorIDPage<Item extends { id: string }>
   data: Array<Item>;
 
   constructor(
-    client: NoahTesting,
+    client: Cartesia,
     response: Response,
     body: CursorIDPageResponse<Item>,
     options: FinalRequestOptions,

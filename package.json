@@ -1,8 +1,8 @@
 {
-  "name": "noah-testing",
+  "name": "@cartesia/cartesia-js",
   "version": "0.0.1",
-  "description": "The official TypeScript library for the Noah Testing API",
-  "author": "Noah Testing <>",
+  "description": "The official TypeScript library for the Cartesia API",
+  "author": "Cartesia <>",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "type": "commonjs",

@@ -1,8 +1,8 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { NoahTesting } from 'noah-testing';
+import { Cartesia } from '@cartesia/cartesia-js';
 
-const { stringifyQuery } = NoahTesting.prototype as any;
+const { stringifyQuery } = Cartesia.prototype as any;
 
 describe(stringifyQuery, () => {
   for (const [input, expected] of [

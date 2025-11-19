@@ -8,7 +8,7 @@ node scripts/utils/check-version.cjs
 
 # Build into dist and will publish the package from there,
 # so that src/resources/foo.ts becomes <package root>/resources/foo.js
-# This way importing from `"noah-testing/resources/foo"` works
+# This way importing from `"@cartesia/cartesia-js/resources/foo"` works
 # even with `"moduleResolution": "node"`
 
 rm -rf dist; mkdir dist
@@ -42,8 +42,8 @@ node scripts/utils/postprocess-files.cjs
 
 # make sure that nothing crashes when we require the output CJS or
 # import the output ESM
-(cd dist && node -e 'require("noah-testing")')
-(cd dist && node -e 'import("noah-testing")' --input-type=module)
+(cd dist && node -e 'require("@cartesia/cartesia-js")')
+(cd dist && node -e 'import("@cartesia/cartesia-js")' --input-type=module)
 
 if [ -e ./scripts/build-deno ]
 then

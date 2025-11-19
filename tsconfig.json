@@ -8,8 +8,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "paths": {
-      "noah-testing/*": ["./src/*"],
-      "noah-testing": ["./src/index.ts"]
+      "@cartesia/cartesia-js/*": ["./src/*"],
+      "@cartesia/cartesia-js": ["./src/index.ts"]
     },
     "noEmit": true,
 

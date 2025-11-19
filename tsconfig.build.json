@@ -5,8 +5,8 @@
   "compilerOptions": {
     "rootDir": "./dist/src",
     "paths": {
-      "noah-testing/*": ["./dist/src/*"],
-      "noah-testing": ["./dist/src/index.ts"]
+      "@cartesia/cartesia-js/*": ["./dist/src/*"],
+      "@cartesia/cartesia-js": ["./dist/src/index.ts"]
     },
     "noEmit": false,
     "declaration": true,

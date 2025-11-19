@@ -1,5 +1,5 @@
 import { inspect } from 'node:util';
-import { buildHeaders, type HeadersLike, type NullableHeaders } from 'noah-testing/internal/headers';
+import { buildHeaders, type HeadersLike, type NullableHeaders } from '@cartesia/cartesia-js/internal/headers';
 
 function inspectNullableHeaders(headers: NullableHeaders) {
   return `NullableHeaders {${[

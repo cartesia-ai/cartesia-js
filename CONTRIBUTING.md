@@ -55,12 +55,12 @@ $ cd noah-testing-typescript
 # With yarn
 $ yarn link
 $ cd ../my-package
-$ yarn link noah-testing
+$ yarn link @cartesia/cartesia-js
 
 # With pnpm
 $ pnpm link --global
 $ cd ../my-package
-$ pnpm link -—global noah-testing
+$ pnpm link -—global @cartesia/cartesia-js
 ```
 
 ## Running tests

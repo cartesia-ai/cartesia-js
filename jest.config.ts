@@ -7,8 +7,8 @@ const config: JestConfigWithTsJest = {
     '^.+\\.(t|j)sx?$': ['@swc/jest', { sourceMaps: 'inline' }],
   },
   moduleNameMapper: {
-    '^noah-testing$': '<rootDir>/src/index.ts',
-    '^noah-testing/(.*)$': '<rootDir>/src/$1',
+    '^@cartesia/cartesia-js$': '<rootDir>/src/index.ts',
+    '^@cartesia/cartesia-js/(.*)$': '<rootDir>/src/$1',
   },
   modulePathIgnorePatterns: [
     '<rootDir>/ecosystem-tests/',

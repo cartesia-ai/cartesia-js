@@ -1,4 +1,4 @@
-import { createPathTagFunction, encodeURIPath } from 'noah-testing/internal/utils/path';
+import { createPathTagFunction, encodeURIPath } from '@cartesia/cartesia-js/internal/utils/path';
 import { inspect } from 'node:util';
 import { runInNewContext } from 'node:vm';
 

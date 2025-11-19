@@ -1,7 +1,7 @@
 import iconv from 'iconv-lite';
-import { stringify } from 'noah-testing/internal/qs';
-import { encode } from 'noah-testing/internal/qs/utils';
-import { StringifyOptions } from 'noah-testing/internal/qs/types';
+import { stringify } from '@cartesia/cartesia-js/internal/qs';
+import { encode } from '@cartesia/cartesia-js/internal/qs/utils';
+import { StringifyOptions } from '@cartesia/cartesia-js/internal/qs/types';
 import { empty_test_cases } from './empty-keys-cases';
 import assert from 'assert';
 
