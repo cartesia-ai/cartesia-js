@@ -66,7 +66,6 @@ import {
   Voices,
   VoicesCursorIDPage,
 } from './resources/voices';
-import { Websocket, WebsocketClientEvent, WebsocketResponse } from './resources/websocket';
 import {
   AgentListPhoneNumbersResponse,
   AgentListResponse,
@@ -830,7 +829,6 @@ export class Cartesia {
   tts: API.TTS = new API.TTS(this);
   voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
   voices: API.Voices = new API.Voices(this);
-  websocket: API.Websocket = new API.Websocket(this);
 }
 
 Cartesia.Agents = Agents;
@@ -843,7 +841,6 @@ Cartesia.Stt = Stt;
 Cartesia.TTS = TTS;
 Cartesia.VoiceChanger = VoiceChanger;
 Cartesia.Voices = Voices;
-Cartesia.Websocket = Websocket;
 
 export declare namespace Cartesia {
   export type RequestOptions = Opts.RequestOptions;
@@ -935,11 +932,5 @@ export declare namespace Cartesia {
     type VoiceListParams as VoiceListParams,
     type VoiceCloneParams as VoiceCloneParams,
     type VoiceLocalizeParams as VoiceLocalizeParams,
-  };
-
-  export {
-    Websocket as Websocket,
-    type WebsocketClientEvent as WebsocketClientEvent,
-    type WebsocketResponse as WebsocketResponse,
   };
 }

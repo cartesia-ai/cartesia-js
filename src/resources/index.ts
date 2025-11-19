@@ -61,5 +61,4 @@ export {
   type VoiceLocalizeParams,
   type VoicesCursorIDPage,
 } from './voices';
-export { Websocket, type WebsocketClientEvent, type WebsocketResponse } from './websocket';
 export { type GetStatusResponse } from './top-level';
