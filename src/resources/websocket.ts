@@ -5,7 +5,7 @@ import * as InfillAPI from './infill';
 import * as TTSAPI from './tts';
 import * as VoicesAPI from './voices';
 
-export class MyWebsocket extends APIResource {}
+export class Websocket extends APIResource {}
 
 /**
  * Use this to generate speech for a transcript.
@@ -262,6 +262,6 @@ export namespace WebsocketResponse {
   }
 }
 
-export declare namespace MyWebsocket {
+export declare namespace Websocket {
   export { type WebsocketClientEvent as WebsocketClientEvent, type WebsocketResponse as WebsocketResponse };
 }

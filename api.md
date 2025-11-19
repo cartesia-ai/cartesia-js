@@ -203,9 +203,9 @@ Methods:
 - <code title="get /voices/{id}">client.voices.<a href="./src/resources/voices.ts">get</a>(id) -> Voice</code>
 - <code title="post /voices/localize">client.voices.<a href="./src/resources/voices.ts">localize</a>({ ...params }) -> VoiceMetadata</code>
 
-# MyWebsocket
+# Websocket
 
 Types:
 
-- <code><a href="./src/resources/my-websocket.ts">WebsocketClientEvent</a></code>
-- <code><a href="./src/resources/my-websocket.ts">WebsocketResponse</a></code>
+- <code><a href="./src/resources/websocket.ts">WebsocketClientEvent</a></code>
+- <code><a href="./src/resources/websocket.ts">WebsocketResponse</a></code>

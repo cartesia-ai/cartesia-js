@@ -31,7 +31,6 @@ import {
   FineTunesCursorIDPage,
 } from './resources/fine-tunes';
 import { Infill, InfillCreateParams, OutputFormatContainer, RawEncoding } from './resources/infill';
-import { MyWebsocket, WebsocketClientEvent, WebsocketResponse } from './resources/my-websocket';
 import {
   PronunciationDict,
   PronunciationDictCreateParams,
@@ -67,6 +66,7 @@ import {
   Voices,
   VoicesCursorIDPage,
 } from './resources/voices';
+import { Websocket, WebsocketClientEvent, WebsocketResponse } from './resources/websocket';
 import {
   AgentListPhoneNumbersResponse,
   AgentListResponse,
@@ -830,7 +830,7 @@ export class NoahTesting {
   tts: API.TTS = new API.TTS(this);
   voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
   voices: API.Voices = new API.Voices(this);
-  myWebsocket: API.MyWebsocket = new API.MyWebsocket(this);
+  websocket: API.Websocket = new API.Websocket(this);
 }
 
 NoahTesting.Agents = Agents;
@@ -843,7 +843,7 @@ NoahTesting.Stt = Stt;
 NoahTesting.TTS = TTS;
 NoahTesting.VoiceChanger = VoiceChanger;
 NoahTesting.Voices = Voices;
-NoahTesting.MyWebsocket = MyWebsocket;
+NoahTesting.Websocket = Websocket;
 
 export declare namespace NoahTesting {
   export type RequestOptions = Opts.RequestOptions;
@@ -938,7 +938,7 @@ export declare namespace NoahTesting {
   };
 
   export {
-    MyWebsocket as MyWebsocket,
+    Websocket as Websocket,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
   };
