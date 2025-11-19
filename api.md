@@ -178,6 +178,13 @@ Methods:
 - <code title="post /tts/bytes">client.tts.<a href="./src/resources/tts.ts">generate</a>({ ...params }) -> Response</code>
 - <code title="post /tts/sse">client.tts.<a href="./src/resources/tts.ts">generateSse</a>({ ...params }) -> void</code>
 
+# TTSWebsocket
+
+Types:
+
+- <code><a href="./src/resources/tts-websocket.ts">WebsocketClientEvent</a></code>
+- <code><a href="./src/resources/tts-websocket.ts">WebsocketResponse</a></code>
+
 # VoiceChanger
 
 Methods:

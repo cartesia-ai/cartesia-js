@@ -49,6 +49,7 @@ import {
   TTSGenerateSseParams,
   VoiceSpecifier,
 } from './resources/tts';
+import { TTSWebsocket, WebsocketClientEvent, WebsocketResponse } from './resources/tts-websocket';
 import {
   VoiceChanger,
   VoiceChangerChangeVoiceBytesParams,
@@ -827,6 +828,7 @@ export class Cartesia {
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
   stt: API.Stt = new API.Stt(this);
   tts: API.TTS = new API.TTS(this);
+  ttsWebsocket: API.TTSWebsocket = new API.TTSWebsocket(this);
   voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
   voices: API.Voices = new API.Voices(this);
 }
@@ -839,6 +841,7 @@ Cartesia.Infill = Infill;
 Cartesia.PronunciationDicts = PronunciationDicts;
 Cartesia.Stt = Stt;
 Cartesia.TTS = TTS;
+Cartesia.TTSWebsocket = TTSWebsocket;
 Cartesia.VoiceChanger = VoiceChanger;
 Cartesia.Voices = Voices;
 
@@ -913,6 +916,12 @@ export declare namespace Cartesia {
     type VoiceSpecifier as VoiceSpecifier,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
+  };
+
+  export {
+    TTSWebsocket as TTSWebsocket,
+    type WebsocketClientEvent as WebsocketClientEvent,
+    type WebsocketResponse as WebsocketResponse,
   };
 
   export {

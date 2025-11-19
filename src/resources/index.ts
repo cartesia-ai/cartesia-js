@@ -44,6 +44,7 @@ export {
   type TTSGenerateParams,
   type TTSGenerateSseParams,
 } from './tts';
+export { TTSWebsocket, type WebsocketClientEvent, type WebsocketResponse } from './tts-websocket';
 export {
   VoiceChanger,
   type VoiceChangerChangeVoiceBytesParams,
