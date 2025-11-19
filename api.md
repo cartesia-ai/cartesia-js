@@ -196,11 +196,11 @@ Types:
 
 Methods:
 
-- <code title="get /voices/{id}">client.voices.<a href="./src/resources/voices.ts">retrieve</a>(id) -> Voice</code>
 - <code title="patch /voices/{id}">client.voices.<a href="./src/resources/voices.ts">update</a>(id, { ...params }) -> Voice</code>
 - <code title="get /voices/">client.voices.<a href="./src/resources/voices.ts">list</a>({ ...params }) -> VoicesCursorIDPage</code>
 - <code title="delete /voices/{id}">client.voices.<a href="./src/resources/voices.ts">delete</a>(id) -> void</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/resources/voices.ts">clone</a>({ ...params }) -> VoiceMetadata</code>
+- <code title="get /voices/{id}">client.voices.<a href="./src/resources/voices.ts">get</a>(id) -> Voice</code>
 - <code title="post /voices/localize">client.voices.<a href="./src/resources/voices.ts">localize</a>({ ...params }) -> VoiceMetadata</code>
 
 # MyWebsocket

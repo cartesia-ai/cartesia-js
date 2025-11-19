@@ -11,13 +11,6 @@ import { path } from '../internal/utils/path';
 
 export class Voices extends APIResource {
   /**
-   * Get Voice
-   */
-  retrieve(id: string, options?: RequestOptions): APIPromise<Voice> {
-    return this._client.get(path`/voices/${id}`, options);
-  }
-
-  /**
    * Update the name, description, and gender of a voice. To set the gender back to
    * the default, set the gender to `null`. If gender is not specified, the gender
    * will not be updated.
@@ -56,6 +49,13 @@ export class Voices extends APIResource {
       '/voices/clone',
       multipartFormRequestOptions({ body, ...options }, this._client),
     );
+  }
+
+  /**
+   * Get Voice
+   */
+  get(id: string, options?: RequestOptions): APIPromise<Voice> {
+    return this._client.get(path`/voices/${id}`, options);
   }
 
   /**
