@@ -45,9 +45,9 @@ import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt
 import {
   ModelSpeed,
   RawOutputFormat,
-  TtGenerateParams,
-  TtGenerateSseParams,
-  Tts,
+  TTS,
+  TTSGenerateParams,
+  TTSGenerateSseParams,
   VoiceSpecifier,
 } from './resources/tts';
 import {
@@ -827,7 +827,7 @@ export class NoahTesting {
   infill: API.Infill = new API.Infill(this);
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
   stt: API.Stt = new API.Stt(this);
-  tts: API.Tts = new API.Tts(this);
+  tts: API.TTS = new API.TTS(this);
   voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
   voices: API.Voices = new API.Voices(this);
   myWebsocket: API.MyWebsocket = new API.MyWebsocket(this);
@@ -840,7 +840,7 @@ NoahTesting.FineTunes = FineTunes;
 NoahTesting.Infill = Infill;
 NoahTesting.PronunciationDicts = PronunciationDicts;
 NoahTesting.Stt = Stt;
-NoahTesting.Tts = Tts;
+NoahTesting.TTS = TTS;
 NoahTesting.VoiceChanger = VoiceChanger;
 NoahTesting.Voices = Voices;
 NoahTesting.MyWebsocket = MyWebsocket;
@@ -910,12 +910,12 @@ export declare namespace NoahTesting {
   };
 
   export {
-    Tts as Tts,
+    TTS as TTS,
     type ModelSpeed as ModelSpeed,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
-    type TtGenerateParams as TtGenerateParams,
-    type TtGenerateSseParams as TtGenerateSseParams,
+    type TTSGenerateParams as TTSGenerateParams,
+    type TTSGenerateSseParams as TTSGenerateSseParams,
   };
 
   export {

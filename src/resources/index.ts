@@ -38,12 +38,12 @@ export {
 } from './pronunciation-dicts';
 export { Stt, type SttTranscribeResponse, type SttTranscribeParams } from './stt';
 export {
-  Tts,
+  TTS,
   type ModelSpeed,
   type RawOutputFormat,
   type VoiceSpecifier,
-  type TtGenerateParams,
-  type TtGenerateSseParams,
+  type TTSGenerateParams,
+  type TTSGenerateSseParams,
 } from './tts';
 export {
   VoiceChanger,

@@ -165,7 +165,7 @@ Methods:
 
 - <code title="post /stt">client.stt.<a href="./src/resources/stt.ts">transcribe</a>({ ...params }) -> SttTranscribeResponse</code>
 
-# Tts
+# TTS
 
 Types:
 

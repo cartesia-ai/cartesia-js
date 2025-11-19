@@ -2,7 +2,7 @@
 
 import { APIResource } from '../core/resource';
 import * as InfillAPI from './infill';
-import * as TtsAPI from './tts';
+import * as TTSAPI from './tts';
 import * as VoicesAPI from './voices';
 
 export class MyWebsocket extends APIResource {}
@@ -32,7 +32,7 @@ export namespace WebsocketClientEvent {
      */
     transcript: string;
 
-    voice: TtsAPI.VoiceSpecifier;
+    voice: TTSAPI.VoiceSpecifier;
 
     /**
      * Whether to return phoneme-level timestamps. If `false` (default), no phoneme
@@ -114,7 +114,7 @@ export namespace WebsocketClientEvent {
      * Influences the speed of the generated speech. Faster speeds may reduce
      * hallucination rate.
      */
-    speed?: TtsAPI.ModelSpeed | null;
+    speed?: TTSAPI.ModelSpeed | null;
 
     /**
      * Whether to use normalized timestamps (True) or original timestamps (False).

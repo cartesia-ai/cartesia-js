@@ -1,18 +1,18 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../core/resource';
-import * as TtsAPI from './tts';
+import * as TTSAPI from './tts';
 import * as InfillAPI from './infill';
 import * as VoicesAPI from './voices';
 import { APIPromise } from '../core/api-promise';
 import { buildHeaders } from '../internal/headers';
 import { RequestOptions } from '../internal/request-options';
 
-export class Tts extends APIResource {
+export class TTS extends APIResource {
   /**
    * Text to Speech (Bytes)
    */
-  generate(body: TtGenerateParams, options?: RequestOptions): APIPromise<Response> {
+  generate(body: TTSGenerateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post('/tts/bytes', {
       body,
       ...options,
@@ -24,7 +24,7 @@ export class Tts extends APIResource {
   /**
    * Text to Speech (SSE)
    */
-  generateSse(body: TtGenerateSseParams, options?: RequestOptions): APIPromise<void> {
+  generateSse(body: TTSGenerateSseParams, options?: RequestOptions): APIPromise<void> {
     return this._client.post('/tts/sse', {
       body,
       ...options,
@@ -58,7 +58,7 @@ export interface VoiceSpecifier {
   mode: 'id';
 }
 
-export interface TtGenerateParams {
+export interface TTSGenerateParams {
   /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
@@ -66,9 +66,9 @@ export interface TtGenerateParams {
   model_id: string;
 
   output_format:
-    | TtGenerateParams.RawOutputFormat
-    | TtGenerateParams.WavOutputFormat
-    | TtGenerateParams.MP3OutputFormat;
+    | TTSGenerateParams.RawOutputFormat
+    | TTSGenerateParams.WavOutputFormat
+    | TTSGenerateParams.MP3OutputFormat;
 
   transcript: string;
 
@@ -85,7 +85,7 @@ export interface TtGenerateParams {
    * Configure the various attributes of the generated speech. These controls are
    * only available for `sonic-3-preview` and will have no effect on earlier models.
    */
-  generation_config?: TtGenerateParams.GenerationConfig | null;
+  generation_config?: TTSGenerateParams.GenerationConfig | null;
 
   /**
    * The language that the given voice should speak the transcript in.
@@ -121,12 +121,12 @@ export interface TtGenerateParams {
   speed?: ModelSpeed | null;
 }
 
-export namespace TtGenerateParams {
-  export interface RawOutputFormat extends TtsAPI.RawOutputFormat {
+export namespace TTSGenerateParams {
+  export interface RawOutputFormat extends TTSAPI.RawOutputFormat {
     container?: 'raw';
   }
 
-  export interface WavOutputFormat extends TtsAPI.RawOutputFormat {
+  export interface WavOutputFormat extends TTSAPI.RawOutputFormat {
     container?: 'wav';
   }
 
@@ -182,14 +182,14 @@ export namespace TtGenerateParams {
   }
 }
 
-export interface TtGenerateSseParams {
+export interface TTSGenerateSseParams {
   /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
   model_id: string;
 
-  output_format: TtGenerateSseParams.OutputFormat;
+  output_format: TTSGenerateSseParams.OutputFormat;
 
   transcript: string;
 
@@ -254,7 +254,7 @@ export interface TtGenerateSseParams {
   use_normalized_timestamps?: boolean | null;
 }
 
-export namespace TtGenerateSseParams {
+export namespace TTSGenerateSseParams {
   export interface OutputFormat {
     container: 'raw';
 
@@ -264,12 +264,12 @@ export namespace TtGenerateSseParams {
   }
 }
 
-export declare namespace Tts {
+export declare namespace TTS {
   export {
     type ModelSpeed as ModelSpeed,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
-    type TtGenerateParams as TtGenerateParams,
-    type TtGenerateSseParams as TtGenerateSseParams,
+    type TTSGenerateParams as TTSGenerateParams,
+    type TTSGenerateSseParams as TTSGenerateSseParams,
   };
 }
