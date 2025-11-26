@@ -160,9 +160,15 @@ export type WebsocketResponse =
 
 export namespace WebsocketResponse {
   export interface Chunk {
+    data: string;
+
     done: boolean;
 
     status_code: number;
+
+    step_time: number;
+
+    type: 'chunk';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -172,8 +178,6 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
-
-    type?: 'chunk';
   }
 
   export interface FlushDone {
