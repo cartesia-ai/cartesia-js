@@ -11,11 +11,8 @@ It is generated with [Stainless](https://www.stainless.com/).
 ## Installation
 
 ```sh
-npm install git+ssh://git@github.com:cartesia-ai/cartesia-js-internal.git
+npm install @cartesia/cartesia-js
 ```
-
-> [!NOTE]
-> Once this package is [published to npm](https://www.stainless.com/docs/guides/publish), this will become: `npm install @cartesia/cartesia-js`
 
 ## Usage
 
