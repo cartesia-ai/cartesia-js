@@ -41,10 +41,11 @@ export {
   type ModelSpeed,
   type RawOutputFormat,
   type VoiceSpecifier,
+  type WebsocketClientEvent,
+  type WebsocketResponse,
   type TTSGenerateParams,
   type TTSGenerateSseParams,
 } from './tts';
-export { TTSWebsocket, type WebsocketClientEvent, type WebsocketResponse } from './tts-websocket';
 export {
   VoiceChanger,
   type VoiceChangerChangeVoiceBytesParams,
