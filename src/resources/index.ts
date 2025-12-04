@@ -38,6 +38,8 @@ export {
 export { Stt, type SttTranscribeResponse, type SttTranscribeParams } from './stt';
 export {
   TTS,
+  type GenerationConfig,
+  type GenerationRequest,
   type ModelSpeed,
   type RawOutputFormat,
   type VoiceSpecifier,

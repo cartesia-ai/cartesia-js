@@ -169,6 +169,8 @@ Methods:
 
 Types:
 
+- <code><a href="./src/resources/tts.ts">GenerationConfig</a></code>
+- <code><a href="./src/resources/tts.ts">GenerationRequest</a></code>
 - <code><a href="./src/resources/tts.ts">ModelSpeed</a></code>
 - <code><a href="./src/resources/tts.ts">RawOutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">VoiceSpecifier</a></code>

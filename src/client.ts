@@ -42,6 +42,8 @@ import {
 } from './resources/pronunciation-dicts';
 import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt';
 import {
+  GenerationConfig,
+  GenerationRequest,
   ModelSpeed,
   RawOutputFormat,
   TTS,
@@ -910,6 +912,8 @@ export declare namespace Cartesia {
 
   export {
     TTS as TTS,
+    type GenerationConfig as GenerationConfig,
+    type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
