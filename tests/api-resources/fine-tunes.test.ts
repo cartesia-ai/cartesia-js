@@ -66,7 +66,11 @@ describe('resource fineTunes', () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
     await expect(
       client.fineTunes.list(
-        { ending_before: 'ending_before', limit: 0, starting_after: 'starting_after' },
+        {
+          ending_before: 'ending_before',
+          limit: 0,
+          starting_after: 'starting_after',
+        },
         { path: '/_stainless_unknown_path' },
       ),
     ).rejects.toThrow(Cartesia.NotFoundError);
@@ -102,7 +106,11 @@ describe('resource fineTunes', () => {
     await expect(
       client.fineTunes.listVoices(
         'id',
-        { ending_before: 'ending_before', limit: 0, starting_after: 'starting_after' },
+        {
+          ending_before: 'ending_before',
+          limit: 0,
+          starting_after: 'starting_after',
+        },
         { path: '/_stainless_unknown_path' },
       ),
     ).rejects.toThrow(Cartesia.NotFoundError);

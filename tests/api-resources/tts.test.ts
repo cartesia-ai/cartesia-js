@@ -11,11 +11,19 @@ describe('resource tts', () => {
   test('generate: required and optional params', async () => {
     const response = await client.tts.generate({
       model_id: 'model_id',
-      output_format: { encoding: 'pcm_f32le', sample_rate: 0, container: 'raw' },
+      output_format: {
+        encoding: 'pcm_f32le',
+        sample_rate: 0,
+        container: 'raw',
+      },
       transcript: 'transcript',
       voice: { id: 'id', mode: 'id' },
       duration: 0,
-      generation_config: { experimental: { accent_localization: 0 }, speed: 0, volume: 0 },
+      generation_config: {
+        experimental: { accent_localization: 0 },
+        speed: 0,
+        volume: 0,
+      },
       language: 'en',
       pronunciation_dict_ids: ['string'],
       save: true,
@@ -27,7 +35,11 @@ describe('resource tts', () => {
   test.skip('generateSse: only required params', async () => {
     const responsePromise = client.tts.generateSse({
       model_id: 'model_id',
-      output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 0 },
+      output_format: {
+        container: 'raw',
+        encoding: 'pcm_f32le',
+        sample_rate: 0,
+      },
       transcript: 'transcript',
       voice: { id: 'id', mode: 'id' },
     });
@@ -44,7 +56,11 @@ describe('resource tts', () => {
   test.skip('generateSse: required and optional params', async () => {
     const response = await client.tts.generateSse({
       model_id: 'model_id',
-      output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 0 },
+      output_format: {
+        container: 'raw',
+        encoding: 'pcm_f32le',
+        sample_rate: 0,
+      },
       transcript: 'transcript',
       voice: { id: 'id', mode: 'id' },
       add_phoneme_timestamps: true,

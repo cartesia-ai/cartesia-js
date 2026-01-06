@@ -26,7 +26,11 @@ describe('resource files', () => {
     await expect(
       client.datasets.files.list(
         'id',
-        { ending_before: 'ending_before', limit: 0, starting_after: 'starting_after' },
+        {
+          ending_before: 'ending_before',
+          limit: 0,
+          starting_after: 'starting_after',
+        },
         { path: '/_stainless_unknown_path' },
       ),
     ).rejects.toThrow(Cartesia.NotFoundError);

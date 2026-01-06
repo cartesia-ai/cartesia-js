@@ -87,7 +87,11 @@ describe('instantiate client', () => {
         error: jest.fn(),
       };
 
-      const client = new Cartesia({ logger: logger, logLevel: 'debug', token: 'My Token' });
+      const client = new Cartesia({
+        logger: logger,
+        logLevel: 'debug',
+        token: 'My Token',
+      });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).toHaveBeenCalled();
@@ -107,7 +111,11 @@ describe('instantiate client', () => {
         error: jest.fn(),
       };
 
-      const client = new Cartesia({ logger: logger, logLevel: 'info', token: 'My Token' });
+      const client = new Cartesia({
+        logger: logger,
+        logLevel: 'info',
+        token: 'My Token',
+      });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).not.toHaveBeenCalled();
@@ -157,7 +165,11 @@ describe('instantiate client', () => {
       };
 
       process.env['CARTESIA_LOG'] = 'debug';
-      const client = new Cartesia({ logger: logger, logLevel: 'off', token: 'My Token' });
+      const client = new Cartesia({
+        logger: logger,
+        logLevel: 'off',
+        token: 'My Token',
+      });
 
       await forceAPIResponseForClient(client);
       expect(debugMock).not.toHaveBeenCalled();
@@ -173,7 +185,11 @@ describe('instantiate client', () => {
       };
 
       process.env['CARTESIA_LOG'] = 'not a log level';
-      const client = new Cartesia({ logger: logger, logLevel: 'debug', token: 'My Token' });
+      const client = new Cartesia({
+        logger: logger,
+        logLevel: 'debug',
+        token: 'My Token',
+      });
       expect(client.logLevel).toBe('debug');
       expect(warnMock).not.toHaveBeenCalled();
     });
@@ -267,7 +283,11 @@ describe('instantiate client', () => {
       return new Response(JSON.stringify({}), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new Cartesia({ baseURL: 'http://localhost:5000/', token: 'My Token', fetch: testFetch });
+    const client = new Cartesia({
+      baseURL: 'http://localhost:5000/',
+      token: 'My Token',
+      fetch: testFetch,
+    });
 
     await client.patch('/foo');
     expect(capturedRequest?.method).toEqual('PATCH');
@@ -345,7 +365,11 @@ describe('instantiate client', () => {
 
   describe('withOptions', () => {
     test('creates a new client with overridden options', async () => {
-      const client = new Cartesia({ baseURL: 'http://localhost:5000/', maxRetries: 3, token: 'My Token' });
+      const client = new Cartesia({
+        baseURL: 'http://localhost:5000/',
+        maxRetries: 3,
+        token: 'My Token',
+      });
 
       const newClient = client.withOptions({
         maxRetries: 5,
@@ -385,7 +409,11 @@ describe('instantiate client', () => {
     });
 
     test('respects runtime property changes when creating new client', () => {
-      const client = new Cartesia({ baseURL: 'http://localhost:5000/', timeout: 1000, token: 'My Token' });
+      const client = new Cartesia({
+        baseURL: 'http://localhost:5000/',
+        timeout: 1000,
+        token: 'My Token',
+      });
 
       // Modify the client properties directly after creation
       client.baseURL = 'http://localhost:6000/';
@@ -517,7 +545,11 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new Cartesia({ token: 'My Token', timeout: 10, fetch: testFetch });
+    const client = new Cartesia({
+      token: 'My Token',
+      timeout: 10,
+      fetch: testFetch,
+    });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
     expect(count).toEqual(2);
@@ -547,7 +579,11 @@ describe('retries', () => {
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
 
-    const client = new Cartesia({ token: 'My Token', fetch: testFetch, maxRetries: 4 });
+    const client = new Cartesia({
+      token: 'My Token',
+      fetch: testFetch,
+      maxRetries: 4,
+    });
 
     expect(await client.request({ path: '/foo', method: 'get' })).toEqual({ a: 1 });
 
@@ -571,7 +607,11 @@ describe('retries', () => {
       capturedRequest = init;
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
-    const client = new Cartesia({ token: 'My Token', fetch: testFetch, maxRetries: 4 });
+    const client = new Cartesia({
+      token: 'My Token',
+      fetch: testFetch,
+      maxRetries: 4,
+    });
 
     expect(
       await client.request({
@@ -633,7 +673,11 @@ describe('retries', () => {
       capturedRequest = init;
       return new Response(JSON.stringify({ a: 1 }), { headers: { 'Content-Type': 'application/json' } });
     };
-    const client = new Cartesia({ token: 'My Token', fetch: testFetch, maxRetries: 4 });
+    const client = new Cartesia({
+      token: 'My Token',
+      fetch: testFetch,
+      maxRetries: 4,
+    });
 
     expect(
       await client.request({
