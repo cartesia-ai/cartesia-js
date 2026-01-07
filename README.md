@@ -23,12 +23,12 @@ The full API of this library can be found in [api.md](api.md).
 import Cartesia from '@cartesia/cartesia-js';
 
 const client = new Cartesia({
-  token: 'My Token',
+  apiKey: 'My API Key',
 });
 
-const response = await client.getStatus();
+const agents = await client.agents.list();
 
-console.log(response.ok);
+console.log(agents.summaries);
 ```
 
 ### Request & Response types
@@ -40,10 +40,10 @@ This library includes TypeScript definitions for all request params and response
 import Cartesia from '@cartesia/cartesia-js';
 
 const client = new Cartesia({
-  token: 'My Token',
+  apiKey: 'My API Key',
 });
 
-const response: Cartesia.GetStatusResponse = await client.getStatus();
+const agents: Cartesia.AgentListResponse = await client.agents.list();
 ```
 
 Documentation for each method, request param, and response field are available in docstrings and will appear on hover in most modern editors.
@@ -85,7 +85,7 @@ a subclass of `APIError` will be thrown:
 
 <!-- prettier-ignore -->
 ```ts
-const response = await client.getStatus().catch(async (err) => {
+const agents = await client.agents.list().catch(async (err) => {
   if (err instanceof Cartesia.APIError) {
     console.log(err.status); // 400
     console.log(err.name); // BadRequestError
@@ -125,7 +125,7 @@ const client = new Cartesia({
 });
 
 // Or, configure per-request:
-await client.getStatus({
+await client.agents.list({
   maxRetries: 5,
 });
 ```
@@ -142,7 +142,7 @@ const client = new Cartesia({
 });
 
 // Override per-request:
-await client.getStatus({
+await client.agents.list({
   timeout: 5 * 1000,
 });
 ```
@@ -157,22 +157,22 @@ List methods in the Cartesia API are paginated.
 You can use the `for await … of` syntax to iterate through items across all pages:
 
 ```ts
-async function fetchAllAgentCalls(params) {
-  const allAgentCalls = [];
+async function fetchAllVoices(params) {
+  const allVoices = [];
   // Automatically fetches more pages as needed.
-  for await (const agentCall of client.agents.calls.list({ agent_id: 'agent_id' })) {
-    allAgentCalls.push(agentCall);
+  for await (const voice of client.voices.list()) {
+    allVoices.push(voice);
   }
-  return allAgentCalls;
+  return allVoices;
 }
 ```
 
 Alternatively, you can request a single page at a time:
 
 ```ts
-let page = await client.agents.calls.list({ agent_id: 'agent_id' });
-for (const agentCall of page.data) {
-  console.log(agentCall);
+let page = await client.voices.list();
+for (const voice of page.data) {
+  console.log(voice);
 }
 
 // Convenience methods are provided for manually paginating:
@@ -193,7 +193,7 @@ import Cartesia from '@cartesia/cartesia-js';
 
 const client = new Cartesia();
 
-const response = await client.getStatus({ headers: { 'cartesia-version': 'My-Custom-Value' } });
+const agents = await client.agents.list({ headers: { 'cartesia-version': 'My-Custom-Value' } });
 ```
 
 ## Advanced Usage
@@ -210,13 +210,13 @@ Unlike `.asResponse()` this method consumes the body, returning once it is parse
 ```ts
 const client = new Cartesia();
 
-const response = await client.getStatus().asResponse();
+const response = await client.agents.list().asResponse();
 console.log(response.headers.get('X-My-Header'));
 console.log(response.statusText); // access the underlying Response object
 
-const { data: response, response: raw } = await client.getStatus().withResponse();
+const { data: agents, response: raw } = await client.agents.list().withResponse();
 console.log(raw.headers.get('X-My-Header'));
-console.log(response.ok);
+console.log(agents.summaries);
 ```
 
 ### Logging
@@ -296,7 +296,7 @@ parameter. This library doesn't validate at runtime that the request matches the
 send will be sent as-is.
 
 ```ts
-client.getStatus({
+client.agents.list({
   // ...
   // @ts-expect-error baz is not yet public
   baz: 'undocumented option',
