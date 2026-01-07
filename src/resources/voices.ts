@@ -2,7 +2,7 @@
 
 import { APIResource } from '../core/resource';
 import { APIPromise } from '../core/api-promise';
-import { CursorIDPage } from '../core/pagination';
+import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../core/pagination';
 import { type Uploadable } from '../core/uploads';
 import { buildHeaders } from '../internal/headers';
 import { RequestOptions } from '../internal/request-options';
@@ -25,6 +25,24 @@ export class Voices extends APIResource {
    */
   update(id: string, body: VoiceUpdateParams, options?: RequestOptions): APIPromise<Voice> {
     return this._client.patch(path`/voices/${id}`, { body, ...options });
+  }
+
+  /**
+   * List Voices
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const voice of client.voices.list()) {
+   *   // ...
+   * }
+   * ```
+   */
+  list(
+    query: VoiceListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): PagePromise<VoicesCursorIDPage, Voice> {
+    return this._client.getAPIList('/voices', CursorIDPage<Voice>, { query, ...options });
   }
 
   /**
@@ -251,6 +269,33 @@ export interface VoiceUpdateParams {
   gender?: GenderPresentation | null;
 }
 
+export interface VoiceListParams extends CursorIDPageParams {
+  /**
+   * Additional fields to include in the response.
+   */
+  expand?: Array<'preview_file_url'> | null;
+
+  /**
+   * The gender presentation of the voices to return.
+   */
+  gender?: GenderPresentation | null;
+
+  /**
+   * Whether to only return voices owned your organization.
+   */
+  is_owner?: boolean | null;
+
+  /**
+   * The number of Voices to return per page, ranging between 1 and 100.
+   */
+  limit?: number | null;
+
+  /**
+   * Query string to search for voices by name, description, or Voice ID.
+   */
+  q?: string | null;
+}
+
 export interface VoiceCloneParams {
   /**
    * Optional base voice ID that the cloned voice is derived from.
@@ -337,7 +382,9 @@ export declare namespace Voices {
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
     type VoiceMetadata as VoiceMetadata,
+    type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,
+    type VoiceListParams as VoiceListParams,
     type VoiceCloneParams as VoiceCloneParams,
     type VoiceGetParams as VoiceGetParams,
     type VoiceLocalizeParams as VoiceLocalizeParams,

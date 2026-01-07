@@ -41,6 +41,13 @@ export class Agents extends APIResource {
   }
 
   /**
+   * Lists all agents associated with your account.
+   */
+  list(options?: RequestOptions): APIPromise<AgentListResponse> {
+    return this._client.get('/agents', options);
+  }
+
+  /**
    * Delete Agent
    */
   delete(agentID: string, options?: RequestOptions): APIPromise<void> {
@@ -179,6 +186,13 @@ export namespace AgentSummary {
   }
 }
 
+export interface AgentListResponse {
+  /**
+   * The summaries of the agents.
+   */
+  summaries: Array<AgentSummary>;
+}
+
 export type AgentListPhoneNumbersResponse =
   Array<AgentListPhoneNumbersResponse.AgentListPhoneNumbersResponseItem>;
 
@@ -305,6 +319,7 @@ Agents.Deployments = Deployments;
 export declare namespace Agents {
   export {
     type AgentSummary as AgentSummary,
+    type AgentListResponse as AgentListResponse,
     type AgentListPhoneNumbersResponse as AgentListPhoneNumbersResponse,
     type AgentListTemplatesResponse as AgentListTemplatesResponse,
     type AgentUpdateParams as AgentUpdateParams,
