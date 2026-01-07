@@ -34,42 +34,88 @@ export class TTS extends APIResource {
 }
 
 /**
- * Configure the various attributes of the generated speech. These controls are
- * only available for `sonic-3-preview` and will have no effect on earlier models.
+ * Configure the various attributes of the generated speech. These are only for
+ * `sonic-3` and have no effect on earlier models.
+ *
+ * See
+ * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+ * for a guide on this option.
  */
 export interface GenerationConfig {
   /**
-   * These controls are **experimental** and subject to breaking changes.
+   * Guide the emotion of the generated speech.
    */
-  experimental?: GenerationConfig.Experimental | null;
+  emotion?:
+    | 'neutral'
+    | 'happy'
+    | 'excited'
+    | 'enthusiastic'
+    | 'elated'
+    | 'euphoric'
+    | 'triumphant'
+    | 'amazed'
+    | 'surprised'
+    | 'flirtatious'
+    | 'curious'
+    | 'content'
+    | 'peaceful'
+    | 'serene'
+    | 'calm'
+    | 'grateful'
+    | 'affectionate'
+    | 'trust'
+    | 'sympathetic'
+    | 'anticipation'
+    | 'mysterious'
+    | 'angry'
+    | 'mad'
+    | 'outraged'
+    | 'frustrated'
+    | 'agitated'
+    | 'threatened'
+    | 'disgusted'
+    | 'contempt'
+    | 'envious'
+    | 'sarcastic'
+    | 'ironic'
+    | 'sad'
+    | 'dejected'
+    | 'melancholic'
+    | 'disappointed'
+    | 'hurt'
+    | 'guilty'
+    | 'bored'
+    | 'tired'
+    | 'rejected'
+    | 'nostalgic'
+    | 'wistful'
+    | 'apologetic'
+    | 'hesitant'
+    | 'insecure'
+    | 'confused'
+    | 'resigned'
+    | 'anxious'
+    | 'panicked'
+    | 'alarmed'
+    | 'scared'
+    | 'proud'
+    | 'confident'
+    | 'distant'
+    | 'skeptical'
+    | 'contemplative'
+    | 'determined';
 
   /**
-   * Adjust the speed of the generated speech between -1.0 (slower) and 1.0 (faster).
-   * 0.0 is the default speed.
+   * Adjust the speed of the generated speech between 0.6x and 1.5x the original
+   * speed (default is 1.0x). Valid values are between [0.6, 1.5] inclusive.
    */
-  speed?: number | null;
+  speed?: number;
 
   /**
-   * Adjust the volume of the generated speech between -1.0 (softer) and 1.0
-   * (louder). 0.0 is the default volume.
+   * Adjust the volume of the generated speech between 0.5x and 2.0x the original
+   * volume (default is 1.0x). Valid values are between [0.5, 2.0] inclusive.
    */
-  volume?: number | null;
-}
-
-export namespace GenerationConfig {
-  /**
-   * These controls are **experimental** and subject to breaking changes.
-   */
-  export interface Experimental {
-    /**
-     * Toggle accent localization: 0 (disabled, default) or 1 (enabled). When enabled,
-     * the voice adapts to match the transcript language's accent while preserving
-     * vocal characteristics. When disabled, maintains the original voice accent. For
-     * more information, see
-     * [Localize Voices](/build-with-sonic/capabilities/localize-voices).
-     */
-    accent_localization?: number | null;
-  }
+  volume?: number;
 }
 
 export interface GenerationRequest {
@@ -118,29 +164,29 @@ export interface GenerationRequest {
   continue?: boolean | null;
 
   /**
-   * The maximum duration of the audio in seconds. You do not usually need to specify
-   * this. If the duration is not appropriate for the length of the transcript, the
-   * output audio may be truncated.
-   */
-  duration?: number | null;
-
-  /**
    * Whether to flush the context.
    */
   flush?: boolean | null;
 
   /**
-   * The language that the given voice should speak the transcript in.
+   * Configure the various attributes of the generated speech. These are only for
+   * `sonic-3` and have no effect on earlier models.
    *
-   * Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-   * Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-   * Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+   * See
+   * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+   * for a guide on this option.
    */
-  language?: VoicesAPI.SupportedLanguage | null;
+  generation_config?: GenerationConfig;
+
+  /**
+   * The language that the given voice should speak the transcript in. For valid
+   * options, see [Models](/build-with-cartesia/tts-models).
+   */
+  language?: VoicesAPI.SupportedLanguage;
 
   /**
    * The maximum time in milliseconds to buffer text before starting generation.
-   * Values between [0, 1000]ms are supported. Defaults to 0 (no buffering).
+   * Values between [0, 5000]ms are supported. Defaults to 3000ms.
    *
    * When set, the model will buffer incoming text chunks until it's confident it has
    * enough context to generate high-quality speech, or the buffer delay elapses,
@@ -153,22 +199,18 @@ export interface GenerationRequest {
   max_buffer_delay_ms?: number | null;
 
   /**
-   * A list of pronunciation dict IDs to use for the generation. This will be applied
-   * in addition to the pinned pronunciation dict, which will be treated as the first
-   * element of the list. If there are conflicts with dict items, the latest dict
-   * will take precedence.
+   * The ID of a pronunciation dictionary to use for the generation. Pronunciation
+   * dictionaries are supported by `sonic-3` models and newer.
    */
-  pronunciation_dict_ids?: Array<string> | null;
+  pronunciation_dict_id?: string | null;
 
   /**
-   * > This feature is experimental and may not work for all voices.
-   *
-   * Speed setting for the model. Defaults to `normal`.
-   *
-   * Influences the speed of the generated speech. Faster speeds may reduce
-   * hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
+   * model. Defaults to `normal`. This feature is experimental and may not work for
+   * all voices. Influences the speed of the generated speech. Faster speeds may
+   * reduce hallucination rate.
    */
-  speed?: ModelSpeed | null;
+  speed?: ModelSpeed;
 
   /**
    * Whether to use normalized timestamps (True) or original timestamps (False).
@@ -182,24 +224,22 @@ export namespace GenerationRequest {
 
     encoding: InfillAPI.RawEncoding;
 
-    sample_rate: number;
+    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
   }
 }
 
 /**
- * > This feature is experimental and may not work for all voices.
- *
- * Speed setting for the model. Defaults to `normal`.
- *
- * Influences the speed of the generated speech. Faster speeds may reduce
- * hallucination rate.
+ * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
+ * model. Defaults to `normal`. This feature is experimental and may not work for
+ * all voices. Influences the speed of the generated speech. Faster speeds may
+ * reduce hallucination rate.
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
 export interface RawOutputFormat {
   encoding: InfillAPI.RawEncoding;
 
-  sample_rate: number;
+  sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
 
 export interface VoiceSpecifier {
@@ -245,15 +285,9 @@ export type WebsocketResponse =
 
 export namespace WebsocketResponse {
   export interface Chunk {
-    data: string;
-
     done: boolean;
 
     status_code: number;
-
-    step_time: number;
-
-    type: 'chunk';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -263,6 +297,8 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
+
+    type?: 'chunk';
   }
 
   export interface FlushDone {
@@ -368,34 +404,26 @@ export interface TTSGenerateParams {
   voice: VoiceSpecifier;
 
   /**
-   * The maximum duration of the audio in seconds. You do not usually need to specify
-   * this. If the duration is not appropriate for the length of the transcript, the
-   * output audio may be truncated.
-   */
-  duration?: number | null;
-
-  /**
-   * Configure the various attributes of the generated speech. These controls are
-   * only available for `sonic-3-preview` and will have no effect on earlier models.
-   */
-  generation_config?: GenerationConfig | null;
-
-  /**
-   * The language that the given voice should speak the transcript in.
+   * Configure the various attributes of the generated speech. These are only for
+   * `sonic-3` and have no effect on earlier models.
    *
-   * Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-   * Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-   * Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+   * See
+   * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+   * for a guide on this option.
+   */
+  generation_config?: GenerationConfig;
+
+  /**
+   * The language that the given voice should speak the transcript in. For valid
+   * options, see [Models](/build-with-cartesia/tts-models).
    */
   language?: VoicesAPI.SupportedLanguage | null;
 
   /**
-   * A list of pronunciation dict IDs to use for the generation. This will be applied
-   * in addition to the pinned pronunciation dict, which will be treated as the first
-   * element of the list. If there are conflicts with dict items, the latest dict
-   * will take precedence.
+   * The ID of a pronunciation dictionary to use for the generation. Pronunciation
+   * dictionaries are supported by `sonic-3` models and newer.
    */
-  pronunciation_dict_ids?: Array<string> | null;
+  pronunciation_dict_id?: string | null;
 
   /**
    * Whether to save the generated audio file. When true, the response will include a
@@ -404,14 +432,12 @@ export interface TTSGenerateParams {
   save?: boolean | null;
 
   /**
-   * > This feature is experimental and may not work for all voices.
-   *
-   * Speed setting for the model. Defaults to `normal`.
-   *
-   * Influences the speed of the generated speech. Faster speeds may reduce
-   * hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
+   * model. Defaults to `normal`. This feature is experimental and may not work for
+   * all voices. Influences the speed of the generated speech. Faster speeds may
+   * reduce hallucination rate.
    */
-  speed?: ModelSpeed | null;
+  speed?: ModelSpeed;
 }
 
 export namespace TTSGenerateParams {
@@ -424,13 +450,9 @@ export namespace TTSGenerateParams {
   }
 
   export interface MP3OutputFormat {
-    /**
-     * The bit rate of the audio in bits per second. Supported bit rates are 32000,
-     * 64000, 96000, 128000, 192000.
-     */
-    bit_rate: number;
+    bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
 
-    sample_rate: number;
+    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 
     container?: 'mp3';
   }
@@ -469,38 +491,34 @@ export interface TTSGenerateSseParams {
   context_id?: string | null;
 
   /**
-   * The maximum duration of the audio in seconds. You do not usually need to specify
-   * this. If the duration is not appropriate for the length of the transcript, the
-   * output audio may be truncated.
+   * Configure the various attributes of the generated speech. These are only for
+   * `sonic-3` and have no effect on earlier models.
+   *
+   * See
+   * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+   * for a guide on this option.
    */
-  duration?: number | null;
+  generation_config?: GenerationConfig;
 
   /**
-   * The language that the given voice should speak the transcript in.
-   *
-   * Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-   * Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-   * Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+   * The language that the given voice should speak the transcript in. For valid
+   * options, see [Models](/build-with-cartesia/tts-models).
    */
-  language?: VoicesAPI.SupportedLanguage | null;
+  language?: VoicesAPI.SupportedLanguage;
 
   /**
-   * A list of pronunciation dict IDs to use for the generation. This will be applied
-   * in addition to the pinned pronunciation dict, which will be treated as the first
-   * element of the list. If there are conflicts with dict items, the latest dict
-   * will take precedence.
+   * The ID of a pronunciation dictionary to use for the generation. Pronunciation
+   * dictionaries are supported by `sonic-3` models and newer.
    */
-  pronunciation_dict_ids?: Array<string> | null;
+  pronunciation_dict_id?: string | null;
 
   /**
-   * > This feature is experimental and may not work for all voices.
-   *
-   * Speed setting for the model. Defaults to `normal`.
-   *
-   * Influences the speed of the generated speech. Faster speeds may reduce
-   * hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
+   * model. Defaults to `normal`. This feature is experimental and may not work for
+   * all voices. Influences the speed of the generated speech. Faster speeds may
+   * reduce hallucination rate.
    */
-  speed?: ModelSpeed | null;
+  speed?: ModelSpeed;
 
   /**
    * Whether to use normalized timestamps (True) or original timestamps (False).
@@ -514,7 +532,7 @@ export namespace TTSGenerateSseParams {
 
     encoding: InfillAPI.RawEncoding;
 
-    sample_rate: number;
+    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
   }
 }
 

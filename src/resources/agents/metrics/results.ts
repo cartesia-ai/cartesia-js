@@ -4,6 +4,7 @@ import { APIResource } from '../../../core/resource';
 import * as CallsAPI from '../calls';
 import { APIPromise } from '../../../core/api-promise';
 import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../../../core/pagination';
+import { type Uploadable } from '../../../core/uploads';
 import { buildHeaders } from '../../../internal/headers';
 import { RequestOptions } from '../../../internal/request-options';
 
@@ -22,16 +23,15 @@ export class Results extends APIResource {
   }
 
   /**
-   * Export metric results to a CSV file. This endpoint is paginated with a default
-   * of 10 results per page and maximum of 100 results per page. Information on
-   * pagination can be found in the headers `x-has-more`, `x-limit`, and
-   * `x-next-page`.
+   * Export metric results to a CSV file. This endpoint streams at most 100k results
+   * as the CSV file directly to the client. Use the optional filters to narrow down
+   * the results to export.
    */
-  export(query: ResultExportParams | null | undefined = {}, options?: RequestOptions): APIPromise<void> {
+  export(query: ResultExportParams | null | undefined = {}, options?: RequestOptions): APIPromise<string> {
     return this._client.get('/agents/metrics/results/export', {
       query,
       ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+      headers: buildHeaders([{ Accept: 'text/csv' }, options?.headers]),
     });
   }
 }
@@ -110,6 +110,8 @@ export interface ResultListResponse {
   value?: unknown;
 }
 
+export type ResultExportResponse = Uploadable;
+
 export interface ResultListParams extends CursorIDPageParams {
   /**
    * The ID of the agent.
@@ -127,6 +129,12 @@ export interface ResultListParams extends CursorIDPageParams {
   deployment_id?: string | null;
 
   /**
+   * Filter metric results created before or at this ISO 8601 date/time (e.g.
+   * 2024-04-30T23:59:59Z).
+   */
+  end_date?: string | null;
+
+  /**
    * The number of metric results to return per page, ranging between 1 and 100.
    */
   limit?: number | null;
@@ -135,6 +143,12 @@ export interface ResultListParams extends CursorIDPageParams {
    * The ID of the metric.
    */
   metric_id?: string | null;
+
+  /**
+   * Filter metric results created at or after this ISO 8601 date/time (e.g.
+   * 2024-04-01T00:00:00Z).
+   */
+  start_date?: string | null;
 }
 
 export interface ResultExportParams {
@@ -154,18 +168,10 @@ export interface ResultExportParams {
   deployment_id?: string | null;
 
   /**
-   * A cursor to use in pagination. `ending_before` is a metric result ID that
-   * defines your place in the list. For example, if you make a /metrics/results
-   * request and receive 100 objects, starting with `metric_result_abc123`, your
-   * subsequent call can include `ending_before=metric_result_abc123` to fetch the
-   * previous page of the list.
+   * Filter metric results created before or at this ISO 8601 date/time (e.g.
+   * 2024-04-30T23:59:59Z).
    */
-  ending_before?: string | null;
-
-  /**
-   * The number of metric results to return per page, ranging between 1 and 100.
-   */
-  limit?: number | null;
+  end_date?: string | null;
 
   /**
    * The ID of the metric.
@@ -173,18 +179,16 @@ export interface ResultExportParams {
   metric_id?: string | null;
 
   /**
-   * A cursor to use in pagination. `starting_after` is a metric result ID that
-   * defines your place in the list. For example, if you make a /metrics/results
-   * request and receive 100 objects, ending with `metric_result_abc123`, your
-   * subsequent call can include `starting_after=metric_result_abc123` to fetch the
-   * next page of the list.
+   * Filter metric results created at or after this ISO 8601 date/time (e.g.
+   * 2024-04-01T00:00:00Z).
    */
-  starting_after?: string | null;
+  start_date?: string | null;
 }
 
 export declare namespace Results {
   export {
     type ResultListResponse as ResultListResponse,
+    type ResultExportResponse as ResultExportResponse,
     type ResultListResponsesCursorIDPage as ResultListResponsesCursorIDPage,
     type ResultListParams as ResultListParams,
     type ResultExportParams as ResultExportParams,

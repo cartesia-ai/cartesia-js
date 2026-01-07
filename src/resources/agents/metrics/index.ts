@@ -12,6 +12,7 @@ export {
 export {
   Results,
   type ResultListResponse,
+  type ResultExportResponse,
   type ResultListParams,
   type ResultExportParams,
   type ResultListResponsesCursorIDPage,

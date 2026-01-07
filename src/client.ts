@@ -51,16 +51,14 @@ import {
   SupportedLanguage,
   Voice,
   VoiceCloneParams,
-  VoiceListParams,
+  VoiceGetParams,
   VoiceLocalizeParams,
   VoiceMetadata,
   VoiceUpdateParams,
   Voices,
-  VoicesCursorIDPage,
 } from './resources/voices';
 import {
   AgentListPhoneNumbersResponse,
-  AgentListResponse,
   AgentListTemplatesResponse,
   AgentSummary,
   AgentUpdateParams,
@@ -857,7 +855,6 @@ export declare namespace Cartesia {
   export {
     Agents as Agents,
     type AgentSummary as AgentSummary,
-    type AgentListResponse as AgentListResponse,
     type AgentListPhoneNumbersResponse as AgentListPhoneNumbersResponse,
     type AgentListTemplatesResponse as AgentListTemplatesResponse,
     type AgentUpdateParams as AgentUpdateParams,
@@ -935,10 +932,9 @@ export declare namespace Cartesia {
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
     type VoiceMetadata as VoiceMetadata,
-    type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,
-    type VoiceListParams as VoiceListParams,
     type VoiceCloneParams as VoiceCloneParams,
+    type VoiceGetParams as VoiceGetParams,
     type VoiceLocalizeParams as VoiceLocalizeParams,
   };
 }

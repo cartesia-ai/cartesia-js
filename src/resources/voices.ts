@@ -2,7 +2,7 @@
 
 import { APIResource } from '../core/resource';
 import { APIPromise } from '../core/api-promise';
-import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../core/pagination';
+import { CursorIDPage } from '../core/pagination';
 import { type Uploadable } from '../core/uploads';
 import { buildHeaders } from '../internal/headers';
 import { RequestOptions } from '../internal/request-options';
@@ -14,23 +14,26 @@ export class Voices extends APIResource {
    * Update the name, description, and gender of a voice. To set the gender back to
    * the default, set the gender to `null`. If gender is not specified, the gender
    * will not be updated.
+   *
+   * @example
+   * ```ts
+   * const voice = await client.voices.update('id', {
+   *   description: 'description',
+   *   name: 'name',
+   * });
+   * ```
    */
   update(id: string, body: VoiceUpdateParams, options?: RequestOptions): APIPromise<Voice> {
     return this._client.patch(path`/voices/${id}`, { body, ...options });
   }
 
   /**
-   * List Voices
-   */
-  list(
-    query: VoiceListParams | null | undefined = {},
-    options?: RequestOptions,
-  ): PagePromise<VoicesCursorIDPage, Voice> {
-    return this._client.getAPIList('/voices/', CursorIDPage<Voice>, { query, ...options });
-  }
-
-  /**
    * Delete Voice
+   *
+   * @example
+   * ```ts
+   * await client.voices.delete('id');
+   * ```
    */
   delete(id: string, options?: RequestOptions): APIPromise<void> {
     return this._client.delete(path`/voices/${id}`, {
@@ -43,6 +46,11 @@ export class Voices extends APIResource {
    * Clone a high similarity voice from an audio clip. Clones are more similar to the
    * source clip, but may reproduce background noise. For these, use an audio clip
    * about 5 seconds long.
+   *
+   * @example
+   * ```ts
+   * const voiceMetadata = await client.voices.clone();
+   * ```
    */
   clone(body: VoiceCloneParams, options?: RequestOptions): APIPromise<VoiceMetadata> {
     return this._client.post(
@@ -53,14 +61,34 @@ export class Voices extends APIResource {
 
   /**
    * Get Voice
+   *
+   * @example
+   * ```ts
+   * const voice = await client.voices.get('id');
+   * ```
    */
-  get(id: string, options?: RequestOptions): APIPromise<Voice> {
-    return this._client.get(path`/voices/${id}`, options);
+  get(
+    id: string,
+    query: VoiceGetParams | null | undefined = {},
+    options?: RequestOptions,
+  ): APIPromise<Voice> {
+    return this._client.get(path`/voices/${id}`, { query, ...options });
   }
 
   /**
    * Create a new voice from an existing voice localized to a new language and
    * dialect.
+   *
+   * @example
+   * ```ts
+   * const voiceMetadata = await client.voices.localize({
+   *   description: 'description',
+   *   language: 'en',
+   *   name: 'name',
+   *   original_speaker_gender: 'male',
+   *   voice_id: 'voice_id',
+   * });
+   * ```
    */
   localize(body: VoiceLocalizeParams, options?: RequestOptions): APIPromise<VoiceMetadata> {
     return this._client.post('/voices/localize', { body, ...options });
@@ -72,11 +100,8 @@ export type VoicesCursorIDPage = CursorIDPage<Voice>;
 export type GenderPresentation = 'masculine' | 'feminine' | 'gender_neutral';
 
 /**
- * The language that the given voice should speak the transcript in.
- *
- * Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
- * Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
- * Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+ * The language that the given voice should speak the transcript in. For valid
+ * options, see [Models](/build-with-cartesia/tts-models).
  */
 export type SupportedLanguage =
   | 'en'
@@ -93,7 +118,34 @@ export type SupportedLanguage =
   | 'pl'
   | 'ru'
   | 'sv'
-  | 'tr';
+  | 'tr'
+  | 'tl'
+  | 'bg'
+  | 'ro'
+  | 'ar'
+  | 'cs'
+  | 'el'
+  | 'fi'
+  | 'hr'
+  | 'ms'
+  | 'sk'
+  | 'da'
+  | 'ta'
+  | 'uk'
+  | 'hu'
+  | 'no'
+  | 'vi'
+  | 'bn'
+  | 'th'
+  | 'he'
+  | 'ka'
+  | 'id'
+  | 'te'
+  | 'gu'
+  | 'kn'
+  | 'ml'
+  | 'mr'
+  | 'pa';
 
 export interface Voice {
   /**
@@ -112,7 +164,7 @@ export interface Voice {
   description: string;
 
   /**
-   * Whether the current user is the owner of the voice.
+   * Whether your organization owns the voice.
    */
   is_owner: boolean;
 
@@ -122,11 +174,8 @@ export interface Voice {
   is_public: boolean;
 
   /**
-   * The language that the given voice should speak the transcript in.
-   *
-   * Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-   * Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-   * Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+   * The language that the given voice should speak the transcript in. For valid
+   * options, see [Models](/build-with-cartesia/tts-models).
    */
   language: SupportedLanguage;
 
@@ -141,10 +190,13 @@ export interface Voice {
   gender?: GenderPresentation | null;
 
   /**
-   * Whether the current user has starred the voice. Only included when `expand`
-   * includes `is_starred`.
+   * A URL to download a preview audio file for this voice. Useful to avoid consuming
+   * credits when looking for the right voice. The URL requires the same
+   * Authorization header. Voice previews may be changed, moved, or deleted so you
+   * should avoid storing the URL permanently. This property will be null if there's
+   * no preview available. Only included when `expand[]` includes `preview_file_url`.
    */
-  is_starred?: boolean | null;
+  preview_file_url?: string | null;
 }
 
 export interface VoiceMetadata {
@@ -169,11 +221,8 @@ export interface VoiceMetadata {
   is_public: boolean;
 
   /**
-   * The language that the given voice should speak the transcript in.
-   *
-   * Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-   * Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-   * Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+   * The language that the given voice should speak the transcript in. For valid
+   * options, see [Models](/build-with-cartesia/tts-models).
    */
   language: SupportedLanguage;
 
@@ -202,35 +251,6 @@ export interface VoiceUpdateParams {
   gender?: GenderPresentation | null;
 }
 
-export interface VoiceListParams extends CursorIDPageParams {
-  /**
-   * Additional fields to include in the response.
-   */
-  expand?: Array<'is_starred'> | null;
-
-  /**
-   * The gender presentation of the voices to return.
-   */
-  gender?: GenderPresentation | null;
-
-  /**
-   * Whether to only return voices owned by the current user.
-   */
-  is_owner?: boolean | null;
-
-  /**
-   * Whether to only return starred voices.
-   */
-  is_starred?: boolean | null;
-
-  language?: string;
-
-  /**
-   * The number of Voices to return per page, ranging between 1 and 100.
-   */
-  limit?: number | null;
-}
-
 export interface VoiceCloneParams {
   /**
    * Optional base voice ID that the cloned voice is derived from.
@@ -245,12 +265,6 @@ export interface VoiceCloneParams {
   description?: string | null;
 
   /**
-   * Whether to apply AI enhancements to the clip to reduce background noise. This is
-   * not recommended unless the source clip is extremely low quality.
-   */
-  enhance?: boolean | null;
-
-  /**
    * The language of the voice.
    */
   language?: SupportedLanguage;
@@ -259,6 +273,13 @@ export interface VoiceCloneParams {
    * The name of the voice.
    */
   name?: string;
+}
+
+export interface VoiceGetParams {
+  /**
+   * Additional fields to include in the response.
+   */
+  expand?: Array<'preview_file_url'> | null;
 }
 
 export interface VoiceLocalizeParams {
@@ -316,10 +337,9 @@ export declare namespace Voices {
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
     type VoiceMetadata as VoiceMetadata,
-    type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,
-    type VoiceListParams as VoiceListParams,
     type VoiceCloneParams as VoiceCloneParams,
+    type VoiceGetParams as VoiceGetParams,
     type VoiceLocalizeParams as VoiceLocalizeParams,
   };
 }

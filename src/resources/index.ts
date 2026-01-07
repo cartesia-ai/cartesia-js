@@ -4,7 +4,6 @@ export { AccessToken, type AccessTokenCreateResponse, type AccessTokenCreatePara
 export {
   Agents,
   type AgentSummary,
-  type AgentListResponse,
   type AgentListPhoneNumbersResponse,
   type AgentListTemplatesResponse,
   type AgentUpdateParams,
@@ -60,8 +59,8 @@ export {
   type Voice,
   type VoiceMetadata,
   type VoiceUpdateParams,
-  type VoiceListParams,
   type VoiceCloneParams,
+  type VoiceGetParams,
   type VoiceLocalizeParams,
   type VoicesCursorIDPage,
 } from './voices';

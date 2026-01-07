@@ -4,6 +4,7 @@ import { APIResource } from '../../../core/resource';
 import * as ResultsAPI from './results';
 import {
   ResultExportParams,
+  ResultExportResponse,
   ResultListParams,
   ResultListResponse,
   ResultListResponsesCursorIDPage,
@@ -179,6 +180,7 @@ export declare namespace Metrics {
   export {
     Results as Results,
     type ResultListResponse as ResultListResponse,
+    type ResultExportResponse as ResultExportResponse,
     type ResultListResponsesCursorIDPage as ResultListResponsesCursorIDPage,
     type ResultListParams as ResultListParams,
     type ResultExportParams as ResultExportParams,

@@ -3,7 +3,6 @@
 export {
   Agents,
   type AgentSummary,
-  type AgentListResponse,
   type AgentListPhoneNumbersResponse,
   type AgentListTemplatesResponse,
   type AgentUpdateParams,

@@ -54,7 +54,7 @@ export interface VoiceChangerChangeVoiceBytesParams {
    */
   'output_format[encoding]'?: InfillAPI.RawEncoding | null;
 
-  'output_format[sample_rate]'?: number;
+  'output_format[sample_rate]'?: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 
   'voice[id]'?: string;
 }
@@ -74,7 +74,7 @@ export interface VoiceChangerChangeVoiceSseParams {
    */
   'output_format[encoding]'?: InfillAPI.RawEncoding | null;
 
-  'output_format[sample_rate]'?: number;
+  'output_format[sample_rate]'?: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 
   'voice[id]'?: string;
 }

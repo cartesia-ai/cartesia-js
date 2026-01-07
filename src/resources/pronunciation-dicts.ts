@@ -55,26 +55,6 @@ export class PronunciationDicts extends APIResource {
       headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
     });
   }
-
-  /**
-   * Pin a pronunciation dictionary for the authenticated user
-   */
-  pin(id: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.post(path`/pronunciation-dicts/${id}/pin`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
-  }
-
-  /**
-   * Unpin a pronunciation dictionary for the authenticated user
-   */
-  unpin(id: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.post(path`/pronunciation-dicts/${id}/unpin`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
-  }
 }
 
 export type PronunciationDictsCursorIDPage = CursorIDPage<PronunciationDict>;

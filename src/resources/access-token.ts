@@ -42,6 +42,12 @@ export namespace AccessTokenCreateParams {
    */
   export interface Grants {
     /**
+     * The `agent` grant allows the token to be used to access the Agent websocket
+     * calling [endpoint](/line/integrations/web-calls#connection).
+     */
+    agent?: boolean | null;
+
+    /**
      * The `stt` grant allows the token to be used to access any STT endpoint.
      */
     stt?: boolean | null;

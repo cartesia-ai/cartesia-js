@@ -16,8 +16,6 @@ export class Infill extends APIResource {
    * **The cost is 1 credit per character of the infill text plus a fixed cost of 300
    * credits.**
    *
-   * Infilling is only available on `sonic-2` at this time.
-   *
    * At least one of `left_audio` or `right_audio` must be provided.
    *
    * As with all generative models, there's some inherent variability, but here's
@@ -55,7 +53,8 @@ export interface InfillCreateParams {
   left_audio?: Uploadable;
 
   /**
-   * The ID of the model to use for generating audio
+   * The ID of the model to use for generating audio. Any model other than the first
+   * `"sonic"` model is supported.
    */
   model_id?: string;
 
@@ -77,7 +76,7 @@ export interface InfillCreateParams {
   /**
    * The sample rate of the output audio
    */
-  'output_format[sample_rate]'?: number;
+  'output_format[sample_rate]'?: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 
   right_audio?: Uploadable;
 
