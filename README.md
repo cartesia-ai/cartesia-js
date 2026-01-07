@@ -26,9 +26,10 @@ const client = new Cartesia({
   apiKey: 'My API Key',
 });
 
-const agents = await client.agents.list();
+const page = await client.voices.list();
+const voice = page.data[0];
 
-console.log(agents.summaries);
+console.log(voice.id);
 ```
 
 ### Request & Response types
@@ -43,7 +44,7 @@ const client = new Cartesia({
   apiKey: 'My API Key',
 });
 
-const agents: Cartesia.AgentListResponse = await client.agents.list();
+const [voice]: [Cartesia.Voice] = await client.voices.list();
 ```
 
 Documentation for each method, request param, and response field are available in docstrings and will appear on hover in most modern editors.
@@ -85,7 +86,7 @@ a subclass of `APIError` will be thrown:
 
 <!-- prettier-ignore -->
 ```ts
-const agents = await client.agents.list().catch(async (err) => {
+const page = await client.voices.list().catch(async (err) => {
   if (err instanceof Cartesia.APIError) {
     console.log(err.status); // 400
     console.log(err.name); // BadRequestError
@@ -125,7 +126,7 @@ const client = new Cartesia({
 });
 
 // Or, configure per-request:
-await client.agents.list({
+await client.voices.list({
   maxRetries: 5,
 });
 ```
@@ -142,7 +143,7 @@ const client = new Cartesia({
 });
 
 // Override per-request:
-await client.agents.list({
+await client.voices.list({
   timeout: 5 * 1000,
 });
 ```
@@ -193,7 +194,8 @@ import Cartesia from '@cartesia/cartesia-js';
 
 const client = new Cartesia();
 
-const agents = await client.agents.list({ headers: { 'cartesia-version': 'My-Custom-Value' } });
+const page = await client.voices.list({ headers: { 'cartesia-version': 'My-Custom-Value' } });
+const voice = page.data[0];
 ```
 
 ## Advanced Usage
@@ -210,13 +212,15 @@ Unlike `.asResponse()` this method consumes the body, returning once it is parse
 ```ts
 const client = new Cartesia();
 
-const response = await client.agents.list().asResponse();
+const response = await client.voices.list().asResponse();
 console.log(response.headers.get('X-My-Header'));
 console.log(response.statusText); // access the underlying Response object
 
-const { data: agents, response: raw } = await client.agents.list().withResponse();
+const { data: page, response: raw } = await client.voices.list().withResponse();
 console.log(raw.headers.get('X-My-Header'));
-console.log(agents.summaries);
+for await (const voice of page) {
+  console.log(voice.id);
+}
 ```
 
 ### Logging
@@ -296,7 +300,7 @@ parameter. This library doesn't validate at runtime that the request matches the
 send will be sent as-is.
 
 ```ts
-client.agents.list({
+client.voices.list({
   // ...
   // @ts-expect-error baz is not yet public
   baz: 'undocumented option',
