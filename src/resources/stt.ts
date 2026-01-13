@@ -100,7 +100,7 @@ export interface SttTranscribeParams {
   sample_rate?: number | null;
 
   /**
-   * Body param:
+   * Body param
    */
   file?: Uploadable;
 
