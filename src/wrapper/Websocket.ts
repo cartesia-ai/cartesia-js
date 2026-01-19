@@ -94,7 +94,7 @@ export default class Websocket {
         // Set a timeout.
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
         if (timeout > 0) {
-            timeoutId = setTimeout(streamCompleteController.abort, timeout);
+            timeoutId = setTimeout(streamCompleteController.abort.bind(streamCompleteController), timeout);
         }
         const handleMessage = createMessageHandlerForContextId(inputs.contextId, async ({ chunk, message, data }) => {
             emitter.emit("message", message);
@@ -109,7 +109,7 @@ export default class Websocket {
             }
             if (timeoutId) {
                 clearTimeout(timeoutId);
-                timeoutId = setTimeout(streamCompleteController.abort, timeout);
+                timeoutId = setTimeout(streamCompleteController.abort.bind(streamCompleteController), timeout);
             }
             if (!chunk) {
                 return;
