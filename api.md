@@ -37,7 +37,7 @@ Methods:
 
 - <code title="get /agents/calls/{call_id}">client.agents.calls.<a href="./src/resources/agents/calls.ts">retrieve</a>(callID) -> AgentCall</code>
 - <code title="get /agents/calls">client.agents.calls.<a href="./src/resources/agents/calls.ts">list</a>({ ...params }) -> AgentCallsCursorIDPage</code>
-- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/resources/agents/calls.ts">downloadAudio</a>(callID) -> void</code>
+- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/resources/agents/calls.ts">downloadAudio</a>(callID) -> Response</code>
 
 ## Metrics
 
@@ -137,7 +137,7 @@ Types:
 
 Methods:
 
-- <code title="post /infill/bytes">client.infill.<a href="./src/resources/infill.ts">create</a>({ ...params }) -> void</code>
+- <code title="post /infill/bytes">client.infill.<a href="./src/resources/infill.ts">create</a>({ ...params }) -> Response</code>
 
 # PronunciationDicts
 

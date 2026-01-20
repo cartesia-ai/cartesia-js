@@ -29,11 +29,16 @@ export class Infill extends APIResource {
    *   keeping as much silence in the left/right audio segments as possible
    *   - This helps the model generate more natural transitions
    */
-  create(body: InfillCreateParams, options?: RequestOptions): APIPromise<void> {
+  create(body: InfillCreateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post(
       '/infill/bytes',
       multipartFormRequestOptions(
-        { body, ...options, headers: buildHeaders([{ Accept: '*/*' }, options?.headers]) },
+        {
+          body,
+          ...options,
+          headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
+          __binaryResponse: true,
+        },
         this._client,
       ),
     );
