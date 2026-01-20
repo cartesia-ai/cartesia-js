@@ -15,11 +15,16 @@ export class VoiceChanger extends APIResource {
    *
    * This endpoint is priced at 15 characters per second of input audio.
    */
-  changeVoiceBytes(body: VoiceChangerChangeVoiceBytesParams, options?: RequestOptions): APIPromise<void> {
+  changeVoiceBytes(body: VoiceChangerChangeVoiceBytesParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post(
       '/voice-changer/bytes',
       multipartFormRequestOptions(
-        { body, ...options, headers: buildHeaders([{ Accept: '*/*' }, options?.headers]) },
+        {
+          body,
+          ...options,
+          headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
+          __binaryResponse: true,
+        },
         this._client,
       ),
     );
