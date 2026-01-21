@@ -3,10 +3,10 @@
 import { APIResource } from '../../core/resource';
 import * as FilesAPI from './files';
 import {
+  FileDeleteParams,
   FileListParams,
   FileListResponse,
   FileListResponsesCursorIDPage,
-  FileRemoveParams,
   FileUploadParams,
   Files,
 } from './files';
@@ -57,7 +57,7 @@ export class Datasets extends APIResource {
   /**
    * Delete a dataset
    */
-  remove(id: string, options?: RequestOptions): APIPromise<void> {
+  delete(id: string, options?: RequestOptions): APIPromise<void> {
     return this._client.delete(path`/datasets/${id}`, {
       ...options,
       headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
@@ -139,7 +139,7 @@ export declare namespace Datasets {
     type FileListResponse as FileListResponse,
     type FileListResponsesCursorIDPage as FileListResponsesCursorIDPage,
     type FileListParams as FileListParams,
-    type FileRemoveParams as FileRemoveParams,
+    type FileDeleteParams as FileDeleteParams,
     type FileUploadParams as FileUploadParams,
   };
 }

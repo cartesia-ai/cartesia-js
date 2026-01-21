@@ -37,8 +37,8 @@ describe('resource files', () => {
   });
 
   // Prism tests are disabled
-  test.skip('remove: only required params', async () => {
-    const responsePromise = client.datasets.files.remove('fileID', { id: 'id' });
+  test.skip('delete: only required params', async () => {
+    const responsePromise = client.datasets.files.delete('fileID', { id: 'id' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -49,8 +49,8 @@ describe('resource files', () => {
   });
 
   // Prism tests are disabled
-  test.skip('remove: required and optional params', async () => {
-    const response = await client.datasets.files.remove('fileID', { id: 'id' });
+  test.skip('delete: required and optional params', async () => {
+    const response = await client.datasets.files.delete('fileID', { id: 'id' });
   });
 
   // Prism tests are disabled

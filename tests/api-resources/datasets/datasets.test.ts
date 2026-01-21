@@ -82,8 +82,8 @@ describe('resource datasets', () => {
   });
 
   // Prism tests are disabled
-  test.skip('remove', async () => {
-    const responsePromise = client.datasets.remove('id');
+  test.skip('delete', async () => {
+    const responsePromise = client.datasets.delete('id');
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;

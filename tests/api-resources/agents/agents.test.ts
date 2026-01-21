@@ -45,6 +45,18 @@ describe('resource agents', () => {
   });
 
   // Prism tests are disabled
+  test.skip('delete', async () => {
+    const responsePromise = client.agents.delete('agent_id');
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Prism tests are disabled
   test.skip('listPhoneNumbers', async () => {
     const responsePromise = client.agents.listPhoneNumbers('agent_id');
     const rawResponse = await responsePromise.asResponse();
@@ -59,18 +71,6 @@ describe('resource agents', () => {
   // Prism tests are disabled
   test.skip('listTemplates', async () => {
     const responsePromise = client.agents.listTemplates();
-    const rawResponse = await responsePromise.asResponse();
-    expect(rawResponse).toBeInstanceOf(Response);
-    const response = await responsePromise;
-    expect(response).not.toBeInstanceOf(Response);
-    const dataAndResponse = await responsePromise.withResponse();
-    expect(dataAndResponse.data).toBe(response);
-    expect(dataAndResponse.response).toBe(rawResponse);
-  });
-
-  // Prism tests are disabled
-  test.skip('remove', async () => {
-    const responsePromise = client.agents.remove('agent_id');
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;

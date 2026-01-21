@@ -22,9 +22,9 @@ Methods:
 - <code title="get /agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">retrieve</a>(agentID) -> AgentSummary</code>
 - <code title="patch /agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">update</a>(agentID, { ...params }) -> AgentSummary</code>
 - <code title="get /agents">client.agents.<a href="./src/resources/agents/agents.ts">list</a>() -> AgentListResponse</code>
+- <code title="delete /agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">delete</a>(agentID) -> void</code>
 - <code title="get /agents/{agent_id}/phone-numbers">client.agents.<a href="./src/resources/agents/agents.ts">listPhoneNumbers</a>(agentID) -> AgentListPhoneNumbersResponse</code>
 - <code title="get /agents/templates">client.agents.<a href="./src/resources/agents/agents.ts">listTemplates</a>() -> AgentListTemplatesResponse</code>
-- <code title="delete /agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">remove</a>(agentID) -> void</code>
 
 ## Calls
 
@@ -100,7 +100,7 @@ Methods:
 - <code title="get /datasets/{id}">client.datasets.<a href="./src/resources/datasets/datasets.ts">retrieve</a>(id) -> Dataset</code>
 - <code title="patch /datasets/{id}">client.datasets.<a href="./src/resources/datasets/datasets.ts">update</a>(id, { ...params }) -> void</code>
 - <code title="get /datasets/">client.datasets.<a href="./src/resources/datasets/datasets.ts">list</a>({ ...params }) -> DatasetsCursorIDPage</code>
-- <code title="delete /datasets/{id}">client.datasets.<a href="./src/resources/datasets/datasets.ts">remove</a>(id) -> void</code>
+- <code title="delete /datasets/{id}">client.datasets.<a href="./src/resources/datasets/datasets.ts">delete</a>(id) -> void</code>
 
 ## Files
 
@@ -111,7 +111,7 @@ Types:
 Methods:
 
 - <code title="get /datasets/{id}/files">client.datasets.files.<a href="./src/resources/datasets/files.ts">list</a>(id, { ...params }) -> FileListResponsesCursorIDPage</code>
-- <code title="delete /datasets/{id}/files/{fileID}">client.datasets.files.<a href="./src/resources/datasets/files.ts">remove</a>(fileID, { ...params }) -> void</code>
+- <code title="delete /datasets/{id}/files/{fileID}">client.datasets.files.<a href="./src/resources/datasets/files.ts">delete</a>(fileID, { ...params }) -> void</code>
 - <code title="post /datasets/{id}/files">client.datasets.files.<a href="./src/resources/datasets/files.ts">upload</a>(id, { ...params }) -> void</code>
 
 # FineTunes
@@ -152,7 +152,7 @@ Methods:
 - <code title="get /pronunciation-dicts/{id}">client.pronunciationDicts.<a href="./src/resources/pronunciation-dicts.ts">retrieve</a>(id) -> PronunciationDict</code>
 - <code title="patch /pronunciation-dicts/{id}">client.pronunciationDicts.<a href="./src/resources/pronunciation-dicts.ts">update</a>(id, { ...params }) -> PronunciationDict</code>
 - <code title="get /pronunciation-dicts/">client.pronunciationDicts.<a href="./src/resources/pronunciation-dicts.ts">list</a>({ ...params }) -> PronunciationDictsCursorIDPage</code>
-- <code title="delete /pronunciation-dicts/{id}">client.pronunciationDicts.<a href="./src/resources/pronunciation-dicts.ts">remove</a>(id) -> void</code>
+- <code title="delete /pronunciation-dicts/{id}">client.pronunciationDicts.<a href="./src/resources/pronunciation-dicts.ts">delete</a>(id) -> void</code>
 
 # Stt
 
@@ -201,7 +201,7 @@ Methods:
 
 - <code title="patch /voices/{id}">client.voices.<a href="./src/resources/voices.ts">update</a>(id, { ...params }) -> Voice</code>
 - <code title="get /voices">client.voices.<a href="./src/resources/voices.ts">list</a>({ ...params }) -> VoicesCursorIDPage</code>
+- <code title="delete /voices/{id}">client.voices.<a href="./src/resources/voices.ts">delete</a>(id) -> void</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/resources/voices.ts">clone</a>({ ...params }) -> VoiceMetadata</code>
 - <code title="get /voices/{id}">client.voices.<a href="./src/resources/voices.ts">get</a>(id, { ...params }) -> Voice</code>
 - <code title="post /voices/localize">client.voices.<a href="./src/resources/voices.ts">localize</a>({ ...params }) -> VoiceMetadata</code>
-- <code title="delete /voices/{id}">client.voices.<a href="./src/resources/voices.ts">remove</a>(id) -> void</code>
