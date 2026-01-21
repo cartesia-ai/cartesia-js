@@ -28,11 +28,10 @@ export class Calls extends APIResource {
    * The downloaded audio file is in .wav format. This endpoint streams the audio
    * file content (WAV format) to the client.
    */
-  downloadAudio(callID: string, options?: RequestOptions): APIPromise<Response> {
+  downloadAudio(callID: string, options?: RequestOptions): APIPromise<void> {
     return this._client.get(path`/agents/calls/${callID}/audio`, {
       ...options,
-      headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
-      __binaryResponse: true,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
     });
   }
 }

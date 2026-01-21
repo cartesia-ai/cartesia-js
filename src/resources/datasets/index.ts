@@ -12,7 +12,7 @@ export {
   Files,
   type FileListResponse,
   type FileListParams,
-  type FileDeleteParams,
+  type FileRemoveParams,
   type FileUploadParams,
   type FileListResponsesCursorIDPage,
 } from './files';

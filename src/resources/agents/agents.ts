@@ -48,16 +48,6 @@ export class Agents extends APIResource {
   }
 
   /**
-   * Delete Agent
-   */
-  delete(agentID: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/agents/${agentID}`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
-  }
-
-  /**
    * List the phone numbers associated with an agent. Currently, you can only have
    * one phone number per agent and these are provisioned by Cartesia.
    */
@@ -70,6 +60,16 @@ export class Agents extends APIResource {
    */
   listTemplates(options?: RequestOptions): APIPromise<AgentListTemplatesResponse> {
     return this._client.get('/agents/templates', options);
+  }
+
+  /**
+   * Delete Agent
+   */
+  remove(agentID: string, options?: RequestOptions): APIPromise<void> {
+    return this._client.delete(path`/agents/${agentID}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 }
 

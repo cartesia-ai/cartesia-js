@@ -46,21 +46,6 @@ export class Voices extends APIResource {
   }
 
   /**
-   * Delete Voice
-   *
-   * @example
-   * ```ts
-   * await client.voices.delete('id');
-   * ```
-   */
-  delete(id: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/voices/${id}`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
-  }
-
-  /**
    * Clone a high similarity voice from an audio clip. Clones are more similar to the
    * source clip, but may reproduce background noise. For these, use an audio clip
    * about 5 seconds long.
@@ -110,6 +95,21 @@ export class Voices extends APIResource {
    */
   localize(body: VoiceLocalizeParams, options?: RequestOptions): APIPromise<VoiceMetadata> {
     return this._client.post('/voices/localize', { body, ...options });
+  }
+
+  /**
+   * Delete Voice
+   *
+   * @example
+   * ```ts
+   * await client.voices.remove('id');
+   * ```
+   */
+  remove(id: string, options?: RequestOptions): APIPromise<void> {
+    return this._client.delete(path`/voices/${id}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 }
 

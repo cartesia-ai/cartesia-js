@@ -80,8 +80,8 @@ describe('resource pronunciationDicts', () => {
   });
 
   // Prism tests are disabled
-  test.skip('delete', async () => {
-    const responsePromise = client.pronunciationDicts.delete('id');
+  test.skip('remove', async () => {
+    const responsePromise = client.pronunciationDicts.remove('id');
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;

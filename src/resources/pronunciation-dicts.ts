@@ -49,7 +49,7 @@ export class PronunciationDicts extends APIResource {
   /**
    * Delete a pronunciation dictionary
    */
-  delete(id: string, options?: RequestOptions): APIPromise<void> {
+  remove(id: string, options?: RequestOptions): APIPromise<void> {
     return this._client.delete(path`/pronunciation-dicts/${id}`, {
       ...options,
       headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),

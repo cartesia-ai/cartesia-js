@@ -9,6 +9,18 @@ const client = new Cartesia({
 
 describe('resource voiceChanger', () => {
   // Prism tests are disabled
+  test.skip('changeVoiceBytes', async () => {
+    const responsePromise = client.voiceChanger.changeVoiceBytes({});
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Prism tests are disabled
   test.skip('changeVoiceSse', async () => {
     const responsePromise = client.voiceChanger.changeVoiceSse({});
     const rawResponse = await responsePromise.asResponse();

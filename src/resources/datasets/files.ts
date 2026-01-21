@@ -27,7 +27,7 @@ export class Files extends APIResource {
   /**
    * Remove a file from a dataset
    */
-  delete(fileID: string, params: FileDeleteParams, options?: RequestOptions): APIPromise<void> {
+  remove(fileID: string, params: FileRemoveParams, options?: RequestOptions): APIPromise<void> {
     const { id } = params;
     return this._client.delete(path`/datasets/${id}/files/${fileID}`, {
       ...options,
@@ -83,7 +83,7 @@ export interface FileListParams extends CursorIDPageParams {
   limit?: number | null;
 }
 
-export interface FileDeleteParams {
+export interface FileRemoveParams {
   /**
    * ID of the dataset containing the file
    */
@@ -104,7 +104,7 @@ export declare namespace Files {
     type FileListResponse as FileListResponse,
     type FileListResponsesCursorIDPage as FileListResponsesCursorIDPage,
     type FileListParams as FileListParams,
-    type FileDeleteParams as FileDeleteParams,
+    type FileRemoveParams as FileRemoveParams,
     type FileUploadParams as FileUploadParams,
   };
 }
