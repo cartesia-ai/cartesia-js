@@ -1,17 +1,37 @@
 {
-    "compilerOptions": {
-        "extendedDiagnostics": true,
-        "strict": true,
-        "target": "ES6",
-        "moduleResolution": "node",
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "declaration": true,
-        "outDir": "dist",
-        "rootDir": "src",
-        "baseUrl": "src",
-        "module": "CommonJS"
+  "include": ["src", "tests", "examples"],
+  "exclude": [],
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "paths": {
+      "@cartesia/cartesia-js/*": ["./src/*"],
+      "@cartesia/cartesia-js": ["./src/index.ts"]
     },
-    "include": ["src"],
-    "exclude": []
+    "noEmit": true,
+
+    "resolveJsonModule": true,
+
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "alwaysStrict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "isolatedModules": false,
+
+    "skipLibCheck": true
+  }
 }

@@ -1,679 +1,436 @@
-# Cartesia TypeScript Library
+# Cartesia TypeScript API Library
 
-[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Fcartesia-ai%2Fcartesia-js)
-[![npm shield](https://img.shields.io/npm/v/@cartesia/cartesia-js)](https://www.npmjs.com/package/@cartesia/cartesia-js)
+[![NPM version](<https://img.shields.io/npm/v/@cartesia/cartesia-js.svg?label=npm%20(stable)>)](https://npmjs.org/package/@cartesia/cartesia-js) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@cartesia/cartesia-js)
 
-The Cartesia TypeScript library provides convenient access to the Cartesia APIs from TypeScript.
+This library provides convenient access to the Cartesia REST API from server-side TypeScript or JavaScript.
+
+The full API of this library can be found in [api.md](api.md).
+
+It is generated with [Stainless](https://www.stainless.com/).
 
 ## Installation
 
 ```sh
-npm i -s @cartesia/cartesia-js
+npm install @cartesia/cartesia-js
 ```
-
-## Reference
-
-A full reference for this library is available [here](https://github.com/cartesia-ai/cartesia-js/blob/HEAD/./reference.md).
 
 ## Usage
 
-Instantiate and use the client with the following:
+The full API of this library can be found in [api.md](api.md).
 
-```typescript
-import { CartesiaClient } from "@cartesia/cartesia-js";
+<!-- prettier-ignore -->
+```js
+import Cartesia from '@cartesia/cartesia-js';
 
-const client = new CartesiaClient({ apiKey: "YOUR_API_KEY" });
-await client.auth.accessToken({
-    grants: {
-        stt: true,
-    },
-    expiresIn: 60,
+const client = new Cartesia({
+  apiKey: 'My API Key',
+});
+
+const page = await client.voices.list();
+const voice = page.data[0];
+
+console.log(voice.id);
+```
+
+### Request & Response types
+
+This library includes TypeScript definitions for all request params and response fields. You may import and use them like so:
+
+<!-- prettier-ignore -->
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+
+const client = new Cartesia({
+  apiKey: 'My API Key',
+});
+
+const [voice]: [Cartesia.Voice] = await client.voices.list();
+```
+
+Documentation for each method, request param, and response field are available in docstrings and will appear on hover in most modern editors.
+
+## File uploads
+
+Request parameters that correspond to file uploads can be passed in many different forms:
+
+- `File` (or an object with the same structure)
+- a `fetch` `Response` (or an object with the same structure)
+- an `fs.ReadStream`
+- the return value of our `toFile` helper
+
+```ts
+import fs from 'fs';
+import Cartesia, { toFile } from '@cartesia/cartesia-js';
+
+const client = new Cartesia();
+
+// If you have access to Node `fs` we recommend using `fs.createReadStream()`:
+await client.datasets.files.upload('id', { file: fs.createReadStream('/path/to/file') });
+
+// Or if you have the web `File` API you can pass a `File` instance:
+await client.datasets.files.upload('id', { file: new File(['my bytes'], 'file') });
+
+// You can also pass a `fetch` `Response`:
+await client.datasets.files.upload('id', { file: await fetch('https://somesite/file') });
+
+// Finally, if none of the above are convenient, you can use our `toFile` helper:
+await client.datasets.files.upload('id', { file: await toFile(Buffer.from('my bytes'), 'file') });
+await client.datasets.files.upload('id', { file: await toFile(new Uint8Array([0, 1, 2]), 'file') });
+```
+
+## Handling errors
+
+When the library is unable to connect to the API,
+or if the API returns a non-success status code (i.e., 4xx or 5xx response),
+a subclass of `APIError` will be thrown:
+
+<!-- prettier-ignore -->
+```ts
+const page = await client.voices.list().catch(async (err) => {
+  if (err instanceof Cartesia.APIError) {
+    console.log(err.status); // 400
+    console.log(err.name); // BadRequestError
+    console.log(err.headers); // {server: 'nginx', ...}
+  } else {
+    throw err;
+  }
 });
 ```
 
-## Speech-to-Text (STT)
-
-```typescript
-import { CartesiaClient } from "@cartesia/cartesia-js";
-import fs from "node:fs";
-
-async function streamingSTTExample() {
-    const client = new CartesiaClient({
-        apiKey: process.env.CARTESIA_API_KEY,
-    });
-
-    // Create websocket connection with endpointing parameters
-    const sttWs = client.stt.websocket({
-        model: "ink-whisper",
-        language: "en", // Language of your audio
-        encoding: "pcm_s16le", // Audio encoding format (required)
-        sampleRate: 16000, // Audio sample rate (required)
-        minVolume: 0.1, // Volume threshold for voice activity detection (0.0-1.0)
-        maxSilenceDurationSecs: 2.0, // Maximum silence duration before endpointing
-    });
-
-    // Concurrent audio sending
-    async function sendAudio() {
-        try {
-            const audioBuffer = fs.readFileSync("audio.wav");
-            const chunkSize = 3200; // ~200ms chunks for more realistic streaming
-
-            console.log("Starting audio stream...");
-
-            for (let i = 0; i < audioBuffer.length; i += chunkSize) {
-                const chunk = audioBuffer.subarray(i, i + chunkSize);
-                const arrayBuffer = chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength);
-
-                await sttWs.send(arrayBuffer);
-                console.log(`Sent chunk ${Math.floor(i / chunkSize) + 1}`);
-
-                // Simulate real-time audio capture delay
-                await new Promise((resolve) => setTimeout(resolve, 100));
-            }
-
-            await sttWs.finalize();
-            console.log("Audio streaming completed");
-        } catch (error) {
-            console.error("Error sending audio:", error);
-        }
-    }
-
-    // Concurrent transcript receiving with word-level timestamps
-    async function receiveTranscripts(): Promise<string> {
-        return new Promise((resolve) => {
-            let fullTranscript = "";
-
-            sttWs.onMessage((result) => {
-                if (result.type === "transcript") {
-                    const status = result.isFinal ? "FINAL" : "INTERIM";
-                    console.log(`[${status}] "${result.text}"`);
-
-                    // Handle word-level timestamps if available
-                    if (result.words && result.words.length > 0) {
-                        console.log("Word-level timestamps:");
-                        result.words.forEach((word) => {
-                            console.log(`  "${word.word}": ${word.start.toFixed(2)}s - ${word.end.toFixed(2)}s`);
-                        });
-                    }
-
-                    if (result.isFinal) {
-                        fullTranscript += `${result.text} `;
-                    }
-                } else if (result.type === "flush_done") {
-                    console.log("Flush completed - sending done command");
-                    sttWs.done().catch(console.error);
-                } else if (result.type === "done") {
-                    console.log("Transcription completed");
-                    resolve(fullTranscript.trim());
-                } else if (result.type === "error") {
-                    console.error(`Error: ${result.message}`);
-                    resolve("");
-                }
-            });
-        });
-    }
-
-    try {
-        console.log("Starting STT processing...");
-
-        // Run audio sending and transcript receiving concurrently
-        const [, finalTranscript] = await Promise.all([sendAudio(), receiveTranscripts()]);
-
-        console.log(`\nFinal transcript: ${finalTranscript}`);
-
-        // Clean up
-        sttWs.disconnect();
-
-        return finalTranscript;
-    } catch (error) {
-        console.error("STT processing error:", error);
-        sttWs.disconnect();
-        throw error;
-    }
-}
-
-// Run the example
-streamingSTTExample().catch(console.error);
-```
-
-## Request And Response Types
-
-The SDK exports all request and response types as TypeScript interfaces. Simply import them with the
-following namespace:
-
-```typescript
-import { Cartesia } from "@cartesia/cartesia-js";
-
-const request: Cartesia.InfillBytesRequest = {
-    ...
-};
-```
-
-## Exception Handling
-
-When the API returns a non-success status code (4xx or 5xx response), a subclass of the following error
-will be thrown.
-
-```typescript
-import { CartesiaError } from "@cartesia/cartesia-js";
-
-try {
-    await client.auth.accessToken(...);
-} catch (err) {
-    if (err instanceof CartesiaError) {
-        console.log(err.statusCode);
-        console.log(err.message);
-        console.log(err.body);
-    }
-}
-```
-
-## Binary Response
-
-You can consume binary data from endpoints using the `BinaryResponse` type which lets you choose how to consume the data:
-
-```typescript
-const response = await client.agents.downloadCallAudio(...);
-const stream: ReadableStream<Uint8Array> = response.stream();
-// const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
-// const blob: Blob = response.blob();
-// const bytes: Uint8Array = response.bytes();
-// You can only use the response body once, so you must choose one of the above methods.
-// If you want to check if the response body has been used, you can use the following property.
-const bodyUsed = response.bodyUsed;
-```
-
-<details>
-<summary>Save binary response to a file</summary>
-
-<blockquote>
-<details>
-<summary>Node.js</summary>
-
-<blockquote>
-<details>
-<summary>ReadableStream (most-efficient)</summary>
-
-```ts
-import { createWriteStream } from 'fs';
-import { Readable } from 'stream';
-import { pipeline } from 'stream/promises';
-
-const response = await client.agents.downloadCallAudio(...);
-
-const stream = response.stream();
-const nodeStream = Readable.fromWeb(stream);
-const writeStream = createWriteStream('path/to/file');
-
-await pipeline(nodeStream, writeStream);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>ArrayBuffer</summary>
-
-```ts
-import { writeFile } from 'fs/promises';
-
-const response = await client.agents.downloadCallAudio(...);
-
-const arrayBuffer = await response.arrayBuffer();
-await writeFile('path/to/file', Buffer.from(arrayBuffer));
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Blob</summary>
-
-```ts
-import { writeFile } from 'fs/promises';
-
-const response = await client.agents.downloadCallAudio(...);
-
-const blob = await response.blob();
-const arrayBuffer = await blob.arrayBuffer();
-await writeFile('output.bin', Buffer.from(arrayBuffer));
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Bytes (UIntArray8)</summary>
-
-```ts
-import { writeFile } from 'fs/promises';
-
-const response = await client.agents.downloadCallAudio(...);
-
-const bytes = await response.bytes();
-await writeFile('path/to/file', bytes);
-```
-
-</details>
-</blockquote>
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Bun</summary>
-
-<blockquote>
-<details>
-<summary>ReadableStream (most-efficient)</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const stream = response.stream();
-await Bun.write('path/to/file', stream);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>ArrayBuffer</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const arrayBuffer = await response.arrayBuffer();
-await Bun.write('path/to/file', arrayBuffer);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Blob</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const blob = await response.blob();
-await Bun.write('path/to/file', blob);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Bytes (UIntArray8)</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const bytes = await response.bytes();
-await Bun.write('path/to/file', bytes);
-```
-
-</details>
-</blockquote>
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Deno</summary>
-
-<blockquote>
-<details>
-<summary>ReadableStream (most-efficient)</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const stream = response.stream();
-const file = await Deno.open('path/to/file', { write: true, create: true });
-await stream.pipeTo(file.writable);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>ArrayBuffer</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const arrayBuffer = await response.arrayBuffer();
-await Deno.writeFile('path/to/file', new Uint8Array(arrayBuffer));
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Blob</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const blob = await response.blob();
-const arrayBuffer = await blob.arrayBuffer();
-await Deno.writeFile('path/to/file', new Uint8Array(arrayBuffer));
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Bytes (UIntArray8)</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const bytes = await response.bytes();
-await Deno.writeFile('path/to/file', bytes);
-```
-
-</details>
-</blockquote>
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Browser</summary>
-
-<blockquote>
-<details>
-<summary>Blob (most-efficient)</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const blob = await response.blob();
-const url = URL.createObjectURL(blob);
-
-// trigger download
-const a = document.createElement('a');
-a.href = url;
-a.download = 'filename';
-a.click();
-URL.revokeObjectURL(url);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>ReadableStream</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const stream = response.stream();
-const reader = stream.getReader();
-const chunks = [];
-
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-  chunks.push(value);
-}
-
-const blob = new Blob(chunks);
-const url = URL.createObjectURL(blob);
-
-// trigger download
-const a = document.createElement('a');
-a.href = url;
-a.download = 'filename';
-a.click();
-URL.revokeObjectURL(url);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>ArrayBuffer</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const arrayBuffer = await response.arrayBuffer();
-const blob = new Blob([arrayBuffer]);
-const url = URL.createObjectURL(blob);
-
-// trigger download
-const a = document.createElement('a');
-a.href = url;
-a.download = 'filename';
-a.click();
-URL.revokeObjectURL(url);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Bytes (UIntArray8)</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const bytes = await response.bytes();
-const blob = new Blob([bytes]);
-const url = URL.createObjectURL(blob);
-
-// trigger download
-const a = document.createElement('a');
-a.href = url;
-a.download = 'filename';
-a.click();
-URL.revokeObjectURL(url);
-```
-
-</details>
-</blockquote>
-
-</details>
-</blockquote>
-
-</details>
-</blockquote>
-
-<details>
-<summary>Convert binary response to text</summary>
-
-<blockquote>
-<details>
-<summary>ReadableStream</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const stream = response.stream();
-const text = await new Response(stream).text();
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>ArrayBuffer</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const arrayBuffer = await response.arrayBuffer();
-const text = new TextDecoder().decode(arrayBuffer);
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Blob</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const blob = await response.blob();
-const text = await blob.text();
-```
-
-</details>
-</blockquote>
-
-<blockquote>
-<details>
-<summary>Bytes (UIntArray8)</summary>
-
-```ts
-const response = await client.agents.downloadCallAudio(...);
-
-const bytes = await response.bytes();
-const text = new TextDecoder().decode(bytes);
-```
-
-</details>
-</blockquote>
-
-</details>
-
-## Pagination
-
-List endpoints are paginated. The SDK provides an iterator so that you can simply loop over the items:
-
-```typescript
-import { CartesiaClient } from "@cartesia/cartesia-js";
-
-const client = new CartesiaClient({ token: "YOUR_TOKEN" });
-const response = await client.agents.listCalls({
-    agentId: "agent_id",
-});
-for await (const item of response) {
-    console.log(item);
-}
-
-// Or you can manually iterate page-by-page
-let page = await client.agents.listCalls({
-    agentId: "agent_id",
-});
-while (page.hasNextPage()) {
-    page = page.getNextPage();
-}
-```
-
-## Advanced
-
-### Additional Headers
-
-If you would like to send additional headers as part of the request, use the `headers` request option.
-
-```typescript
-const response = await client.auth.accessToken(..., {
-    headers: {
-        'X-Custom-Header': 'custom value'
-    }
-});
-```
+Error codes are as follows:
+
+| Status Code | Error Type                 |
+| ----------- | -------------------------- |
+| 400         | `BadRequestError`          |
+| 401         | `AuthenticationError`      |
+| 403         | `PermissionDeniedError`    |
+| 404         | `NotFoundError`            |
+| 422         | `UnprocessableEntityError` |
+| 429         | `RateLimitError`           |
+| >=500       | `InternalServerError`      |
+| N/A         | `APIConnectionError`       |
 
 ### Retries
 
-The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long
-as the request is deemed retriable and the number of retry attempts has not grown larger than the configured
-retry limit (default: 2).
+Certain errors will be automatically retried 2 times by default, with a short exponential backoff.
+Connection errors (for example, due to a network connectivity problem), 408 Request Timeout, 409 Conflict,
+429 Rate Limit, and >=500 Internal errors will all be retried by default.
 
-A request is deemed retriable when any of the following HTTP status codes is returned:
+You can use the `maxRetries` option to configure or disable this:
 
-- [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
-- [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
-- [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) (Internal Server Errors)
+<!-- prettier-ignore -->
+```js
+// Configure the default for all requests:
+const client = new Cartesia({
+  maxRetries: 0, // default is 2
+});
 
-Use the `maxRetries` request option to configure this behavior.
-
-```typescript
-const response = await client.auth.accessToken(..., {
-    maxRetries: 0 // override maxRetries at the request level
+// Or, configure per-request:
+await client.voices.list({
+  maxRetries: 5,
 });
 ```
 
 ### Timeouts
 
-The SDK defaults to a 60 second timeout. Use the `timeoutInSeconds` option to configure this behavior.
+Requests time out after 1 minute by default. You can configure this with a `timeout` option:
 
-```typescript
-const response = await client.auth.accessToken(..., {
-    timeoutInSeconds: 30 // override timeout to 30s
+<!-- prettier-ignore -->
+```ts
+// Configure the default for all requests:
+const client = new Cartesia({
+  timeout: 20 * 1000, // 20 seconds (default is 1 minute)
+});
+
+// Override per-request:
+await client.voices.list({
+  timeout: 5 * 1000,
 });
 ```
 
-### Aborting Requests
+On timeout, an `APIConnectionTimeoutError` is thrown.
 
-The SDK allows users to abort requests at any point by passing in an abort signal.
+Note that requests which time out will be [retried twice by default](#retries).
 
-```typescript
-const controller = new AbortController();
-const response = await client.auth.accessToken(..., {
-    abortSignal: controller.signal
-});
-controller.abort(); // aborts the request
+## Auto-pagination
+
+List methods in the Cartesia API are paginated.
+You can use the `for await … of` syntax to iterate through items across all pages:
+
+```ts
+async function fetchAllVoices(params) {
+  const allVoices = [];
+  // Automatically fetches more pages as needed.
+  for await (const voice of client.voices.list()) {
+    allVoices.push(voice);
+  }
+  return allVoices;
+}
 ```
 
-### Runtime Compatibility
+Alternatively, you can request a single page at a time:
 
-The SDK defaults to `node-fetch` but will use the global fetch client if present. The SDK works in the following
-runtimes:
+```ts
+let page = await client.voices.list();
+for (const voice of page.data) {
+  console.log(voice);
+}
 
-- Node.js 18+
-- Vercel
-- Cloudflare Workers
-- Deno v1.25+
-- Bun 1.0+
-- React Native
+// Convenience methods are provided for manually paginating:
+while (page.hasNextPage()) {
+  page = await page.getNextPage();
+  // ...
+}
+```
 
-### Customizing Fetch Client
+## Default Headers
 
-The SDK provides a way for your to customize the underlying HTTP client / Fetch function. If you're running in an
-unsupported environment, this provides a way for you to break glass and ensure the SDK works.
+We automatically send the `cartesia-version` header set to `2025-04-16`.
 
-```typescript
-import { CartesiaClient } from "@cartesia/cartesia-js";
+If you need to, you can override it by setting default headers on a per-request basis.
 
-const client = new CartesiaClient({
-    ...
-    fetcher: // provide your implementation here
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+
+const client = new Cartesia();
+
+const page = await client.voices.list({ headers: { 'cartesia-version': 'My-Custom-Value' } });
+const voice = page.data[0];
+```
+
+## Advanced Usage
+
+### Accessing raw Response data (e.g., headers)
+
+The "raw" `Response` returned by `fetch()` can be accessed through the `.asResponse()` method on the `APIPromise` type that all methods return.
+This method returns as soon as the headers for a successful response are received and does not consume the response body, so you are free to write custom parsing or streaming logic.
+
+You can also use the `.withResponse()` method to get the raw `Response` along with the parsed data.
+Unlike `.asResponse()` this method consumes the body, returning once it is parsed.
+
+<!-- prettier-ignore -->
+```ts
+const client = new Cartesia();
+
+const response = await client.voices.list().asResponse();
+console.log(response.headers.get('X-My-Header'));
+console.log(response.statusText); // access the underlying Response object
+
+const { data: page, response: raw } = await client.voices.list().withResponse();
+console.log(raw.headers.get('X-My-Header'));
+for await (const voice of page) {
+  console.log(voice.id);
+}
+```
+
+### Logging
+
+> [!IMPORTANT]
+> All log messages are intended for debugging only. The format and content of log messages
+> may change between releases.
+
+#### Log levels
+
+The log level can be configured in two ways:
+
+1. Via the `CARTESIA_LOG` environment variable
+2. Using the `logLevel` client option (overrides the environment variable if set)
+
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+
+const client = new Cartesia({
+  logLevel: 'debug', // Show all log messages
 });
 ```
+
+Available log levels, from most to least verbose:
+
+- `'debug'` - Show debug messages, info, warnings, and errors
+- `'info'` - Show info messages, warnings, and errors
+- `'warn'` - Show warnings and errors (default)
+- `'error'` - Show only errors
+- `'off'` - Disable all logging
+
+At the `'debug'` level, all HTTP requests and responses are logged, including headers and bodies.
+Some authentication-related headers are redacted, but sensitive data in request and response bodies
+may still be visible.
+
+#### Custom logger
+
+By default, this library logs to `globalThis.console`. You can also provide a custom logger.
+Most logging libraries are supported, including [pino](https://www.npmjs.com/package/pino), [winston](https://www.npmjs.com/package/winston), [bunyan](https://www.npmjs.com/package/bunyan), [consola](https://www.npmjs.com/package/consola), [signale](https://www.npmjs.com/package/signale), and [@std/log](https://jsr.io/@std/log). If your logger doesn't work, please open an issue.
+
+When providing a custom logger, the `logLevel` option still controls which messages are emitted, messages
+below the configured level will not be sent to your logger.
+
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+import pino from 'pino';
+
+const logger = pino();
+
+const client = new Cartesia({
+  logger: logger.child({ name: 'Cartesia' }),
+  logLevel: 'debug', // Send all messages to pino, allowing it to filter
+});
+```
+
+### Making custom/undocumented requests
+
+This library is typed for convenient access to the documented API. If you need to access undocumented
+endpoints, params, or response properties, the library can still be used.
+
+#### Undocumented endpoints
+
+To make requests to undocumented endpoints, you can use `client.get`, `client.post`, and other HTTP verbs.
+Options on the client, such as retries, will be respected when making these requests.
+
+```ts
+await client.post('/some/path', {
+  body: { some_prop: 'foo' },
+  query: { some_query_arg: 'bar' },
+});
+```
+
+#### Undocumented request params
+
+To make requests using undocumented parameters, you may use `// @ts-expect-error` on the undocumented
+parameter. This library doesn't validate at runtime that the request matches the type, so any extra values you
+send will be sent as-is.
+
+```ts
+client.voices.list({
+  // ...
+  // @ts-expect-error baz is not yet public
+  baz: 'undocumented option',
+});
+```
+
+For requests with the `GET` verb, any extra params will be in the query, all other requests will send the
+extra param in the body.
+
+If you want to explicitly send an extra argument, you can do so with the `query`, `body`, and `headers` request
+options.
+
+#### Undocumented response properties
+
+To access undocumented response properties, you may access the response object with `// @ts-expect-error` on
+the response object, or cast the response object to the requisite type. Like the request params, we do not
+validate or strip extra properties from the response from the API.
+
+### Customizing the fetch client
+
+By default, this library expects a global `fetch` function is defined.
+
+If you want to use a different `fetch` function, you can either polyfill the global:
+
+```ts
+import fetch from 'my-fetch';
+
+globalThis.fetch = fetch;
+```
+
+Or pass it to the client:
+
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+import fetch from 'my-fetch';
+
+const client = new Cartesia({ fetch });
+```
+
+### Fetch options
+
+If you want to set custom `fetch` options without overriding the `fetch` function, you can provide a `fetchOptions` object when instantiating the client or making a request. (Request-specific options override client options.)
+
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+
+const client = new Cartesia({
+  fetchOptions: {
+    // `RequestInit` options
+  },
+});
+```
+
+#### Configuring proxies
+
+To modify proxy behavior, you can provide custom `fetchOptions` that add runtime-specific proxy
+options to requests:
+
+<img src="https://raw.githubusercontent.com/stainless-api/sdk-assets/refs/heads/main/node.svg" align="top" width="18" height="21"> **Node** <sup>[[docs](https://github.com/nodejs/undici/blob/main/docs/docs/api/ProxyAgent.md#example---proxyagent-with-fetch)]</sup>
+
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+import * as undici from 'undici';
+
+const proxyAgent = new undici.ProxyAgent('http://localhost:8888');
+const client = new Cartesia({
+  fetchOptions: {
+    dispatcher: proxyAgent,
+  },
+});
+```
+
+<img src="https://raw.githubusercontent.com/stainless-api/sdk-assets/refs/heads/main/bun.svg" align="top" width="18" height="21"> **Bun** <sup>[[docs](https://bun.sh/guides/http/proxy)]</sup>
+
+```ts
+import Cartesia from '@cartesia/cartesia-js';
+
+const client = new Cartesia({
+  fetchOptions: {
+    proxy: 'http://localhost:8888',
+  },
+});
+```
+
+<img src="https://raw.githubusercontent.com/stainless-api/sdk-assets/refs/heads/main/deno.svg" align="top" width="18" height="21"> **Deno** <sup>[[docs](https://docs.deno.com/api/deno/~/Deno.createHttpClient)]</sup>
+
+```ts
+import Cartesia from 'npm:@cartesia/cartesia-js';
+
+const httpClient = Deno.createHttpClient({ proxy: { url: 'http://localhost:8888' } });
+const client = new Cartesia({
+  fetchOptions: {
+    client: httpClient,
+  },
+});
+```
+
+## Frequently Asked Questions
+
+## Semantic versioning
+
+This package generally follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions, though certain backwards-incompatible changes may be released as minor versions:
+
+1. Changes that only affect static types, without breaking runtime behavior.
+2. Changes to library internals which are technically public but not intended or documented for external use. _(Please open a GitHub issue to let us know if you are relying on such internals.)_
+3. Changes that we do not expect to impact the vast majority of users in practice.
+
+We take backwards-compatibility seriously and work hard to ensure you can rely on a smooth upgrade experience.
+
+We are keen for your feedback; please open an [issue](https://www.github.com/cartesia-ai/cartesia-js-internal/issues) with questions, bugs, or suggestions.
+
+## Requirements
+
+TypeScript >= 4.9 is supported.
+
+The following runtimes are supported:
+
+- Web browsers (Up-to-date Chrome, Firefox, Safari, Edge, and more)
+- Node.js 20 LTS or later ([non-EOL](https://endoflife.date/nodejs)) versions.
+- Deno v1.28.0 or higher.
+- Bun 1.0 or later.
+- Cloudflare Workers.
+- Vercel Edge Runtime.
+- Jest 28 or greater with the `"node"` environment (`"jsdom"` is not supported at this time).
+- Nitro v2.6 or greater.
+
+Note that React Native is not supported at this time.
+
+If you are interested in other runtime environments, please open or upvote an issue on GitHub.
 
 ## Contributing
 
-While we value open-source contributions to this SDK, this library is generated programmatically.
-Additions made directly to this library would have to be moved over to our generation code,
-otherwise they would be overwritten upon the next generated release. Feel free to open a PR as
-a proof of concept, but know that we will not be able to merge it as-is. We suggest opening
-an issue first to discuss with us!
-
-On the other hand, contributions to the README are always very welcome!
-
-## Documentation
-
-API reference documentation is available [here](https://docs.cartesia.ai/).
+See [the contributing documentation](./CONTRIBUTING.md).

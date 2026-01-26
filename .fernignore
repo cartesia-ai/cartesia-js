@@ -1,8 +1,0 @@
-# Specify files that shouldn't be modified by Fern
-
-src/wrapper
-src/index.ts
-
-src/core/websocket
-src/serialization/resources/tts/types/OutputFormat.ts
-
