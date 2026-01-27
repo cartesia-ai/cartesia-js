@@ -9,7 +9,7 @@ jobs:
   release_doctor:
     name: release doctor
     runs-on: ubuntu-latest
-    environment: cartesia-github-release
+    environment: stainless-pypi-release
     if: github.repository == 'cartesia-ai/cartesia-js' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'release-please') || github.head_ref == 'next')
 
     steps:
@@ -20,3 +20,4 @@ jobs:
           bash ./bin/check-release-environment
         env:
           NPM_TOKEN: ${{ secrets.CARTESIA_NPM_TOKEN || secrets.NPM_TOKEN }}
+
