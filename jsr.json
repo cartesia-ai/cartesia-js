@@ -1,0 +1,8 @@
+{
+  "name": "@cartesia/cartesia-js",
+  "version": "3.0.0-b15",
+  "exports": "./index.ts",
+  "publish": {
+    "exclude": ["!."]
+  }
+}
