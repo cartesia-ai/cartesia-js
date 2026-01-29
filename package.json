@@ -1,6 +1,6 @@
 {
   "name": "@cartesia/cartesia-js",
-  "version": "3.0.0-b15",
+  "version": "3.0.0-b16",
   "description": "The official TypeScript library for the Cartesia API",
   "author": "Cartesia <>",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
   "type": "commonjs",
   "repository": "github:cartesia-ai/cartesia-js",
   "license": "Apache-2.0",
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "pnpm@10.24.0",
   "files": [
     "**/*"
   ],
@@ -19,7 +19,7 @@
   "scripts": {
     "test": "./scripts/test",
     "build": "./scripts/build",
-    "prepublishOnly": "echo 'to publish, run yarn build && (cd dist; yarn publish)' && exit 1",
+    "prepublishOnly": "echo 'to publish, run pnpm build && (cd dist; pnpm publish)' && exit 1",
     "format": "./scripts/format",
     "prepare": "if ./scripts/utils/check-is-in-git-install.sh; then ./scripts/build && ./scripts/utils/git-swap.sh; fi",
     "tsn": "ts-node -r tsconfig-paths/register",
