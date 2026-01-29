@@ -1,5 +1,40 @@
 # Changelog
 
+## 3.0.0-b15 (2026-01-29)
+
+Full Changelog: [v3.0.0-b14...v3.0.0-b15](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b14...v3.0.0-b15)
+
+### Features
+
+* **api:** add release environment ([501864c](https://github.com/cartesia-ai/cartesia-js/commit/501864ca051ad7197b54bbb8c08039bb883ff4fd))
+* **api:** update release environment ([c148860](https://github.com/cartesia-ai/cartesia-js/commit/c148860eea503d0720b08e7d187272625491d918))
+* ws context helpers ([d1898fb](https://github.com/cartesia-ai/cartesia-js/commit/d1898fbe768daeb527282a4e7bcc53d4e4f7af51))
+
+
+### Bug Fixes
+
+* bytes returns arraybuffer ([#26](https://github.com/cartesia-ai/cartesia-js/issues/26)) ([229ea0f](https://github.com/cartesia-ai/cartesia-js/commit/229ea0f08c21d9a5fb56be8fac2a044368a33c34))
+* export correct client ([#21](https://github.com/cartesia-ai/cartesia-js/issues/21)) ([e8456dd](https://github.com/cartesia-ai/cartesia-js/commit/e8456dd39a91f55cb27cd038cef0dbcd1b1acf3e))
+* include message in `TimeoutError` for `.fernignore` clients. ([#41](https://github.com/cartesia-ai/cartesia-js/issues/41)) ([d50a5b9](https://github.com/cartesia-ai/cartesia-js/commit/d50a5b9a30a3c7001572d60314a6a3bb752ac28f))
+* upgrade qs from 6.11.2 to 6.13.0 ([#24](https://github.com/cartesia-ai/cartesia-js/issues/24)) ([fddd4ac](https://github.com/cartesia-ai/cartesia-js/commit/fddd4acef6bd20d3859712b25f8774c6d04c2031))
+
+
+### Chores
+
+* downgrade emittery for cjs compatiblity ([#23](https://github.com/cartesia-ai/cartesia-js/issues/23)) ([015d941](https://github.com/cartesia-ai/cartesia-js/commit/015d9414cff876e44adf776cecca73bc081c2b48))
+* export `WebPlayer` ([#31](https://github.com/cartesia-ai/cartesia-js/issues/31)) ([e31186e](https://github.com/cartesia-ai/cartesia-js/commit/e31186e75fbb22c5a79d82ddea5b160f3dd05e04))
+* fix compile ([#64](https://github.com/cartesia-ai/cartesia-js/issues/64)) ([1de7fd0](https://github.com/cartesia-ai/cartesia-js/commit/1de7fd0b7891e54a13a78699516e610886578681))
+* **internal:** codegen related update ([e44abc2](https://github.com/cartesia-ai/cartesia-js/commit/e44abc24b5c18735c74f1a9345b6f9d312aad338))
+* remove `ci.yml` branch ([#22](https://github.com/cartesia-ai/cartesia-js/issues/22)) ([6d2201a](https://github.com/cartesia-ai/cartesia-js/commit/6d2201a7d13172768b5d17c2e8dc5ebfd3d9bcd2))
+* remove fernignore on ArrayBuffer ([#55](https://github.com/cartesia-ai/cartesia-js/issues/55)) ([b10bbc7](https://github.com/cartesia-ai/cartesia-js/commit/b10bbc75335089004b38f4b547d92d789f15275c))
+* remove ignored `README.md` ([#56](https://github.com/cartesia-ai/cartesia-js/issues/56)) ([ee6d2dd](https://github.com/cartesia-ai/cartesia-js/commit/ee6d2dd17b0e392189e553affdc411fcde42d5ed))
+* remove STT .fernignore ([#65](https://github.com/cartesia-ai/cartesia-js/issues/65)) ([3c0ce3e](https://github.com/cartesia-ai/cartesia-js/commit/3c0ce3e0449166e3e7dc766eeeb90a991e12e401))
+* sync repo ([1ad7016](https://github.com/cartesia-ai/cartesia-js/commit/1ad7016dc4222eb858389a0eed7dcd0558713346))
+* update `apiKeyHeader` to `apiKey` ([#20](https://github.com/cartesia-ai/cartesia-js/issues/20)) ([0f54d2e](https://github.com/cartesia-ai/cartesia-js/commit/0f54d2ee812cd080c8722a55a157b63a37f885d5))
+* update README ([#58](https://github.com/cartesia-ai/cartesia-js/issues/58)) ([c24f0a6](https://github.com/cartesia-ai/cartesia-js/commit/c24f0a6bfb43647723e322215ffc59f3b307b700))
+* Update README.md ([#32](https://github.com/cartesia-ai/cartesia-js/issues/32)) ([8d36b88](https://github.com/cartesia-ai/cartesia-js/commit/8d36b88f76a56b470e57d16190f127d915e934e9))
+* update SDK settings ([e2be8ea](https://github.com/cartesia-ai/cartesia-js/commit/e2be8ea4b2dbc3891029efa3f40bec512622f78d))
+
 ## 3.0.0-b14 (2026-01-23)
 
 Full Changelog: [v3.0.0-b13...v3.0.0-b14](https://github.com/cartesia-ai/cartesia-js-internal/compare/v3.0.0-b13...v3.0.0-b14)
