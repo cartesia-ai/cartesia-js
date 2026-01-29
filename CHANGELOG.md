@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.0-b16 (2026-01-29)
+
+Full Changelog: [v3.0.0-b15...v3.0.0-b16](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b15...v3.0.0-b16)
+
+### Features
+
+* **api:** add jsr key to npm target ([5afbf2e](https://github.com/cartesia-ai/cartesia-js/commit/5afbf2e0bad2551e2dbaa0be31553f98fdeb9724))
+
 ## 3.0.0-b15 (2026-01-29)
 
 Full Changelog: [v3.0.0-b14...v3.0.0-b15](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b14...v3.0.0-b15)
