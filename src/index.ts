@@ -1,7 +1,24 @@
-export * as Cartesia from "./api";
-export { CartesiaClient } from "./wrapper/Client";
-export { WebPlayer } from "./wrapper/WebPlayer";
-export { default as SttWebsocket } from "./wrapper/SttWebsocket";
-export { StreamingSTTClient } from "./wrapper/StreamingSTTClient";
-export { CartesiaEnvironment } from "./environments";
-export { CartesiaError, CartesiaTimeoutError } from "./errors";
+// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+
+export { Cartesia as default } from './client';
+
+export { type Uploadable, toFile } from './core/uploads';
+export { APIPromise } from './core/api-promise';
+export { Cartesia, type ClientOptions } from './client';
+export * from './backcompat';
+export { PagePromise } from './core/pagination';
+export {
+  CartesiaError,
+  APIError,
+  APIConnectionError,
+  APIConnectionTimeoutError,
+  APIUserAbortError,
+  NotFoundError,
+  ConflictError,
+  RateLimitError,
+  BadRequestError,
+  AuthenticationError,
+  InternalServerError,
+  PermissionDeniedError,
+  UnprocessableEntityError,
+} from './core/error';
