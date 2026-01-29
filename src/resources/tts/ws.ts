@@ -17,7 +17,7 @@ export class TTSWS extends TTSEmitter {
     this.socket = new WS.WebSocket(this.url, {
       ...options,
       headers: {
-        'cartesia-version': '2025-04-16',
+        'cartesia-version': '2025-11-04',
         ...this.authHeaders(),
         ...options?.headers,
       },
