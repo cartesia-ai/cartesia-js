@@ -12,3 +12,5 @@ export {
   type TTSGenerateParams,
   type TTSGenerateSseParams,
 } from './tts';
+
+export { TTSWS, TTSWSContext, type ContextOptions, type ContextGenerateRequest } from './ws';

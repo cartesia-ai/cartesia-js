@@ -1,5 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+import type * as WS from 'ws';
 import { APIResource } from '../../core/resource';
 import * as TTSAPI from './tts';
 import * as InfillAPI from '../infill';
@@ -7,6 +8,7 @@ import * as VoicesAPI from '../voices';
 import { APIPromise } from '../../core/api-promise';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
+import { TTSWS } from './ws';
 
 export class TTS extends APIResource {
   /**
@@ -30,6 +32,15 @@ export class TTS extends APIResource {
       ...options,
       headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
     });
+  }
+
+  /**
+   * Create a WebSocket connection for streaming TTS.
+   * Returns a promise that resolves when the connection is open.
+   */
+  async websocket(options?: WS.ClientOptions): Promise<TTSWS> {
+    const ws = new TTSWS(this._client, options);
+    return ws.connect();
   }
 }
 
