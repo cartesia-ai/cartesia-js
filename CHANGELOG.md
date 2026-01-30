@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.0-b17 (2026-01-30)
+
+Full Changelog: [v3.0.0-b16...v3.0.0-b17](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b16...v3.0.0-b17)
+
+### Features
+
+* **api:** update api version ([e98298c](https://github.com/cartesia-ai/cartesia-js/commit/e98298c56b49f1bf1a8e494edfaafd78cc5ebd4c))
+
 ## 3.0.0-b16 (2026-01-29)
 
 Full Changelog: [v3.0.0-b15...v3.0.0-b16](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b15...v3.0.0-b16)
