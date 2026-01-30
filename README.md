@@ -2,6 +2,8 @@
 
 [![NPM version](<https://img.shields.io/npm/v/@cartesia/cartesia-js.svg?label=npm%20(stable)>)](https://npmjs.org/package/@cartesia/cartesia-js) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@cartesia/cartesia-js)
 
+> **Note:** This README is for the 3.x beta. For the stable 2.x series, see the [`branch-2.x`](https://github.com/cartesia-ai/cartesia-js/tree/branch-2.x) branch.
+
 This library provides convenient access to the Cartesia REST API from server-side TypeScript or JavaScript.
 
 The full API of this library can be found in [api.md](api.md).
