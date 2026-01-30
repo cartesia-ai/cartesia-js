@@ -172,7 +172,7 @@ export class WebSocketWrapper {
     const url = new URL(urlStr);
 
     const headers: any = {
-      'cartesia-version': '2025-04-16',
+      'cartesia-version': '2025-11-04',
     };
     if (this.client.apiKey) {
       headers['Authorization'] = `Bearer ${this.client.apiKey}`;
