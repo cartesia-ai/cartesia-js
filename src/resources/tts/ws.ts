@@ -2,7 +2,7 @@
 
 import * as WS from 'ws';
 import { humanId } from 'human-id';
-import { TTSEmitter, buildURL } from './internal-base';
+import { TTSEmitter, WebSocketError, buildURL } from './internal-base';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
 
@@ -88,7 +88,7 @@ export class TTSWSContext {
   async *receive(): AsyncGenerator<TTSAPI.WebsocketResponse> {
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
-    let error: Error | null = null;
+    let error: WebSocketError | null = null;
     let resolve: (() => void) | null = null;
 
     const onEvent = (event: TTSAPI.WebsocketResponse) => {
@@ -100,7 +100,7 @@ export class TTSWSContext {
       if (event.type === 'done' || event.type === 'error') {
         done = true;
         if (event.type === 'error') {
-          error = new Error(JSON.stringify(event));
+          error = new WebSocketError(event.message, event);
         }
       }
       resolve?.();
@@ -215,7 +215,7 @@ export class TTSWS extends TTSEmitter {
     const contextId = request.context_id;
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
-    let error: Error | null = null;
+    let error: WebSocketError | null = null;
     let resolve: (() => void) | null = null;
 
     const onEvent = (event: TTSAPI.WebsocketResponse) => {
@@ -227,7 +227,7 @@ export class TTSWS extends TTSEmitter {
       if (event.type === 'done' || event.type === 'error') {
         done = true;
         if (event.type === 'error') {
-          error = new Error(JSON.stringify(event));
+          error = new WebSocketError(event.message, event);
         }
       }
       resolve?.();

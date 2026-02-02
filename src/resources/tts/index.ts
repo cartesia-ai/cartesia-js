@@ -17,3 +17,5 @@ export {
 } from './tts';
 
 export { TTSWS, TTSWSContext, type ContextOptions, type ContextGenerateRequest } from './ws';
+
+export { WebSocketError } from './internal-base';
