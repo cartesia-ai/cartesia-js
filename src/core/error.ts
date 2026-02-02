@@ -1,29 +1,85 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { castToError } from '../internal/errors';
+import { isObj } from '../internal/utils';
 
 export class CartesiaError extends Error {}
+
+export type BadRequestErrorCode =
+  | 'file_too_large'
+  | 'voice_model_mismatch'
+  | 'unsupported_audio_format'
+  | 'language_not_supported';
+
+export type PaymentRequiredErrorCode = 'quota_exceeded' | 'plan_upgrade_required';
+
+export type NotFoundErrorCode = 'voice_not_found' | 'model_not_found';
+
+export type RateLimitErrorCode = 'concurrency_limited';
+
+export type ContentTooLargeErrorCode = 'file_too_large';
+
+// Union of all error codes
+export type APIErrorCode =
+  | BadRequestErrorCode
+  | PaymentRequiredErrorCode
+  | NotFoundErrorCode
+  | RateLimitErrorCode
+  | ContentTooLargeErrorCode;
+
+export type APIErrorPayload<TErrorCode extends APIErrorCode | undefined = APIErrorCode | undefined> = {
+  request_id: string;
+  message: string;
+  title: string;
+  error_code: TErrorCode | undefined;
+  doc_url: string | undefined;
+};
+
+export function safeAPIErrorPayload(response: unknown): APIErrorPayload | undefined {
+  if (!isObj(response)) return undefined;
+  const { request_id, message, title, error_code, doc_url } = response;
+  if (typeof request_id !== 'string' || typeof message !== 'string' || typeof title !== 'string') {
+    return undefined;
+  }
+  return {
+    request_id,
+    message,
+    title,
+    // If error_code is a string, assume its a valid APIErrorCode since its coming from the API.
+    error_code: typeof error_code === 'string' ? (error_code as APIErrorCode) : undefined,
+    doc_url: typeof doc_url === 'string' ? doc_url : undefined,
+  };
+}
 
 export class APIError<
   TStatus extends number | undefined = number | undefined,
   THeaders extends Headers | undefined = Headers | undefined,
-  TError extends Object | undefined = Object | undefined,
+  TErrorCode extends APIErrorCode | undefined = APIErrorCode | undefined,
 > extends CartesiaError {
   /** HTTP status for the response that caused the error */
   readonly status: TStatus;
   /** HTTP headers for the response that caused the error */
   readonly headers: THeaders;
   /** JSON body of the response that caused the error */
-  readonly error: TError;
+  readonly error: APIErrorPayload<TErrorCode | undefined> | undefined;
 
-  constructor(status: TStatus, error: TError, message: string | undefined, headers: THeaders) {
+  constructor(
+    status: TStatus,
+    error: APIErrorPayload<TErrorCode> | undefined,
+    message: string | undefined,
+    headers: THeaders,
+  ) {
     super(`${APIError.makeMessage(status, error, message)}`);
     this.status = status;
     this.headers = headers;
     this.error = error;
   }
 
-  private static makeMessage(status: number | undefined, error: any, message: string | undefined) {
+  private static makeMessage(
+    status: number | undefined,
+    error: APIErrorPayload | undefined,
+    message: string | undefined,
+  ) {
     const msg =
       error?.message ?
         typeof error.message === 'string' ?
@@ -46,49 +102,75 @@ export class APIError<
 
   static generate(
     status: number | undefined,
-    errorResponse: Object | undefined,
+    errorPayload: APIErrorPayload | undefined,
     message: string | undefined,
     headers: Headers | undefined,
   ): APIError {
     if (!status || !headers) {
-      return new APIConnectionError({ message, cause: castToError(errorResponse) });
+      return new APIConnectionError({ message, cause: castToError(errorPayload) });
     }
 
-    const error = errorResponse as Record<string, any>;
-
     if (status === 400) {
-      return new BadRequestError(status, error, message, headers);
+      return new BadRequestError(
+        status,
+        errorPayload as APIErrorPayload<BadRequestErrorCode>,
+        message,
+        headers,
+      );
     }
 
     if (status === 401) {
-      return new AuthenticationError(status, error, message, headers);
+      return new AuthenticationError(status, errorPayload, message, headers);
+    }
+
+    if (status === 402) {
+      return new PaymentRequiredError(
+        status,
+        errorPayload as APIErrorPayload<PaymentRequiredErrorCode>,
+        message,
+        headers,
+      );
     }
 
     if (status === 403) {
-      return new PermissionDeniedError(status, error, message, headers);
+      return new PermissionDeniedError(status, errorPayload, message, headers);
     }
 
     if (status === 404) {
-      return new NotFoundError(status, error, message, headers);
+      return new NotFoundError(status, errorPayload as APIErrorPayload<NotFoundErrorCode>, message, headers);
     }
 
     if (status === 409) {
-      return new ConflictError(status, error, message, headers);
+      return new ConflictError(status, errorPayload, message, headers);
+    }
+
+    if (status === 413) {
+      return new ContentTooLargeError(
+        status,
+        errorPayload as APIErrorPayload<ContentTooLargeErrorCode>,
+        message,
+        headers,
+      );
     }
 
     if (status === 422) {
-      return new UnprocessableEntityError(status, error, message, headers);
+      return new UnprocessableEntityError(status, errorPayload, message, headers);
     }
 
     if (status === 429) {
-      return new RateLimitError(status, error, message, headers);
+      return new RateLimitError(
+        status,
+        errorPayload as APIErrorPayload<RateLimitErrorCode>,
+        message,
+        headers,
+      );
     }
 
     if (status >= 500) {
-      return new InternalServerError(status, error, message, headers);
+      return new InternalServerError(status, errorPayload, message, headers);
     }
 
-    return new APIError(status, error, message, headers);
+    return new APIError(status, errorPayload, message, headers);
   }
 }
 
@@ -113,18 +195,22 @@ export class APIConnectionTimeoutError extends APIConnectionError {
   }
 }
 
-export class BadRequestError extends APIError<400, Headers> {}
+export class BadRequestError extends APIError<400, Headers, BadRequestErrorCode> {}
 
 export class AuthenticationError extends APIError<401, Headers> {}
 
+export class PaymentRequiredError extends APIError<402, Headers, PaymentRequiredErrorCode> {}
+
 export class PermissionDeniedError extends APIError<403, Headers> {}
 
-export class NotFoundError extends APIError<404, Headers> {}
+export class NotFoundError extends APIError<404, Headers, NotFoundErrorCode> {}
 
 export class ConflictError extends APIError<409, Headers> {}
 
+export class ContentTooLargeError extends APIError<413, Headers, ContentTooLargeErrorCode> {}
+
 export class UnprocessableEntityError extends APIError<422, Headers> {}
 
-export class RateLimitError extends APIError<429, Headers> {}
+export class RateLimitError extends APIError<429, Headers, RateLimitErrorCode> {}
 
 export class InternalServerError extends APIError<number, Headers> {}
