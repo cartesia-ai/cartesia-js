@@ -37,6 +37,7 @@ export {
 export { Stt, type SttTranscribeResponse, type SttTranscribeParams } from './stt';
 export {
   TTS,
+  WebSocketError,
   type GenerationConfig,
   type GenerationRequest,
   type ModelSpeed,

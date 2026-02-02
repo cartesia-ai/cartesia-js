@@ -66,7 +66,7 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
     message?: string | undefined,
     cause?: any,
   ): void {
-    message = message ?? safeJSONStringify(event) ?? 'unknown error';
+    message = message ?? event?.message ?? 'unknown error';
 
     if (!this._hasListener('error')) {
       const error = new WebSocketError(
@@ -97,12 +97,4 @@ export function buildURL(client: Cartesia, query?: object | null): URL {
   }
   url.protocol = url.protocol === 'http:' ? 'ws:' : 'wss:';
   return url;
-}
-
-function safeJSONStringify(value: unknown): string | null {
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return null;
-  }
 }

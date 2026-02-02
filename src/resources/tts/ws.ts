@@ -170,7 +170,7 @@ export class TTSWSContext {
             return;
           }
           if (event.type === 'error') {
-            throw new Error(JSON.stringify(event));
+            throw new WebSocketError(event.message, event);
           }
         } else {
           // Wait for the next event to be pushed into the queue.
@@ -360,7 +360,7 @@ export class TTSWS extends TTSEmitter {
     request = { ...request, context_id: contextId };
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
-    let error: Error | null = null;
+    let error: WebSocketError | null = null;
     let resolve: (() => void) | null = null;
 
     const onEvent = (event: TTSAPI.WebsocketResponse) => {
@@ -372,7 +372,7 @@ export class TTSWS extends TTSEmitter {
       if (event.type === 'done' || event.type === 'error') {
         done = true;
         if (event.type === 'error') {
-          error = new Error(JSON.stringify(event));
+          error = new WebSocketError(event.message, event);
         }
       }
       resolve?.();

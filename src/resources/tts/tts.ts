@@ -467,6 +467,14 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
+
+    doc_url?: string;
+
+    request_id: string;
+
+    message: string;
+
+    title: string;
   }
 
   export interface PhonemeTimestamps {
