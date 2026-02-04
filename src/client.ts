@@ -30,7 +30,6 @@ import {
   FineTunes,
   FineTunesCursorIDPage,
 } from './resources/fine-tunes';
-import { Infill, InfillCreateParams, OutputFormatContainer, RawEncoding } from './resources/infill';
 import {
   PronunciationDict,
   PronunciationDictCreateParams,
@@ -79,10 +78,13 @@ import {
   GenerationConfig,
   GenerationRequest,
   ModelSpeed,
+  OutputFormatContainer,
+  RawEncoding,
   RawOutputFormat,
   TTS,
   TTSGenerateParams,
   TTSGenerateSseParams,
+  TTSInfillParams,
   VoiceSpecifier,
   WebsocketClientEvent,
   WebsocketResponse,
@@ -836,7 +838,6 @@ export class Cartesia {
   accessToken: API.AccessToken = new API.AccessToken(this);
   datasets: API.Datasets = new API.Datasets(this);
   fineTunes: API.FineTunes = new API.FineTunes(this);
-  infill: API.Infill = new API.Infill(this);
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
   stt: API.Stt = new API.Stt(this);
   tts: API.TTS = new API.TTS(this);
@@ -848,7 +849,6 @@ Cartesia.Agents = Agents;
 Cartesia.AccessToken = AccessToken;
 Cartesia.Datasets = Datasets;
 Cartesia.FineTunes = FineTunes;
-Cartesia.Infill = Infill;
 Cartesia.PronunciationDicts = PronunciationDicts;
 Cartesia.Stt = Stt;
 Cartesia.TTS = TTS;
@@ -900,13 +900,6 @@ export declare namespace Cartesia {
   };
 
   export {
-    Infill as Infill,
-    type OutputFormatContainer as OutputFormatContainer,
-    type RawEncoding as RawEncoding,
-    type InfillCreateParams as InfillCreateParams,
-  };
-
-  export {
     PronunciationDicts as PronunciationDicts,
     type PronunciationDict as PronunciationDict,
     type PronunciationDictItem as PronunciationDictItem,
@@ -927,12 +920,15 @@ export declare namespace Cartesia {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
+    type OutputFormatContainer as OutputFormatContainer,
+    type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
+    type TTSInfillParams as TTSInfillParams,
   };
 
   export {

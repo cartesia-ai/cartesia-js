@@ -5,12 +5,15 @@ export {
   type GenerationConfig,
   type GenerationRequest,
   type ModelSpeed,
+  type OutputFormatContainer,
+  type RawEncoding,
   type RawOutputFormat,
   type VoiceSpecifier,
   type WebsocketClientEvent,
   type WebsocketResponse,
   type TTSGenerateParams,
   type TTSGenerateSseParams,
+  type TTSInfillParams,
 } from './tts';
 
 export { TTSWS, TTSWSContext, type ContextOptions, type ContextGenerateRequest } from './ws';

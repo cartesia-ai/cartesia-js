@@ -3,12 +3,13 @@
 import type * as WS from 'ws';
 import { APIResource } from '../../core/resource';
 import * as TTSAPI from './tts';
-import * as InfillAPI from '../infill';
 import * as VoicesAPI from '../voices';
 import { APIPromise } from '../../core/api-promise';
+import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { TTSWS } from './ws';
+import { multipartFormRequestOptions } from '../../internal/uploads';
 
 export class TTS extends APIResource {
   /**
@@ -41,6 +42,37 @@ export class TTS extends APIResource {
   async websocket(options?: WS.ClientOptions): Promise<TTSWS> {
     const ws = new TTSWS(this._client, options);
     return ws.connect();
+  }
+
+  /**
+   * Generate audio that smoothly connects two existing audio segments. This is
+   * useful for inserting new speech between existing speech segments while
+   * maintaining natural transitions.
+   *
+   * **The cost is 1 credit per character of the infill text plus a fixed cost of 300
+   * credits.**
+   *
+   * At least one of `left_audio` or `right_audio` must be provided.
+   *
+   * As with all generative models, there's some inherent variability, but here's
+   * some tips we recommend to get the best results from infill:
+   *
+   * - Use longer infill transcripts
+   *   - This gives the model more flexibility to adapt to the rest of the audio
+   * - Target natural pauses in the audio when deciding where to clip
+   *   - This means you don't need word-level timestamps to be as precise
+   * - Clip right up to the start and end of the audio segment you want infilled,
+   *   keeping as much silence in the left/right audio segments as possible
+   *   - This helps the model generate more natural transitions
+   */
+  infill(body: TTSInfillParams, options?: RequestOptions): APIPromise<void> {
+    return this._client.post(
+      '/infill/bytes',
+      multipartFormRequestOptions(
+        { body, ...options, headers: buildHeaders([{ Accept: '*/*' }, options?.headers]) },
+        this._client,
+      ),
+    );
   }
 }
 
@@ -233,7 +265,7 @@ export namespace GenerationRequest {
   export interface OutputFormat {
     container: 'raw';
 
-    encoding: InfillAPI.RawEncoding;
+    encoding: TTSAPI.RawEncoding;
 
     sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
   }
@@ -247,8 +279,12 @@ export namespace GenerationRequest {
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
+export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
+
+export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
+
 export interface RawOutputFormat {
-  encoding: InfillAPI.RawEncoding;
+  encoding: RawEncoding;
 
   sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
@@ -541,10 +577,57 @@ export namespace TTSGenerateSseParams {
   export interface OutputFormat {
     container: 'raw';
 
-    encoding: InfillAPI.RawEncoding;
+    encoding: TTSAPI.RawEncoding;
 
     sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
   }
+}
+
+export interface TTSInfillParams {
+  /**
+   * The language of the transcript
+   */
+  language?: string;
+
+  left_audio?: Uploadable;
+
+  /**
+   * The ID of the model to use for generating audio. Any model other than the first
+   * `"sonic"` model is supported.
+   */
+  model_id?: string;
+
+  /**
+   * Required for `mp3` containers.
+   */
+  'output_format[bit_rate]'?: number | null;
+
+  /**
+   * The format of the output audio
+   */
+  'output_format[container]'?: OutputFormatContainer;
+
+  /**
+   * Required for `raw` and `wav` containers.
+   */
+  'output_format[encoding]'?: RawEncoding | null;
+
+  /**
+   * The sample rate of the output audio
+   */
+  'output_format[sample_rate]'?: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
+
+  right_audio?: Uploadable;
+
+  /**
+   * The infill text to generate
+   */
+  transcript?: string;
+
+  /**
+   * The ID of the voice to use for generating audio
+   */
+  voice_id?: string;
 }
 
 export declare namespace TTS {
@@ -552,11 +635,14 @@ export declare namespace TTS {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
+    type OutputFormatContainer as OutputFormatContainer,
+    type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
+    type TTSInfillParams as TTSInfillParams,
   };
 }
