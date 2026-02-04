@@ -128,17 +128,6 @@ Methods:
 - <code title="delete /fine-tunes/{id}">client.fineTunes.<a href="./src/resources/fine-tunes.ts">delete</a>(id) -> void</code>
 - <code title="get /fine-tunes/{id}/voices">client.fineTunes.<a href="./src/resources/fine-tunes.ts">listVoices</a>(id, { ...params }) -> VoicesCursorIDPage</code>
 
-# Infill
-
-Types:
-
-- <code><a href="./src/resources/infill.ts">OutputFormatContainer</a></code>
-- <code><a href="./src/resources/infill.ts">RawEncoding</a></code>
-
-Methods:
-
-- <code title="post /infill/bytes">client.infill.<a href="./src/resources/infill.ts">create</a>({ ...params }) -> void</code>
-
 # PronunciationDicts
 
 Types:
@@ -171,6 +160,8 @@ Types:
 - <code><a href="./src/resources/tts.ts">GenerationConfig</a></code>
 - <code><a href="./src/resources/tts.ts">GenerationRequest</a></code>
 - <code><a href="./src/resources/tts.ts">ModelSpeed</a></code>
+- <code><a href="./src/resources/tts.ts">OutputFormatContainer</a></code>
+- <code><a href="./src/resources/tts.ts">RawEncoding</a></code>
 - <code><a href="./src/resources/tts.ts">RawOutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">VoiceSpecifier</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketClientEvent</a></code>
@@ -180,6 +171,7 @@ Methods:
 
 - <code title="post /tts/bytes">client.tts.<a href="./src/resources/tts.ts">generate</a>({ ...params }) -> Response</code>
 - <code title="post /tts/sse">client.tts.<a href="./src/resources/tts.ts">generateSse</a>({ ...params }) -> void</code>
+- <code title="post /infill/bytes">client.tts.<a href="./src/resources/tts.ts">infill</a>({ ...params }) -> void</code>
 
 # VoiceChanger
 

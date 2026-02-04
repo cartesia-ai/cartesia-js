@@ -25,7 +25,6 @@ export {
   type FineTuneListVoicesParams,
   type FineTunesCursorIDPage,
 } from './fine-tunes';
-export { Infill, type OutputFormatContainer, type RawEncoding, type InfillCreateParams } from './infill';
 export {
   PronunciationDicts,
   type PronunciationDict,
@@ -41,12 +40,15 @@ export {
   type GenerationConfig,
   type GenerationRequest,
   type ModelSpeed,
+  type OutputFormatContainer,
+  type RawEncoding,
   type RawOutputFormat,
   type VoiceSpecifier,
   type WebsocketClientEvent,
   type WebsocketResponse,
   type TTSGenerateParams,
   type TTSGenerateSseParams,
+  type TTSInfillParams,
 } from './tts';
 export {
   VoiceChanger,

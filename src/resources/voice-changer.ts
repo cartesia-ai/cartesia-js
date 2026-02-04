@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../core/resource';
-import * as InfillAPI from './infill';
+import * as TTSAPI from './tts/tts';
 import { APIPromise } from '../core/api-promise';
 import { type Uploadable } from '../core/uploads';
 import { buildHeaders } from '../internal/headers';
@@ -47,12 +47,12 @@ export interface VoiceChangerChangeVoiceBytesParams {
    */
   'output_format[bit_rate]'?: number | null;
 
-  'output_format[container]'?: InfillAPI.OutputFormatContainer;
+  'output_format[container]'?: TTSAPI.OutputFormatContainer;
 
   /**
    * Required for `raw` and `wav` containers.
    */
-  'output_format[encoding]'?: InfillAPI.RawEncoding | null;
+  'output_format[encoding]'?: TTSAPI.RawEncoding | null;
 
   'output_format[sample_rate]'?: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 
@@ -67,12 +67,12 @@ export interface VoiceChangerChangeVoiceSseParams {
    */
   'output_format[bit_rate]'?: number | null;
 
-  'output_format[container]'?: InfillAPI.OutputFormatContainer;
+  'output_format[container]'?: TTSAPI.OutputFormatContainer;
 
   /**
    * Required for `raw` and `wav` containers.
    */
-  'output_format[encoding]'?: InfillAPI.RawEncoding | null;
+  'output_format[encoding]'?: TTSAPI.RawEncoding | null;
 
   'output_format[sample_rate]'?: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 
