@@ -171,7 +171,7 @@ Methods:
 
 - <code title="post /tts/bytes">client.tts.<a href="./src/resources/tts.ts">generate</a>({ ...params }) -> Response</code>
 - <code title="post /tts/sse">client.tts.<a href="./src/resources/tts.ts">generateSse</a>({ ...params }) -> void</code>
-- <code title="post /infill/bytes">client.tts.<a href="./src/resources/tts.ts">infill</a>({ ...params }) -> void</code>
+- <code title="post /infill/bytes">client.tts.<a href="./src/resources/tts.ts">infill</a>({ ...params }) -> Response</code>
 
 # VoiceChanger
 

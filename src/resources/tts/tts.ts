@@ -65,11 +65,16 @@ export class TTS extends APIResource {
    *   keeping as much silence in the left/right audio segments as possible
    *   - This helps the model generate more natural transitions
    */
-  infill(body: TTSInfillParams, options?: RequestOptions): APIPromise<void> {
+  infill(body: TTSInfillParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post(
       '/infill/bytes',
       multipartFormRequestOptions(
-        { body, ...options, headers: buildHeaders([{ Accept: '*/*' }, options?.headers]) },
+        {
+          body,
+          ...options,
+          headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
+          __binaryResponse: true,
+        },
         this._client,
       ),
     );
