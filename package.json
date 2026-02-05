@@ -8,7 +8,7 @@
   "type": "commonjs",
   "repository": "github:cartesia-ai/cartesia-js",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.27.0",
   "files": [
     "**/*"
   ],
