@@ -591,6 +591,11 @@ export interface TTSInfillParams {
    */
   model_id?: string;
 
+  output_format?:
+    | TTSInfillParams.RawOutputFormat
+    | TTSInfillParams.WavOutputFormat
+    | TTSInfillParams.MP3OutputFormat;
+
   /**
    * Required for `mp3` containers.
    */
@@ -622,6 +627,24 @@ export interface TTSInfillParams {
    * The ID of the voice to use for generating audio
    */
   voice_id?: string;
+}
+
+export namespace TTSInfillParams {
+  export interface RawOutputFormat extends TTSAPI.RawOutputFormat {
+    container?: 'raw';
+  }
+
+  export interface WavOutputFormat extends TTSAPI.RawOutputFormat {
+    container?: 'wav';
+  }
+
+  export interface MP3OutputFormat {
+    bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
+
+    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
+
+    container?: 'mp3';
+  }
 }
 
 export declare namespace TTS {
