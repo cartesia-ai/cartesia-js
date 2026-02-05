@@ -607,26 +607,6 @@ export interface TTSInfillParams {
     | TTSInfillParams.WavOutputFormat
     | TTSInfillParams.MP3OutputFormat;
 
-  /**
-   * Required for `mp3` containers.
-   */
-  'output_format[bit_rate]'?: number | null;
-
-  /**
-   * The format of the output audio
-   */
-  'output_format[container]'?: OutputFormatContainer;
-
-  /**
-   * Required for `raw` and `wav` containers.
-   */
-  'output_format[encoding]'?: RawEncoding | null;
-
-  /**
-   * The sample rate of the output audio
-   */
-  'output_format[sample_rate]'?: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-
   right_audio?: Uploadable;
 
   /**
