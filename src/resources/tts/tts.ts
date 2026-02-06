@@ -337,9 +337,15 @@ export type WebsocketResponse =
 
 export namespace WebsocketResponse {
   export interface Chunk {
+    data: string;
+
     done: boolean;
 
     status_code: number;
+
+    step_time: number;
+
+    type: 'chunk';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -350,13 +356,31 @@ export namespace WebsocketResponse {
      */
     context_id?: string | null;
 
-    type?: 'chunk';
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id?: number | null;
   }
 
   export interface FlushDone {
     done: boolean;
 
+    flush_done: boolean;
+
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id: number;
+
     status_code: number;
+
+    type: 'flush_done';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -366,8 +390,6 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
-
-    type?: 'flush_done';
   }
 
   export interface Done {
@@ -375,6 +397,8 @@ export namespace WebsocketResponse {
 
     status_code: number;
 
+    type: 'done';
+
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
@@ -383,8 +407,6 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
-
-    type?: 'done';
   }
 
   export interface Timestamps {
@@ -392,6 +414,8 @@ export namespace WebsocketResponse {
 
     status_code: number;
 
+    type: 'timestamps';
+
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
@@ -401,13 +425,35 @@ export namespace WebsocketResponse {
      */
     context_id?: string | null;
 
-    type?: 'timestamps';
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id?: number | null;
+
+    word_timestamps?: Timestamps.WordTimestamps | null;
+  }
+
+  export namespace Timestamps {
+    export interface WordTimestamps {
+      end: Array<number>;
+
+      start: Array<number>;
+
+      words: Array<string>;
+    }
   }
 
   export interface Error {
     done: boolean;
 
+    error: string;
+
     status_code: number;
+
+    type: 'error';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -417,8 +463,6 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
-
-    type?: 'error';
   }
 
   export interface PhonemeTimestamps {
@@ -426,6 +470,8 @@ export namespace WebsocketResponse {
 
     status_code: number;
 
+    type: 'phoneme_timestamps';
+
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
@@ -435,7 +481,25 @@ export namespace WebsocketResponse {
      */
     context_id?: string | null;
 
-    type?: 'phoneme_timestamps';
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id?: number | null;
+
+    phoneme_timestamps?: PhonemeTimestamps.PhonemeTimestamps | null;
+  }
+
+  export namespace PhonemeTimestamps {
+    export interface PhonemeTimestamps {
+      end: Array<number>;
+
+      phonemes: Array<string>;
+
+      start: Array<number>;
+    }
   }
 }
 
