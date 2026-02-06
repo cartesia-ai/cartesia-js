@@ -343,7 +343,6 @@ export namespace WebsocketResponse {
      * NB: this is a manually-added helper, not auto-generated.
      */
     audio: Buffer | null;
-
     done: boolean;
 
     status_code: number;
