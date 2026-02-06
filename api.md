@@ -177,7 +177,7 @@ Methods:
 
 Methods:
 
-- <code title="post /voice-changer/bytes">client.voiceChanger.<a href="./src/resources/voice-changer.ts">changeVoiceBytes</a>({ ...params }) -> void</code>
+- <code title="post /voice-changer/bytes">client.voiceChanger.<a href="./src/resources/voice-changer.ts">changeVoiceBytes</a>({ ...params }) -> Response</code>
 - <code title="post /voice-changer/sse">client.voiceChanger.<a href="./src/resources/voice-changer.ts">changeVoiceSse</a>({ ...params }) -> void</code>
 
 # Voices
