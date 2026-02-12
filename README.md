@@ -23,13 +23,22 @@ The full API of this library can be found in [api.md](api.md).
 import Cartesia from '@cartesia/cartesia-js';
 
 const client = new Cartesia({
-  apiKey: 'My API Key',
+  token: 'My Token',
 });
 
-const page = await client.voices.list();
-const voice = page.data[0];
+const response = await client.tts.generate({
+  model_id: 'sonic-3',
+  output_format: {
+    container: 'wav',
+    encoding: 'pcm_f32le',
+    sample_rate: 44100,
+  },
+  transcript: "I have to say that I'd rather stay awake when I'm asleep.",
+  voice: { mode: 'id', id: 'e07c00bc-4134-4eae-9ea4-1a55fb45746b' },
+});
 
-console.log(voice.id);
+const content = await response.blob();
+console.log(content);
 ```
 
 ### Request & Response types
@@ -300,7 +309,7 @@ parameter. This library doesn't validate at runtime that the request matches the
 send will be sent as-is.
 
 ```ts
-client.voices.list({
+client.tts.generate({
   // ...
   // @ts-expect-error baz is not yet public
   baz: 'undocumented option',

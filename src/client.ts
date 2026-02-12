@@ -103,9 +103,9 @@ import {
 import { isEmptyObj } from './internal/utils/values';
 
 export interface ClientOptions {
-  token?: string | null | undefined;
-
   apiKey?: string | null | undefined;
+
+  token?: string | null | undefined;
 
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
@@ -180,8 +180,8 @@ export interface ClientOptions {
  * API Client for interfacing with the Cartesia API.
  */
 export class Cartesia {
-  token: string | null;
   apiKey: string | null;
+  token: string | null;
 
   baseURL: string;
   maxRetries: number;
@@ -198,8 +198,8 @@ export class Cartesia {
   /**
    * API Client for interfacing with the Cartesia API.
    *
-   * @param {string | null | undefined} [opts.token]
    * @param {string | null | undefined} [opts.apiKey]
+   * @param {string | null | undefined} [opts.token]
    * @param {string} [opts.baseURL=process.env['CARTESIA_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {MergedRequestInit} [opts.fetchOptions] - Additional `RequestInit` options to be passed to `fetch` calls.
@@ -210,13 +210,13 @@ export class Cartesia {
    */
   constructor({
     baseURL = readEnv('CARTESIA_BASE_URL'),
-    token = null,
     apiKey = null,
+    token = null,
     ...opts
   }: ClientOptions = {}) {
     const options: ClientOptions = {
-      token,
       apiKey,
+      token,
       ...opts,
       baseURL: baseURL || `https://api.cartesia.ai`,
     };
@@ -238,8 +238,8 @@ export class Cartesia {
 
     this._options = options;
 
-    this.token = token;
     this.apiKey = apiKey;
+    this.token = token;
   }
 
   /**
@@ -255,8 +255,8 @@ export class Cartesia {
       logLevel: this.logLevel,
       fetch: this.fetch,
       fetchOptions: this.fetchOptions,
-      token: this.token,
       apiKey: this.apiKey,
+      token: this.token,
       ...options,
     });
     return client;
