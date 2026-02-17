@@ -111,8 +111,9 @@ export class TTSWSContext {
    * Sends an empty transcript with continue: false.
    */
   async done() {
-    // Flush any remaining buffer if it's speakable
-    if (this._buffer && this._isSpeakable(this._buffer)) {
+    // Flush any remaining buffer, even if it's just punctuation (non-speakable).
+    // The server should handle the final piece of text particularly for intonation.
+    if (this._buffer.length > 0) {
       this._ws.send({
         model_id: this._options.model_id,
         voice: this._options.voice,
