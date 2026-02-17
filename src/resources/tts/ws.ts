@@ -14,6 +14,11 @@ export type ContextGenerateRequest = Omit<TTSAPI.GenerationRequest, 'context_id'
 /**
  * Options for creating a context, including the model, voice, and output format.
  */
+import { WebSocketError } from './internal-base';
+
+/**
+ * Options for creating a context, including the model, voice, and output format.
+ */
 export interface ContextOptions {
   model_id: string;
   voice: TTSAPI.VoiceSpecifier;
@@ -24,6 +29,11 @@ export interface ContextOptions {
    * If true, short/empty inputs will be buffered until a speakable character is received.
    */
   bufferInputs?: boolean;
+  /**
+   * Whether to close the underlying WebSocket connection when the context ends.
+   * This is useful for single-use contexts like those created by `client.tts.stream()`.
+   */
+  disconnectOnClose?: boolean;
 }
 
 
@@ -36,6 +46,7 @@ export class TTSWSContext {
   readonly contextId: string;
   private _buffer: string = '';
   private _isBufferingEnabled: boolean;
+  private _disconnectOnClose: boolean;
   /**
    * Maximum number of characters to buffer before forcing a flush.
    * This prevents memory issues if the input is an endless stream of non-speakable characters.
@@ -52,6 +63,7 @@ export class TTSWSContext {
     };
     this.contextId = options.contextId ?? humanId({ separator: '-', capitalize: false });
     this._isBufferingEnabled = options.bufferInputs ?? false;
+    this._disconnectOnClose = options.disconnectOnClose ?? false;
   }
 
   /**
@@ -135,6 +147,10 @@ export class TTSWSContext {
       }
     }
     this._listeners.clear();
+
+    if (this._disconnectOnClose) {
+      this._ws.close();
+    }
   }
 
   /**
@@ -162,6 +178,13 @@ export class TTSWSContext {
       if (e && typeof e === 'object' && 'context_id' in e && e.context_id !== this.contextId) {
         return;
       }
+      // Check for nested context_id in WebSocketError
+      if (e instanceof WebSocketError) {
+        const errorEvent = e.error;
+        if (errorEvent && 'context_id' in errorEvent && errorEvent.context_id !== this.contextId) {
+          return;
+        }
+      }
       listener(...args);
     };
 
@@ -184,6 +207,13 @@ export class TTSWSContext {
       const e = args[0];
       if (e && typeof e === 'object' && 'context_id' in e && e.context_id !== this.contextId) {
         return;
+      }
+      // Check for nested context_id in WebSocketError
+      if (e instanceof WebSocketError) {
+        const errorEvent = e.error;
+        if (errorEvent && 'context_id' in errorEvent && errorEvent.context_id !== this.contextId) {
+          return;
+        }
       }
       this.off(event, listener);
       listener(...args);

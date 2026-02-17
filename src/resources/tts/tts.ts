@@ -55,8 +55,8 @@ export class TTS extends APIResource {
    */
   async stream(options: ContextOptions): Promise<TTSWSContext> {
     const ws = await this.websocket();
-    // Enable buffering by default for this convenience method
-    return ws.context({ ...options, bufferInputs: options.bufferInputs ?? true });
+    // Enable buffering by default for this convenience method, and clear the connection on close.
+    return ws.context({ ...options, bufferInputs: options.bufferInputs ?? true, disconnectOnClose: true });
   }
 }
 
