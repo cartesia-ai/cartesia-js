@@ -13,6 +13,23 @@ export class WebSocketError extends CartesiaError {
   error?: TTSAPI.WebsocketResponse.Error | undefined;
 
   constructor(message: string, event: TTSAPI.WebsocketResponse.Error | null) {
+    // Try to extract a useful message from the event
+    if (event) {
+      let extraInfo = '';
+      const rawEvent = event as any;
+      if (typeof rawEvent.error === 'string') {
+        extraInfo = rawEvent.error;
+      } else if (rawEvent.error && typeof rawEvent.error === 'object') {
+        extraInfo = JSON.stringify(rawEvent.error);
+      } else if ('message' in rawEvent && typeof rawEvent.message === 'string') {
+        extraInfo = rawEvent.message;
+      }
+
+      if (extraInfo) {
+        message = `${extraInfo} | ${message}`;
+      }
+    }
+
     super(message);
 
     this.error = event ?? undefined;
@@ -55,7 +72,7 @@ export abstract class TTSEmitter extends EventEmitter<WebsocketEvents> {
     if (!this._hasListener('error')) {
       const error = new WebSocketError(
         message +
-          `\n\nTo resolve these unhandled rejection errors you should bind an \`error\` callback, e.g. \`ws.on('error', (error) => ...)\` `,
+        `\n\nTo resolve these unhandled rejection errors you should bind an \`error\` callback, e.g. \`ws.on('error', (error) => ...)\` `,
         event,
       );
       // @ts-ignore

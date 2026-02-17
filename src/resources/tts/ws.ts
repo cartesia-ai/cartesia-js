@@ -19,7 +19,13 @@ export interface ContextOptions {
   voice: TTSAPI.VoiceSpecifier;
   output_format: TTSAPI.GenerationRequest['output_format'];
   contextId?: string;
+  /**
+   * Whether to enable input buffering for LLM streaming resilience.
+   * If true, short/empty inputs will be buffered until a speakable character is received.
+   */
+  bufferInputs?: boolean;
 }
+
 
 /**
  * A context helper for managing WebSocket conversations with automatic context_id handling.
@@ -28,6 +34,14 @@ export class TTSWSContext {
   private _ws: TTSWS;
   private _options: Omit<ContextOptions, 'contextId'>;
   readonly contextId: string;
+  private _buffer: string = '';
+  private _isBufferingEnabled: boolean;
+  /**
+   * Maximum number of characters to buffer before forcing a flush.
+   * This prevents memory issues if the input is an endless stream of non-speakable characters.
+   */
+  private static MAX_BUFFER_CHARS = 256;
+  private _listeners = new Map<Function, Function>();
 
   constructor(ws: TTSWS, options: ContextOptions) {
     this._ws = ws;
@@ -37,6 +51,7 @@ export class TTSWSContext {
       output_format: options.output_format,
     };
     this.contextId = options.contextId ?? humanId({ separator: '-', capitalize: false });
+    this._isBufferingEnabled = options.bufferInputs ?? false;
   }
 
   /**
@@ -44,14 +59,39 @@ export class TTSWSContext {
    * Call this multiple times to stream transcript chunks, then call done() to finish.
    */
   async push(options: { transcript: string }) {
+    let transcript = options.transcript;
+
+    if (this._isBufferingEnabled) {
+      if (!this._isSpeakable(transcript)) {
+        this._buffer += transcript;
+        if (this._buffer.length > TTSWSContext.MAX_BUFFER_CHARS) {
+          // Force flush if buffer gets too large
+          transcript = this._buffer;
+          this._buffer = '';
+        } else {
+          return;
+        }
+      } else {
+        transcript = this._buffer + transcript;
+        this._buffer = '';
+      }
+    }
+
     this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
-      transcript: options.transcript,
+      transcript: transcript,
       context_id: this.contextId,
       continue: true,
     });
+  }
+
+  /**
+   * Check if the text contains at least one letter or number.
+   */
+  private _isSpeakable(text: string): boolean {
+    return /[\p{L}\p{N}]/u.test(text);
   }
 
   /**
@@ -59,6 +99,19 @@ export class TTSWSContext {
    * Sends an empty transcript with continue: false.
    */
   async done() {
+    // Flush any remaining buffer if it's speakable
+    if (this._buffer && this._isSpeakable(this._buffer)) {
+      this._ws.send({
+        model_id: this._options.model_id,
+        voice: this._options.voice,
+        output_format: this._options.output_format,
+        transcript: this._buffer,
+        context_id: this.contextId,
+        continue: true,
+      });
+    }
+    this._buffer = '';
+
     this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
@@ -70,6 +123,14 @@ export class TTSWSContext {
   }
 
   /**
+   * Stop the stream and close the context.
+   * This handles flushing any pending buffer and sending the final message.
+   */
+  async end() {
+    await this.done();
+  }
+
+  /**
    * Send a generation request without waiting for responses.
    * Use this for streaming multiple transcript chunks.
    * The context_id is automatically set.
@@ -77,8 +138,66 @@ export class TTSWSContext {
   send(request: ContextGenerateRequest) {
     this._ws.send({
       ...request,
+      model_id: request.model_id ?? this._options.model_id,
+      voice: request.voice ?? this._options.voice,
+      output_format: request.output_format ?? this._options.output_format,
       context_id: this.contextId,
     });
+  }
+
+  /**
+   * Add a listener for a specific event type, filtered by this context's ID.
+   */
+  on(event: string, listener: (...args: any[]) => void): this {
+    const wrapped = (...args: any[]) => {
+      const e = args[0];
+      // Check context_id if it exists on the event object
+      if (e && typeof e === 'object' && 'context_id' in e && e.context_id !== this.contextId) {
+        return;
+      }
+      listener(...args);
+    };
+    this._listeners.set(listener, wrapped);
+    this._ws.on(event as any, wrapped);
+    return this;
+  }
+
+  /**
+   * Add a one-time listener for a specific event type, filtered by this context's ID.
+   */
+  once(event: string, listener: (...args: any[]) => void): this {
+    const wrapped = (...args: any[]) => {
+      const e = args[0];
+      if (e && typeof e === 'object' && 'context_id' in e && e.context_id !== this.contextId) {
+        // If it's not our context, we act as if we didn't see it (don't remove listener yet)
+        // However, 'once' in EventEmitter usually removes immediately.
+        // This is tricky with filtering.
+        // For 'once', we realistically need to re-bind if it wasn't our event, OR use a persistent listener that checks and removes itself only when it matches.
+        // Simplified approach: usage of 'once' on a context usually implies we expect OUR event.
+        // If we blindly delegate to _ws.once, it will trigger on ANY context's event and remove.
+        // So we must use .on() and remove self after success.
+        return;
+      }
+      this._ws.off(event as any, wrapped);
+      this._listeners.delete(listener);
+      listener(...args);
+    };
+
+    this._listeners.set(listener, wrapped);
+    this._ws.on(event as any, wrapped);
+    return this;
+  }
+
+  /**
+   * Remove a listener.
+   */
+  off(event: string, listener: (...args: any[]) => void): this {
+    const wrapped = this._listeners.get(listener);
+    if (wrapped) {
+      this._ws.off(event as any, (wrapped as any));
+      this._listeners.delete(listener);
+    }
+    return this;
   }
 
   /**
@@ -170,10 +289,10 @@ export class TTSWS extends TTSEmitter {
 
     this._ready = new Promise((resolve, reject) => {
       this.socket.once('open', () => resolve());
-      this.socket.once('error', (err) => reject(err));
+      this.socket.once('error', (err: Error) => reject(err));
     });
 
-    this.socket.on('message', (wsEvent) => {
+    this.socket.on('message', (wsEvent: any) => {
       const event = (() => {
         try {
           return JSON.parse(wsEvent.toString()) as TTSAPI.WebsocketResponse;
@@ -186,6 +305,17 @@ export class TTSWS extends TTSEmitter {
       if (event) {
         this._emit('event', event);
 
+        // Normalize audio data: if 'data' is present but 'audio' is missing, copy 'data' to 'audio'.
+        // This handles cases where certain encodings return audio in 'data' field.
+        if (
+          event.type === 'chunk' &&
+          'data' in event &&
+          !('audio' in event) &&
+          typeof (event as any).data === 'string'
+        ) {
+          (event as any).audio = (event as any).data;
+        }
+
         if (event.type === 'error') {
           this._onError(event);
         } else {
@@ -195,7 +325,7 @@ export class TTSWS extends TTSEmitter {
       }
     });
 
-    this.socket.on('error', (err) => {
+    this.socket.on('error', (err: Error) => {
       this._onError(null, err.message, err);
     });
   }
