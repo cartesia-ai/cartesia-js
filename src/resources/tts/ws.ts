@@ -41,7 +41,7 @@ export class TTSWSContext {
    * This prevents memory issues if the input is an endless stream of non-speakable characters.
    */
   private static MAX_BUFFER_CHARS = 256;
-  private _listeners = new Map<Function, Function>();
+  private _listeners = new Map<string, Map<Function, Function>>();
 
   constructor(ws: TTSWS, options: ContextOptions) {
     this._ws = ws;
@@ -65,9 +65,9 @@ export class TTSWSContext {
       if (!this._isSpeakable(transcript)) {
         this._buffer += transcript;
         if (this._buffer.length > TTSWSContext.MAX_BUFFER_CHARS) {
-          // Force flush if buffer gets too large
-          transcript = this._buffer;
+          // Buffer is full of non-speakable characters. Drop it to avoid sending invalid audio requests.
           this._buffer = '';
+          return;
         } else {
           return;
         }
@@ -128,6 +128,13 @@ export class TTSWSContext {
    */
   async end() {
     await this.done();
+    // Cleanup listeners
+    for (const [event, eventMap] of this._listeners) {
+      for (const [, wrapped] of eventMap) {
+        this._ws.off(event as any, wrapped);
+      }
+    }
+    this._listeners.clear();
   }
 
   /**
@@ -157,7 +164,14 @@ export class TTSWSContext {
       }
       listener(...args);
     };
-    this._listeners.set(listener, wrapped);
+
+    let eventMap = this._listeners.get(event);
+    if (!eventMap) {
+      eventMap = new Map();
+      this._listeners.set(event, eventMap);
+    }
+    eventMap.set(listener, wrapped);
+
     this._ws.on(event as any, wrapped);
     return this;
   }
@@ -169,21 +183,19 @@ export class TTSWSContext {
     const wrapped = (...args: any[]) => {
       const e = args[0];
       if (e && typeof e === 'object' && 'context_id' in e && e.context_id !== this.contextId) {
-        // If it's not our context, we act as if we didn't see it (don't remove listener yet)
-        // However, 'once' in EventEmitter usually removes immediately.
-        // This is tricky with filtering.
-        // For 'once', we realistically need to re-bind if it wasn't our event, OR use a persistent listener that checks and removes itself only when it matches.
-        // Simplified approach: usage of 'once' on a context usually implies we expect OUR event.
-        // If we blindly delegate to _ws.once, it will trigger on ANY context's event and remove.
-        // So we must use .on() and remove self after success.
         return;
       }
-      this._ws.off(event as any, wrapped);
-      this._listeners.delete(listener);
+      this.off(event, listener);
       listener(...args);
     };
 
-    this._listeners.set(listener, wrapped);
+    let eventMap = this._listeners.get(event);
+    if (!eventMap) {
+      eventMap = new Map();
+      this._listeners.set(event, eventMap);
+    }
+    eventMap.set(listener, wrapped);
+
     this._ws.on(event as any, wrapped);
     return this;
   }
@@ -192,10 +204,16 @@ export class TTSWSContext {
    * Remove a listener.
    */
   off(event: string, listener: (...args: any[]) => void): this {
-    const wrapped = this._listeners.get(listener);
-    if (wrapped) {
-      this._ws.off(event as any, (wrapped as any));
-      this._listeners.delete(listener);
+    const eventMap = this._listeners.get(event);
+    if (eventMap) {
+      const wrapped = eventMap.get(listener);
+      if (wrapped) {
+        this._ws.off(event as any, wrapped);
+        eventMap.delete(listener);
+        if (eventMap.size === 0) {
+          this._listeners.delete(event);
+        }
+      }
     }
     return this;
   }
@@ -303,8 +321,6 @@ export class TTSWS extends TTSEmitter {
       })();
 
       if (event) {
-        this._emit('event', event);
-
         // Normalize audio data: if 'data' is present but 'audio' is missing, copy 'data' to 'audio'.
         // This handles cases where certain encodings return audio in 'data' field.
         if (
@@ -315,6 +331,8 @@ export class TTSWS extends TTSEmitter {
         ) {
           (event as any).audio = (event as any).data;
         }
+
+        this._emit('event', event);
 
         if (event.type === 'error') {
           this._onError(event);
