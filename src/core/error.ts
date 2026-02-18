@@ -33,10 +33,69 @@ export type APIErrorPayload<TErrorCode extends APIErrorCode | undefined = APIErr
   title: string;
   error_code: TErrorCode | undefined;
   doc_url: string | undefined;
+  raw: Record<string, unknown>;
 };
+
+const BAD_REQUEST_ERROR_CODES = {
+  file_too_large: true,
+  voice_model_mismatch: true,
+  unsupported_audio_format: true,
+  language_not_supported: true,
+} as const satisfies Record<BadRequestErrorCode, true>;
+
+const PAYMENT_REQUIRED_ERROR_CODES = {
+  quota_exceeded: true,
+  plan_upgrade_required: true,
+} as const satisfies Record<PaymentRequiredErrorCode, true>;
+
+const NOT_FOUND_ERROR_CODES = {
+  voice_not_found: true,
+  model_not_found: true,
+} as const satisfies Record<NotFoundErrorCode, true>;
+
+const RATE_LIMIT_ERROR_CODES = {
+  concurrency_limited: true,
+} as const satisfies Record<RateLimitErrorCode, true>;
+
+const CONTENT_TOO_LARGE_ERROR_CODES = {
+  file_too_large: true,
+} as const satisfies Record<ContentTooLargeErrorCode, true>;
+
+const API_ERROR_CODES = {
+  ...BAD_REQUEST_ERROR_CODES,
+  ...PAYMENT_REQUIRED_ERROR_CODES,
+  ...NOT_FOUND_ERROR_CODES,
+  ...RATE_LIMIT_ERROR_CODES,
+  ...CONTENT_TOO_LARGE_ERROR_CODES,
+} as const satisfies Record<APIErrorCode, true>;
+
+function isAPIErrorCode(errorCode: unknown): errorCode is APIErrorCode {
+  return typeof errorCode === 'string' && errorCode in API_ERROR_CODES;
+}
+
+function isAPIErrorPayloadForCodes<TErrorCode extends APIErrorCode>(
+  payload: APIErrorPayload | undefined,
+  codes: Readonly<Record<TErrorCode, true>>,
+): payload is APIErrorPayload<TErrorCode> | undefined {
+  return payload === undefined || payload.error_code === undefined || payload.error_code in codes;
+}
+
+function narrowAPIErrorPayload<TErrorCode extends APIErrorCode>(
+  payload: APIErrorPayload | undefined,
+  codes: Readonly<Record<TErrorCode, true>>,
+): APIErrorPayload<TErrorCode> | undefined {
+  if (!payload) {
+    return undefined;
+  }
+  if (isAPIErrorPayloadForCodes(payload, codes)) {
+    return payload;
+  }
+  return { ...payload, error_code: undefined };
+}
 
 export function safeAPIErrorPayload(response: unknown): APIErrorPayload | undefined {
   if (!isObj(response)) return undefined;
+  const raw = response;
   const { request_id, message, title, error_code, doc_url } = response;
   if (typeof request_id !== 'string' || typeof message !== 'string' || typeof title !== 'string') {
     return undefined;
@@ -45,9 +104,9 @@ export function safeAPIErrorPayload(response: unknown): APIErrorPayload | undefi
     request_id,
     message,
     title,
-    // If error_code is a string, assume its a valid APIErrorCode since its coming from the API.
-    error_code: typeof error_code === 'string' ? (error_code as APIErrorCode) : undefined,
+    error_code: isAPIErrorCode(error_code) ? error_code : undefined,
     doc_url: typeof doc_url === 'string' ? doc_url : undefined,
+    raw,
   };
 }
 
@@ -113,7 +172,7 @@ export class APIError<
     if (status === 400) {
       return new BadRequestError(
         status,
-        errorPayload as APIErrorPayload<BadRequestErrorCode>,
+        narrowAPIErrorPayload(errorPayload, BAD_REQUEST_ERROR_CODES),
         message,
         headers,
       );
@@ -126,7 +185,7 @@ export class APIError<
     if (status === 402) {
       return new PaymentRequiredError(
         status,
-        errorPayload as APIErrorPayload<PaymentRequiredErrorCode>,
+        narrowAPIErrorPayload(errorPayload, PAYMENT_REQUIRED_ERROR_CODES),
         message,
         headers,
       );
@@ -137,7 +196,7 @@ export class APIError<
     }
 
     if (status === 404) {
-      return new NotFoundError(status, errorPayload as APIErrorPayload<NotFoundErrorCode>, message, headers);
+      return new NotFoundError(status, narrowAPIErrorPayload(errorPayload, NOT_FOUND_ERROR_CODES), message, headers);
     }
 
     if (status === 409) {
@@ -147,7 +206,7 @@ export class APIError<
     if (status === 413) {
       return new ContentTooLargeError(
         status,
-        errorPayload as APIErrorPayload<ContentTooLargeErrorCode>,
+        narrowAPIErrorPayload(errorPayload, CONTENT_TOO_LARGE_ERROR_CODES),
         message,
         headers,
       );
@@ -160,7 +219,7 @@ export class APIError<
     if (status === 429) {
       return new RateLimitError(
         status,
-        errorPayload as APIErrorPayload<RateLimitErrorCode>,
+        narrowAPIErrorPayload(errorPayload, RATE_LIMIT_ERROR_CODES),
         message,
         headers,
       );
