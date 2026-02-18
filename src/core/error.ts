@@ -28,7 +28,7 @@ export type APIErrorCode =
   | RateLimitErrorCode
   | ContentTooLargeErrorCode;
 
-export type APIErrorPayload<TErrorCode extends APIErrorCode = APIErrorCode> = {
+export type APIErrorPayload<TErrorCode extends string = string> = {
   request_id: string;
   message: string;
   title: string;
@@ -39,7 +39,7 @@ export type APIErrorPayload<TErrorCode extends APIErrorCode = APIErrorCode> = {
 
 export type APIErrorRaw = Record<string, unknown> | string;
 
-type APIErrorPayloadFor<TErrorCode extends APIErrorCode | never> =
+type APIErrorPayloadFor<TErrorCode extends string | never> =
   [TErrorCode] extends [never] ? undefined : APIErrorPayload<TErrorCode> | undefined;
 
 const DEFAULT_ERROR_PAYLOAD: APIErrorPayload = {
@@ -80,7 +80,7 @@ export function safeAPIErrorPayload(response: unknown): APIErrorPayload {
 export class APIError<
   TStatus extends number | undefined = number | undefined,
   THeaders extends Headers | undefined = Headers | undefined,
-  TErrorCode extends APIErrorCode | never = APIErrorCode,
+  TErrorCode extends string | never = string,
 > extends CartesiaError {
   /** HTTP status for the response that caused the error */
   readonly status: TStatus;
@@ -137,12 +137,7 @@ export class APIError<
     }
 
     if (status === 400) {
-      return new BadRequestError(
-        status,
-        errorPayload as APIErrorPayload<BadRequestErrorCode>,
-        message,
-        headers,
-      );
+      return new BadRequestError(status, errorPayload, message, headers);
     }
 
     if (status === 401) {
@@ -150,12 +145,7 @@ export class APIError<
     }
 
     if (status === 402) {
-      return new PaymentRequiredError(
-        status,
-        errorPayload as APIErrorPayload<PaymentRequiredErrorCode>,
-        message,
-        headers,
-      );
+      return new PaymentRequiredError(status, errorPayload, message, headers);
     }
 
     if (status === 403) {
@@ -163,7 +153,7 @@ export class APIError<
     }
 
     if (status === 404) {
-      return new NotFoundError(status, errorPayload as APIErrorPayload<NotFoundErrorCode>, message, headers);
+      return new NotFoundError(status, errorPayload, message, headers);
     }
 
     if (status === 409) {
@@ -171,12 +161,7 @@ export class APIError<
     }
 
     if (status === 413) {
-      return new ContentTooLargeError(
-        status,
-        errorPayload as APIErrorPayload<ContentTooLargeErrorCode>,
-        message,
-        headers,
-      );
+      return new ContentTooLargeError(status, errorPayload, message, headers);
     }
 
     if (status === 422) {
@@ -184,12 +169,7 @@ export class APIError<
     }
 
     if (status === 429) {
-      return new RateLimitError(
-        status,
-        errorPayload as APIErrorPayload<RateLimitErrorCode>,
-        message,
-        headers,
-      );
+      return new RateLimitError(status, errorPayload, message, headers);
     }
 
     if (status >= 500) {
