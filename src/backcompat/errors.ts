@@ -36,7 +36,7 @@ export async function wrap<T>(promise: Promise<T>): Promise<T> {
       throw new CartesiaClientError({
         message: e.message,
         statusCode: e.status,
-        body: e.error,
+        body: e.details,
       });
     }
     throw e;

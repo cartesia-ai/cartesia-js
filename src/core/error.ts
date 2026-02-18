@@ -34,7 +34,7 @@ export type APIErrorPayload<TErrorCode extends APIErrorCode = APIErrorCode> = {
   title: string;
   error_code: TErrorCode | undefined;
   doc_url: string | undefined;
-  raw?: APIErrorRaw;
+  raw: APIErrorRaw;
 };
 
 export type APIErrorRaw = Record<string, unknown> | string;
@@ -102,6 +102,7 @@ const DEFAULT_ERROR_PAYLOAD: APIErrorPayload = {
   title: 'Unknown error',
   error_code: undefined,
   doc_url: undefined,
+  raw: 'unknown',
 };
 
 export function safeAPIErrorPayload(response: unknown): APIErrorPayload {
@@ -140,31 +141,31 @@ export class APIError<
   /** HTTP headers for the response that caused the error */
   readonly headers: THeaders;
   /** JSON body of the response that caused the error */
-  readonly error: APIErrorPayloadFor<TErrorCode>;
+  readonly details: APIErrorPayloadFor<TErrorCode>;
 
   constructor(
     status: TStatus,
-    error: APIErrorPayloadFor<TErrorCode>,
+    details: APIErrorPayloadFor<TErrorCode>,
     message: string | undefined,
     headers: THeaders,
   ) {
-    super(`${APIError.makeMessage(status, error, message)}`);
+    super(`${APIError.makeMessage(status, details, message)}`);
     this.status = status;
     this.headers = headers;
-    this.error = error;
+    this.details = details;
   }
 
   private static makeMessage(
     status: number | undefined,
-    error: APIErrorPayload | undefined,
+    details: APIErrorPayload | undefined,
     message: string | undefined,
   ) {
     const msg =
-      error?.message ?
-        typeof error.message === 'string' ?
-          error.message
-        : JSON.stringify(error.message)
-      : error ? JSON.stringify(error)
+      details?.message ?
+        typeof details.message === 'string' ?
+          details.message
+        : JSON.stringify(details.message)
+      : details ? JSON.stringify(details)
       : message;
 
     if (status && msg) {
