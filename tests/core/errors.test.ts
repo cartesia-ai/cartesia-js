@@ -12,10 +12,10 @@ describe('safeAPIErrorPayload', () => {
       { request_id: '123', message: 'test', title: 'test' },
       { request_id: '123', message: 'test', title: 'test', error_code: undefined, doc_url: undefined },
     ],
-    // Unknown error code is dropped
+    // Unknown error code is kept
     [
       { request_id: '123', message: 'test', title: 'test', error_code: 'test', doc_url: undefined },
-      { request_id: '123', message: 'test', title: 'test', error_code: undefined, doc_url: undefined },
+      { request_id: '123', message: 'test', title: 'test', error_code: 'test', doc_url: undefined },
     ],
     // Missing required field message falls back to default payload and stringifies message
     [
@@ -96,7 +96,7 @@ describe('APIError.generate', () => {
     expect(error.details?.error_code).toBe('voice_model_mismatch');
   });
 
-  it('drops mismatched status-specific error_code but keeps payload content', () => {
+  it('keeps mismatched status-specific error_code', () => {
     const payload = safeAPIErrorPayload({
       request_id: '123',
       message: 'test',
@@ -112,7 +112,7 @@ describe('APIError.generate', () => {
       request_id: '123',
       message: 'test',
       title: 'test',
-      error_code: undefined,
+      error_code: 'quota_exceeded',
       doc_url: 'test',
       raw: payload.raw,
     });
