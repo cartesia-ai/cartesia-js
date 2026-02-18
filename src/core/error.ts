@@ -9,15 +9,16 @@ export type BadRequestErrorCode =
   | 'file_too_large'
   | 'voice_model_mismatch'
   | 'unsupported_audio_format'
-  | 'language_not_supported';
+  | 'language_not_supported'
+  | (string & {});
 
-export type PaymentRequiredErrorCode = 'quota_exceeded' | 'plan_upgrade_required';
+export type PaymentRequiredErrorCode = 'quota_exceeded' | 'plan_upgrade_required' | (string & {});
 
-export type NotFoundErrorCode = 'voice_not_found' | 'model_not_found';
+export type NotFoundErrorCode = 'voice_not_found' | 'model_not_found' | (string & {});
 
-export type RateLimitErrorCode = 'concurrency_limited';
+export type RateLimitErrorCode = 'concurrency_limited' | (string & {});
 
-export type ContentTooLargeErrorCode = 'file_too_large';
+export type ContentTooLargeErrorCode = 'file_too_large' | (string & {});
 
 // Union of all error codes
 export type APIErrorCode =
