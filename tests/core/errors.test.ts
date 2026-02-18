@@ -41,7 +41,13 @@ describe('safeAPIErrorPayload', () => {
   }
 
   it('keeps raw as an object reference (not a deep copy)', () => {
-    const input = { request_id: '123', message: 'test', title: 'test', error_code: 'quota_exceeded', doc_url: 'x' };
+    const input = {
+      request_id: '123',
+      message: 'test',
+      title: 'test',
+      error_code: 'quota_exceeded',
+      doc_url: 'x',
+    };
     const payload = safeAPIErrorPayload(input);
 
     expect(payload?.raw).toBe(input);
