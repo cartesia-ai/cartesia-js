@@ -51,7 +51,7 @@ export class TTSWSContext {
    * This prevents memory issues if the input is an endless stream of non-speakable characters.
    */
   private static MAX_BUFFER_CHARS = 256;
-  private _listeners = new Map<string, Map<Function, Function>>();
+
 
   constructor(ws: TTSWS, options: ContextOptions) {
     this._ws = ws;
@@ -146,12 +146,7 @@ export class TTSWSContext {
   async end() {
     await this.done();
     // Cleanup listeners
-    for (const [event, eventMap] of this._listeners) {
-      for (const [, wrapped] of eventMap) {
-        this._ws.off(event as any, wrapped);
-      }
-    }
-    this._listeners.clear();
+    this._ws.removeAllContextListeners(this.contextId);
 
     if (this._disconnectOnClose) {
       this._ws.close();
@@ -177,30 +172,7 @@ export class TTSWSContext {
    * Add a listener for a specific event type, filtered by this context's ID.
    */
   on(event: string, listener: (...args: any[]) => void): this {
-    const wrapped = (...args: any[]) => {
-      const e = args[0];
-      // Check context_id if it exists on the event object
-      if (e && typeof e === 'object' && 'context_id' in e && e.context_id !== this.contextId) {
-        return;
-      }
-      // Check for nested context_id in WebSocketError
-      if (e instanceof WebSocketError) {
-        const errorEvent = e.error;
-        if (errorEvent && 'context_id' in errorEvent && errorEvent.context_id !== this.contextId) {
-          return;
-        }
-      }
-      listener(...args);
-    };
-
-    let eventMap = this._listeners.get(event);
-    if (!eventMap) {
-      eventMap = new Map();
-      this._listeners.set(event, eventMap);
-    }
-    eventMap.set(listener, wrapped);
-
-    this._ws.on(event as any, wrapped);
+    this._ws.addContextListener(this.contextId, event, listener);
     return this;
   }
 
@@ -208,30 +180,11 @@ export class TTSWSContext {
    * Add a one-time listener for a specific event type, filtered by this context's ID.
    */
   once(event: string, listener: (...args: any[]) => void): this {
-    const wrapped = (...args: any[]) => {
-      const e = args[0];
-      if (e && typeof e === 'object' && 'context_id' in e && e.context_id !== this.contextId) {
-        return;
-      }
-      // Check for nested context_id in WebSocketError
-      if (e instanceof WebSocketError) {
-        const errorEvent = e.error;
-        if (errorEvent && 'context_id' in errorEvent && errorEvent.context_id !== this.contextId) {
-          return;
-        }
-      }
-      this.off(event, listener);
+    const wrapper = (...args: any[]) => {
+      this._ws.removeContextListener(this.contextId, event, wrapper);
       listener(...args);
     };
-
-    let eventMap = this._listeners.get(event);
-    if (!eventMap) {
-      eventMap = new Map();
-      this._listeners.set(event, eventMap);
-    }
-    eventMap.set(listener, wrapped);
-
-    this._ws.on(event as any, wrapped);
+    this._ws.addContextListener(this.contextId, event, wrapper);
     return this;
   }
 
@@ -239,17 +192,7 @@ export class TTSWSContext {
    * Remove a listener.
    */
   off(event: string, listener: (...args: any[]) => void): this {
-    const eventMap = this._listeners.get(event);
-    if (eventMap) {
-      const wrapped = eventMap.get(listener);
-      if (wrapped) {
-        this._ws.off(event as any, wrapped);
-        eventMap.delete(listener);
-        if (eventMap.size === 0) {
-          this._listeners.delete(event);
-        }
-      }
-    }
+    this._ws.removeContextListener(this.contextId, event, listener);
     return this;
   }
 
@@ -266,6 +209,7 @@ export class TTSWSContext {
     const onEvent = (event: TTSAPI.WebsocketResponse) => {
       // Filter by context_id
       if ('context_id' in event && event.context_id !== this.contextId) {
+        // Redundant check if dispatched correctly, but harmless
         return;
       }
       queue.push(event);
@@ -278,7 +222,7 @@ export class TTSWSContext {
       resolve?.();
     };
 
-    this._ws.on('event', onEvent);
+    this._ws.addContextListener(this.contextId, 'event', onEvent);
 
     try {
       while (!done || queue.length > 0) {
@@ -298,7 +242,7 @@ export class TTSWSContext {
         }
       }
     } finally {
-      this._ws.off('event', onEvent);
+      this._ws.removeContextListener(this.contextId, 'event', onEvent);
     }
   }
 
@@ -326,6 +270,7 @@ export class TTSWS extends TTSEmitter {
   socket: WS.WebSocket;
   private client: Cartesia;
   private _ready: Promise<void>;
+  private _contextListeners = new Map<string, Map<string, Set<Function>>>();
 
   constructor(client: Cartesia, options?: WS.ClientOptions | undefined) {
     super();
@@ -372,6 +317,16 @@ export class TTSWS extends TTSEmitter {
         if (event.type === 'error') {
           this._onError(event);
         } else {
+          // Dispatch to context listeners first
+          if ('context_id' in event && typeof event.context_id === 'string') {
+            const contextId = event.context_id;
+            if (event.type) {
+              this._dispatchToContext(contextId, event.type, event);
+            }
+            // Also emit 'event' generic type to context
+            this._dispatchToContext(contextId, 'event', event);
+          }
+
           // @ts-ignore TS isn't smart enough to get the relationship right here
           this._emit(event.type, event);
         }
@@ -481,5 +436,109 @@ export class TTSWS extends TTSEmitter {
       return { Authorization: `Bearer ${this.client.apiKey}` };
     }
     return {};
+  }
+
+  addContextListener(contextId: string, event: string, listener: Function) {
+    let contextMap = this._contextListeners.get(contextId);
+    if (!contextMap) {
+      contextMap = new Map();
+      this._contextListeners.set(contextId, contextMap);
+    }
+    let listeners = contextMap.get(event);
+    if (!listeners) {
+      listeners = new Set();
+      contextMap.set(event, listeners);
+    }
+    listeners.add(listener);
+  }
+
+  removeContextListener(contextId: string, event: string, listener: Function) {
+    const contextMap = this._contextListeners.get(contextId);
+    if (contextMap) {
+      const listeners = contextMap.get(event);
+      if (listeners) {
+        listeners.delete(listener);
+        if (listeners.size === 0) {
+          contextMap.delete(event);
+        }
+      }
+      if (contextMap.size === 0) {
+        this._contextListeners.delete(contextId);
+      }
+    }
+  }
+
+  removeAllContextListeners(contextId: string) {
+    this._contextListeners.delete(contextId);
+  }
+
+  private _dispatchToContext(contextId: string, event: string, ...args: any[]) {
+    const contextMap = this._contextListeners.get(contextId);
+    if (contextMap) {
+      const listeners = contextMap.get(event);
+      if (listeners) {
+        for (const listener of listeners) {
+          try {
+            listener(...args);
+          } catch (err) {
+            console.error('Error in context listener', err);
+          }
+        }
+      }
+    }
+  }
+
+  // Override _onError to support context-specific handling
+  protected override _onError(
+    event: TTSAPI.WebsocketResponse.Error | null,
+    message?: string | undefined,
+    cause?: any,
+  ): void {
+    // Determine context_id from event
+    let contextId: string | undefined | null;
+    if (event && 'context_id' in event) {
+      contextId = event.context_id;
+    }
+
+    // Check strict context listeners
+    let hasContextListener = false;
+    if (contextId) {
+      const contextMap = this._contextListeners.get(contextId);
+      if (contextMap && contextMap.has('error') && contextMap.get('error')!.size > 0) {
+        hasContextListener = true;
+      }
+    }
+
+    // Check global listeners (using super's logic if possible, or just checking implementation)
+    // We can't access super._listeners easily if private, but we can check _hasListener
+    // inherited from TTSEmitter -> EventEmitter
+    const hasGlobalListener = this._hasListener('error');
+
+    if (!hasContextListener && !hasGlobalListener) {
+      // Unhandled by ANYONE
+      const error = new WebSocketError(
+        (message ?? JSON.stringify(event) ?? 'unknown error') +
+        `\n\nTo resolve these unhandled rejection errors you should bind an \`error\` callback on the context or client.`,
+        event,
+      );
+      // @ts-ignore
+      error.cause = cause;
+      Promise.reject(error);
+      return;
+    }
+
+    const error = new WebSocketError(message ?? JSON.stringify(event) ?? 'unknown error', event);
+    // @ts-ignore
+    error.cause = cause;
+
+    // Dispatch to context
+    if (contextId && hasContextListener) {
+      this._dispatchToContext(contextId, 'error', error);
+    }
+
+    // Dispatch to global
+    if (hasGlobalListener) {
+      this._emit('error', error);
+    }
   }
 }
