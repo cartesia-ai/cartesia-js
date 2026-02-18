@@ -11,9 +11,7 @@ import type { Cartesia } from '../../client';
  */
 export type ContextGenerateRequest = Omit<TTSAPI.GenerationRequest, 'context_id'>;
 
-/**
- * Options for creating a context, including the model, voice, and output format.
- */
+
 import { WebSocketError } from './internal-base';
 
 /**
@@ -47,6 +45,7 @@ export class TTSWSContext {
   private _buffer: string = '';
   private _isBufferingEnabled: boolean;
   private _disconnectOnClose: boolean;
+  private _isDone = false;
   /**
    * Maximum number of characters to buffer before forcing a flush.
    * This prevents memory issues if the input is an endless stream of non-speakable characters.
@@ -111,6 +110,11 @@ export class TTSWSContext {
    * Sends an empty transcript with continue: false.
    */
   async done() {
+    if (this._isDone) {
+      return;
+    }
+    this._isDone = true;
+
     // Flush any remaining buffer, even if it's just punctuation (non-speakable).
     // The server should handle the final piece of text particularly for intonation.
     if (this._buffer.length > 0) {
