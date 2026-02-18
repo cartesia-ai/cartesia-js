@@ -1,3 +1,5 @@
+import { APIConnectionTimeoutError, APIError } from '../core/error';
+
 /** @deprecated Use {@link CartesiaError} or specialized error classes from core/error instead. */
 export class CartesiaClientError extends Error {
   readonly statusCode?: number;
@@ -20,5 +22,23 @@ export class CartesiaTimeoutError extends Error {
   constructor(message: string) {
     super(message);
     Object.setPrototypeOf(this, CartesiaTimeoutError.prototype);
+  }
+}
+
+export async function wrap<T>(promise: Promise<T>): Promise<T> {
+  try {
+    return await promise;
+  } catch (e) {
+    if (e instanceof APIConnectionTimeoutError) {
+      throw new CartesiaTimeoutError(e.message);
+    }
+    if (e instanceof APIError) {
+      throw new CartesiaClientError({
+        message: e.message,
+        statusCode: e.status,
+        body: e.details,
+      });
+    }
+    throw e;
   }
 }
