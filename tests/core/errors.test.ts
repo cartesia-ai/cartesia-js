@@ -93,7 +93,7 @@ describe('APIError.generate', () => {
     const error = APIError.generate(400, payload, undefined, new Headers());
 
     expect(error).toBeInstanceOf(BadRequestError);
-    expect(error.error?.error_code).toBe('voice_model_mismatch');
+    expect(error.details?.error_code).toBe('voice_model_mismatch');
   });
 
   it('drops mismatched status-specific error_code but keeps payload content', () => {
@@ -108,7 +108,7 @@ describe('APIError.generate', () => {
     const error = APIError.generate(400, payload, undefined, new Headers());
 
     expect(error).toBeInstanceOf(BadRequestError);
-    expect(error.error).toEqual({
+    expect(error.details).toEqual({
       request_id: '123',
       message: 'test',
       title: 'test',
