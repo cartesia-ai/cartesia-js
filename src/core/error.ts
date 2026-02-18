@@ -196,7 +196,12 @@ export class APIError<
     }
 
     if (status === 404) {
-      return new NotFoundError(status, narrowAPIErrorPayload(errorPayload, NOT_FOUND_ERROR_CODES), message, headers);
+      return new NotFoundError(
+        status,
+        narrowAPIErrorPayload(errorPayload, NOT_FOUND_ERROR_CODES),
+        message,
+        headers,
+      );
     }
 
     if (status === 409) {
