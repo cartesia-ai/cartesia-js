@@ -27,14 +27,19 @@ export type APIErrorCode =
   | RateLimitErrorCode
   | ContentTooLargeErrorCode;
 
-export type APIErrorPayload<TErrorCode extends APIErrorCode | undefined = APIErrorCode | undefined> = {
+export type APIErrorPayload<TErrorCode extends APIErrorCode = APIErrorCode> = {
   request_id: string;
   message: string;
   title: string;
   error_code: TErrorCode | undefined;
   doc_url: string | undefined;
-  raw: Record<string, unknown>;
+  raw?: APIErrorRaw;
 };
+
+export type APIErrorRaw = Record<string, unknown> | string;
+
+type APIErrorPayloadFor<TErrorCode extends APIErrorCode | never> =
+  [TErrorCode] extends [never] ? undefined : APIErrorPayload<TErrorCode> | undefined;
 
 const BAD_REQUEST_ERROR_CODES = {
   file_too_large: true,
@@ -74,31 +79,45 @@ function isAPIErrorCode(errorCode: unknown): errorCode is APIErrorCode {
 }
 
 function isAPIErrorPayloadForCodes<TErrorCode extends APIErrorCode>(
-  payload: APIErrorPayload | undefined,
+  payload: APIErrorPayload,
   codes: Readonly<Record<TErrorCode, true>>,
-): payload is APIErrorPayload<TErrorCode> | undefined {
-  return payload === undefined || payload.error_code === undefined || payload.error_code in codes;
+): payload is APIErrorPayload<TErrorCode> {
+  return payload.error_code === undefined || payload.error_code in codes;
 }
 
 function narrowAPIErrorPayload<TErrorCode extends APIErrorCode>(
-  payload: APIErrorPayload | undefined,
+  payload: APIErrorPayload,
   codes: Readonly<Record<TErrorCode, true>>,
-): APIErrorPayload<TErrorCode> | undefined {
-  if (!payload) {
-    return undefined;
-  }
+): APIErrorPayload<TErrorCode> {
   if (isAPIErrorPayloadForCodes(payload, codes)) {
     return payload;
   }
   return { ...payload, error_code: undefined };
 }
 
-export function safeAPIErrorPayload(response: unknown): APIErrorPayload | undefined {
-  if (!isObj(response)) return undefined;
+const DEFAULT_ERROR_PAYLOAD: APIErrorPayload = {
+  request_id: 'unknown',
+  message: 'Unknown error',
+  title: 'Unknown error',
+  error_code: undefined,
+  doc_url: undefined,
+};
+
+export function safeAPIErrorPayload(response: unknown): APIErrorPayload {
+  if (!isObj(response))
+    return {
+      ...DEFAULT_ERROR_PAYLOAD,
+      message: String(response),
+      raw: String(response),
+    };
   const raw = response;
   const { request_id, message, title, error_code, doc_url } = response;
   if (typeof request_id !== 'string' || typeof message !== 'string' || typeof title !== 'string') {
-    return undefined;
+    return {
+      ...DEFAULT_ERROR_PAYLOAD,
+      message: String(message),
+      raw: response,
+    };
   }
   return {
     request_id,
@@ -113,18 +132,18 @@ export function safeAPIErrorPayload(response: unknown): APIErrorPayload | undefi
 export class APIError<
   TStatus extends number | undefined = number | undefined,
   THeaders extends Headers | undefined = Headers | undefined,
-  TErrorCode extends APIErrorCode | undefined = APIErrorCode | undefined,
+  TErrorCode extends APIErrorCode | never = APIErrorCode,
 > extends CartesiaError {
   /** HTTP status for the response that caused the error */
   readonly status: TStatus;
   /** HTTP headers for the response that caused the error */
   readonly headers: THeaders;
   /** JSON body of the response that caused the error */
-  readonly error: APIErrorPayload<TErrorCode | undefined> | undefined;
+  readonly error: APIErrorPayloadFor<TErrorCode>;
 
   constructor(
     status: TStatus,
-    error: APIErrorPayload<TErrorCode> | undefined,
+    error: APIErrorPayloadFor<TErrorCode>,
     message: string | undefined,
     headers: THeaders,
   ) {
@@ -161,7 +180,7 @@ export class APIError<
 
   static generate(
     status: number | undefined,
-    errorPayload: APIErrorPayload | undefined,
+    errorPayload: APIErrorPayload,
     message: string | undefined,
     headers: Headers | undefined,
   ): APIError {
@@ -238,13 +257,13 @@ export class APIError<
   }
 }
 
-export class APIUserAbortError extends APIError<undefined, undefined, undefined> {
+export class APIUserAbortError extends APIError<undefined, undefined, never> {
   constructor({ message }: { message?: string } = {}) {
     super(undefined, undefined, message || 'Request was aborted.', undefined);
   }
 }
 
-export class APIConnectionError extends APIError<undefined, undefined, undefined> {
+export class APIConnectionError extends APIError<undefined, undefined, never> {
   constructor({ message, cause }: { message?: string | undefined; cause?: Error | undefined }) {
     super(undefined, undefined, message || 'Connection error.', undefined);
     // in some environments the 'cause' property is already declared
