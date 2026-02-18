@@ -8,7 +8,7 @@ import * as VoicesAPI from '../voices';
 import { APIPromise } from '../../core/api-promise';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
-import { TTSWS } from './ws';
+import { TTSWS, TTSWSContext, ContextOptions } from './ws';
 
 export class TTS extends APIResource {
   /**
@@ -42,6 +42,22 @@ export class TTS extends APIResource {
     const ws = new TTSWS(this._client, options);
     return ws.connect();
   }
+
+  /**
+   * Create a dedicated streaming context for TTS.
+   * This is the recommended method for LLM streaming as it handles:
+   * - Connection management (auto-connect)
+   * - Buffering of empty/short inputs
+   * - Context persistence
+   *
+   * @param options Configuration for the stream (model, voice, format)
+   * @returns A Promise resolving to a ready-to-use TTSWSContext
+   */
+  async stream(options: ContextOptions): Promise<TTSWSContext> {
+    const ws = await this.websocket();
+    // Enable buffering by default for this convenience method, and clear the connection on close.
+    return ws.context({ ...options, bufferInputs: options.bufferInputs ?? true, disconnectOnClose: true });
+  }
 }
 
 /**
@@ -57,64 +73,64 @@ export interface GenerationConfig {
    * Guide the emotion of the generated speech.
    */
   emotion?:
-    | 'neutral'
-    | 'happy'
-    | 'excited'
-    | 'enthusiastic'
-    | 'elated'
-    | 'euphoric'
-    | 'triumphant'
-    | 'amazed'
-    | 'surprised'
-    | 'flirtatious'
-    | 'curious'
-    | 'content'
-    | 'peaceful'
-    | 'serene'
-    | 'calm'
-    | 'grateful'
-    | 'affectionate'
-    | 'trust'
-    | 'sympathetic'
-    | 'anticipation'
-    | 'mysterious'
-    | 'angry'
-    | 'mad'
-    | 'outraged'
-    | 'frustrated'
-    | 'agitated'
-    | 'threatened'
-    | 'disgusted'
-    | 'contempt'
-    | 'envious'
-    | 'sarcastic'
-    | 'ironic'
-    | 'sad'
-    | 'dejected'
-    | 'melancholic'
-    | 'disappointed'
-    | 'hurt'
-    | 'guilty'
-    | 'bored'
-    | 'tired'
-    | 'rejected'
-    | 'nostalgic'
-    | 'wistful'
-    | 'apologetic'
-    | 'hesitant'
-    | 'insecure'
-    | 'confused'
-    | 'resigned'
-    | 'anxious'
-    | 'panicked'
-    | 'alarmed'
-    | 'scared'
-    | 'proud'
-    | 'confident'
-    | 'distant'
-    | 'skeptical'
-    | 'contemplative'
-    | 'determined';
+  | 'neutral'
+  | 'happy'
+  | 'excited'
+  | 'enthusiastic'
+  | 'elated'
+  | 'euphoric'
+  | 'triumphant'
+  | 'amazed'
+  | 'surprised'
+  | 'flirtatious'
+  | 'curious'
+  | 'content'
+  | 'peaceful'
+  | 'serene'
+  | 'calm'
+  | 'grateful'
+  | 'affectionate'
+  | 'trust'
+  | 'sympathetic'
+  | 'anticipation'
+  | 'mysterious'
+  | 'angry'
+  | 'mad'
+  | 'outraged'
+  | 'frustrated'
+  | 'agitated'
+  | 'threatened'
+  | 'disgusted'
+  | 'contempt'
+  | 'envious'
+  | 'sarcastic'
+  | 'ironic'
+  | 'sad'
+  | 'dejected'
+  | 'melancholic'
+  | 'disappointed'
+  | 'hurt'
+  | 'guilty'
+  | 'bored'
+  | 'tired'
+  | 'rejected'
+  | 'nostalgic'
+  | 'wistful'
+  | 'apologetic'
+  | 'hesitant'
+  | 'insecure'
+  | 'confused'
+  | 'resigned'
+  | 'anxious'
+  | 'panicked'
+  | 'alarmed'
+  | 'scared'
+  | 'proud'
+  | 'confident'
+  | 'distant'
+  | 'skeptical'
+  | 'contemplative'
+  | 'determined';
 
   /**
    * Adjust the speed of the generated speech between 0.6x and 1.5x the original
@@ -406,9 +422,9 @@ export interface TTSGenerateParams {
   model_id: string;
 
   output_format:
-    | TTSGenerateParams.RawOutputFormat
-    | TTSGenerateParams.WavOutputFormat
-    | TTSGenerateParams.MP3OutputFormat;
+  | TTSGenerateParams.RawOutputFormat
+  | TTSGenerateParams.WavOutputFormat
+  | TTSGenerateParams.MP3OutputFormat;
 
   transcript: string;
 
