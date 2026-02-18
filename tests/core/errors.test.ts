@@ -17,26 +17,52 @@ describe('safeAPIErrorPayload', () => {
       { request_id: '123', message: 'test', title: 'test', error_code: 'test', doc_url: undefined },
       { request_id: '123', message: 'test', title: 'test', error_code: undefined, doc_url: undefined },
     ],
-    // Missing required field message
-    [{ request_id: '123', title: 'test', error_code: 'test', doc_url: undefined }, undefined],
-    // Required field message wrong type
-    [{ request_id: '123', message: 123, title: 'test', error_code: 'test', doc_url: null }, undefined],
+    // Missing required field message falls back to default payload and stringifies message
+    [
+      { request_id: '123', title: 'test', error_code: 'test', doc_url: undefined },
+      {
+        request_id: 'unknown',
+        message: 'undefined',
+        title: 'Unknown error',
+        error_code: undefined,
+        doc_url: undefined,
+      },
+    ],
+    // Required field message wrong type falls back to default payload and stringifies message
+    [
+      { request_id: '123', message: 123, title: 'test', error_code: 'test', doc_url: null },
+      {
+        request_id: 'unknown',
+        message: '123',
+        title: 'Unknown error',
+        error_code: undefined,
+        doc_url: undefined,
+      },
+    ],
     // Optional field doc_url wrong type
     [
       { request_id: '123', message: 'test', title: 'test', error_code: 'quota_exceeded', doc_url: 123 },
       { request_id: '123', message: 'test', title: 'test', error_code: 'quota_exceeded', doc_url: undefined },
     ],
-  ]) {
-    it(`${JSON.stringify(input)} -> ${expected}`, () => {
-      if (expected === undefined) {
-        expect(safeAPIErrorPayload(input)).toEqual(undefined);
-        return;
-      }
-
-      expect(safeAPIErrorPayload(input)).toEqual({
+    // Non-object payload falls back to default payload and stringifies response
+    [
+      'Unexpected string response',
+      {
+        request_id: 'unknown',
+        message: 'Unexpected string response',
+        title: 'Unknown error',
+        error_code: undefined,
+        doc_url: undefined,
+      },
+    ],
+  ] as const) {
+    it(`${JSON.stringify(input)}`, () => {
+      const payload = safeAPIErrorPayload(input);
+      expect(payload).toEqual({
         ...expected,
         raw: input,
       });
+      expect(payload.raw).toBeTruthy();
     });
   }
 
