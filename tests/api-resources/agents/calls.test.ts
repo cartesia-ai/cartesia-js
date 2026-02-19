@@ -8,7 +8,7 @@ const client = new Cartesia({
 });
 
 describe('resource calls', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('retrieve', async () => {
     const responsePromise = client.agents.calls.retrieve('call_id');
     const rawResponse = await responsePromise.asResponse();
@@ -20,7 +20,7 @@ describe('resource calls', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('list: only required params', async () => {
     const responsePromise = client.agents.calls.list({ agent_id: 'agent_id' });
     const rawResponse = await responsePromise.asResponse();
@@ -32,7 +32,7 @@ describe('resource calls', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('list: required and optional params', async () => {
     const response = await client.agents.calls.list({
       agent_id: 'agent_id',
@@ -43,7 +43,7 @@ describe('resource calls', () => {
     });
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('downloadAudio', async () => {
     const responsePromise = client.agents.calls.downloadAudio('call_id');
     const rawResponse = await responsePromise.asResponse();
