@@ -8,7 +8,7 @@ const client = new Cartesia({
 });
 
 describe('resource accessToken', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('create', async () => {
     const responsePromise = client.accessToken.create({});
     const rawResponse = await responsePromise.asResponse();

@@ -8,7 +8,7 @@ const client = new Cartesia({
 });
 
 describe('resource voiceChanger', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('changeVoiceSse', async () => {
     const responsePromise = client.voiceChanger.changeVoiceSse({});
     const rawResponse = await responsePromise.asResponse();

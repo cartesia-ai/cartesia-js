@@ -8,7 +8,7 @@ const client = new Cartesia({
 });
 
 describe('resource stt', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('transcribe', async () => {
     const responsePromise = client.stt.transcribe({});
     const rawResponse = await responsePromise.asResponse();

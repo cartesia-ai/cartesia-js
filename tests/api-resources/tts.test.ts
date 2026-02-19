@@ -30,7 +30,7 @@ describe('resource tts', () => {
     });
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('generateSse: only required params', async () => {
     const responsePromise = client.tts.generateSse({
       model_id: 'model_id',
@@ -51,7 +51,7 @@ describe('resource tts', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('generateSse: required and optional params', async () => {
     const response = await client.tts.generateSse({
       model_id: 'model_id',
