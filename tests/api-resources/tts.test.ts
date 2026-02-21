@@ -8,7 +8,8 @@ const client = new Cartesia({
 });
 
 describe('resource tts', () => {
-  test('generate: required and optional params', async () => {
+  // Mock server tests are disabled
+  test.skip('generate: required and optional params', async () => {
     const response = await client.tts.generate({
       model_id: 'model_id',
       output_format: {
