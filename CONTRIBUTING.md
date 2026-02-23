@@ -60,7 +60,7 @@ $ yarn link @cartesia/cartesia-js
 # With pnpm
 $ pnpm link --global
 $ cd ../my-package
-$ pnpm link -—global @cartesia/cartesia-js
+$ pnpm link --global @cartesia/cartesia-js
 ```
 
 ## Running tests
