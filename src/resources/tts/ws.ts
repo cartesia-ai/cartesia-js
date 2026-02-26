@@ -172,8 +172,15 @@ export class TTSWSContext {
   /**
    * Send a generation request and iterate over the responses.
    * The context_id is automatically set.
+   *
+   * Note: this uses TTSWS.generate()'s own EventEmitter-based collection,
+   * so the per-context queue is unregistered to avoid accumulating events
+   * in both places.
    */
   async *generate(request: ContextGenerateRequest): AsyncGenerator<TTSAPI.WebsocketResponse> {
+    // Unregister our queue — ws.generate() uses its own EventEmitter listener
+    // and would cause events to accumulate in both places (memory leak).
+    this._ws._unregisterContext(this.contextId);
     yield* this._ws.generate({
       ...request,
       context_id: this.contextId,
@@ -184,8 +191,14 @@ export class TTSWSContext {
    * Cancel this context to stop generating speech.
    */
   async cancel() {
-    await this._ws.cancelContext(this.contextId);
+    // Unregister first so receive() unblocks immediately, even if
+    // sending the cancel request to the server fails.
     this._ws._unregisterContext(this.contextId);
+    try {
+      await this._ws.cancelContext(this.contextId);
+    } catch {
+      // If the connection is dead, there's nothing to cancel server-side, so do nothing.
+    }
   }
 }
 
@@ -363,6 +376,11 @@ export class TTSWS extends TTSEmitter {
 
   /** Unregister a per-context queue. Called on context completion or cancellation. */
   _unregisterContext(contextId: string): void {
+    const entry = this._contextQueues.get(contextId);
+    if (entry?.resolve) {
+      entry.resolve();
+      entry.resolve = null;
+    }
     this._contextQueues.delete(contextId);
   }
 

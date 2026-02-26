@@ -225,6 +225,61 @@ describe('WebSocket multi-context routing', () => {
     ws.close();
   });
 
+  test('cancel() while receive() is waiting unblocks receive()', async () => {
+    const ws = createTestWS();
+
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'cancel-while-waiting' });
+
+    // Start receiving (will block waiting for events).
+    const events: WebsocketResponse[] = [];
+    const receivePromise = (async () => {
+      for await (const event of ctx.receive()) {
+        events.push(event);
+      }
+    })();
+
+    // Give receive() a tick to start waiting.
+    await new Promise<void>((r) => setTimeout(r, 10));
+
+    // Cancel should unblock receive().
+    await ctx.cancel();
+
+    // receive() should complete without hanging.
+    await receivePromise;
+
+    expect(events.length).toBe(0);
+    expect(ws._getContextQueue('cancel-while-waiting')).toBeUndefined();
+
+    ws.close();
+  });
+
+  test('generate() unregisters context queue to avoid memory leak', async () => {
+    const ws = createTestWS();
+
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'gen-leak-test' });
+    expect(ws._getContextQueue('gen-leak-test')).toBeDefined();
+
+    // Calling generate() should immediately unregister the per-context queue
+    // so events don't accumulate in both the queue and generate()'s local buffer.
+    // We just need to start the generator to trigger the unregister — we don't
+    // need to actually consume it (that would require a live connection).
+    const gen = ctx.generate({
+      model_id: 'sonic-3',
+      voice: { mode: 'id', id: 'test-voice' },
+      output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 as const },
+      transcript: 'test',
+    });
+
+    // Advance the generator to the first yield point (triggers unregister).
+    // It will hang on send() since there's no connection, so race with a timeout.
+    const step = Promise.race([gen.next(), new Promise<void>((r) => setTimeout(r, 50))]);
+    await step;
+
+    expect(ws._getContextQueue('gen-leak-test')).toBeUndefined();
+
+    ws.close();
+  });
+
   test('receive() with timeout throws WebSocketTimeoutError', async () => {
     const ws = createTestWS();
 

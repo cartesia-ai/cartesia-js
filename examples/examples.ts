@@ -140,6 +140,11 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
   const files: Map<number, fs.WriteStream> = new Map();
 
   for await (const event of ctx.receive()) {
+    // Log every response, but redact audio data to avoid swamping the console.
+    const loggable = { ...(event as any) };
+    if (loggable.data) loggable.data = '[...]';
+    console.log('Event:', JSON.stringify(loggable));
+
     if (event.type === 'chunk') {
       const audio = chunkData(event);
       if (audio) {
@@ -147,12 +152,9 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
         if (!files.has(flushId)) {
           const name = `tts_flush_${flushId}_${ts}.pcm`;
           files.set(flushId, fs.createWriteStream(name));
-          console.log(`Created new file for flush_id ${flushId}: ${name}`);
         }
         files.get(flushId)!.write(audio);
       }
-    } else if (event.type === 'flush_done') {
-      console.log(`Flush done received for flush_id: ${(event as any).flush_id}`);
     }
   }
 
