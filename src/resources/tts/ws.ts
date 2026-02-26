@@ -2,7 +2,7 @@
 
 import * as WS from 'ws';
 import { humanId } from 'human-id';
-import { TTSEmitter, buildURL } from './internal-base';
+import { TTSEmitter, WebSocketTimeoutError, buildURL } from './internal-base';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
 
@@ -19,6 +19,13 @@ export interface ContextOptions {
   voice: TTSAPI.VoiceSpecifier;
   output_format: TTSAPI.GenerationRequest['output_format'];
   contextId?: string;
+  /** Receive timeout in milliseconds. If set, receive() will throw WebSocketTimeoutError after this duration of inactivity. */
+  timeout?: number;
+}
+
+interface ContextQueueEntry {
+  queue: TTSAPI.WebsocketResponse[];
+  resolve: (() => void) | null;
 }
 
 /**
@@ -26,7 +33,8 @@ export interface ContextOptions {
  */
 export class TTSWSContext {
   private _ws: TTSWS;
-  private _options: Omit<ContextOptions, 'contextId'>;
+  private _options: Omit<ContextOptions, 'contextId' | 'timeout'>;
+  private _timeout: number | undefined;
   readonly contextId: string;
 
   constructor(ws: TTSWS, options: ContextOptions) {
@@ -36,15 +44,17 @@ export class TTSWSContext {
       voice: options.voice,
       output_format: options.output_format,
     };
+    this._timeout = options.timeout;
     this.contextId = options.contextId ?? humanId({ separator: '-', capitalize: false });
   }
 
   /**
    * Send a transcript chunk with continue: true.
    * Call this multiple times to stream transcript chunks, then call done() to finish.
+   * If flush is true, sends an additional flush request after the transcript.
    */
-  async push(options: { transcript: string }) {
-    this._ws.send({
+  async push(options: { transcript: string; flush?: boolean }) {
+    await this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -52,6 +62,10 @@ export class TTSWSContext {
       context_id: this.contextId,
       continue: true,
     });
+
+    if (options.flush) {
+      await this.flush();
+    }
   }
 
   /**
@@ -59,7 +73,7 @@ export class TTSWSContext {
    * Sends an empty transcript with continue: false.
    */
   async done() {
-    this._ws.send({
+    await this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -74,59 +88,84 @@ export class TTSWSContext {
    * Use this for streaming multiple transcript chunks.
    * The context_id is automatically set.
    */
-  send(request: ContextGenerateRequest) {
-    this._ws.send({
+  async send(request: ContextGenerateRequest) {
+    await this._ws.send({
       ...request,
       context_id: this.contextId,
     });
   }
 
   /**
+   * Flush any buffered audio for this context.
+   * Sends an empty transcript with flush=true and continue=true.
+   * This is always sent as a separate request per the API requirement.
+   */
+  async flush() {
+    await this._ws.send({
+      model_id: this._options.model_id,
+      voice: this._options.voice,
+      output_format: this._options.output_format,
+      transcript: '',
+      context_id: this.contextId,
+      continue: true,
+      flush: true,
+    });
+  }
+
+  /**
    * Iterate over responses for this context.
    * Completes when a "done" event is received.
+   * Events for other contexts are properly routed to their queues, not dropped.
+   *
+   * @param options.timeout - Override the context-level timeout (ms) for this receive call.
    */
-  async *receive(): AsyncGenerator<TTSAPI.WebsocketResponse> {
-    const queue: TTSAPI.WebsocketResponse[] = [];
-    let done = false;
-    let error: Error | null = null;
-    let resolve: (() => void) | null = null;
-
-    const onEvent = (event: TTSAPI.WebsocketResponse) => {
-      // Filter by context_id
-      if ('context_id' in event && event.context_id !== this.contextId) {
-        return;
-      }
-      queue.push(event);
-      if (event.type === 'done' || event.type === 'error') {
-        done = true;
-        if (event.type === 'error') {
-          error = new Error(JSON.stringify(event));
-        }
-      }
-      resolve?.();
-    };
-
-    this._ws.on('event', onEvent);
+  async *receive(options?: { timeout?: number }): AsyncGenerator<TTSAPI.WebsocketResponse> {
+    const timeout = options?.timeout ?? this._timeout;
 
     try {
-      while (!done || queue.length > 0) {
-        if (queue.length > 0) {
-          const event = queue.shift()!;
+      while (true) {
+        const entry = this._ws._getContextQueue(this.contextId);
+        if (!entry) {
+          // Queue was removed (context unregistered by reconnect or cancel), stop.
+          return;
+        }
+
+        if (entry.queue.length > 0) {
+          const event = entry.queue.shift()!;
           yield event;
           if (event.type === 'done') {
             return;
           }
           if (event.type === 'error') {
-            throw error;
+            throw new Error(JSON.stringify(event));
           }
         } else {
-          await new Promise<void>((r) => {
-            resolve = r;
+          // Wait for the next event to be pushed into the queue.
+          const waitPromise = new Promise<void>((r) => {
+            entry.resolve = r;
           });
+
+          if (timeout !== undefined) {
+            let timer: ReturnType<typeof setTimeout>;
+            const timeoutPromise = new Promise<'timeout'>((r) => {
+              timer = setTimeout(() => r('timeout'), timeout);
+            });
+
+            const result = await Promise.race([waitPromise.then(() => 'event' as const), timeoutPromise]);
+
+            clearTimeout(timer!);
+
+            if (result === 'timeout') {
+              entry.resolve = null;
+              throw new WebSocketTimeoutError(this.contextId, timeout);
+            }
+          } else {
+            await waitPromise;
+          }
         }
       }
     } finally {
-      this._ws.off('event', onEvent);
+      this._ws._unregisterContext(this.contextId);
     }
   }
 
@@ -144,21 +183,30 @@ export class TTSWSContext {
   /**
    * Cancel this context to stop generating speech.
    */
-  cancel() {
-    this._ws.cancelContext(this.contextId);
+  async cancel() {
+    await this._ws.cancelContext(this.contextId);
+    this._ws._unregisterContext(this.contextId);
   }
 }
 
 export class TTSWS extends TTSEmitter {
   url: URL;
-  socket: WS.WebSocket;
+  socket!: WS.WebSocket;
   private client: Cartesia;
   private _ready: Promise<void>;
+  private _wsOptions: WS.ClientOptions | undefined;
+  private _contextQueues: Map<string, ContextQueueEntry> = new Map();
 
   constructor(client: Cartesia, options?: WS.ClientOptions | undefined) {
     super();
     this.client = client;
+    this._wsOptions = options;
     this.url = buildURL(client);
+    this._ready = Promise.resolve();
+    this._initSocket(options);
+  }
+
+  private _initSocket(options?: WS.ClientOptions | undefined): void {
     this.socket = new WS.WebSocket(this.url, {
       ...options,
       headers: {
@@ -184,6 +232,7 @@ export class TTSWS extends TTSEmitter {
       })();
 
       if (event) {
+        // Always emit on EventEmitter for backwards compatibility and global listeners.
         this._emit('event', event);
 
         if (event.type === 'error') {
@@ -191,6 +240,17 @@ export class TTSWS extends TTSEmitter {
         } else {
           // @ts-ignore TS isn't smart enough to get the relationship right here
           this._emit(event.type, event);
+        }
+
+        // Route to per-context queue if registered.
+        const ctxId = 'context_id' in event ? (event as any).context_id : null;
+        if (ctxId && this._contextQueues.has(ctxId)) {
+          const entry = this._contextQueues.get(ctxId)!;
+          entry.queue.push(event);
+          if (entry.resolve) {
+            entry.resolve();
+            entry.resolve = null;
+          }
         }
       }
     });
@@ -200,7 +260,8 @@ export class TTSWS extends TTSEmitter {
     });
   }
 
-  send(event: TTSAPI.WebsocketClientEvent) {
+  async send(event: TTSAPI.WebsocketClientEvent) {
+    await this._ensureConnected();
     try {
       this.socket.send(JSON.stringify(event));
     } catch (err) {
@@ -236,7 +297,7 @@ export class TTSWS extends TTSEmitter {
     this.on('event', onEvent);
 
     try {
-      this.send(request);
+      await this.send(request);
 
       while (!done || queue.length > 0) {
         if (queue.length > 0) {
@@ -262,15 +323,18 @@ export class TTSWS extends TTSEmitter {
   /**
    * Cancel a context to stop generating speech for it.
    */
-  cancelContext(contextId: string) {
-    this.send({ cancel: true, context_id: contextId });
+  async cancelContext(contextId: string) {
+    await this.send({ cancel: true, context_id: contextId });
   }
 
   /**
    * Create a new context with the given options.
+   * Registers a per-context event queue for proper multi-context routing.
    */
   context(options: ContextOptions): TTSWSContext {
-    return new TTSWSContext(this, options);
+    const ctx = new TTSWSContext(this, options);
+    this._registerContext(ctx.contextId);
+    return ctx;
   }
 
   close(props?: { code: number; reason: string }) {
@@ -287,6 +351,46 @@ export class TTSWS extends TTSEmitter {
   async connect(): Promise<this> {
     await this._ready;
     return this;
+  }
+
+  /** Register a per-context queue. Called by context(). */
+  _registerContext(contextId: string): void {
+    if (this._contextQueues.has(contextId)) {
+      throw new Error(`Context ${contextId} is already registered`);
+    }
+    this._contextQueues.set(contextId, { queue: [], resolve: null });
+  }
+
+  /** Unregister a per-context queue. Called on context completion or cancellation. */
+  _unregisterContext(contextId: string): void {
+    this._contextQueues.delete(contextId);
+  }
+
+  /** Get the queue entry for a context, or undefined. */
+  _getContextQueue(contextId: string): ContextQueueEntry | undefined {
+    return this._contextQueues.get(contextId);
+  }
+
+  /**
+   * Check if the connection is open; if closed, reconnect transparently.
+   * Clears all context queues on reconnect since server-side state is lost.
+   */
+  private async _ensureConnected(): Promise<void> {
+    const state = this.socket.readyState;
+    if (state === WS.WebSocket.CLOSING || state === WS.WebSocket.CLOSED) {
+      // Wake up any waiting receive() calls so they can exit cleanly.
+      for (const [, entry] of this._contextQueues) {
+        if (entry.resolve) {
+          entry.resolve();
+          entry.resolve = null;
+        }
+      }
+      this._contextQueues.clear();
+
+      // Create a fresh socket connection.
+      this._initSocket(this._wsOptions);
+      await this._ready;
+    }
   }
 
   private authHeaders(): Record<string, string> {
