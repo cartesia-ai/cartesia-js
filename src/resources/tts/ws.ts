@@ -245,6 +245,12 @@ export class TTSWS extends TTSEmitter {
       })();
 
       if (event) {
+        // Decode audio for chunk events (mirrors Python SDK's .audio property).
+        if (event.type === 'chunk') {
+          const chunk = event as TTSAPI.WebsocketResponse.Chunk;
+          chunk.audio = chunk.data ? Buffer.from(chunk.data, 'base64') : null;
+        }
+
         // Always emit on EventEmitter for backwards compatibility and global listeners.
         this._emit('event', event);
 
