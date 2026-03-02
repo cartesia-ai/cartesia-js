@@ -1,6 +1,6 @@
 {
   "name": "@cartesia/cartesia-js",
-  "version": "3.0.0-b17",
+  "version": "3.0.0",
   "description": "The official TypeScript library for the Cartesia API",
   "author": "Cartesia <>",
   "types": "dist/index.d.ts",
