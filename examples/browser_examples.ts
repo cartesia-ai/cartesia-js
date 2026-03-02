@@ -23,7 +23,7 @@ import Cartesia from '@cartesia/cartesia-js';
 function createClient(token: string): Cartesia {
   // In a browser, use a short-lived access token from your backend,
   // not a raw API key.
-  return new Cartesia({ token: `Bearer ${token}` });
+  return new Cartesia({ token });
 }
 
 // =============================================================================
