@@ -6,12 +6,38 @@ let _ws: typeof import('ws') | undefined;
 try {
   _ws = require('ws');
 } catch {
-  // Optional — will throw a clear error when WebSocket is actually used.
+  // Optional — in browsers, we use the native WebSocket API instead.
 }
 import { uuid4 } from '../../internal/utils/uuid';
 import { TTSEmitter, WebSocketTimeoutError, buildURL } from './internal-base';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
+
+/** Decode a base64 string to bytes. Works in both Node and browsers. */
+function decodeBase64(data: string): Uint8Array {
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(data, 'base64');
+  }
+  const binary = atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+// WebSocket readyState constants (same in both ws and native WebSocket)
+const WS_CLOSING = 2;
+const WS_CLOSED = 3;
+
+/** Common WebSocket interface shared by both the `ws` package and the browser's native WebSocket. */
+interface WebSocketLike {
+  readyState: number;
+  send(data: string): void;
+  close(code?: number, reason?: string): void;
+  addEventListener(type: string, listener: (event: any) => void): void;
+  removeEventListener(type: string, listener: (event: any) => void): void;
+}
 
 /**
  * Request parameters for context.generate(), same as GenerationRequest but without context_id.
@@ -211,7 +237,7 @@ export class TTSWSContext {
 
 export class TTSWS extends TTSEmitter {
   url: URL;
-  socket!: WS.WebSocket;
+  socket!: WebSocketLike;
   private client: Cartesia;
   private _ready: Promise<void>;
   private _wsOptions: WS.ClientOptions | undefined;
@@ -227,29 +253,51 @@ export class TTSWS extends TTSEmitter {
   }
 
   private _initSocket(options?: WS.ClientOptions | undefined): void {
-    if (!_ws) {
+    if (_ws) {
+      // Node: use ws package with custom headers for auth
+      this.socket = new _ws.WebSocket(this.url, {
+        ...options,
+        headers: {
+          'cartesia-version': '2025-11-04',
+          ...this.authHeaders(),
+          ...options?.headers,
+        },
+      });
+    } else if (typeof WebSocket !== 'undefined') {
+      // Browser: use native WebSocket with auth in URL query params
+      const url = new URL(this.url.toString());
+      url.searchParams.set('cartesia_version', '2025-11-04');
+      const authToken = this.client.token || this.client.apiKey;
+      if (authToken) {
+        url.searchParams.set('api_key', authToken);
+      }
+      this.socket = new WebSocket(url.toString());
+    } else {
       throw new Error(
-        'The "ws" peer dependency is required for WebSocket support. Install it with: npm install ws',
+        'The "ws" peer dependency is required for WebSocket support in Node.js. Install it with: npm install ws',
       );
     }
-    this.socket = new _ws.WebSocket(this.url, {
-      ...options,
-      headers: {
-        'cartesia-version': '2025-11-04',
-        ...this.authHeaders(),
-        ...options?.headers,
-      },
-    });
 
+    // Use addEventListener — works with both ws and native WebSocket.
     this._ready = new Promise((resolve, reject) => {
-      this.socket.once('open', () => resolve());
-      this.socket.once('error', (err) => reject(err));
+      const onOpen = () => {
+        this.socket.removeEventListener('error', onError);
+        resolve();
+      };
+      const onError = (err: any) => {
+        this.socket.removeEventListener('open', onOpen);
+        reject(err);
+      };
+      this.socket.addEventListener('open', onOpen);
+      this.socket.addEventListener('error', onError);
     });
 
-    this.socket.on('message', (wsEvent) => {
+    this.socket.addEventListener('message', (msgEvent: any) => {
+      // With addEventListener, both ws and native WebSocket wrap data in a MessageEvent.
+      const raw = msgEvent.data;
       const event = (() => {
         try {
-          return JSON.parse(wsEvent.toString()) as TTSAPI.WebsocketResponse;
+          return JSON.parse(typeof raw === 'string' ? raw : raw.toString()) as TTSAPI.WebsocketResponse;
         } catch (err) {
           this._onError(null, 'could not parse websocket event', err);
           return null;
@@ -260,7 +308,7 @@ export class TTSWS extends TTSEmitter {
         // Decode audio for chunk events (mirrors Python SDK's .audio property).
         if (event.type === 'chunk') {
           const chunk = event as TTSAPI.WebsocketResponse.Chunk;
-          chunk.audio = chunk.data ? Buffer.from(chunk.data, 'base64') : null;
+          chunk.audio = chunk.data ? decodeBase64(chunk.data) as any : null;
         }
 
         // Always emit on EventEmitter for backwards compatibility and global listeners.
@@ -286,8 +334,8 @@ export class TTSWS extends TTSEmitter {
       }
     });
 
-    this.socket.on('error', (err) => {
-      this._onError(null, err.message, err);
+    this.socket.addEventListener('error', (err: any) => {
+      this._onError(null, err.message || 'WebSocket error', err);
     });
   }
 
@@ -414,7 +462,7 @@ export class TTSWS extends TTSEmitter {
    */
   private async _ensureConnected(): Promise<void> {
     const state = this.socket.readyState;
-    if (state === _ws!.WebSocket.CLOSING || state === _ws!.WebSocket.CLOSED) {
+    if (state === WS_CLOSING || state === WS_CLOSED) {
       // Wake up any waiting receive() calls so they can exit cleanly.
       for (const [, entry] of this._contextQueues) {
         if (entry.resolve) {
