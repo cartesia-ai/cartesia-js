@@ -4,7 +4,7 @@ import { type Uploadable } from '../core/uploads';
 import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
 import { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
-import { wrap } from './errors';
+import { wrap } from './utils';
 
 export interface BackCompatVoiceChangerBytesRequest {
   voiceId: string;

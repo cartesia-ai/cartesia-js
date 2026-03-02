@@ -11,7 +11,7 @@ import type { APIResponseProps } from './internal/parse';
 import { getPlatformHeaders } from './internal/detect-platform';
 import * as Shims from './internal/shims';
 import * as Opts from './internal/request-options';
-import * as qs from './internal/qs';
+import { stringifyQuery } from './internal/utils/query';
 import { VERSION } from './version';
 import * as Errors from './core/error';
 import * as Pagination from './core/pagination';
@@ -30,7 +30,6 @@ import {
   FineTunes,
   FineTunesCursorIDPage,
 } from './resources/fine-tunes';
-import { Infill, InfillCreateParams, OutputFormatContainer, RawEncoding } from './resources/infill';
 import {
   PronunciationDict,
   PronunciationDictCreateParams,
@@ -79,10 +78,13 @@ import {
   GenerationConfig,
   GenerationRequest,
   ModelSpeed,
+  OutputFormatContainer,
+  RawEncoding,
   RawOutputFormat,
   TTS,
   TTSGenerateParams,
   TTSGenerateSseParams,
+  TTSInfillParams,
   VoiceSpecifier,
   WebsocketClientEvent,
   WebsocketResponse,
@@ -101,9 +103,9 @@ import {
 import { isEmptyObj } from './internal/utils/values';
 
 export interface ClientOptions {
-  token?: string | null | undefined;
-
   apiKey?: string | null | undefined;
+
+  token?: string | null | undefined;
 
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
@@ -178,8 +180,8 @@ export interface ClientOptions {
  * API Client for interfacing with the Cartesia API.
  */
 export class Cartesia {
-  token: string | null;
   apiKey: string | null;
+  token: string | null;
 
   baseURL: string;
   maxRetries: number;
@@ -196,8 +198,8 @@ export class Cartesia {
   /**
    * API Client for interfacing with the Cartesia API.
    *
-   * @param {string | null | undefined} [opts.token]
    * @param {string | null | undefined} [opts.apiKey]
+   * @param {string | null | undefined} [opts.token]
    * @param {string} [opts.baseURL=process.env['CARTESIA_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {MergedRequestInit} [opts.fetchOptions] - Additional `RequestInit` options to be passed to `fetch` calls.
@@ -208,13 +210,13 @@ export class Cartesia {
    */
   constructor({
     baseURL = readEnv('CARTESIA_BASE_URL'),
-    token = null,
     apiKey = null,
+    token = null,
     ...opts
   }: ClientOptions = {}) {
     const options: ClientOptions = {
-      token,
       apiKey,
+      token,
       ...opts,
       baseURL: baseURL || `https://api.cartesia.ai`,
     };
@@ -236,8 +238,8 @@ export class Cartesia {
 
     this._options = options;
 
-    this.token = token;
     this.apiKey = apiKey;
+    this.token = token;
   }
 
   /**
@@ -253,8 +255,8 @@ export class Cartesia {
       logLevel: this.logLevel,
       fetch: this.fetch,
       fetchOptions: this.fetchOptions,
-      token: this.token,
       apiKey: this.apiKey,
+      token: this.token,
       ...options,
     });
     return client;
@@ -316,8 +318,8 @@ export class Cartesia {
     return buildHeaders([{ Authorization: `Bearer ${this.apiKey}` }]);
   }
 
-  protected stringifyQuery(query: Record<string, unknown>): string {
-    return qs.stringify(query, { arrayFormat: 'brackets' });
+  protected stringifyQuery(query: object | Record<string, unknown>): string {
+    return stringifyQuery(query);
   }
 
   private getUserAgent(): string {
@@ -354,7 +356,7 @@ export class Cartesia {
     }
 
     if (typeof query === 'object' && query && !Array.isArray(query)) {
-      url.search = this.stringifyQuery(query as Record<string, unknown>);
+      url.search = this.stringifyQuery(query);
     }
 
     return url.toString();
@@ -538,7 +540,7 @@ export class Cartesia {
       loggerFor(this).info(`${responseInfo} - ${retryMessage}`);
 
       const errText = await response.text().catch((err: any) => castToError(err).message);
-      const errJSON = safeJSON(errText);
+      const errJSON = safeJSON(errText) as any;
       const errMessage = errJSON ? undefined : errText;
 
       loggerFor(this).debug(
@@ -575,9 +577,14 @@ export class Cartesia {
   getAPIList<Item, PageClass extends Pagination.AbstractPage<Item> = Pagination.AbstractPage<Item>>(
     path: string,
     Page: new (...args: any[]) => PageClass,
-    opts?: RequestOptions,
+    opts?: PromiseOrValue<RequestOptions>,
   ): Pagination.PagePromise<PageClass, Item> {
-    return this.requestAPIList(Page, { method: 'get', path, ...opts });
+    return this.requestAPIList(
+      Page,
+      opts && 'then' in opts ?
+        opts.then((opts) => ({ method: 'get', path, ...opts }))
+      : { method: 'get', path, ...opts },
+    );
   }
 
   requestAPIList<
@@ -585,7 +592,7 @@ export class Cartesia {
     PageClass extends Pagination.AbstractPage<Item> = Pagination.AbstractPage<Item>,
   >(
     Page: new (...args: ConstructorParameters<typeof Pagination.AbstractPage>) => PageClass,
-    options: FinalRequestOptions,
+    options: PromiseOrValue<FinalRequestOptions>,
   ): Pagination.PagePromise<PageClass, Item> {
     const request = this.makeRequest(options, null, undefined);
     return new Pagination.PagePromise<PageClass, Item>(this as any as Cartesia, request, Page);
@@ -598,9 +605,10 @@ export class Cartesia {
     controller: AbortController,
   ): Promise<Response> {
     const { signal, method, ...options } = init || {};
-    if (signal) signal.addEventListener('abort', () => controller.abort());
+    const abort = this._makeAbort(controller);
+    if (signal) signal.addEventListener('abort', abort, { once: true });
 
-    const timeout = setTimeout(() => controller.abort(), ms);
+    const timeout = setTimeout(abort, ms);
 
     const isReadableBody =
       ((globalThis as any).ReadableStream && options.body instanceof (globalThis as any).ReadableStream) ||
@@ -768,6 +776,12 @@ export class Cartesia {
     return headers.values;
   }
 
+  private _makeAbort(controller: AbortController) {
+    // note: we can't just inline this method inside `fetchWithTimeout()` because then the closure
+    //       would capture all request options, and cause a memory leak.
+    return () => controller.abort();
+  }
+
   private buildBody({ options: { body, headers: rawHeaders } }: { options: FinalRequestOptions }): {
     bodyHeaders: HeadersLike;
     body: BodyInit | undefined;
@@ -800,6 +814,14 @@ export class Cartesia {
         (Symbol.iterator in body && 'next' in body && typeof body.next === 'function'))
     ) {
       return { bodyHeaders: undefined, body: Shims.ReadableStreamFrom(body as AsyncIterable<Uint8Array>) };
+    } else if (
+      typeof body === 'object' &&
+      headers.values.get('content-type') === 'application/x-www-form-urlencoded'
+    ) {
+      return {
+        bodyHeaders: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: this.stringifyQuery(body),
+      };
     } else {
       return this.#encoder({ body, headers });
     }
@@ -828,7 +850,6 @@ export class Cartesia {
   accessToken: API.AccessToken = new API.AccessToken(this);
   datasets: API.Datasets = new API.Datasets(this);
   fineTunes: API.FineTunes = new API.FineTunes(this);
-  infill: API.Infill = new API.Infill(this);
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
   stt: API.Stt = new API.Stt(this);
   tts: API.TTS = new API.TTS(this);
@@ -840,7 +861,6 @@ Cartesia.Agents = Agents;
 Cartesia.AccessToken = AccessToken;
 Cartesia.Datasets = Datasets;
 Cartesia.FineTunes = FineTunes;
-Cartesia.Infill = Infill;
 Cartesia.PronunciationDicts = PronunciationDicts;
 Cartesia.Stt = Stt;
 Cartesia.TTS = TTS;
@@ -892,13 +912,6 @@ export declare namespace Cartesia {
   };
 
   export {
-    Infill as Infill,
-    type OutputFormatContainer as OutputFormatContainer,
-    type RawEncoding as RawEncoding,
-    type InfillCreateParams as InfillCreateParams,
-  };
-
-  export {
     PronunciationDicts as PronunciationDicts,
     type PronunciationDict as PronunciationDict,
     type PronunciationDictItem as PronunciationDictItem,
@@ -919,12 +932,15 @@ export declare namespace Cartesia {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
+    type OutputFormatContainer as OutputFormatContainer,
+    type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
+    type TTSInfillParams as TTSInfillParams,
   };
 
   export {

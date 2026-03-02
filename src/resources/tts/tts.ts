@@ -3,12 +3,13 @@
 import type * as WS from 'ws';
 import { APIResource } from '../../core/resource';
 import * as TTSAPI from './tts';
-import * as InfillAPI from '../infill';
 import * as VoicesAPI from '../voices';
 import { APIPromise } from '../../core/api-promise';
+import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { TTSWS } from './ws';
+import { multipartFormRequestOptions } from '../../internal/uploads';
 
 export class TTS extends APIResource {
   /**
@@ -41,6 +42,42 @@ export class TTS extends APIResource {
   async websocket(options?: WS.ClientOptions): Promise<TTSWS> {
     const ws = new TTSWS(this._client, options);
     return ws.connect();
+  }
+
+  /**
+   * Generate audio that smoothly connects two existing audio segments. This is
+   * useful for inserting new speech between existing speech segments while
+   * maintaining natural transitions.
+   *
+   * **The cost is 1 credit per character of the infill text plus a fixed cost of 300
+   * credits.**
+   *
+   * At least one of `left_audio` or `right_audio` must be provided.
+   *
+   * As with all generative models, there's some inherent variability, but here's
+   * some tips we recommend to get the best results from infill:
+   *
+   * - Use longer infill transcripts
+   *   - This gives the model more flexibility to adapt to the rest of the audio
+   * - Target natural pauses in the audio when deciding where to clip
+   *   - This means you don't need word-level timestamps to be as precise
+   * - Clip right up to the start and end of the audio segment you want infilled,
+   *   keeping as much silence in the left/right audio segments as possible
+   *   - This helps the model generate more natural transitions
+   */
+  infill(body: TTSInfillParams, options?: RequestOptions): APIPromise<Response> {
+    return this._client.post(
+      '/infill/bytes',
+      multipartFormRequestOptions(
+        {
+          body,
+          ...options,
+          headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
+          __binaryResponse: true,
+        },
+        this._client,
+      ),
+    );
   }
 }
 
@@ -233,7 +270,7 @@ export namespace GenerationRequest {
   export interface OutputFormat {
     container: 'raw';
 
-    encoding: InfillAPI.RawEncoding;
+    encoding: TTSAPI.RawEncoding;
 
     sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
   }
@@ -247,8 +284,12 @@ export namespace GenerationRequest {
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
+export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
+
+export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
+
 export interface RawOutputFormat {
-  encoding: InfillAPI.RawEncoding;
+  encoding: RawEncoding;
 
   sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
@@ -296,9 +337,20 @@ export type WebsocketResponse =
 
 export namespace WebsocketResponse {
   export interface Chunk {
+    data: string;
+
+    /** Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt. 
+     * NB: this is a manually-added helper, not auto-generated.
+     */
+    audio: Buffer | null;
+
     done: boolean;
 
     status_code: number;
+
+    step_time: number;
+
+    type: 'chunk';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -309,13 +361,31 @@ export namespace WebsocketResponse {
      */
     context_id?: string | null;
 
-    type?: 'chunk';
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id?: number | null;
   }
 
   export interface FlushDone {
     done: boolean;
 
+    flush_done: boolean;
+
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id: number;
+
     status_code: number;
+
+    type: 'flush_done';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -325,8 +395,6 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
-
-    type?: 'flush_done';
   }
 
   export interface Done {
@@ -334,6 +402,8 @@ export namespace WebsocketResponse {
 
     status_code: number;
 
+    type: 'done';
+
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
@@ -342,8 +412,6 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
-
-    type?: 'done';
   }
 
   export interface Timestamps {
@@ -351,6 +419,8 @@ export namespace WebsocketResponse {
 
     status_code: number;
 
+    type: 'timestamps';
+
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
@@ -360,13 +430,35 @@ export namespace WebsocketResponse {
      */
     context_id?: string | null;
 
-    type?: 'timestamps';
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id?: number | null;
+
+    word_timestamps?: Timestamps.WordTimestamps | null;
+  }
+
+  export namespace Timestamps {
+    export interface WordTimestamps {
+      end: Array<number>;
+
+      start: Array<number>;
+
+      words: Array<string>;
+    }
   }
 
   export interface Error {
     done: boolean;
 
+    error: string;
+
     status_code: number;
+
+    type: 'error';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
@@ -376,8 +468,6 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
-
-    type?: 'error';
   }
 
   export interface PhonemeTimestamps {
@@ -385,6 +475,8 @@ export namespace WebsocketResponse {
 
     status_code: number;
 
+    type: 'phoneme_timestamps';
+
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
@@ -394,7 +486,25 @@ export namespace WebsocketResponse {
      */
     context_id?: string | null;
 
-    type?: 'phoneme_timestamps';
+    /**
+     * An identifier corresponding to the number of flush commands that have been sent
+     * for this context. Starts at 1.
+     *
+     * This can be used to map chunks of audio to certain transcript submissions.
+     */
+    flush_id?: number | null;
+
+    phoneme_timestamps?: PhonemeTimestamps.PhonemeTimestamps | null;
+  }
+
+  export namespace PhonemeTimestamps {
+    export interface PhonemeTimestamps {
+      end: Array<number>;
+
+      phonemes: Array<string>;
+
+      start: Array<number>;
+    }
   }
 }
 
@@ -541,9 +651,59 @@ export namespace TTSGenerateSseParams {
   export interface OutputFormat {
     container: 'raw';
 
-    encoding: InfillAPI.RawEncoding;
+    encoding: TTSAPI.RawEncoding;
 
     sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
+  }
+}
+
+export interface TTSInfillParams {
+  /**
+   * The language of the transcript
+   */
+  language?: string;
+
+  left_audio?: Uploadable;
+
+  /**
+   * The ID of the model to use for generating audio. Any model other than the first
+   * `"sonic"` model is supported.
+   */
+  model_id?: string;
+
+  output_format?:
+    | TTSInfillParams.RawOutputFormat
+    | TTSInfillParams.WavOutputFormat
+    | TTSInfillParams.MP3OutputFormat;
+
+  right_audio?: Uploadable;
+
+  /**
+   * The infill text to generate
+   */
+  transcript?: string;
+
+  /**
+   * The ID of the voice to use for generating audio
+   */
+  voice_id?: string;
+}
+
+export namespace TTSInfillParams {
+  export interface RawOutputFormat extends TTSAPI.RawOutputFormat {
+    container?: 'raw';
+  }
+
+  export interface WavOutputFormat extends TTSAPI.RawOutputFormat {
+    container?: 'wav';
+  }
+
+  export interface MP3OutputFormat {
+    bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
+
+    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
+
+    container?: 'mp3';
   }
 }
 
@@ -552,11 +712,14 @@ export declare namespace TTS {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
+    type OutputFormatContainer as OutputFormatContainer,
+    type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
+    type TTSInfillParams as TTSInfillParams,
   };
 }

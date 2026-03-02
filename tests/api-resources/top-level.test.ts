@@ -8,7 +8,7 @@ const client = new Cartesia({
 });
 
 describe('top level methods', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('getStatus', async () => {
     const responsePromise = client.getStatus();
     const rawResponse = await responsePromise.asResponse();

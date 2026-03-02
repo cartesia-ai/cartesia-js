@@ -8,7 +8,7 @@ const client = new Cartesia({
 });
 
 describe('resource agents', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('retrieve', async () => {
     const responsePromise = client.agents.retrieve('agent_id');
     const rawResponse = await responsePromise.asResponse();
@@ -20,7 +20,7 @@ describe('resource agents', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('update', async () => {
     const responsePromise = client.agents.update('agent_id', {});
     const rawResponse = await responsePromise.asResponse();
@@ -32,7 +32,7 @@ describe('resource agents', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('list', async () => {
     const responsePromise = client.agents.list();
     const rawResponse = await responsePromise.asResponse();
@@ -44,7 +44,7 @@ describe('resource agents', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('delete', async () => {
     const responsePromise = client.agents.delete('agent_id');
     const rawResponse = await responsePromise.asResponse();
@@ -56,7 +56,7 @@ describe('resource agents', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('listPhoneNumbers', async () => {
     const responsePromise = client.agents.listPhoneNumbers('agent_id');
     const rawResponse = await responsePromise.asResponse();
@@ -68,7 +68,7 @@ describe('resource agents', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('listTemplates', async () => {
     const responsePromise = client.agents.listTemplates();
     const rawResponse = await responsePromise.asResponse();

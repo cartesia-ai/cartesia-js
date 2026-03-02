@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.0.0 (2026-03-02)
+
+Full Changelog: [v3.0.0-b17...v3.0.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b17...v3.0.0)
+
+### Features
+
+* **api:** add flush_id to chunks response and binary response to voice changer ([1d98580](https://github.com/cartesia-ai/cartesia-js/commit/1d98580ffe61be7a86d28bdf1ee5bb1d50df7382))
+* **api:** group infill output_format ([ac4ded7](https://github.com/cartesia-ai/cartesia-js/commit/ac4ded743720fedbc4517c9c94ed75e79bb2f18b))
+* **api:** infill output_format ([c3d3dac](https://github.com/cartesia-ai/cartesia-js/commit/c3d3dac2d3756038b2d199a75c204413c23a19d1))
+* **api:** infill response ([b9cbaa2](https://github.com/cartesia-ai/cartesia-js/commit/b9cbaa27c220db26462aee7c80692df89edeb8fe))
+* **api:** inline websocketresponse type definitions ([c5cbfbf](https://github.com/cartesia-ai/cartesia-js/commit/c5cbfbfeca17b0f799d791a9ba32c8d2fd18cda8))
+* **api:** move infill and websocket_connect ([a987ebd](https://github.com/cartesia-ai/cartesia-js/commit/a987ebdddc35712a26bbad443672ee45a78b4afc))
+* **api:** update headline example ([715db7e](https://github.com/cartesia-ai/cartesia-js/commit/715db7e02534a0e2254da61fc7342b240e7f251e))
+
+
+### Bug Fixes
+
+* **client:** avoid memory leak with abort signals ([fb63460](https://github.com/cartesia-ai/cartesia-js/commit/fb63460d3701ac1684f5385f7d882f5e71747f14))
+* **client:** avoid removing abort listener too early ([b89ee81](https://github.com/cartesia-ai/cartesia-js/commit/b89ee81caf0ae443eeac9898fb807c34545eb70b))
+* **docs/contributing:** correct pnpm link command ([d5830ae](https://github.com/cartesia-ai/cartesia-js/commit/d5830aed6fd927265bfdbbe875aed7093e0f24cc))
+* **internal:** skip tests that depend on mock server ([e55b44f](https://github.com/cartesia-ai/cartesia-js/commit/e55b44f8402a4f59f59e4780e06300260c9b8170))
+
+
+### Chores
+
+* **client:** do not parse responses with empty content-length ([ed0b69e](https://github.com/cartesia-ai/cartesia-js/commit/ed0b69e1c1d6d7854bccfb2d65ef273cc9564d93))
+* **client:** restructure abort controller binding ([e969433](https://github.com/cartesia-ai/cartesia-js/commit/e9694332f28915c81908a09bffc1d877befb848f))
+* **internal/client:** fix form-urlencoded requests ([80aceb7](https://github.com/cartesia-ai/cartesia-js/commit/80aceb72e17b1c6989e2ea9e53b83d29cdfe766e))
+* **internal:** avoid type checking errors with ts-reset ([3eb6f15](https://github.com/cartesia-ai/cartesia-js/commit/3eb6f15cb8faa30ab5b759599a0bf74243851a5b))
+* **internal:** fix pagination internals not accepting option promises ([822f34f](https://github.com/cartesia-ai/cartesia-js/commit/822f34fab79bd7274e15fe383798696e9ae3930b))
+* **internal:** move stringifyQuery implementation to internal function ([ec23288](https://github.com/cartesia-ai/cartesia-js/commit/ec23288564c1586c22e64581ff4d77763a00a268))
+* **internal:** remove mock server code ([2fe0e85](https://github.com/cartesia-ai/cartesia-js/commit/2fe0e85f5884a797b9bbbe80013e30f17f6ca5cb))
+* **internal:** upgrade pnpm ([948fa2d](https://github.com/cartesia-ai/cartesia-js/commit/948fa2dbdc13671eda76493bbac27976fb70649b))
+* **internal:** upgrade pnpm version ([9cc6aa2](https://github.com/cartesia-ai/cartesia-js/commit/9cc6aa2b033369cea8ade26c92bca06c3f6d4a79))
+* update mock server docs ([4f1e1c6](https://github.com/cartesia-ai/cartesia-js/commit/4f1e1c6f34149aa4a65d4d562e32d19f8c247ce9))
+
 ## 3.0.0-b17 (2026-01-30)
 
 Full Changelog: [v3.0.0-b16...v3.0.0-b17](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b16...v3.0.0-b17)

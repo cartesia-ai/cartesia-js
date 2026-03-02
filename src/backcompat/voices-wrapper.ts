@@ -3,16 +3,37 @@ import { Cartesia } from '../client';
 import { type Uploadable } from '../core/uploads';
 import {
   type VoiceCloneParams,
-  type VoiceMetadata,
   type SupportedLanguage,
+  type GenderPresentation,
   type VoiceUpdateParams,
-  type Voice,
   type VoiceLocalizeParams,
   type VoiceListParams,
 } from '../resources/voices';
 import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
 import { BackCompatRequestOptions } from './types';
-import { wrap } from './errors';
+import { wrap, snakeToCamel } from './utils';
+
+export interface BackCompatVoice {
+  id: string;
+  createdAt: string;
+  description: string;
+  isOwner: boolean;
+  isPublic: boolean;
+  language: SupportedLanguage;
+  name: string;
+  gender?: GenderPresentation | null;
+  previewFileUrl?: string | null;
+}
+
+export interface BackCompatVoiceMetadata {
+  id: string;
+  createdAt: string;
+  description: string;
+  isPublic: boolean;
+  language: SupportedLanguage;
+  name: string;
+  userId: string;
+}
 
 export interface BackCompatVoiceListOptions {
   gender?: 'masculine' | 'feminine' | 'gender_neutral' | null;
@@ -73,7 +94,7 @@ export class VoicesWrapper {
     clip: File | fs.ReadStream | Blob,
     request: BackCompatCloneVoiceRequest,
     requestOptions?: BackCompatRequestOptions,
-  ): Promise<VoiceMetadata> {
+  ): Promise<BackCompatVoiceMetadata> {
     const params: VoiceCloneParams = {
       clip: clip as Uploadable,
       name: request.name,
@@ -99,7 +120,7 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap(this.client.voices.clone(params, options));
+    return wrap<any, BackCompatVoiceMetadata>(this.client.voices.clone(params, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.update} instead. */
@@ -107,7 +128,7 @@ export class VoicesWrapper {
     id: string,
     request: BackCompatUpdateVoiceRequest,
     requestOptions?: BackCompatRequestOptions,
-  ): Promise<Voice> {
+  ): Promise<BackCompatVoice> {
     const params: VoiceUpdateParams = {
       name: request.name,
       description: request.description,
@@ -125,14 +146,14 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap(this.client.voices.update(id, params, options));
+    return wrap<any, BackCompatVoice>(this.client.voices.update(id, params, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.localize} instead. */
   async localize(
     request: BackCompatLocalizeVoiceRequest,
     requestOptions?: BackCompatRequestOptions,
-  ): Promise<VoiceMetadata> {
+  ): Promise<BackCompatVoiceMetadata> {
     const params: VoiceLocalizeParams = {
       voice_id: request.voiceId,
       name: request.name,
@@ -157,11 +178,11 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap(this.client.voices.localize(params, options));
+    return wrap<any, BackCompatVoiceMetadata>(this.client.voices.localize(params, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.get} instead. */
-  async get(id: string, requestOptions?: BackCompatRequestOptions): Promise<Voice> {
+  async get(id: string, requestOptions?: BackCompatRequestOptions): Promise<BackCompatVoice> {
     const options: InternalRequestOptions = {};
     if (requestOptions) {
       if (requestOptions.timeoutInSeconds) {
@@ -174,14 +195,14 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap(this.client.voices.get(id, {}, options));
+    return wrap<any, BackCompatVoice>(this.client.voices.get(id, {}, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.list} instead. */
   async list(
     listOptions?: BackCompatVoiceListOptions,
     requestOptions?: BackCompatRequestOptions,
-  ): Promise<Voice[]> {
+  ): Promise<BackCompatVoice[]> {
     const params: VoiceListParams = {};
     if (listOptions) {
       if (listOptions.gender !== undefined) params.gender = listOptions.gender;
@@ -204,9 +225,9 @@ export class VoicesWrapper {
     }
 
     // The new SDK returns a paginated result, we collect all pages
-    const voices: Voice[] = [];
+    const voices: BackCompatVoice[] = [];
     for await (const voice of this.client.voices.list(params, options)) {
-      voices.push(voice);
+      voices.push(snakeToCamel(voice) as BackCompatVoice);
     }
     return voices;
   }

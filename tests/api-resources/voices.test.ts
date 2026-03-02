@@ -8,7 +8,7 @@ const client = new Cartesia({
 });
 
 describe('resource voices', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('update: only required params', async () => {
     const responsePromise = client.voices.update('id', { description: 'description', name: 'name' });
     const rawResponse = await responsePromise.asResponse();
@@ -20,7 +20,7 @@ describe('resource voices', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('update: required and optional params', async () => {
     const response = await client.voices.update('id', {
       description: 'description',
@@ -29,7 +29,7 @@ describe('resource voices', () => {
     });
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('list', async () => {
     const responsePromise = client.voices.list();
     const rawResponse = await responsePromise.asResponse();
@@ -41,7 +41,7 @@ describe('resource voices', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('list: request options and params are passed correctly', async () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
     await expect(
@@ -60,7 +60,7 @@ describe('resource voices', () => {
     ).rejects.toThrow(Cartesia.NotFoundError);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('delete', async () => {
     const responsePromise = client.voices.delete('id');
     const rawResponse = await responsePromise.asResponse();
@@ -72,7 +72,7 @@ describe('resource voices', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('clone', async () => {
     const responsePromise = client.voices.clone({});
     const rawResponse = await responsePromise.asResponse();
@@ -84,7 +84,7 @@ describe('resource voices', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('get', async () => {
     const responsePromise = client.voices.get('id');
     const rawResponse = await responsePromise.asResponse();
@@ -96,7 +96,7 @@ describe('resource voices', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('get: request options and params are passed correctly', async () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
     await expect(
@@ -104,7 +104,7 @@ describe('resource voices', () => {
     ).rejects.toThrow(Cartesia.NotFoundError);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('localize: only required params', async () => {
     const responsePromise = client.voices.localize({
       description: 'description',
@@ -122,7 +122,7 @@ describe('resource voices', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('localize: required and optional params', async () => {
     const response = await client.voices.localize({
       description: 'description',

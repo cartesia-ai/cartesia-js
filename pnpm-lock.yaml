@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      human-id:
-        specifier: ^4.1.3
-        version: 4.1.3
     devDependencies:
       '@arethetypeswrong/cli':
         specifier: ^0.17.0
@@ -1145,10 +1141,6 @@ packages:
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
 
-  human-id@4.1.3:
-    resolution: {integrity: sha512-tsYlhAYpjCKa//8rXZ9DqKEawhPoSytweBC2eNvcaDK+57RZLHGqNs3PZTQO6yekLFSuvA6AlnAfrw1uBvtb+Q==}
-    hasBin: true
-
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
@@ -1895,7 +1887,7 @@ packages:
         optional: true
 
   tsc-multi@https://github.com/stainless-api/tsc-multi/releases/download/v1.1.9/tsc-multi.tgz:
-    resolution: {tarball: https://github.com/stainless-api/tsc-multi/releases/download/v1.1.9/tsc-multi.tgz}
+    resolution: {integrity: sha512-tWyCXnx0WqCkVlo5s+4KMj7HC0/0YrCZY0PustUwX9F2lNwd8Kp07q/Q56uGvV9q80XaSDrhy0YqBmrX5TDNpQ==, tarball: https://github.com/stainless-api/tsc-multi/releases/download/v1.1.9/tsc-multi.tgz}
     version: 1.1.9
     engines: {node: '>=14'}
     hasBin: true
@@ -3271,8 +3263,6 @@ snapshots:
   highlight.js@10.7.3: {}
 
   html-escaper@2.0.2: {}
-
-  human-id@4.1.3: {}
 
   human-signals@2.1.0: {}
 
