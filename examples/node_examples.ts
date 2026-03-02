@@ -1,8 +1,8 @@
 /**
- * Examples for Cartesia JS SDK v3.x
+ * Node.js examples for Cartesia JS SDK v3.x
  *
  * Run an example:
- *   CARTESIA_API_KEY=... npx ts-node examples/examples.ts <functionName>
+ *   CARTESIA_API_KEY=... npx ts-node examples/node_examples.ts <functionName>
  */
 
 import * as fs from 'fs';
@@ -451,7 +451,7 @@ async function main() {
   const name = process.argv[2];
 
   if (!name || !(name in examples)) {
-    console.log('Usage: npx ts-node examples/examples.ts <functionName>');
+    console.log('Usage: npx ts-node examples/node_examples.ts <functionName>');
     console.log(`Available: ${Object.keys(examples).join(', ')}`);
     process.exit(1);
   }

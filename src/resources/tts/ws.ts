@@ -1,6 +1,13 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import * as WS from 'ws';
+import type * as WS from 'ws';
+
+let _ws: typeof import('ws') | undefined;
+try {
+  _ws = require('ws');
+} catch {
+  // Optional — will throw a clear error when WebSocket is actually used.
+}
 import { uuid4 } from '../../internal/utils/uuid';
 import { TTSEmitter, WebSocketTimeoutError, buildURL } from './internal-base';
 import * as TTSAPI from './tts';
@@ -220,7 +227,12 @@ export class TTSWS extends TTSEmitter {
   }
 
   private _initSocket(options?: WS.ClientOptions | undefined): void {
-    this.socket = new WS.WebSocket(this.url, {
+    if (!_ws) {
+      throw new Error(
+        'The "ws" peer dependency is required for WebSocket support. Install it with: npm install ws',
+      );
+    }
+    this.socket = new _ws.WebSocket(this.url, {
       ...options,
       headers: {
         'cartesia-version': '2025-11-04',
@@ -402,7 +414,7 @@ export class TTSWS extends TTSEmitter {
    */
   private async _ensureConnected(): Promise<void> {
     const state = this.socket.readyState;
-    if (state === WS.WebSocket.CLOSING || state === WS.WebSocket.CLOSED) {
+    if (state === _ws!.WebSocket.CLOSING || state === _ws!.WebSocket.CLOSED) {
       // Wake up any waiting receive() calls so they can exit cleanly.
       for (const [, entry] of this._contextQueues) {
         if (entry.resolve) {
