@@ -146,7 +146,7 @@ const ctx = ws.context({
 
 await ctx.push({ transcript: "First part. " });
 await ctx.push({ transcript: "Second part." });
-await ctx.done();
+await ctx.no_more_inputs();
 
 for await (const event of ctx.receive()) {
   if (event.type === "chunk" && event.audio) {
@@ -170,7 +170,7 @@ const ctx = ws.context({
 await ctx.push({ transcript: "First sentence. " });
 await ctx.flush(); // Force generation of buffered text
 await ctx.push({ transcript: "Second sentence." });
-await ctx.done();
+await ctx.no_more_inputs();
 
 for await (const event of ctx.receive()) {
   if (event.type === "chunk") {
@@ -312,5 +312,5 @@ try {
 | Response naming | camelCase (`createdAt`) | snake_case (`created_at`) |
 | WebSocket connect | `ws = client.tts.websocket({...}); await ws.connect()` | `ws = await client.tts.websocket()` |
 | WebSocket single generation | `ws.send({transcript, ...})` returns `{ source }` | `ws.generate({transcript, ...})` returns async iterator |
-| WebSocket continuations | `ws.send({..., continue: true})`  then `ws.continue({...})` | `ctx = ws.context({...})` then `ctx.push({transcript})` and `ctx.done()` |
+| WebSocket continuations | `ws.send({..., continue: true})`  then `ws.continue({...})` | `ctx = ws.context({...})` then `ctx.push({transcript})` and `ctx.no_more_inputs()` |
 | WebSocket disconnect | `ws.disconnect()` | `ws.close()` |

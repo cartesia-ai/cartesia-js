@@ -105,7 +105,7 @@ export class TTSWSContext {
    * Signal that no more transcript chunks will be sent.
    * Sends an empty transcript with continue: false.
    */
-  async done() {
+  async no_more_inputs() {
     await this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,

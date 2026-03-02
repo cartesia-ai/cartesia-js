@@ -84,7 +84,7 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
   for (const part of ['The road ', 'goes ever ', 'on and ', 'on.']) {
     await ctx.push({ transcript: part });
   }
-  await ctx.done();
+  await ctx.no_more_inputs();
 
   const filename = `tts_websocket_continuations_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
@@ -124,7 +124,7 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
   console.log('Sending second transcript...');
   await ctx.push({ transcript: 'stay foolish.' });
 
-  await ctx.done();
+  await ctx.no_more_inputs();
 
   const ts = timestamp();
   const files: Map<number, fs.WriteStream> = new Map();
@@ -178,7 +178,7 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
     generation_config: { emotion: 'angry' },
   });
 
-  await ctx.done();
+  await ctx.no_more_inputs();
 
   const filename = `tts_emotion_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
@@ -219,7 +219,7 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
     generation_config: { speed: 1.5 },
   });
 
-  await ctx.done();
+  await ctx.no_more_inputs();
 
   const filename = `tts_speed_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
@@ -260,7 +260,7 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
       'audio chunks from both contexts are interleaved on the wire. ' +
       'The quick brown fox jumps over the lazy dog.',
   });
-  await ctx1.done();
+  await ctx1.no_more_inputs();
 
   await ctx2.push({
     transcript:
@@ -268,7 +268,7 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
       'logic correctly separates the audio streams. ' +
       'Pack my box with five dozen liquor jugs.',
   });
-  await ctx2.done();
+  await ctx2.no_more_inputs();
 
   const ts = timestamp();
 
