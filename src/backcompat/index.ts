@@ -83,3 +83,4 @@ export * from './voices-wrapper';
 export * from './voice-changer-wrapper';
 export * from './types';
 export * from './errors';
+export * from './utils';

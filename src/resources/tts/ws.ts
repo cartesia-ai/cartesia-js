@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import * as WS from 'ws';
-import { humanId } from 'human-id';
+import { uuid4 } from '../../internal/utils/uuid';
 import { TTSEmitter, WebSocketTimeoutError, buildURL } from './internal-base';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
@@ -45,7 +45,7 @@ export class TTSWSContext {
       output_format: options.output_format,
     };
     this._timeout = options.timeout;
-    this.contextId = options.contextId ?? humanId({ separator: '-', capitalize: false });
+    this.contextId = options.contextId ?? uuid4();
   }
 
   /**
@@ -245,6 +245,12 @@ export class TTSWS extends TTSEmitter {
       })();
 
       if (event) {
+        // Decode audio for chunk events (mirrors Python SDK's .audio property).
+        if (event.type === 'chunk') {
+          const chunk = event as TTSAPI.WebsocketResponse.Chunk;
+          chunk.audio = chunk.data ? Buffer.from(chunk.data, 'base64') : null;
+        }
+
         // Always emit on EventEmitter for backwards compatibility and global listeners.
         this._emit('event', event);
 
@@ -286,7 +292,8 @@ export class TTSWS extends TTSEmitter {
    * Send a generation request and iterate over the responses.
    */
   async *generate(request: TTSAPI.GenerationRequest): AsyncGenerator<TTSAPI.WebsocketResponse> {
-    const contextId = request.context_id;
+    const contextId = request.context_id ?? uuid4();
+    request = { ...request, context_id: contextId };
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
     let error: Error | null = null;

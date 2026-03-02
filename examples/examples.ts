@@ -13,14 +13,6 @@ import Cartesia, {
   BadRequestError,
   AuthenticationError,
 } from '@cartesia/cartesia-js';
-import type { WebsocketResponse } from '@cartesia/cartesia-js/resources/tts/tts';
-
-// The generated WebsocketResponse types don't include all wire fields (e.g. `data`
-// on chunks, `word_timestamps` on timestamps). We use a small helper to access them.
-function chunkData(event: WebsocketResponse): Buffer | null {
-  const data = (event as any).data as string | undefined;
-  return data ? Buffer.from(data, 'base64') : null;
-}
 
 // =============================================================================
 // Client Initialization
@@ -68,8 +60,7 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
     output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
   })) {
     if (event.type === 'chunk') {
-      const audio = chunkData(event);
-      if (audio) file.write(audio);
+      if (event.audio) file.write(event.audio);
     }
   }
 
@@ -100,8 +91,7 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
 
   for await (const event of ctx.receive()) {
     if (event.type === 'chunk') {
-      const audio = chunkData(event);
-      if (audio) file.write(audio);
+      if (event.audio) file.write(event.audio);
     }
   }
 
@@ -145,16 +135,13 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
     if (loggable.data) loggable.data = '[...]';
     console.log('Event:', JSON.stringify(loggable));
 
-    if (event.type === 'chunk') {
-      const audio = chunkData(event);
-      if (audio) {
-        const flushId = (event as any).flush_id ?? 0;
-        if (!files.has(flushId)) {
-          const name = `tts_flush_${flushId}_${ts}.pcm`;
-          files.set(flushId, fs.createWriteStream(name));
-        }
-        files.get(flushId)!.write(audio);
+    if (event.type === 'chunk' && event.audio) {
+      const flushId = (event as any).flush_id ?? 0;
+      if (!files.has(flushId)) {
+        const name = `tts_flush_${flushId}_${ts}.pcm`;
+        files.set(flushId, fs.createWriteStream(name));
       }
+      files.get(flushId)!.write(event.audio);
     }
   }
 
@@ -198,8 +185,7 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
 
   for await (const event of ctx.receive()) {
     if (event.type === 'chunk') {
-      const audio = chunkData(event);
-      if (audio) file.write(audio);
+      if (event.audio) file.write(event.audio);
     }
   }
 
@@ -240,8 +226,7 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
 
   for await (const event of ctx.receive()) {
     if (event.type === 'chunk') {
-      const audio = chunkData(event);
-      if (audio) file.write(audio);
+      if (event.audio) file.write(event.audio);
     }
   }
 
@@ -290,9 +275,8 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
   async function collect(ctx: { receive: typeof ctx1.receive }, filename: string): Promise<void> {
     const file = fs.createWriteStream(filename);
     for await (const event of ctx.receive()) {
-      if (event.type === 'chunk') {
-        const audio = chunkData(event);
-        if (audio) file.write(audio);
+      if (event.type === 'chunk' && event.audio) {
+        file.write(event.audio);
       }
     }
     file.end();
@@ -327,8 +311,7 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
     add_timestamps: true,
   })) {
     if (event.type === 'chunk') {
-      const audio = chunkData(event);
-      if (audio) file.write(audio);
+      if (event.audio) file.write(event.audio);
     } else if (event.type === 'timestamps') {
       const wt = (event as any).word_timestamps;
       if (wt) {
