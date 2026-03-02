@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import { Cartesia } from '../client';
 import { BackCompatRequestOptions } from './types';
-import { wrap } from './errors';
+import { wrap } from './utils';
 import { Readable } from 'stream';
 
 // Define compatible interfaces to match the old SDK types for WebSocket
