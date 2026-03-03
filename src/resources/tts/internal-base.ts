@@ -5,6 +5,7 @@ import { Cartesia } from '../../client';
 
 import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
+import { stringifyQuery } from '../../internal/utils';
 
 export class WebSocketError extends CartesiaError {
   /**
@@ -83,10 +84,13 @@ export abstract class TTSEmitter extends EventEmitter<WebsocketEvents> {
   }
 }
 
-export function buildURL(client: Cartesia): URL {
+export function buildURL(client: Cartesia, query?: object | null): URL {
   const path = '/tts/websocket';
   const baseURL = client.baseURL;
   const url = new URL(baseURL + (baseURL.endsWith('/') ? path.slice(1) : path));
+  if (query) {
+    url.search = stringifyQuery(query);
+  }
   url.protocol = 'wss';
   return url;
 }
