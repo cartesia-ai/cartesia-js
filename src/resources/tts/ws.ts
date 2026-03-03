@@ -10,10 +10,14 @@ export class TTSWS extends TTSEmitter {
   socket: WS.WebSocket;
   private client: Cartesia;
 
-  constructor(client: Cartesia, options?: WS.ClientOptions | undefined) {
+  constructor(
+    client: Cartesia,
+    parameters?: null | undefined,
+    options?: WS.ClientOptions | null | undefined,
+  ) {
     super();
     this.client = client;
-    this.url = buildURL(client);
+    this.url = buildURL(client, parameters);
     this.socket = new WS.WebSocket(this.url, {
       ...options,
       headers: {
