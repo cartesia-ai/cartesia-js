@@ -1,6 +1,6 @@
-import Cartesia from "@cartesia/cartesia-js";
+import Cartesia from '@cartesia/cartesia-js';
 
-const client = new Cartesia({ apiKey: process.env.CARTESIA_API_KEY });
+const client = new Cartesia({ apiKey: process.env['CARTESIA_API_KEY'] });
 
 export async function POST() {
   const { token } = await client.accessToken.create({
