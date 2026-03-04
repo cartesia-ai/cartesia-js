@@ -1,9 +1,12 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { castToError } from '../internal/errors';
-import { isObj } from '../internal/utils';
 
 export class CartesiaError extends Error {}
+
+const isObj = (obj: unknown): obj is Record<string, unknown> => {
+  return obj != null && typeof obj === 'object' && !Array.isArray(obj);
+};
 
 export type BadRequestErrorCode =
   | 'file_too_large'

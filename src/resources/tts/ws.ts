@@ -37,6 +37,7 @@ interface WebSocketLike {
   close(code?: number, reason?: string): void;
   addEventListener(type: string, listener: (event: any) => void): void;
   removeEventListener(type: string, listener: (event: any) => void): void;
+  emit?(event: string, ...args: any[]): void;
 }
 
 /**
@@ -312,7 +313,7 @@ export class TTSWS extends TTSEmitter {
         // Decode audio for chunk events (mirrors Python SDK's .audio property).
         if (event.type === 'chunk') {
           const chunk = event as TTSAPI.WebsocketResponse.Chunk;
-          chunk.audio = chunk.data ? decodeBase64(chunk.data) as any : null;
+          chunk.audio = chunk.data ? (decodeBase64(chunk.data) as any) : null;
         }
 
         // Always emit on EventEmitter for backwards compatibility and global listeners.

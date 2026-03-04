@@ -67,7 +67,7 @@ describe('toFile', () => {
   it('is assignable to File and Blob', async () => {
     const input = new File(['foo'], 'input.jsonl', { type: 'jsonl' });
     const result = await toFile(input);
-    const file: File = result;
+    const file: import('node:buffer').File = result;
     const blob: Blob = result;
     (void file, blob);
   });
