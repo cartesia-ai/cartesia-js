@@ -18,3 +18,4 @@ export {
 
 export { TTSWS, TTSWSContext, type ContextOptions, type ContextGenerateRequest } from './ws';
 export { WebSocketTimeoutError } from './internal-base';
+export { WebSocketError } from './internal-base';

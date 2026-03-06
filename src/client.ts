@@ -332,7 +332,7 @@ export class Cartesia {
 
   protected makeStatusError(
     status: number,
-    error: Object,
+    error: Errors.APIErrorPayload,
     message: string | undefined,
     headers: Headers,
   ): Errors.APIError {
@@ -540,8 +540,7 @@ export class Cartesia {
       loggerFor(this).info(`${responseInfo} - ${retryMessage}`);
 
       const errText = await response.text().catch((err: any) => castToError(err).message);
-      const errJSON = safeJSON(errText) as any;
-      const errMessage = errJSON ? undefined : errText;
+      const errJSON = Errors.safeAPIErrorPayload(safeJSON(errText));
 
       loggerFor(this).debug(
         `[${requestLogID}] response error (${retryMessage})`,
@@ -550,12 +549,12 @@ export class Cartesia {
           url: response.url,
           status: response.status,
           headers: response.headers,
-          message: errMessage,
+          message: errJSON.message,
           durationMs: Date.now() - startTime,
         }),
       );
 
-      const err = this.makeStatusError(response.status, errJSON, errMessage, response.headers);
+      const err = this.makeStatusError(response.status, errJSON, errJSON.message, response.headers);
       throw err;
     }
 

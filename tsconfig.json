@@ -1,9 +1,9 @@
 {
-  "include": ["src", "tests", "examples"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "examples/**/*.ts"],
   "exclude": [],
   "compilerOptions": {
     "target": "es2020",
-    "lib": ["es2020"],
+    "lib": ["es2020", "dom", "dom.iterable", "dom.asynciterable"],
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
