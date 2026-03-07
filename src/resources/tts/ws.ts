@@ -243,11 +243,15 @@ export class TTSWS extends TTSEmitter {
   private _wsOptions: WS.ClientOptions | undefined;
   private _contextQueues: Map<string, ContextQueueEntry> = new Map();
 
-  constructor(client: Cartesia, options?: WS.ClientOptions | undefined) {
+  constructor(
+    client: Cartesia,
+    parameters?: null | undefined,
+    options?: WS.ClientOptions | null | undefined,
+  ) {
     super();
     this.client = client;
     this._wsOptions = options;
-    this.url = buildURL(client);
+    this.url = buildURL(client, parameters);
     this._ready = Promise.resolve();
     this._initSocket(options);
   }

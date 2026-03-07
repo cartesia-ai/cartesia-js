@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.1.0 (2026-03-07)
+
+Full Changelog: [v3.0.0...v3.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0...v3.1.0)
+
+### Features
+
+* **api:** mintlify examples ([67909d1](https://github.com/cartesia-ai/cartesia-js/commit/67909d1a906ba28c035d49d817c3d3cbe9967212))
+
+
+### Bug Fixes
+
+* **client:** preserve URL params already embedded in path ([ba4e064](https://github.com/cartesia-ai/cartesia-js/commit/ba4e0643309bcf87426c1aac1d9402601198b531))
+* fix request delays for retrying to be more respectful of high requested delays ([470fefc](https://github.com/cartesia-ai/cartesia-js/commit/470fefc190506fe476d841aaa1cea128274fda8a))
+
+
+### Chores
+
+* **ci:** skip uploading artifacts on stainless-internal branches ([2199c31](https://github.com/cartesia-ai/cartesia-js/commit/2199c319f701c071b7c6bb1bc1099352b23e58c2))
+* extract query parameters to string conversion from client ([ab488a0](https://github.com/cartesia-ai/cartesia-js/commit/ab488a0cae5aaa77f79798c612b12216f5da938e))
+
 ## 3.0.0 (2026-03-02)
 
 Full Changelog: [v3.0.0-b17...v3.0.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b17...v3.0.0)
