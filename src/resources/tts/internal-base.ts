@@ -22,7 +22,7 @@ export class WebSocketError extends CartesiaError {
 
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-type WebsocketEvents = Simplify<
+type WebSocketEvents = Simplify<
   {
     event: (event: TTSAPI.WebsocketResponse) => void;
     error: (error: WebSocketError) => void;
@@ -33,14 +33,14 @@ type WebsocketEvents = Simplify<
   }
 >;
 
-export abstract class TTSEmitter extends EventEmitter<WebsocketEvents> {
+export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
   /**
    * Send an event to the API.
    */
   abstract send(event: TTSAPI.WebsocketClientEvent): void;
 
   /**
-   * Close the websocket connection.
+   * Close the WebSocket connection.
    */
   abstract close(props?: { code: number; reason: string }): void;
 
