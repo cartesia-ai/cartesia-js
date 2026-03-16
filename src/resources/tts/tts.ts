@@ -339,11 +339,10 @@ export namespace WebsocketResponse {
   export interface Chunk {
     data: string;
 
-    /** Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt. 
+    /** Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt.
      * NB: this is a manually-added helper, not auto-generated.
      */
     audio: Buffer | null;
-
     done: boolean;
 
     status_code: number;
@@ -468,6 +467,14 @@ export namespace WebsocketResponse {
      * conversation IDs) as context IDs.
      */
     context_id?: string | null;
+
+    doc_url?: string;
+
+    request_id: string;
+
+    message: string;
+
+    title: string;
   }
 
   export interface PhonemeTimestamps {

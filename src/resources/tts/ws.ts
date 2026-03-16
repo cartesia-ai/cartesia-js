@@ -9,7 +9,7 @@ try {
   // Optional — in browsers, we use the native WebSocket API instead.
 }
 import { uuid4 } from '../../internal/utils/uuid';
-import { TTSEmitter, WebSocketTimeoutError, buildURL } from './internal-base';
+import { TTSEmitter, WebSocketError, WebSocketTimeoutError, buildURL } from './internal-base';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
 
@@ -37,6 +37,7 @@ interface WebSocketLike {
   close(code?: number, reason?: string): void;
   addEventListener(type: string, listener: (event: any) => void): void;
   removeEventListener(type: string, listener: (event: any) => void): void;
+  emit?(event: string, ...args: any[]): void;
 }
 
 /**
@@ -170,7 +171,7 @@ export class TTSWSContext {
             return;
           }
           if (event.type === 'error') {
-            throw new Error(JSON.stringify(event));
+            throw new WebSocketError(event.message, event);
           }
         } else {
           // Wait for the next event to be pushed into the queue.
@@ -312,7 +313,7 @@ export class TTSWS extends TTSEmitter {
         // Decode audio for chunk events (mirrors Python SDK's .audio property).
         if (event.type === 'chunk') {
           const chunk = event as TTSAPI.WebsocketResponse.Chunk;
-          chunk.audio = chunk.data ? decodeBase64(chunk.data) as any : null;
+          chunk.audio = chunk.data ? (decodeBase64(chunk.data) as any) : null;
         }
 
         // Always emit on EventEmitter for backwards compatibility and global listeners.
@@ -360,7 +361,7 @@ export class TTSWS extends TTSEmitter {
     request = { ...request, context_id: contextId };
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
-    let error: Error | null = null;
+    let error: WebSocketError | null = null;
     let resolve: (() => void) | null = null;
 
     const onEvent = (event: TTSAPI.WebsocketResponse) => {
@@ -372,7 +373,7 @@ export class TTSWS extends TTSEmitter {
       if (event.type === 'done' || event.type === 'error') {
         done = true;
         if (event.type === 'error') {
-          error = new Error(JSON.stringify(event));
+          error = new WebSocketError(event.message, event);
         }
       }
       resolve?.();

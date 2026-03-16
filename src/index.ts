@@ -22,3 +22,4 @@ export {
   PermissionDeniedError,
   UnprocessableEntityError,
 } from './core/error';
+export { WebSocketError } from './resources';
