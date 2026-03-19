@@ -2,7 +2,6 @@
 
 import * as TTSAPI from './tts';
 import { Cartesia } from '../../client';
-
 import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
 import { stringifyQuery } from '../../internal/utils';
