@@ -6,6 +6,11 @@ import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
 import { stringifyQuery } from '../../internal/utils';
 
+export type TTSStreamMessage =
+  | { type: 'connecting' | 'open' | 'closing' | 'close' }
+  | { type: 'message'; message: TTSAPI.WebsocketResponse }
+  | { type: 'error'; error: WebSocketError };
+
 export class WebSocketError extends CartesiaError {
   /**
    * The error data that the API sent back in an error event.
