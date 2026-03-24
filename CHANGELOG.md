@@ -1,5 +1,33 @@
 # Changelog
 
+## 3.1.0 (2026-03-24)
+
+Full Changelog: [v3.0.0...v3.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0...v3.1.0)
+
+### Features
+
+* **api:** mintlify examples ([67909d1](https://github.com/cartesia-ai/cartesia-js/commit/67909d1a906ba28c035d49d817c3d3cbe9967212))
+* **client:** add async iterator and stream() to WebSocket classes ([69e04bc](https://github.com/cartesia-ai/cartesia-js/commit/69e04bcdc5eb80272c3ac1b67a02ab7f83d6b503))
+
+
+### Bug Fixes
+
+* **client:** preserve URL params already embedded in path ([ba4e064](https://github.com/cartesia-ai/cartesia-js/commit/ba4e0643309bcf87426c1aac1d9402601198b531))
+* fix request delays for retrying to be more respectful of high requested delays ([470fefc](https://github.com/cartesia-ai/cartesia-js/commit/470fefc190506fe476d841aaa1cea128274fda8a))
+
+
+### Chores
+
+* **ci:** skip lint on metadata-only changes ([9c2fc3c](https://github.com/cartesia-ai/cartesia-js/commit/9c2fc3cb85594456ff7f7dd80550977773497dd8))
+* **ci:** skip uploading artifacts on stainless-internal branches ([2199c31](https://github.com/cartesia-ai/cartesia-js/commit/2199c319f701c071b7c6bb1bc1099352b23e58c2))
+* extract query parameters to string conversion from client ([ab488a0](https://github.com/cartesia-ai/cartesia-js/commit/ab488a0cae5aaa77f79798c612b12216f5da938e))
+* **internal:** refactor imports ([af6d526](https://github.com/cartesia-ai/cartesia-js/commit/af6d526d01b521ea7f9ff5c13f6d6205c9bf55b6))
+* **internal:** tweak CI branches ([fcda8af](https://github.com/cartesia-ai/cartesia-js/commit/fcda8af3e886463bc67adefb985d792df84b7aec))
+* **internal:** update dependencies to address dependabot vulnerabilities ([1ba9f3e](https://github.com/cartesia-ai/cartesia-js/commit/1ba9f3e43b93932e8b27a83c882b312daf3672e4))
+* **internal:** update gitignore ([a03b8fb](https://github.com/cartesia-ai/cartesia-js/commit/a03b8fb56afe760c6b11faaa80ff7bd2db6eb6e5))
+* match http protocol with ws protocol instead of wss ([ffe03d4](https://github.com/cartesia-ai/cartesia-js/commit/ffe03d40d407911d0dcd1ccbb2cc115873e030f9))
+* use proper capitalization for WebSockets ([fcacc25](https://github.com/cartesia-ai/cartesia-js/commit/fcacc2570aba08a305780874298770456067b54f))
+
 ## 3.0.0 (2026-03-02)
 
 Full Changelog: [v3.0.0-b17...v3.0.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0-b17...v3.0.0)
