@@ -9,7 +9,7 @@ try {
   // Optional — in browsers, we use the native WebSocket API instead.
 }
 import { uuid4 } from '../../internal/utils/uuid';
-import { TTSEmitter, WebSocketTimeoutError, buildURL } from './internal-base';
+import { TTSEmitter, WebSocketTimeoutError, TTSStreamMessage, WebSocketError, buildURL } from './internal-base';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
 
@@ -243,11 +243,15 @@ export class TTSWS extends TTSEmitter {
   private _wsOptions: WS.ClientOptions | undefined;
   private _contextQueues: Map<string, ContextQueueEntry> = new Map();
 
-  constructor(client: Cartesia, options?: WS.ClientOptions | undefined) {
+  constructor(
+    client: Cartesia,
+    parameters?: null | undefined,
+    options?: WS.ClientOptions | null | undefined,
+  ) {
     super();
     this.client = client;
     this._wsOptions = options;
-    this.url = buildURL(client);
+    this.url = buildURL(client, parameters);
     this._ready = Promise.resolve();
     this._initSocket(options);
   }
@@ -476,6 +480,135 @@ export class TTSWS extends TTSEmitter {
       this._initSocket(this._wsOptions);
       await this._ready;
     }
+  }
+
+  /**
+   * Returns an async iterator over WebSocket lifecycle and message events,
+   * providing an alternative to the event-based `.on()` API.
+   * The iterator will exit if the socket closes but breaking out of the iterator
+   * does not close the socket.
+   *
+   * @example
+   * ```ts
+   * for await (const event of connection.stream()) {
+   *   switch (event.type) {
+   *     case 'message':
+   *       console.log('received:', event.message);
+   *       break;
+   *     case 'error':
+   *       console.error(event.error);
+   *       break;
+   *     case 'close':
+   *       console.log('connection closed');
+   *       break;
+   *   }
+   * }
+   * ```
+   */
+  stream(): AsyncIterableIterator<TTSStreamMessage> {
+    return this[Symbol.asyncIterator]();
+  }
+
+  [Symbol.asyncIterator](): AsyncIterableIterator<TTSStreamMessage> {
+    // Two-queue async iterator: `queue` buffers incoming messages,
+    // `resolvers` buffers waiting next() calls. A push wakes the
+    // oldest next(); a next() drains the oldest message.
+    const queue: TTSStreamMessage[] = [];
+    const resolvers: (() => void)[] = [];
+    let done = false;
+
+    const push = (msg: TTSStreamMessage) => {
+      queue.push(msg);
+      resolvers.shift()?.();
+    };
+
+    const onEvent = (event: TTSAPI.WebsocketResponse) => {
+      if (event.type === 'error') return; // handled by onEmitterError
+      push({ type: 'message', message: event });
+    };
+
+    // Catches both API-level and socket-level errors via _onError → _emit('error')
+    const onEmitterError = (err: WebSocketError) => {
+      push({ type: 'error', error: err });
+    };
+
+    const onOpen = () => {
+      push({ type: 'open' });
+    };
+
+    const flushResolvers = () => {
+      for (let resolver = resolvers.shift(); resolver; resolver = resolvers.shift()) {
+        resolver();
+      }
+    };
+
+    const onClose = () => {
+      push({ type: 'close' });
+      done = true;
+      flushResolvers();
+      cleanup();
+    };
+
+    const cleanup = () => {
+      this.off('event', onEvent);
+      this.off('error', onEmitterError);
+      this.socket.off('open', onOpen);
+      this.socket.off('close', onClose);
+    };
+
+    this.on('event', onEvent);
+    this.on('error', onEmitterError);
+    this.socket.on('open', onOpen);
+    this.socket.on('close', onClose);
+
+    switch (this.socket.readyState) {
+      case WS.WebSocket.CONNECTING:
+        push({ type: 'connecting' });
+        break;
+      case WS.WebSocket.OPEN:
+        push({ type: 'open' });
+        break;
+      case WS.WebSocket.CLOSING:
+        push({ type: 'closing' });
+        break;
+      case WS.WebSocket.CLOSED:
+        push({ type: 'close' });
+        done = true;
+        cleanup();
+        break;
+    }
+
+    const resolve = (res: (value: IteratorResult<TTSStreamMessage>) => void) => {
+      if (queue.length > 0) {
+        res({ value: queue.shift()!, done: false });
+      } else if (done) {
+        res({ value: undefined, done: true });
+      } else {
+        return false;
+      }
+      return true;
+    };
+
+    const next = (): Promise<IteratorResult<TTSStreamMessage>> =>
+      new Promise((res) => {
+        if (resolve(res)) return;
+        resolvers.push(() => {
+          resolve(res);
+        });
+      });
+
+    return {
+      next,
+      return: (): Promise<IteratorReturnResult<undefined>> => {
+        done = true;
+        cleanup();
+        flushResolvers();
+        return Promise.resolve({ value: undefined, done: true });
+      },
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+    };
   }
 
   private authHeaders(): Record<string, string> {

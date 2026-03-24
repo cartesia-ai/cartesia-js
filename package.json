@@ -1,6 +1,6 @@
 {
   "name": "@cartesia/cartesia-js",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "The official TypeScript library for the Cartesia API",
   "author": "Cartesia <>",
   "types": "dist/index.d.ts",
@@ -59,6 +59,17 @@
     "ws": {
       "optional": true
     }
+  },
+  "overrides": {
+    "minimatch": "^9.0.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "minimatch": "^9.0.5"
+    }
+  },
+  "resolutions": {
+    "minimatch": "^9.0.5"
   },
   "exports": {
     ".": {
