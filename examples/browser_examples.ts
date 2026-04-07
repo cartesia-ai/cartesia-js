@@ -92,11 +92,7 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
   })) {
     if (event.type === 'chunk' && event.audio) {
       // event.audio is a raw buffer of f32le samples
-      const floats = new Float32Array(
-        event.audio.buffer,
-        event.audio.byteOffset,
-        event.audio.byteLength / 4,
-      );
+      const floats = new Float32Array(event.audio.buffer, event.audio.byteOffset, event.audio.byteLength / 4);
       chunks.push(floats);
     }
   }
@@ -139,11 +135,7 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
     output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
   })) {
     if (event.type === 'chunk' && event.audio) {
-      const floats = new Float32Array(
-        event.audio.buffer,
-        event.audio.byteOffset,
-        event.audio.byteLength / 4,
-      );
+      const floats = new Float32Array(event.audio.buffer, event.audio.byteOffset, event.audio.byteLength / 4);
 
       const audioBuffer = audioCtx.createBuffer(1, floats.length, sampleRate);
       audioBuffer.getChannelData(0).set(floats);

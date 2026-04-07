@@ -9,7 +9,7 @@
  *
  * Additional tests cover correct routing by context_id and receive timeouts.
  */
-
+import { WebSocket } from 'ws';
 import { TTSWS } from '@cartesia/cartesia-js/resources/tts/ws';
 import { WebSocketTimeoutError } from '@cartesia/cartesia-js/resources/tts/internal-base';
 import type { WebsocketResponse } from '@cartesia/cartesia-js/resources/tts/tts';
@@ -37,7 +37,9 @@ function createTestWS(): TTSWS {
 
 /** Simulate a server‑sent message by emitting directly on the socket. */
 function injectEvent(ws: TTSWS, event: Record<string, unknown>) {
-  ws.socket.emit('message', Buffer.from(JSON.stringify(event)), false);
+  if (ws.socket instanceof WebSocket) {
+    ws.socket.emit('message', Buffer.from(JSON.stringify(event)), false);
+  }
 }
 
 function makeChunk(contextId: string, seq: number): Record<string, unknown> {

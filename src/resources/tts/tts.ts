@@ -40,7 +40,7 @@ export class TTS extends APIResource {
    * Returns a promise that resolves when the connection is open.
    */
   async websocket(options?: WS.ClientOptions): Promise<TTSWS> {
-    const ws = new TTSWS(this._client, options);
+    const ws = new TTSWS(this._client, undefined /* parameters */, options);
     return ws.connect();
   }
 
@@ -339,10 +339,10 @@ export namespace WebsocketResponse {
   export interface Chunk {
     data: string;
 
-    /** Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt. 
+    /** Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt.
      * NB: this is a manually-added helper, not auto-generated.
      */
-    audio: Buffer | null;
+    audio: Uint8Array | null;
 
     done: boolean;
 

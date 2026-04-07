@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useRef, useState } from "react";
-import Cartesia from "@cartesia/cartesia-js";
+import { useRef, useState } from 'react';
+import Cartesia from '@cartesia/cartesia-js';
 
 const SAMPLE_RATE = 44100;
 const BYTES_PER_SAMPLE = 4; // f32le
 
 async function getToken(): Promise<string> {
-  const res = await fetch("/api/token", { method: "POST" });
+  const res = await fetch('/api/token', { method: 'POST' });
   const { token } = await res.json();
   return token;
 }
@@ -25,10 +25,10 @@ function BatchCartesiaTTSExample() {
     try {
       const client = new Cartesia({ token: await getToken() });
       const response = await client.tts.generate({
-        model_id: "sonic-3",
-        transcript: "Hello! This audio was generated in one batch and then played.",
-        voice: { mode: "id", id: "6ccbfb76-1fc6-48f7-b71d-91ac6298247b" },
-        output_format: { container: "wav", encoding: "pcm_s16le", sample_rate: SAMPLE_RATE },
+        model_id: 'sonic-3',
+        transcript: 'Hello! This audio was generated in one batch and then played.',
+        voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+        output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: SAMPLE_RATE },
       });
 
       const blob = await response.blob();
@@ -47,9 +47,9 @@ function BatchCartesiaTTSExample() {
       <h2>Batch</h2>
       <p>Waits for the full audio, then plays via an audio element.</p>
       <button onClick={speak} disabled={loading}>
-        {loading ? "Generating..." : "Speak"}
+        {loading ? 'Generating...' : 'Speak'}
       </button>
-      <audio ref={audioRef} controls style={{ display: "block", marginTop: "0.5rem" }} />
+      <audio ref={audioRef} controls style={{ display: 'block', marginTop: '0.5rem' }} />
     </section>
   );
 }
@@ -66,11 +66,10 @@ function StreamingCartesiaTTSExample() {
     try {
       const client = new Cartesia({ token: await getToken() });
       const response = await client.tts.generate({
-        model_id: "sonic-3",
-        transcript:
-          "Hello! This audio is being streamed and played as chunks arrive.",
-        voice: { mode: "id", id: "6ccbfb76-1fc6-48f7-b71d-91ac6298247b" },
-        output_format: { container: "raw", encoding: "pcm_f32le", sample_rate: SAMPLE_RATE },
+        model_id: 'sonic-3',
+        transcript: 'Hello! This audio is being streamed and played as chunks arrive.',
+        voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+        output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: SAMPLE_RATE },
       });
 
       // Stream the response and play each chunk as it arrives.
@@ -127,7 +126,7 @@ function StreamingCartesiaTTSExample() {
       <h2>Streaming</h2>
       <p>Plays audio chunks as they arrive via the Web Audio API.</p>
       <button onClick={speak} disabled={loading}>
-        {loading ? "Streaming..." : "Speak"}
+        {loading ? 'Streaming...' : 'Speak'}
       </button>
     </section>
   );
@@ -139,13 +138,13 @@ function StreamingCartesiaTTSExample() {
 
 export default function Home() {
   return (
-    <main style={{ padding: "2rem", fontFamily: "system-ui" }}>
+    <main style={{ padding: '2rem', fontFamily: 'system-ui' }}>
       <h1>Cartesia TTS — Next.js Example</h1>
-      <div style={{ display: "flex", flexDirection: "column", gap: "2rem", marginTop: "1rem" }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '1rem' }}>
         <BatchCartesiaTTSExample />
         <StreamingCartesiaTTSExample />
       </div>
-      <p style={{ marginTop: "2rem" }}>
+      <p style={{ marginTop: '2rem' }}>
         <a href="/websocket">WebSocket streaming example →</a>
       </p>
     </main>

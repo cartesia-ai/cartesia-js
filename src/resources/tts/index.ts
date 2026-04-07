@@ -16,5 +16,12 @@ export {
   type TTSInfillParams,
 } from './tts';
 
-export { TTSWS, TTSWSContext, type ContextOptions, type ContextGenerateRequest } from './ws';
+export {
+  TTSWS,
+  TTSWSContext,
+  type ContextOptions,
+  type ContextGenerateRequest,
+  type TTSWSClientOptions,
+  type TTSWSReconnectOptions,
+} from './ws';
 export { WebSocketTimeoutError } from './internal-base';

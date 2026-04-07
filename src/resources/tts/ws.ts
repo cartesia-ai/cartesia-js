@@ -9,7 +9,16 @@ try {
   // Optional — in browsers, we use the native WebSocket API instead.
 }
 import { uuid4 } from '../../internal/utils/uuid';
-import { TTSEmitter, WebSocketTimeoutError, TTSStreamMessage, WebSocketError, buildURL } from './internal-base';
+import {
+  TTSEmitter,
+  WebSocketTimeoutError,
+  TTSStreamMessage,
+  WebSocketError,
+  buildURL,
+} from './internal-base';
+import { InternalEventEmitter } from '../../core/EventEmitter';
+import { sleep } from '../../internal/utils/sleep';
+import { isRecoverableClose, type ReconnectingEvent, type ReconnectingOverrides } from '../../internal/ws';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
 
@@ -26,17 +35,22 @@ function decodeBase64(data: string): Uint8Array {
   return bytes;
 }
 
-// WebSocket readyState constants (same in both ws and native WebSocket)
+// WebSocket readyState constants (same values in both `ws` and native WebSocket).
+const WS_CONNECTING = 0;
+const WS_OPEN = 1;
 const WS_CLOSING = 2;
 const WS_CLOSED = 3;
+
+// WebSocket CloseEvent codes
+const WS_ABNORMAL_CLOSURE_CODE = 1006;
 
 /** Common WebSocket interface shared by both the `ws` package and the browser's native WebSocket. */
 interface WebSocketLike {
   readyState: number;
   send(data: string): void;
   close(code?: number, reason?: string): void;
-  addEventListener(type: string, listener: (event: any) => void): void;
-  removeEventListener(type: string, listener: (event: any) => void): void;
+  addEventListener(type: string, listener: (event: unknown) => void): void;
+  removeEventListener(type: string, listener: (event: unknown) => void): void;
 }
 
 /**
@@ -87,7 +101,7 @@ export class TTSWSContext {
    * If flush is true, sends an additional flush request after the transcript.
    */
   async push(options: { transcript: string; flush?: boolean }) {
-    await this._ws.send({
+    this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -106,7 +120,7 @@ export class TTSWSContext {
    * Sends an empty transcript with continue: false.
    */
   async no_more_inputs() {
-    await this._ws.send({
+    this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -122,7 +136,7 @@ export class TTSWSContext {
    * The context_id is automatically set.
    */
   async send(request: ContextGenerateRequest) {
-    await this._ws.send({
+    this._ws.send({
       ...request,
       context_id: this.contextId,
     });
@@ -134,7 +148,7 @@ export class TTSWSContext {
    * This is always sent as a separate request per the API requirement.
    */
   async flush() {
-    await this._ws.send({
+    this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -235,116 +249,89 @@ export class TTSWSContext {
   }
 }
 
+export interface TTSWSReconnectOptions {
+  /**
+   * Called before each reconnect attempt. Return an object with
+   * `parameters` to override query parameters for the next connection.
+   */
+  onReconnecting(
+    event: ReconnectingEvent<Record<string, unknown>>,
+  ): ReconnectingOverrides<Record<string, unknown>> | void;
+
+  /**
+   * Maximum number of reconnection attempts. Default: 5.
+   * Set to 0 to disable reconnection entirely.
+   */
+  maxRetries?: number;
+
+  /**
+   * Initial backoff delay in milliseconds. Default: 500.
+   */
+  initialDelay?: number;
+
+  /**
+   * Maximum backoff delay in milliseconds. Default: 8000.
+   */
+  maxDelay?: number;
+}
+
+export interface TTSWSClientOptions extends WS.ClientOptions {
+  /**
+   * Options for automatic reconnection on recoverable close codes.
+   * Automatic reconnection is only enabled when this has a non-null value.
+   */
+  reconnect?: TTSWSReconnectOptions | null;
+}
+
 export class TTSWS extends TTSEmitter {
   url: URL;
-  socket!: WebSocketLike;
-  private client: Cartesia;
+  socket: WebSocketLike;
+
+  private _client: Cartesia;
+  private _parameters: Record<string, unknown> | undefined;
+  private _wsOptions: WS.ClientOptions | null | undefined;
+  private _reconnectOptions: TTSWSReconnectOptions | null;
   private _ready: Promise<void>;
-  private _wsOptions: WS.ClientOptions | undefined;
   private _contextQueues: Map<string, ContextQueueEntry> = new Map();
+  private _sendQueue: string[] = [];
+  private _isReconnecting: boolean = false;
+  private _intentionallyClosed = false;
+
+  // Necessary to keep the public event interface clean while we manage reconnecting
+  private _internalEvents = new InternalEventEmitter<{
+    socketSwap: (oldSocket: WebSocketLike, newSocket: WebSocketLike) => void;
+    reconnecting: (event: ReconnectingEvent<Record<string, unknown>>) => void;
+    reconnected: () => void;
+    close: () => void;
+  }>();
 
   constructor(
     client: Cartesia,
-    parameters?: null | undefined,
-    options?: WS.ClientOptions | null | undefined,
+    parameters?: Record<string, unknown> | undefined,
+    options?: TTSWSClientOptions | null | undefined,
   ) {
     super();
-    this.client = client;
-    this._wsOptions = options;
     this.url = buildURL(client, parameters);
-    this._ready = Promise.resolve();
-    this._initSocket(options);
+    this._client = client;
+    this._parameters = parameters;
+    const { reconnect, ...wsOptions } = options ?? {};
+    this._wsOptions = wsOptions;
+    this._reconnectOptions = reconnect ?? null;
+    this.socket = this._connect();
+    this._ready = this._awaitOpen(this.socket);
+    // Avoid an unhandled-rejection crash when nobody awaits connect().
+    this._ready.catch(() => {});
   }
 
-  private _initSocket(options?: WS.ClientOptions | undefined): void {
-    if (_ws) {
-      // Node: use ws package with custom headers for auth
-      this.socket = new _ws.WebSocket(this.url, {
-        ...options,
-        headers: {
-          'cartesia-version': '2025-11-04',
-          ...this.authHeaders(),
-          ...options?.headers,
-        },
-      });
-    } else if (typeof WebSocket !== 'undefined') {
-      // Browser: use native WebSocket with auth in URL query params
-      const url = new URL(this.url.toString());
-      url.searchParams.set('cartesia_version', '2025-11-04');
-      const authToken = this.client.token || this.client.apiKey;
-      if (authToken) {
-        url.searchParams.set('api_key', authToken);
-      }
-      this.socket = new WebSocket(url.toString());
-    } else {
-      throw new Error(
-        'The "ws" peer dependency is required for WebSocket support in Node.js. Install it with: npm install ws',
-      );
+  send(event: TTSAPI.WebsocketClientEvent) {
+    if (this._isReconnecting || this.socket.readyState === WS_CONNECTING) {
+      this._sendQueue.push(JSON.stringify(event));
+      return;
     }
-
-    // Use addEventListener — works with both ws and native WebSocket.
-    this._ready = new Promise((resolve, reject) => {
-      const onOpen = () => {
-        this.socket.removeEventListener('error', onError);
-        resolve();
-      };
-      const onError = (err: any) => {
-        this.socket.removeEventListener('open', onOpen);
-        reject(err);
-      };
-      this.socket.addEventListener('open', onOpen);
-      this.socket.addEventListener('error', onError);
-    });
-
-    this.socket.addEventListener('message', (msgEvent: any) => {
-      // With addEventListener, both ws and native WebSocket wrap data in a MessageEvent.
-      const raw = msgEvent.data;
-      const event = (() => {
-        try {
-          return JSON.parse(typeof raw === 'string' ? raw : raw.toString()) as TTSAPI.WebsocketResponse;
-        } catch (err) {
-          this._onError(null, 'could not parse websocket event', err);
-          return null;
-        }
-      })();
-
-      if (event) {
-        // Decode audio for chunk events (mirrors Python SDK's .audio property).
-        if (event.type === 'chunk') {
-          const chunk = event as TTSAPI.WebsocketResponse.Chunk;
-          chunk.audio = chunk.data ? decodeBase64(chunk.data) as any : null;
-        }
-
-        // Always emit on EventEmitter for backwards compatibility and global listeners.
-        this._emit('event', event);
-
-        if (event.type === 'error') {
-          this._onError(event);
-        } else {
-          // @ts-ignore TS isn't smart enough to get the relationship right here
-          this._emit(event.type, event);
-        }
-
-        // Route to per-context queue if registered.
-        const ctxId = 'context_id' in event ? (event as any).context_id : null;
-        if (ctxId && this._contextQueues.has(ctxId)) {
-          const entry = this._contextQueues.get(ctxId)!;
-          entry.queue.push(event);
-          if (entry.resolve) {
-            entry.resolve();
-            entry.resolve = null;
-          }
-        }
-      }
-    });
-
-    this.socket.addEventListener('error', (err: any) => {
-      this._onError(null, err.message || 'WebSocket error', err);
-    });
-  }
-
-  async send(event: TTSAPI.WebsocketClientEvent) {
-    await this._ensureConnected();
+    if (this.socket.readyState !== WS_OPEN) {
+      this._onError(null, 'cannot send on a closed WebSocket', undefined);
+      return;
+    }
     try {
       this.socket.send(JSON.stringify(event));
     } catch (err) {
@@ -381,7 +368,7 @@ export class TTSWS extends TTSEmitter {
     this.on('event', onEvent);
 
     try {
-      await this.send(request);
+      this.send(request);
 
       while (!done || queue.length > 0) {
         if (queue.length > 0) {
@@ -408,7 +395,7 @@ export class TTSWS extends TTSEmitter {
    * Cancel a context to stop generating speech for it.
    */
   async cancelContext(contextId: string) {
-    await this.send({ cancel: true, context_id: contextId });
+    this.send({ cancel: true, context_id: contextId });
   }
 
   /**
@@ -422,6 +409,7 @@ export class TTSWS extends TTSEmitter {
   }
 
   close(props?: { code: number; reason: string }) {
+    this._intentionallyClosed = true;
     try {
       this.socket.close(props?.code ?? 1000, props?.reason ?? 'OK');
     } catch (err) {
@@ -461,36 +449,14 @@ export class TTSWS extends TTSEmitter {
   }
 
   /**
-   * Check if the connection is open; if closed, reconnect transparently.
-   * Clears all context queues on reconnect since server-side state is lost.
-   */
-  private async _ensureConnected(): Promise<void> {
-    const state = this.socket.readyState;
-    if (state === WS_CLOSING || state === WS_CLOSED) {
-      // Wake up any waiting receive() calls so they can exit cleanly.
-      for (const [, entry] of this._contextQueues) {
-        if (entry.resolve) {
-          entry.resolve();
-          entry.resolve = null;
-        }
-      }
-      this._contextQueues.clear();
-
-      // Create a fresh socket connection.
-      this._initSocket(this._wsOptions);
-      await this._ready;
-    }
-  }
-
-  /**
    * Returns an async iterator over WebSocket lifecycle and message events,
    * providing an alternative to the event-based `.on()` API.
-   * The iterator will exit if the socket closes but breaking out of the iterator
+   * The iterator will exit if the socket closes but exiting the iterator
    * does not close the socket.
    *
    * @example
    * ```ts
-   * for await (const event of connection.stream()) {
+   * for await (const event of client.stream()) {
    *   switch (event.type) {
    *     case 'message':
    *       console.log('received:', event.message);
@@ -516,6 +482,7 @@ export class TTSWS extends TTSEmitter {
     const queue: TTSStreamMessage[] = [];
     const resolvers: (() => void)[] = [];
     let done = false;
+    let currentSocket = this.socket;
 
     const push = (msg: TTSStreamMessage) => {
       queue.push(msg);
@@ -527,13 +494,21 @@ export class TTSWS extends TTSEmitter {
       push({ type: 'message', message: event });
     };
 
-    // Catches both API-level and socket-level errors via _onError → _emit('error')
+    // All errors (API + socket) funnel through _onError → 'error' event
     const onEmitterError = (err: WebSocketError) => {
       push({ type: 'error', error: err });
     };
 
     const onOpen = () => {
       push({ type: 'open' });
+    };
+
+    const onReconnecting = (evt: ReconnectingEvent<Record<string, unknown>>) => {
+      push({ type: 'reconnecting', reconnect: evt });
+    };
+
+    const onReconnected = () => {
+      push({ type: 'reconnected' });
     };
 
     const flushResolvers = () => {
@@ -543,39 +518,67 @@ export class TTSWS extends TTSEmitter {
     };
 
     const onClose = () => {
+      // Mid-reconnect; the swap handler will rebind us to the new socket
+      if (this._isReconnecting) return;
       push({ type: 'close' });
       done = true;
       flushResolvers();
       cleanup();
     };
 
+    const onSocketSwap = (oldSocket: WebSocketLike, newSocket: WebSocketLike) => {
+      oldSocket.removeEventListener('open', onOpen);
+      oldSocket.removeEventListener('close', onClose);
+      newSocket.addEventListener('open', onOpen);
+      newSocket.addEventListener('close', onClose);
+      currentSocket = newSocket;
+    };
+
     const cleanup = () => {
       this.off('event', onEvent);
       this.off('error', onEmitterError);
-      this.socket.off('open', onOpen);
-      this.socket.off('close', onClose);
+      currentSocket.removeEventListener('open', onOpen);
+      currentSocket.removeEventListener('close', onClose);
+      this._internalEvents.off('socketSwap', onSocketSwap);
+      this._internalEvents.off('reconnecting', onReconnecting);
+      this._internalEvents.off('reconnected', onReconnected);
+      this._internalEvents.off('close', onClose);
     };
 
     this.on('event', onEvent);
     this.on('error', onEmitterError);
-    this.socket.on('open', onOpen);
-    this.socket.on('close', onClose);
+    this.socket.addEventListener('open', onOpen);
+    this.socket.addEventListener('close', onClose);
+    this._internalEvents.on('socketSwap', onSocketSwap);
+    this._internalEvents.on('reconnecting', onReconnecting);
+    this._internalEvents.on('reconnected', onReconnected);
+    this._internalEvents.on('close', onClose);
 
-    switch (this.socket.readyState) {
-      case WS.WebSocket.CONNECTING:
-        push({ type: 'connecting' });
-        break;
-      case WS.WebSocket.OPEN:
-        push({ type: 'open' });
-        break;
-      case WS.WebSocket.CLOSING:
-        push({ type: 'closing' });
-        break;
-      case WS.WebSocket.CLOSED:
-        push({ type: 'close' });
-        done = true;
-        cleanup();
-        break;
+    if (this._isReconnecting) {
+      // A reconnect is already in flight. The socket may be CLOSED but the
+      // instance is still alive. Emit 'reconnecting' so the iterator stays
+      // open and receives the upcoming reconnected/message events.
+      push({
+        type: 'reconnecting',
+        reconnect: { attempt: 0, maxAttempts: 0, delay: 0, closeCode: 0, parameters: undefined },
+      });
+    } else {
+      switch (this.socket.readyState) {
+        case WS_CONNECTING:
+          push({ type: 'connecting' });
+          break;
+        case WS_OPEN:
+          push({ type: 'open' });
+          break;
+        case WS_CLOSING:
+          push({ type: 'closing' });
+          break;
+        case WS_CLOSED:
+          push({ type: 'close' });
+          done = true;
+          cleanup();
+          break;
+      }
     }
 
     const resolve = (res: (value: IteratorResult<TTSStreamMessage>) => void) => {
@@ -611,13 +614,339 @@ export class TTSWS extends TTSEmitter {
     };
   }
 
-  private authHeaders(): Record<string, string> {
-    if (this.client.token) {
-      return { Authorization: `Bearer ${this.client.token}` };
+  /**
+   * Create a new underlying socket and wire its event listeners.
+   * Uses the `ws` package in Node (auth via headers) and the native
+   * WebSocket in browsers (auth via query string).
+   */
+  private _connect(): WebSocketLike {
+    this.url = buildURL(this._client, this._parameters);
+
+    let socket: WebSocketLike;
+    if (_ws) {
+      // Node: use ws package with custom headers for auth.
+      socket = new _ws.WebSocket(this.url, {
+        ...this._wsOptions,
+        headers: {
+          'cartesia-version': '2025-11-04',
+          ...this._authHeaders(),
+          ...this._wsOptions?.headers,
+        },
+      });
+    } else if (typeof WebSocket !== 'undefined') {
+      // Browser: use native WebSocket with auth in URL query params.
+      const url = new URL(this.url.toString());
+      url.searchParams.set('cartesia_version', '2025-11-04');
+      if (this._client.token) {
+        url.searchParams.set('access_token', this._client.token);
+      } else if (this._client.apiKey) {
+        url.searchParams.set('api_key', this._client.apiKey);
+      }
+      socket = new WebSocket(url.toString());
+    } else {
+      throw new Error(
+        'The "ws" peer dependency is required for WebSocket support in Node.js. Install it with: npm install ws',
+      );
     }
 
-    if (this.client.apiKey) {
-      return { Authorization: `Bearer ${this.client.apiKey}` };
+    socket.addEventListener('message', (msgEvent) => {
+      // With addEventListener, both ws and native WebSocket wrap data in a MessageEvent.
+      const event: TTSAPI.WebsocketResponse | null = (() => {
+        try {
+          const raw = (msgEvent as any).data;
+          return JSON.parse(typeof raw === 'string' ? raw : raw.toString());
+        } catch (err) {
+          this._onError(null, 'could not parse websocket event', err);
+          return null;
+        }
+      })();
+
+      if (event) {
+        // Decode audio for chunk events (mirrors Python SDK's .audio property).
+        if (event.type === 'chunk') {
+          const chunk = event;
+          chunk.audio = chunk.data ? decodeBase64(chunk.data) : null;
+        }
+
+        // Always emit on EventEmitter for backwards compatibility and global listeners.
+        this._emit('event', event);
+
+        if (event.type === 'error') {
+          this._onError(event);
+        } else {
+          // @ts-ignore TS isn't smart enough to get the relationship right here
+          this._emit(event.type, event);
+        }
+
+        // Route to per-context queue if registered.
+        const ctxId = 'context_id' in event ? event.context_id : null;
+        if (ctxId && this._contextQueues.has(ctxId)) {
+          const entry = this._contextQueues.get(ctxId)!;
+          entry.queue.push(event);
+          if (entry.resolve) {
+            entry.resolve();
+            entry.resolve = null;
+          }
+        }
+      }
+    });
+
+    socket.addEventListener('error', (err) => {
+      // Suppress transient errors during reconnection — the retry loop
+      // already handles them and will surface a close if retries exhaust.
+      if (this._isReconnecting) return;
+      const errorMessage =
+        typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string' ?
+          err.message
+        : null;
+      this._onError(null, errorMessage || 'WebSocket error', err);
+    });
+
+    socket.addEventListener('open', () => {
+      this._flushSendQueue();
+    });
+
+    socket.addEventListener('close', (event) => {
+      // Ignore close events from superseded sockets — a stale socket's
+      // late close must not kick off a second reconnect loop.
+      if (socket !== this.socket) return;
+
+      const code =
+        typeof event === 'object' && event !== null && 'code' in event && typeof event.code === 'number' ?
+          event.code
+        : WS_ABNORMAL_CLOSURE_CODE;
+      if (!this._canReconnect(code)) {
+        if (!this._isReconnecting) {
+          this._emit('close');
+        }
+        return;
+      }
+
+      this._reconnect(code);
+    });
+
+    return socket;
+  }
+
+  // Reconnect is opt-in via onReconnecting so callers can pass
+  // state (e.g. session IDs) into the new connection.
+  private _canReconnect(code: number): boolean {
+    if (this._intentionallyClosed) return false;
+    if (!this._reconnectOptions) return false;
+    if (this._reconnectOptions.maxRetries === 0) return false;
+    if (!this._reconnectOptions.onReconnecting) return false;
+    return isRecoverableClose(code);
+  }
+
+  private async _reconnect(closeCode: number): Promise<void> {
+    if (this._isReconnecting || !this._reconnectOptions) return;
+    this._isReconnecting = true;
+
+    // Server-side context state is lost across a reconnect — wake any waiting
+    // receive() calls so their generators can exit cleanly.
+    for (const entry of this._contextQueues.values()) {
+      if (entry.resolve) {
+        entry.resolve();
+        entry.resolve = null;
+      }
+    }
+    this._contextQueues.clear();
+
+    const maxRetries = this._reconnectOptions.maxRetries ?? 5;
+    const initialDelay = this._reconnectOptions.initialDelay ?? 500;
+    const maxDelay = this._reconnectOptions.maxDelay ?? 8000;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      if (!this._canReconnect(closeCode)) {
+        this._isReconnecting = false;
+        if (!this._intentionallyClosed) {
+          this._onError(
+            null,
+            `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`,
+            undefined,
+          );
+        }
+        this._emit('close');
+        this._internalEvents._emit('close');
+        return;
+      }
+
+      const baseDelay = Math.min(initialDelay * Math.pow(2, attempt - 1), maxDelay);
+      // Jitter: rand [0.75, 1.0] to spread out connection attempts without over-delaying
+      const jitter = 0.75 + Math.random() * 0.25;
+      const actualDelay = Math.round(baseDelay * jitter);
+
+      let reconnectingEvent: ReconnectingEvent<Record<string, unknown>> = {
+        attempt,
+        maxAttempts: maxRetries,
+        delay: actualDelay,
+        closeCode,
+        parameters: this._parameters ? { ...this._parameters } : undefined,
+      };
+
+      let overrides: ReconnectingOverrides<Record<string, unknown>> | void;
+      try {
+        overrides = this._reconnectOptions.onReconnecting(reconnectingEvent);
+      } catch (err) {
+        this._isReconnecting = false;
+        this._onError(null, 'onReconnecting callback threw', err);
+        this._emit('close');
+        this._internalEvents._emit('close');
+        return;
+      }
+
+      if (overrides && 'abort' in overrides && overrides.abort) {
+        this._isReconnecting = false;
+        this._emit('close');
+        this._internalEvents._emit('close');
+        return;
+      }
+
+      if (overrides && 'parameters' in overrides) {
+        this._parameters = overrides.parameters;
+        reconnectingEvent = { ...reconnectingEvent, parameters: this._parameters };
+      }
+
+      try {
+        this._emit('reconnecting', reconnectingEvent);
+      } catch (err) {
+        this._onError(null, 'onReconnecting callback threw', err);
+      }
+      this._internalEvents._emit('reconnecting', reconnectingEvent);
+
+      if (!this._canReconnect(closeCode)) {
+        this._isReconnecting = false;
+        if (!this._intentionallyClosed) {
+          this._onError(
+            null,
+            `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`,
+            undefined,
+          );
+        }
+        this._emit('close');
+        this._internalEvents._emit('close');
+        return;
+      }
+
+      await sleep(actualDelay);
+
+      if (!this._canReconnect(closeCode)) {
+        this._isReconnecting = false;
+        if (!this._intentionallyClosed) {
+          this._onError(
+            null,
+            `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`,
+            undefined,
+          );
+        }
+        this._emit('close');
+        this._internalEvents._emit('close');
+        return;
+      }
+
+      let closeCodePromise: Promise<number> | undefined;
+      try {
+        const oldSocket = this.socket;
+        this.socket = this._connect();
+        // Registered synchronously after _connect() and before any
+        // await so the code is captured even when the socket emits 'close'
+        // in the same tick as 'error' (e.g. abortHandshake).
+        closeCodePromise = new Promise<number>((resolve) => {
+          const handler = (evt: unknown) => {
+            this.socket.removeEventListener('close', handler);
+            resolve(
+              typeof evt === 'object' && evt !== null && 'code' in evt && typeof evt.code === 'number' ?
+                evt.code
+              : WS_ABNORMAL_CLOSURE_CODE,
+            );
+          };
+          this.socket.addEventListener('close', handler);
+        });
+
+        await this._awaitOpen(this.socket);
+
+        this._internalEvents._emit('socketSwap', oldSocket, this.socket);
+        this._isReconnecting = false;
+        this._flushSendQueue();
+        this._emit('reconnected');
+        this._internalEvents._emit('reconnected');
+        return;
+      } catch {
+        if (closeCodePromise) {
+          // The socket may emit 'error' before 'close', so await the code
+          // rather than reading it synchronously.
+          closeCode = await closeCodePromise;
+        }
+      }
+    }
+
+    // All retries exhausted — surface an error so consumers can
+    // distinguish retry failure from a clean close.
+    this._isReconnecting = false;
+    this._onError(
+      null,
+      `WebSocket reconnect failed after ${maxRetries} attempts (close code: ${closeCode})`,
+      undefined,
+    );
+    this._emit('close');
+    this._internalEvents._emit('close');
+  }
+
+  /**
+   * Resolves once the socket is open, rejects if it errors or closes first.
+   */
+  private _awaitOpen(socket: WebSocketLike): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        socket.removeEventListener('open', onOpen);
+        socket.removeEventListener('error', onError);
+        socket.removeEventListener('close', onFail);
+      };
+      const onOpen = () => {
+        cleanup();
+        resolve();
+      };
+      const onError = (err: unknown) => {
+        cleanup();
+        reject(err);
+      };
+      const onFail = () => {
+        cleanup();
+        reject(new Error('socket closed before open'));
+      };
+      socket.addEventListener('open', onOpen);
+      socket.addEventListener('error', onError);
+      socket.addEventListener('close', onFail);
+    });
+  }
+
+  private _flushSendQueue(): void {
+    const pending = this._sendQueue.splice(0);
+    for (let i = 0; i < pending.length; i++) {
+      try {
+        if (this.socket.readyState !== WS_OPEN) {
+          // Avoid dropping messages by sending them out over a closing socket
+          this._sendQueue.unshift(...pending.slice(i));
+          return;
+        } else {
+          this.socket.send(pending[i]!);
+        }
+      } catch (err) {
+        // Re-queue remaining for next open/reconnect
+        this._sendQueue.unshift(...pending.slice(i));
+        this._onError(null, 'could not send queued data', err);
+        return;
+      }
+    }
+  }
+
+  private _authHeaders(): Record<string, string> {
+    if (this._client.token) {
+      return { Authorization: `Bearer ${this._client.token}` };
+    }
+
+    if (this._client.apiKey) {
+      return { Authorization: `Bearer ${this._client.apiKey}` };
     }
     return {};
   }

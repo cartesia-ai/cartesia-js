@@ -1,4 +1,4 @@
-import Cartesia from "@cartesia/cartesia-js";
+import Cartesia from '@cartesia/cartesia-js';
 
 const client = new Cartesia({ apiKey: process.env.CARTESIA_API_KEY });
 
