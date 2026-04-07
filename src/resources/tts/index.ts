@@ -15,3 +15,4 @@ export {
   type TTSGenerateSseParams,
   type TTSInfillParams,
 } from './tts';
+export { type TTSWSClientOptions, type TTSWSReconnectOptions } from './ws';
