@@ -6,8 +6,12 @@ import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
 import { stringifyQuery } from '../../internal/utils';
 
+import type { ReconnectingEvent } from '../../internal/ws';
+
 export type TTSStreamMessage =
   | { type: 'connecting' | 'open' | 'closing' | 'close' }
+  | { type: 'reconnecting'; reconnect: ReconnectingEvent }
+  | { type: 'reconnected' }
   | { type: 'message'; message: TTSAPI.WebsocketResponse }
   | { type: 'error'; error: WebSocketError };
 
@@ -39,8 +43,11 @@ type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 type WebSocketEvents = Simplify<
   {
+    close: () => void;
     event: (event: TTSAPI.WebsocketResponse) => void;
     error: (error: WebSocketError) => void;
+    reconnecting: (event: ReconnectingEvent) => void;
+    reconnected: () => void;
   } & {
     [EventType in Exclude<NonNullable<TTSAPI.WebsocketResponse['type']>, 'error'>]: (
       event: Extract<TTSAPI.WebsocketResponse, { type?: EventType }>,
