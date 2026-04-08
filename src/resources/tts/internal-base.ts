@@ -84,14 +84,24 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
   }
 }
 
-export function buildURL(client: Cartesia, query?: object | null): URL {
-  const path = '/tts/websocket';
+export function buildURL(client: Cartesia, parameters: Record<string, unknown>): URL {
+  const { ...query } = parameters;
+  const endpoint = '/tts/websocket';
   const baseURL = client.baseURL;
-  const url = new URL(baseURL + (baseURL.endsWith('/') ? path.slice(1) : path));
-  if (query) {
+  const url = new URL(baseURL);
+  url.pathname +=
+    url.pathname.endsWith('/') ?
+      endpoint.startsWith('/') ?
+        endpoint.slice(1)
+      : endpoint
+    : endpoint.startsWith('/') ? endpoint
+    : `/${endpoint}`;
+  if (url.search) {
+    url.search += `&${stringifyQuery(query)}`;
+  } else {
     url.search = stringifyQuery(query);
   }
-  url.protocol = url.protocol === 'http:' ? 'ws:' : 'wss:';
+  url.protocol = url.protocol === 'http:' || url.protocol === 'ws:' ? 'ws:' : 'wss:';
   return url;
 }
 

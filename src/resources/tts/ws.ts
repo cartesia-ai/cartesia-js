@@ -47,7 +47,7 @@ export class TTSWS extends TTSEmitter {
   socket: WS.WebSocket;
 
   private _client: Cartesia;
-  private _parameters: Record<string, unknown> | undefined;
+  private _parameters: Record<string, unknown> | null | undefined;
   private _wsOptions: WS.ClientOptions | null | undefined;
   private _reconnectOptions: TTSWSReconnectOptions | null;
   private _sendQueue: string[] = [];
@@ -73,7 +73,7 @@ export class TTSWS extends TTSEmitter {
     const { reconnect, ...wsOptions } = options ?? {};
     this._wsOptions = wsOptions;
     this._reconnectOptions = reconnect ?? null;
-    this.url = buildURL(client, parameters);
+    this.url = buildURL(client, parameters ?? {});
     this.socket = this._connect();
   }
 
@@ -269,7 +269,7 @@ export class TTSWS extends TTSEmitter {
   }
 
   private _connect(): WS.WebSocket {
-    this.url = buildURL(this._client, this._parameters);
+    this.url = buildURL(this._client, this._parameters ?? {});
 
     const socket = new WS.WebSocket(this.url, {
       ...this._wsOptions,
