@@ -288,7 +288,7 @@ export class TTSWS extends TTSEmitter {
   socket: WebSocketLike;
 
   private _client: Cartesia;
-  private _parameters: Record<string, unknown> | undefined;
+  private _parameters: Record<string, unknown> | null | undefined;
   private _wsOptions: WS.ClientOptions | null | undefined;
   private _reconnectOptions: TTSWSReconnectOptions | null;
   private _ready: Promise<void>;
@@ -311,7 +311,7 @@ export class TTSWS extends TTSEmitter {
     options?: TTSWSClientOptions | null | undefined,
   ) {
     super();
-    this.url = buildURL(client, parameters);
+    this.url = buildURL(client, parameters ?? {});
     this._client = client;
     this._parameters = parameters;
     const { reconnect, ...wsOptions } = options ?? {};
@@ -620,7 +620,7 @@ export class TTSWS extends TTSEmitter {
    * WebSocket in browsers (auth via query string).
    */
   private _connect(): WebSocketLike {
-    this.url = buildURL(this._client, this._parameters);
+    this.url = buildURL(this._client, this._parameters ?? {});
 
     let socket: WebSocketLike;
     if (_ws) {
