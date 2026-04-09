@@ -6,14 +6,15 @@ import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
 import { stringifyQuery } from '../../internal/utils';
 
-import type { ReconnectingEvent } from '../../internal/ws';
+import type { RawWebSocketData, ReconnectingEvent, UnsentMessage } from '../../internal/ws';
 
 export type TTSStreamMessage =
   | { type: 'connecting' | 'open' | 'closing' }
-  | { type: 'close'; code: number; reason: string; unsent: TTSAPI.WebsocketClientEvent[] }
+  | { type: 'close'; code: number; reason: string; unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[] }
   | { type: 'reconnecting'; reconnect: ReconnectingEvent }
   | { type: 'reconnected' }
   | { type: 'message'; message: TTSAPI.WebsocketResponse }
+  | { type: 'raw'; data: RawWebSocketData }
   | { type: 'error'; error: WebSocketError };
 
 export class WebSocketError extends CartesiaError {
@@ -45,8 +46,9 @@ type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 type WebSocketEvents = Simplify<
   {
     event: (event: TTSAPI.WebsocketResponse) => void;
+    raw: (data: RawWebSocketData) => void;
     error: (error: WebSocketError) => void;
-    close: (code: number, reason: string, unsent: TTSAPI.WebsocketClientEvent[]) => void;
+    close: (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => void;
     reconnecting: (event: ReconnectingEvent) => void;
     reconnected: () => void;
   } & {
@@ -61,6 +63,11 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
    * Send an event to the API.
    */
   abstract send(event: TTSAPI.WebsocketClientEvent): void | Promise<void>;
+
+  /**
+   * Send raw data over the WebSocket without JSON serialization.
+   */
+  abstract sendRaw(data: RawWebSocketData): void;
 
   /**
    * Close the WebSocket connection.

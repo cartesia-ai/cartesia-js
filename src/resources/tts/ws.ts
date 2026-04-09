@@ -20,9 +20,12 @@ import { InternalEventEmitter } from '../../core/EventEmitter';
 import { sleep } from '../../internal/utils/sleep';
 import {
   SendQueue,
+  flattenRawData,
   isRecoverableClose,
+  type RawWebSocketData,
   type ReconnectingEvent,
   type ReconnectingOverrides,
+  type UnsentMessage,
 } from '../../internal/ws';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
@@ -320,7 +323,7 @@ export class TTSWS extends TTSEmitter {
     socketSwap: (oldSocket: WebSocketLike, newSocket: WebSocketLike) => void;
     reconnecting: (event: ReconnectingEvent<Record<string, unknown>>) => void;
     reconnected: () => void;
-    close: (code: number, reason: string, unsent: TTSAPI.WebsocketClientEvent[]) => void;
+    close: (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => void;
   }>();
 
   constructor(
@@ -429,6 +432,24 @@ export class TTSWS extends TTSEmitter {
     return ctx;
   }
 
+  sendRaw(data: RawWebSocketData) {
+    if (this._isReconnecting || this.socket.readyState === WS.WebSocket.CONNECTING) {
+      if (!this._sendQueue.enqueueRaw(data)) {
+        this._onError(null, 'send queue is full, message discarded', undefined);
+      }
+      return;
+    }
+    if (this.socket.readyState !== WS.WebSocket.OPEN) {
+      this._onError(null, 'cannot send on a closed WebSocket', undefined);
+      return;
+    }
+    try {
+      this.socket.send(flattenRawData(data));
+    } catch (err) {
+      this._onError(null, 'could not send data', err);
+    }
+  }
+
   close(props?: { code: number; reason: string }) {
     this._intentionallyClosed = true;
     this._closeCode = props?.code ?? 1000;
@@ -517,6 +538,10 @@ export class TTSWS extends TTSEmitter {
       push({ type: 'message', message: event });
     };
 
+    const onRaw = (data: RawWebSocketData) => {
+      push({ type: 'raw', data });
+    };
+
     // All errors (API + socket) funnel through _onError → 'error' event
     const onEmitterError = (err: WebSocketError) => {
       push({ type: 'error', error: err });
@@ -540,7 +565,7 @@ export class TTSWS extends TTSEmitter {
       }
     };
 
-    const onClose = (code: number, reason: string, unsent: TTSAPI.WebsocketClientEvent[]) => {
+    const onClose = (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => {
       push({ type: 'close', code, reason, unsent });
       done = true;
       flushResolvers();
@@ -555,6 +580,7 @@ export class TTSWS extends TTSEmitter {
 
     const cleanup = () => {
       this.off('event', onEvent);
+      this.off('raw', onRaw);
       this.off('error', onEmitterError);
       currentSocket.removeEventListener('open', onOpen);
       this._internalEvents.off('close', onClose);
@@ -564,6 +590,7 @@ export class TTSWS extends TTSEmitter {
     };
 
     this.on('event', onEvent);
+    this.on('raw', onRaw);
     this.on('error', onEmitterError);
     this.socket.addEventListener('open', onOpen);
     this._internalEvents.on('close', onClose);
@@ -953,7 +980,9 @@ export class TTSWS extends TTSEmitter {
 
   private _flushSendQueue(): void {
     try {
-      this._sendQueue.flush((data) => this.socket.send(data));
+      this._sendQueue.flush((data) =>
+        this.socket.send(typeof data === 'string' ? data : flattenRawData(data)),
+      );
     } catch (err) {
       this._onError(null, 'could not send queued data', err);
     }
