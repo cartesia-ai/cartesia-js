@@ -4,7 +4,12 @@ import * as WS from 'ws';
 import { TTSEmitter, TTSStreamMessage, WebSocketError, buildURL } from './internal-base';
 import { InternalEventEmitter } from '../../core/EventEmitter';
 import { sleep } from '../../internal/utils/sleep';
-import { isRecoverableClose, type ReconnectingEvent, type ReconnectingOverrides } from '../../internal/ws';
+import {
+  SendQueue,
+  isRecoverableClose,
+  type ReconnectingEvent,
+  type ReconnectingOverrides,
+} from '../../internal/ws';
 import * as TTSAPI from './tts';
 import { Cartesia } from '../../client';
 
@@ -40,6 +45,15 @@ export interface TTSWSClientOptions extends WS.ClientOptions {
    * Automatic reconnection is only enabled when this has a non-null value.
    */
   reconnect?: TTSWSReconnectOptions | null;
+
+  /**
+   * Maximum size of the outgoing message queue in bytes.
+   * Messages queued while the socket is connecting or reconnecting are held
+   * in memory up to this limit. Once the limit is reached, new messages are
+   * discarded and an `error` event is emitted.
+   * Default: 1 MB
+   */
+  maxQueueSize?: number;
 }
 
 export class TTSWS extends TTSEmitter {
@@ -50,16 +64,20 @@ export class TTSWS extends TTSEmitter {
   private _parameters: Record<string, unknown> | null | undefined;
   private _wsOptions: WS.ClientOptions | null | undefined;
   private _reconnectOptions: TTSWSReconnectOptions | null;
-  private _sendQueue: string[] = [];
+  private _sendQueue: SendQueue<TTSAPI.WebsocketClientEvent>;
   private _isReconnecting: boolean = false;
   private _intentionallyClosed = false;
+  private _closeCode: number = 1000;
+  private _closeReason: string = 'OK';
+  private _lastCloseCode: number = 1006;
+  private _lastCloseReason: string = '';
 
   // Necessary to keep the public event interface clean while we manage reconnecting
   private _internalEvents = new InternalEventEmitter<{
     socketSwap: (oldSocket: WS.WebSocket, newSocket: WS.WebSocket) => void;
     reconnecting: (event: ReconnectingEvent<Record<string, unknown>>) => void;
     reconnected: () => void;
-    close: () => void;
+    close: (code: number, reason: string, unsent: TTSAPI.WebsocketClientEvent[]) => void;
   }>();
 
   constructor(
@@ -70,16 +88,19 @@ export class TTSWS extends TTSEmitter {
     super();
     this._client = client;
     this._parameters = undefined;
-    const { reconnect, ...wsOptions } = options ?? {};
+    const { reconnect, maxQueueSize, ...wsOptions } = options ?? {};
     this._wsOptions = wsOptions;
     this._reconnectOptions = reconnect ?? null;
+    this._sendQueue = new SendQueue<TTSAPI.WebsocketClientEvent>(maxQueueSize);
     this.url = buildURL(client, parameters ?? {});
     this.socket = this._connect();
   }
 
   send(event: TTSAPI.WebsocketClientEvent) {
     if (this._isReconnecting || this.socket.readyState === WS.WebSocket.CONNECTING) {
-      this._sendQueue.push(JSON.stringify(event));
+      if (!this._sendQueue.enqueue(event)) {
+        this._onError(null, 'send queue is full, message discarded', undefined);
+      }
       return;
     }
     if (this.socket.readyState !== WS.WebSocket.OPEN) {
@@ -95,8 +116,10 @@ export class TTSWS extends TTSEmitter {
 
   close(props?: { code: number; reason: string }) {
     this._intentionallyClosed = true;
+    this._closeCode = props?.code ?? 1000;
+    this._closeReason = props?.reason ?? 'OK';
     try {
-      this.socket.close(props?.code ?? 1000, props?.reason ?? 'OK');
+      this.socket.close(this._closeCode, this._closeReason);
     } catch (err) {
       this._onError(null, 'could not close the connection', err);
     }
@@ -171,10 +194,8 @@ export class TTSWS extends TTSEmitter {
       }
     };
 
-    const onClose = () => {
-      // Mid-reconnect; the swap handler will rebind us to the new socket
-      if (this._isReconnecting) return;
-      push({ type: 'close' });
+    const onClose = (code: number, reason: string, unsent: TTSAPI.WebsocketClientEvent[]) => {
+      push({ type: 'close', code, reason, unsent });
       done = true;
       flushResolvers();
       cleanup();
@@ -182,9 +203,7 @@ export class TTSWS extends TTSEmitter {
 
     const onSocketSwap = (oldSocket: WS.WebSocket, newSocket: WS.WebSocket) => {
       oldSocket.off('open', onOpen);
-      oldSocket.off('close', onClose);
       newSocket.on('open', onOpen);
-      newSocket.on('close', onClose);
       currentSocket = newSocket;
     };
 
@@ -192,21 +211,19 @@ export class TTSWS extends TTSEmitter {
       this.off('event', onEvent);
       this.off('error', onEmitterError);
       currentSocket.off('open', onOpen);
-      currentSocket.off('close', onClose);
+      this._internalEvents.off('close', onClose);
       this._internalEvents.off('socketSwap', onSocketSwap);
       this._internalEvents.off('reconnecting', onReconnecting);
       this._internalEvents.off('reconnected', onReconnected);
-      this._internalEvents.off('close', onClose);
     };
 
     this.on('event', onEvent);
     this.on('error', onEmitterError);
     this.socket.on('open', onOpen);
-    this.socket.on('close', onClose);
+    this._internalEvents.on('close', onClose);
     this._internalEvents.on('socketSwap', onSocketSwap);
     this._internalEvents.on('reconnecting', onReconnecting);
     this._internalEvents.on('reconnected', onReconnected);
-    this._internalEvents.on('close', onClose);
 
     if (this._isReconnecting) {
       // A reconnect is already in flight. The socket may be CLOSED but the
@@ -228,7 +245,12 @@ export class TTSWS extends TTSEmitter {
           push({ type: 'closing' });
           break;
         case WS.WebSocket.CLOSED:
-          push({ type: 'close' });
+          push({
+            type: 'close',
+            code: this._lastCloseCode,
+            reason: this._lastCloseReason,
+            unsent: this._sendQueue.drain(),
+          });
           done = true;
           cleanup();
           break;
@@ -313,19 +335,15 @@ export class TTSWS extends TTSEmitter {
       this._flushSendQueue();
     });
 
-    socket.on('close', (code: number) => {
+    socket.on('close', (code: number, reason: Buffer) => {
       // Ignore close events from superseded sockets — a stale socket's
       // late close must not kick off a second reconnect loop.
       if (socket !== this.socket) return;
-
-      if (!this._canReconnect(code)) {
-        if (!this._isReconnecting) {
-          this._emit('close');
-        }
-        return;
+      if (!this._intentionallyClosed && this._canReconnect(code)) {
+        this._reconnect(code);
+      } else if (!this._isReconnecting) {
+        this._emitPermanentClose(code, reason.toString());
       }
-
-      this._reconnect(code);
     });
 
     return socket;
@@ -359,8 +377,10 @@ export class TTSWS extends TTSEmitter {
             undefined,
           );
         }
-        this._emit('close');
-        this._internalEvents._emit('close');
+        this._emitPermanentClose(
+          this._intentionallyClosed ? this._closeCode : closeCode,
+          this._intentionallyClosed ? this._closeReason : 'reconnect aborted',
+        );
         return;
       }
 
@@ -383,15 +403,13 @@ export class TTSWS extends TTSEmitter {
       } catch (err) {
         this._isReconnecting = false;
         this._onError(null, 'onReconnecting callback threw', err);
-        this._emit('close');
-        this._internalEvents._emit('close');
+        this._emitPermanentClose(closeCode, 'onReconnecting callback threw');
         return;
       }
 
       if (overrides && 'abort' in overrides && overrides.abort) {
         this._isReconnecting = false;
-        this._emit('close');
-        this._internalEvents._emit('close');
+        this._emitPermanentClose(closeCode, 'reconnect aborted by handler');
         return;
       }
 
@@ -416,8 +434,10 @@ export class TTSWS extends TTSEmitter {
             undefined,
           );
         }
-        this._emit('close');
-        this._internalEvents._emit('close');
+        this._emitPermanentClose(
+          this._intentionallyClosed ? this._closeCode : closeCode,
+          this._intentionallyClosed ? this._closeReason : 'reconnect aborted',
+        );
         return;
       }
 
@@ -432,8 +452,10 @@ export class TTSWS extends TTSEmitter {
             undefined,
           );
         }
-        this._emit('close');
-        this._internalEvents._emit('close');
+        this._emitPermanentClose(
+          this._intentionallyClosed ? this._closeCode : closeCode,
+          this._intentionallyClosed ? this._closeReason : 'reconnect aborted',
+        );
         return;
       }
 
@@ -473,8 +495,7 @@ export class TTSWS extends TTSEmitter {
       `WebSocket reconnect failed after ${maxRetries} attempts (close code: ${closeCode})`,
       undefined,
     );
-    this._emit('close');
-    this._internalEvents._emit('close');
+    this._emitPermanentClose(closeCode, `reconnect failed after ${maxRetries} attempts`);
   }
 
   /**
@@ -506,23 +527,25 @@ export class TTSWS extends TTSEmitter {
   }
 
   private _flushSendQueue(): void {
-    const pending = this._sendQueue.splice(0);
-    for (let i = 0; i < pending.length; i++) {
-      try {
-        if (this.socket.readyState !== WS.WebSocket.OPEN) {
-          // Avoid dropping messages by sending them out over a closing socket
-          this._sendQueue.unshift(...pending.slice(i));
-          return;
-        } else {
-          this.socket.send(pending[i]!);
-        }
-      } catch (err) {
-        // Re-queue remaining for next open/reconnect
-        this._sendQueue.unshift(...pending.slice(i));
-        this._onError(null, 'could not send queued data', err);
-        return;
-      }
+    try {
+      this._sendQueue.flush((data) => this.socket.send(data));
+    } catch (err) {
+      this._onError(null, 'could not send queued data', err);
     }
+  }
+
+  /**
+   * Emits the public `close` event with unsent messages and the internal
+   * `close` event used by the async iterator.
+   */
+  private _emitPermanentClose(code: number, reason: string): void {
+    this._lastCloseCode = code;
+    this._lastCloseReason = reason;
+    const unsent = this._sendQueue.drain();
+    // Internal close fires first so the async iterator is guaranteed to
+    // terminate even if a public 'close' listener throws.
+    this._internalEvents._emit('close', code, reason, unsent);
+    this._emit('close', code, reason, unsent);
   }
 
   private _authHeaders(): Record<string, string> {
