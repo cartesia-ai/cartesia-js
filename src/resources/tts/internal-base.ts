@@ -4,7 +4,6 @@ import * as TTSAPI from './tts';
 import { Cartesia } from '../../client';
 import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
-import { stringifyQuery } from '../../internal/utils';
 
 import type { RawWebSocketData, ReconnectingEvent, UnsentMessage } from '../../internal/ws';
 
@@ -95,20 +94,7 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
 export function buildURL(client: Cartesia, parameters: Record<string, unknown>): URL {
   const { ...query } = parameters;
   const endpoint = '/tts/websocket';
-  const baseURL = client.baseURL;
-  const url = new URL(baseURL);
-  url.pathname +=
-    url.pathname.endsWith('/') ?
-      endpoint.startsWith('/') ?
-        endpoint.slice(1)
-      : endpoint
-    : endpoint.startsWith('/') ? endpoint
-    : `/${endpoint}`;
-  if (url.search) {
-    url.search += `&${stringifyQuery(query)}`;
-  } else {
-    url.search = stringifyQuery(query);
-  }
+  const url = new URL(client.buildURL(endpoint, query, undefined));
   url.protocol = url.protocol === 'http:' || url.protocol === 'ws:' ? 'ws:' : 'wss:';
   return url;
 }
