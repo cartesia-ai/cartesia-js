@@ -217,7 +217,7 @@ export class TTSWSContext {
 
 export interface TTSWSClientOptions extends WS.ClientOptions, TTSWSBaseOptions {}
 
-export class TTSWS extends TTSWSBase {
+export class TTSWS extends TTSWSBase<NodeWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
   private _contextQueues: Map<string, ContextQueueEntry> = new Map();
   private _ready: Promise<void>;
@@ -277,7 +277,7 @@ export class TTSWS extends TTSWSBase {
     this._ready.catch(() => {});
   }
 
-  protected _createSocket(url: URL, authHeaders: Record<string, string>): WebSocketLike {
+  protected _createSocket(url: URL, authHeaders: Record<string, string>): NodeWebSocket {
     if (_ws?.WebSocket) {
       const ws = new _ws.WebSocket(url, {
         ...this._wsOptions,
