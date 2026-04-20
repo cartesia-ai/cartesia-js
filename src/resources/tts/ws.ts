@@ -2,7 +2,6 @@
 
 import * as WS from 'ws';
 import { NodeWebSocket } from '../../internal/ws-adapter-node';
-import type { WebSocketLike } from '../../internal/ws-adapter';
 import { TTSWSBase, type TTSWSBaseOptions } from './ws-base';
 import { Cartesia } from '../../client';
 
@@ -10,7 +9,7 @@ export type { TTSWSReconnectOptions } from './ws-base';
 
 export interface TTSWSClientOptions extends WS.ClientOptions, TTSWSBaseOptions {}
 
-export class TTSWS extends TTSWSBase {
+export class TTSWS extends TTSWSBase<NodeWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
 
   constructor(
@@ -30,7 +29,7 @@ export class TTSWS extends TTSWSBase {
     this._connectInitial();
   }
 
-  protected _createSocket(url: URL, authHeaders: Record<string, string>): WebSocketLike {
+  protected _createSocket(url: URL, authHeaders: Record<string, string>): NodeWebSocket {
     const ws = new WS.WebSocket(url, {
       ...this._wsOptions,
       headers: {
