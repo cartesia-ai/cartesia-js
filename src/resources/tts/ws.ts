@@ -20,7 +20,16 @@ import { InternalEventEmitter } from '../../core/EventEmitter';
 import { sleep } from '../../internal/utils/sleep';
 import {
   SendQueue,
+  WS_ABNORMAL_CLOSURE_CODE,
+  WS_CLOSED,
+  WS_CLOSING,
+  WS_CONNECTING,
+  WS_OPEN,
+  WebSocketLike,
+  decodeBase64,
   flattenRawData,
+} from '../../lib/ws';
+import {
   isRecoverableClose,
   type RawWebSocketData,
   type ReconnectingEvent,
@@ -29,37 +38,6 @@ import {
 } from '../../internal/ws';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
-
-/** Decode a base64 string to bytes. Works in both Node and browsers. */
-function decodeBase64(data: string): Uint8Array {
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(data, 'base64');
-  }
-  const binary = atob(data);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
-}
-
-// WebSocket readyState constants (same values in both `ws` and native WebSocket).
-const WS_CONNECTING = 0;
-const WS_OPEN = 1;
-const WS_CLOSING = 2;
-const WS_CLOSED = 3;
-
-// WebSocket CloseEvent codes
-const WS_ABNORMAL_CLOSURE_CODE = 1006;
-
-/** Common WebSocket interface shared by both the `ws` package and the browser's native WebSocket. */
-interface WebSocketLike {
-  readyState: number;
-  send(data: string): void;
-  close(code?: number, reason?: string): void;
-  addEventListener(type: string, listener: (event: unknown) => void): void;
-  removeEventListener(type: string, listener: (event: unknown) => void): void;
-}
 
 /**
  * Request parameters for context.generate(), same as GenerationRequest but without context_id.
@@ -433,13 +411,13 @@ export class TTSWS extends TTSEmitter {
   }
 
   sendRaw(data: RawWebSocketData) {
-    if (this._isReconnecting || this.socket.readyState === WS.WebSocket.CONNECTING) {
+    if (this._isReconnecting || this.socket.readyState === WS_CONNECTING) {
       if (!this._sendQueue.enqueueRaw(data)) {
         this._onError(null, 'send queue is full, message discarded', undefined);
       }
       return;
     }
-    if (this.socket.readyState !== WS.WebSocket.OPEN) {
+    if (this.socket.readyState !== WS_OPEN) {
       this._onError(null, 'cannot send on a closed WebSocket', undefined);
       return;
     }
@@ -699,43 +677,44 @@ export class TTSWS extends TTSEmitter {
     }
 
     socket.addEventListener('message', (msgEvent) => {
-      // With addEventListener, both ws and native WebSocket wrap data in a MessageEvent.
-      const event: TTSAPI.WebsocketResponse | null = (() => {
-        try {
-          const raw = (msgEvent as any).data;
-          return JSON.parse(typeof raw === 'string' ? raw : raw.toString());
-        } catch (err) {
-          this._onError(null, 'could not parse websocket event', err);
-          return null;
-        }
-      })();
+      // Binary frames are emitted as 'raw' for consumers that want them.
+      if (typeof msgEvent.data !== 'string') {
+        this._emit('raw', msgEvent.data);
+        return;
+      }
 
-      if (event) {
-        // Decode audio for chunk events (mirrors Python SDK's .audio property).
-        if (event.type === 'chunk') {
-          const chunk = event;
-          chunk.audio = chunk.data ? decodeBase64(chunk.data) : null;
-        }
+      let event: TTSAPI.WebsocketResponse;
+      try {
+        event = JSON.parse(msgEvent.data);
+      } catch {
+        this._emit('raw', msgEvent.data);
+        return;
+      }
 
-        // Always emit on EventEmitter for backwards compatibility and global listeners.
-        this._emit('event', event);
+      // Decode audio for chunk events (mirrors Python SDK's .audio property).
+      if (event.type === 'chunk') {
+        const chunk = event;
+        chunk.audio = chunk.data ? decodeBase64(chunk.data) : null;
+      }
 
-        if (event.type === 'error') {
-          this._onError(event);
-        } else {
-          // @ts-ignore TS isn't smart enough to get the relationship right here
-          this._emit(event.type, event);
-        }
+      // Always emit on EventEmitter for backwards compatibility and global listeners.
+      this._emit('event', event);
 
-        // Route to per-context queue if registered.
-        const ctxId = 'context_id' in event ? event.context_id : null;
-        if (ctxId && this._contextQueues.has(ctxId)) {
-          const entry = this._contextQueues.get(ctxId)!;
-          entry.queue.push(event);
-          if (entry.resolve) {
-            entry.resolve();
-            entry.resolve = null;
-          }
+      if (event.type === 'error') {
+        this._onError(event);
+      } else {
+        // @ts-ignore TS isn't smart enough to get the relationship right here
+        this._emit(event.type, event);
+      }
+
+      // Route to per-context queue if registered.
+      const ctxId = 'context_id' in event ? event.context_id : null;
+      if (ctxId && this._contextQueues.has(ctxId)) {
+        const entry = this._contextQueues.get(ctxId)!;
+        entry.queue.push(event);
+        if (entry.resolve) {
+          entry.resolve();
+          entry.resolve = null;
         }
       }
     });
