@@ -1,7 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import type * as WS from 'ws';
-
 let _ws: typeof import('ws') | undefined;
 try {
   _ws = require('ws');
@@ -19,7 +18,6 @@ import {
 import { InternalEventEmitter } from '../../core/EventEmitter';
 import { sleep } from '../../internal/utils/sleep';
 import {
-  SendQueue,
   WS_ABNORMAL_CLOSURE_CODE,
   WS_CLOSED,
   WS_CLOSING,
@@ -27,10 +25,11 @@ import {
   WS_OPEN,
   WebSocketLike,
   decodeBase64,
-  flattenRawData,
 } from '../../lib/ws';
 import {
+  flattenRawData,
   isRecoverableClose,
+  SendQueue,
   type RawWebSocketData,
   type ReconnectingEvent,
   type ReconnectingOverrides,

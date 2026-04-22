@@ -1,108 +1,3 @@
-import type { RawWebSocketData, UnsentMessage } from '../internal/ws';
-
-const hasBuffer = typeof Buffer !== 'undefined';
-
-function utf8ByteLength(s: string): number {
-  return hasBuffer ? Buffer.byteLength(s, 'utf8') : new TextEncoder().encode(s).byteLength;
-}
-
-function concatBufferList(list: Buffer[]): Buffer | Uint8Array {
-  if (hasBuffer) return Buffer.concat(list);
-  let total = 0;
-  for (const b of list) total += b.byteLength;
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const b of list) {
-    out.set(b, offset);
-    offset += b.byteLength;
-  }
-  return out;
-}
-
-function copyArrayBufferView(v: ArrayBufferView): ArrayBufferLike {
-  return v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength);
-}
-
-export function flattenRawData(data: RawWebSocketData): Exclude<RawWebSocketData, Buffer[]> {
-  // `Buffer[]` only arrives from the `ws` package on Node; browsers never deliver it.
-  if (Array.isArray(data)) return concatBufferList(data);
-  return data;
-}
-
-function snapshotRawData(data: RawWebSocketData): Exclude<RawWebSocketData, Buffer[]> {
-  if (typeof data === 'string') return data;
-  if (Array.isArray(data)) return concatBufferList(data);
-  if (ArrayBuffer.isView(data)) return copyArrayBufferView(data);
-  return data.slice(0);
-}
-
-function rawByteLength(data: Exclude<RawWebSocketData, Buffer[]>): number {
-  if (typeof data === 'string') return utf8ByteLength(data);
-  if ('byteLength' in data) return data.byteLength;
-  return 0;
-}
-
-type QueueEntry =
-  | { kind: 'json'; data: string; byteLength: number }
-  | { kind: 'raw'; data: Exclude<RawWebSocketData, Buffer[]>; byteLength: number };
-
-export class SendQueue<T = unknown> {
-  private _queue: QueueEntry[] = [];
-  private _bytes: number = 0;
-  private _maxBytes: number;
-
-  constructor(maxBytes: number = 1_048_576) {
-    this._maxBytes = maxBytes;
-  }
-
-  enqueue(event: T): boolean {
-    const data = JSON.stringify(event);
-    const byteLength = utf8ByteLength(data);
-    if (this._bytes + byteLength > this._maxBytes) {
-      return false;
-    }
-    this._queue.push({ kind: 'json', data, byteLength });
-    this._bytes += byteLength;
-    return true;
-  }
-
-  enqueueRaw(data: RawWebSocketData): boolean {
-    const snapshot = snapshotRawData(data);
-    const byteLength = rawByteLength(snapshot);
-    if (this._bytes + byteLength > this._maxBytes) {
-      return false;
-    }
-    this._queue.push({ kind: 'raw', data: snapshot, byteLength });
-    this._bytes += byteLength;
-    return true;
-  }
-
-  flush(send: (data: string | RawWebSocketData) => void): void {
-    const pending = this._queue.splice(0);
-    this._bytes = 0;
-    for (let i = 0; i < pending.length; i++) {
-      try {
-        send(pending[i]!.data);
-      } catch (err) {
-        const remaining = pending.slice(i);
-        this._queue = remaining.concat(this._queue);
-        this._bytes = this._queue.reduce((sum, item) => sum + item.byteLength, 0);
-        throw err;
-      }
-    }
-  }
-
-  drain(): UnsentMessage<T>[] {
-    const unsent = this._queue.map((entry): UnsentMessage<T> => {
-      if (entry.kind === 'raw') return { type: 'raw', data: entry.data };
-      return { type: 'message', message: JSON.parse(entry.data) };
-    });
-    this._queue = [];
-    this._bytes = 0;
-    return unsent;
-  }
-}
-
 /** Decode a base64 string to bytes. Works in both Node and browsers. */
 export function decodeBase64(data: string): Uint8Array {
   if (typeof Buffer !== 'undefined') {
@@ -161,7 +56,7 @@ interface WebSocketLikeEventMap {
 /** Common WebSocket interface shared by both the `ws` package and the browser's native WebSocket. */
 export interface WebSocketLike {
   readyState: number;
-  send(data: SharedArrayBuffer | ArrayBufferView | BufferSource | Blob | string): void;
+  send(data: SharedArrayBuffer | ArrayBufferView | ArrayBuffer | Blob | string): void;
   close(code?: number, reason?: string): void;
   addEventListener<K extends keyof WebSocketLikeEventMap>(
     type: K,
