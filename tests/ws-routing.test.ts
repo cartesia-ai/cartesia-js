@@ -27,7 +27,21 @@ const CONTEXT_OPTIONS = {
 /** Create a TTSWS whose underlying socket will fail to connect (that's fine —
  *  we inject messages by emitting directly on the socket). */
 function createTestWS(): TTSWS {
-  const fakeClient = { baseURL: 'http://127.0.0.1:1', token: 'test' } as any;
+  const fakeClient = {
+    baseURL: 'http://127.0.0.1:1',
+    token: 'test',
+    buildURL(path: string, query: Record<string, unknown> | null | undefined): string {
+      const url = new URL(
+        this.baseURL + (this.baseURL.endsWith('/') && path.startsWith('/') ? path.slice(1) : path),
+      );
+      if (query && typeof query === 'object' && !Array.isArray(query)) {
+        for (const [key, value] of Object.entries(query)) {
+          if (value !== undefined) url.searchParams.set(key, String(value));
+        }
+      }
+      return url.toString();
+    },
+  } as any;
   const ws = new TTSWS(fakeClient);
   // Suppress connection‑error noise.
   ws.on('error', () => {});
