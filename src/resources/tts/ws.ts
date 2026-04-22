@@ -765,12 +765,7 @@ export class TTSWS extends TTSEmitter {
           event.code
         : WS_ABNORMAL_CLOSURE_CODE;
       const reason =
-        (
-          typeof event === 'object' &&
-          event !== null &&
-          'reason' in event &&
-          typeof event.reason === 'string'
-        ) ?
+        typeof event === 'object' && event !== null && 'reason' in event && typeof event.reason === 'string' ?
           event.reason
         : '';
       if (!this._intentionallyClosed && this._canReconnect(code)) {
