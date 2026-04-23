@@ -16,15 +16,16 @@ import {
 import * as TTSAPI from './tts';
 import { Cartesia } from '../../client';
 import { CartesiaError } from '../../core/error';
+import { createWebSocketOpenPromise } from '../../lib/ws';
 
 export interface TTSWSReconnectOptions {
   /**
    * Called before each reconnect attempt. Return an object with
    * `parameters` to override query parameters for the next connection.
    */
-  onReconnecting(
-    event: ReconnectingEvent<Record<string, unknown>>,
-  ): ReconnectingOverrides<Record<string, unknown>> | void;
+  onReconnecting?: (
+    event: ReconnectingEvent<Record<never, unknown>>,
+  ) => ReconnectingOverrides<Record<never, unknown>> | void;
 
   /**
    * Maximum number of reconnection attempts. Default: 5.
@@ -61,44 +62,38 @@ export interface TTSWSBaseOptions {
 }
 
 export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitter {
-  url!: URL;
-  socket!: TSocket;
+  url: URL | null = null;
+  socket: TSocket | null = null;
 
   protected _client: Cartesia;
-  protected _parameters: Record<string, unknown> | null | undefined;
+  protected _parameters: Record<never, unknown> | null | undefined;
   private _reconnectOptions: TTSWSReconnectOptions | null;
   private _sendQueue: SendQueue<TTSAPI.WebsocketClientEvent>;
-  private _isReconnecting: boolean = false;
+  protected _isReconnecting: boolean = false;
   private _intentionallyClosed = false;
   private _closeCode: number = 1000;
   private _closeReason: string = 'OK';
-  private _lastCloseCode: number = 1006;
+  protected _lastCloseCode: number = 1006;
   private _lastCloseReason: string = '';
 
   // Necessary to keep the public event interface clean while we manage reconnecting
   private _internalEvents = new InternalEventEmitter<{
     socketSwap: (oldSocket: TSocket, newSocket: TSocket) => void;
-    reconnecting: (event: ReconnectingEvent<Record<string, unknown>>) => void;
+    reconnecting: (event: ReconnectingEvent<Record<never, unknown>>) => void;
     reconnected: () => void;
     close: (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => void;
   }>();
 
   constructor(
     client: Cartesia,
-    parameters?: Record<string, unknown> | undefined,
+    parameters?: Record<never, unknown> | undefined,
     options?: TTSWSBaseOptions | undefined,
   ) {
     super();
     this._client = client;
-    this._parameters = undefined;
+    this._parameters = parameters;
     this._reconnectOptions = options?.reconnect ?? null;
     this._sendQueue = new SendQueue<TTSAPI.WebsocketClientEvent>(options?.maxQueueSize);
-  }
-
-  /** Establishes the initial WebSocket connection. */
-  protected _connectInitial(): void {
-    this.url = buildURL(this._client, this._parameters ?? {});
-    this.socket = this._connect();
   }
 
   /** Creates a platform-specific WebSocket for the given URL and auth headers. */
@@ -226,7 +221,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       push({ type: 'open' });
     };
 
-    const onReconnecting = (evt: ReconnectingEvent<Record<string, unknown>>) => {
+    const onReconnecting = (evt: ReconnectingEvent<Record<never, unknown>>) => {
       push({ type: 'reconnecting', reconnect: evt });
     };
 
@@ -338,7 +333,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
     };
   }
 
-  private _connect(): TSocket {
+  protected _connect(): TSocket {
     this.url = buildURL(this._client, this._parameters ?? {});
 
     const socket = this._createSocket(this.url, this._authHeaders());
@@ -385,9 +380,9 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       // Ignore close events from superseded sockets — a stale socket's
       // late close must not kick off a second reconnect loop.
       if (socket !== this.socket) return;
-      if (!this._intentionallyClosed && this._canReconnect(code)) {
+      if (this._reconnectOptions !== null && this._canReconnect(code)) {
         this._reconnect(code);
-      } else if (!this._isReconnecting) {
+      } else if (!this._isReconnecting && !this._canReconnect(code)) {
         this._emitPermanentClose(code, reason);
       }
     });
@@ -395,27 +390,23 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
     return socket;
   }
 
-  // Reconnect is opt-in via onReconnecting so callers can pass
-  // state (e.g. session IDs) into the new connection.
   private _canReconnect(code: number): boolean {
     if (this._intentionallyClosed) return false;
-    if (!this._reconnectOptions) return false;
-    if (this._reconnectOptions.maxRetries === 0) return false;
-    if (!this._reconnectOptions.onReconnecting) return false;
+    if (this._reconnectOptions?.maxRetries === 0) return false;
     return isRecoverableClose(code);
   }
 
-  private async _reconnect(closeCode: number): Promise<void> {
+  protected async _reconnect(closeCode: number): Promise<void> {
     if (!this.socket) {
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
 
-    if (this._isReconnecting || !this._reconnectOptions) return;
+    if (this._isReconnecting) return;
     this._isReconnecting = true;
 
-    const maxRetries = this._reconnectOptions.maxRetries ?? 5;
-    const initialDelay = this._reconnectOptions.initialDelay ?? 500;
-    const maxDelay = this._reconnectOptions.maxDelay ?? 8000;
+    const maxRetries = this._reconnectOptions?.maxRetries ?? 5;
+    const initialDelay = this._reconnectOptions?.initialDelay ?? 500;
+    const maxDelay = this._reconnectOptions?.maxDelay ?? 8000;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       if (!this._canReconnect(closeCode)) {
@@ -439,7 +430,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       const jitter = 0.75 + Math.random() * 0.25;
       const actualDelay = Math.round(baseDelay * jitter);
 
-      let reconnectingEvent: ReconnectingEvent<Record<string, unknown>> = {
+      let reconnectingEvent: ReconnectingEvent<Record<never, unknown>> = {
         attempt,
         maxAttempts: maxRetries,
         delay: actualDelay,
@@ -447,9 +438,9 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
         parameters: this._parameters ? { ...this._parameters } : undefined,
       };
 
-      let overrides: ReconnectingOverrides<Record<string, unknown>> | void;
+      let overrides: ReconnectingOverrides<Record<never, unknown>> | void;
       try {
-        overrides = this._reconnectOptions.onReconnecting(reconnectingEvent);
+        overrides = this._reconnectOptions?.onReconnecting?.(reconnectingEvent);
       } catch (err) {
         this._isReconnecting = false;
         this._onError(null, 'onReconnecting callback threw', err);
@@ -512,17 +503,18 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       let closeCodePromise: Promise<number> | undefined;
       try {
         const oldSocket = this.socket;
-        this.socket = this._connect();
+        const newSocket = this._connect();
+        this.socket = newSocket;
         // Registered synchronously after _connect() and before any
         // await so the code is captured even when ws emits 'close'
         // in the same tick as 'error' (e.g. abortHandshake).
         closeCodePromise = new Promise<number>((resolve) => {
-          this.socket.once('close', resolve);
+          newSocket.once('close', resolve);
         });
 
-        await this._awaitOpen(this.socket);
+        await createWebSocketOpenPromise(newSocket);
 
-        this._internalEvents._emit('socketSwap', oldSocket, this.socket);
+        this._internalEvents._emit('socketSwap', oldSocket, newSocket);
         this._isReconnecting = false;
         this._flushSendQueue();
         this._emit('reconnected');
@@ -548,41 +540,14 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
     this._emitPermanentClose(closeCode, `reconnect failed after ${maxRetries} attempts`);
   }
 
-  /**
-   * Resolves once the socket is open, rejects if it errors or closes first
-   */
-  private _awaitOpen(socket: TSocket): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const cleanup = () => {
-        socket.off('open', onOpen);
-        socket.off('error', onError);
-        socket.off('close', onFail);
-      };
-      const onOpen = () => {
-        cleanup();
-        resolve();
-      };
-      const onError = (err: Error) => {
-        cleanup();
-        reject(err);
-      };
-      const onFail = () => {
-        cleanup();
-        reject(new Error('socket closed before open'));
-      };
-      socket.once('open', onOpen);
-      socket.once('error', onError);
-      socket.once('close', onFail);
-    });
-  }
-
   private _flushSendQueue(): void {
-    if (!this.socket) {
+    const socket = this.socket;
+    if (!socket) {
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
 
     try {
-      this._sendQueue.flush((data) => this.socket.send(flattenRawData(data)));
+      this._sendQueue.flush((data) => socket.send(flattenRawData(data)));
     } catch (err) {
       this._onError(null, 'could not send queued data', err);
     }

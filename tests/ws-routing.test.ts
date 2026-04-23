@@ -12,6 +12,9 @@
 import { TTSWS } from '@cartesia/cartesia-js/resources/tts/ws';
 import { WebSocketTimeoutError } from '@cartesia/cartesia-js/resources/tts/internal-base';
 import type { WebsocketResponse } from '@cartesia/cartesia-js/resources/tts/tts';
+import { ReadyState } from '@cartesia/cartesia-js/internal/ws-adapter';
+import EventEmitter from 'node:events';
+import { NodeWebSocket } from '@cartesia/cartesia-js/internal/ws-adapter-node';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -23,8 +26,24 @@ const CONTEXT_OPTIONS = {
   output_format: { container: 'raw' as const, encoding: 'pcm_f32le' as const, sample_rate: 44100 as const },
 };
 
-/** Create a TTSWS whose underlying socket will fail to connect (that's fine —
- *  we inject messages by emitting directly on the socket). */
+/** In-memory stand-in for `ws.WebSocket`. Stays in OPEN so connect()/send()
+ *  are no-ops, but is an EventEmitter so injectEvent() can push 'message' frames. */
+class FakePlatformSocket extends EventEmitter {
+  readyState: number = ReadyState.OPEN;
+  send = jest.fn();
+  close = jest.fn((code: number = 1000) => {
+    this.readyState = ReadyState.CLOSED;
+    // Mirror `ws` library: close() eventually emits 'close' on the emitter.
+    queueMicrotask(() => this.emit('close', code, Buffer.from('')));
+  });
+}
+
+class TestTTSWS extends TTSWS {
+  protected override _createSocket(): NodeWebSocket {
+    return new NodeWebSocket(new FakePlatformSocket() as any);
+  }
+}
+
 function createTestWS(): TTSWS {
   const fakeClient = {
     baseURL: 'http://127.0.0.1:1',
@@ -41,16 +60,15 @@ function createTestWS(): TTSWS {
       return url.toString();
     },
   } as any;
-  const ws = new TTSWS(fakeClient);
-  // Suppress connection‑error noise.
+
+  const ws = new TestTTSWS(fakeClient);
+  void ws.connect(); // resolves immediately (fake socket is OPEN)
   ws.on('error', () => {});
-  ws.connect().catch(() => {});
   return ws;
 }
 
-/** Simulate a server‑sent message by emitting directly on the underlying socket. */
 function injectEvent(ws: TTSWS, event: Record<string, unknown>) {
-  if ('emit' in ws.socket.platformSocket) {
+  if (ws.socket !== null && 'emit' in ws.socket.platformSocket) {
     ws.socket.platformSocket.emit('message', Buffer.from(JSON.stringify(event)), false);
   }
 }
