@@ -48,9 +48,11 @@ function createTestWS(): TTSWS {
   return ws;
 }
 
-/** Simulate a server‑sent message. */
+/** Simulate a server‑sent message by emitting directly on the underlying socket. */
 function injectEvent(ws: TTSWS, event: Record<string, unknown>) {
-  (ws as any)._emit('message', Buffer.from(JSON.stringify(event)), false);
+  if ('emit' in ws.socket.platformSocket) {
+    ws.socket.platformSocket.emit('message', Buffer.from(JSON.stringify(event)), false);
+  }
 }
 
 function makeChunk(contextId: string, seq: number): Record<string, unknown> {
