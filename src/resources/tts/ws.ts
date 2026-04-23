@@ -12,7 +12,6 @@ import { WebSocketTimeoutError } from './internal-base';
 import { TTSWSBase, type TTSWSBaseOptions } from './ws-base';
 import { NodeWebSocket } from '../../internal/ws-adapter-node';
 import { BrowserWebSocket } from '../../internal/ws-adapter-browser';
-import type { WebSocketLike } from '../../internal/ws-adapter';
 import { decodeBase64 } from '../../lib/ws';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
@@ -217,7 +216,7 @@ export class TTSWSContext {
 
 export interface TTSWSClientOptions extends WS.ClientOptions, TTSWSBaseOptions {}
 
-export class TTSWS extends TTSWSBase<NodeWebSocket> {
+export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
   private _contextQueues: Map<string, ContextQueueEntry> = new Map();
   private _ready: Promise<void>;
@@ -277,7 +276,7 @@ export class TTSWS extends TTSWSBase<NodeWebSocket> {
     this._ready.catch(() => {});
   }
 
-  protected _createSocket(url: URL, authHeaders: Record<string, string>): NodeWebSocket {
+  protected _createSocket(url: URL, authHeaders: Record<string, string>) {
     if (_ws?.WebSocket) {
       const ws = new _ws.WebSocket(url, {
         ...this._wsOptions,
