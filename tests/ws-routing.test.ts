@@ -286,7 +286,7 @@ describe('WebSocket multi-context routing', () => {
     ws.close();
   });
 
-  test('generate() unregisters context queue to avoid memory leak', async () => {
+  test('generate() diverts messages away from context queue to avoid memory leak', async () => {
     const ws = createTestWS();
 
     const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'gen-leak-test' });
@@ -308,7 +308,7 @@ describe('WebSocket multi-context routing', () => {
     const step = Promise.race([gen.next(), new Promise<void>((r) => setTimeout(r, 50))]);
     await step;
 
-    expect(ws._getContextQueue('gen-leak-test')).toBeUndefined();
+    expect(ws._getContextQueue('gen-leak-test')?.queue.length).toBe(0);
 
     ws.close();
   });

@@ -40,6 +40,7 @@ export interface ContextOptions {
 interface ContextQueueEntry {
   queue: TTSAPI.WebsocketResponse[];
   resolve: (() => void) | null;
+  isGenerateFunctionActive: boolean;
 }
 
 /**
@@ -69,6 +70,8 @@ export class TTSWSContext {
    */
   async push(options: { transcript: string; flush?: boolean }) {
     await this._ws.connect();
+    this._ws._registerContext(this.contextId);
+
     this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
@@ -89,6 +92,8 @@ export class TTSWSContext {
    */
   async no_more_inputs() {
     await this._ws.connect();
+    this._ws._registerContext(this.contextId);
+
     this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
@@ -106,6 +111,8 @@ export class TTSWSContext {
    */
   async send(request: ContextGenerateRequest) {
     await this._ws.connect();
+    this._ws._registerContext(this.contextId);
+
     this._ws.send({
       ...request,
       context_id: this.contextId,
@@ -119,6 +126,8 @@ export class TTSWSContext {
    */
   async flush() {
     await this._ws.connect();
+    this._ws._registerContext(this.contextId);
+
     this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
@@ -143,8 +152,8 @@ export class TTSWSContext {
     try {
       while (true) {
         const entry = this._ws._getContextQueue(this.contextId);
-        if (!entry) {
-          // Queue was removed (context unregistered by cancel), stop.
+        if (entry === undefined) {
+          // Queue was removed (context unregistered by reconnect, cancel, or generate), stop.
           return;
         }
 
@@ -193,9 +202,7 @@ export class TTSWSContext {
    * Send a generation request and iterate over the responses.
    * The context_id is automatically set.
    *
-   * Note: this uses TTSWS.generate()'s own EventEmitter-based collection,
-   * so the per-context queue is unregistered to avoid accumulating events
-   * in both places.
+   * This function captures events for the context until it returns (do not use in parallel with TTSWSContext.receive).
    */
   async *generate(request: ContextGenerateRequest): AsyncGenerator<TTSAPI.WebsocketResponse> {
     yield* this._ws.generate({
@@ -205,7 +212,7 @@ export class TTSWSContext {
   }
 
   /**
-   * Send a Cancel request to ask the model to stop generating speech.
+   * Cancel this context to stop generating speech.
    */
   async cancel() {
     await this._ws.cancelContext(this.contextId);
@@ -217,7 +224,6 @@ export interface TTSWSClientOptions extends WS.ClientOptions, TTSWSBaseOptions {
 export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
   private _contextQueues: Map<string, ContextQueueEntry> = new Map();
-  private _isClosed: boolean = false;
 
   constructor(client: Cartesia, options?: TTSWSClientOptions | null | undefined) {
     const { reconnect, maxQueueSize, ...wsOptions } = options ?? {};
@@ -241,7 +247,8 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
       }
       const ctxId = 'context_id' in event ? event.context_id : null;
       const entry = ctxId ? this._contextQueues.get(ctxId) : undefined;
-      if (entry !== undefined) {
+      // ignore events while generate() is consuming them
+      if (entry !== undefined && !entry.isGenerateFunctionActive) {
         entry.queue.push(event);
         if (entry.resolve) {
           entry.resolve();
@@ -250,13 +257,20 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
       }
     });
 
-    this.on('close', () => {
-      this._isClosed = true;
-      // unregister all contexts
-      for (const contextId of Array.from(this._contextQueues.keys())) {
-        this._unregisterContext(contextId);
+    const unregisterAllContexts = () => {
+      for (const entry of this._contextQueues.values()) {
+        if (entry.resolve) {
+          entry.resolve();
+          entry.resolve = null;
+        }
       }
-    });
+      this._contextQueues.clear();
+    };
+
+    // contexts are lost on socket close (even if we reconnect later)
+    this.on('close', unregisterAllContexts);
+    // contexts are lost on reconnects
+    this.on('reconnecting', unregisterAllContexts);
   }
 
   protected _createSocket(url: URL, authHeaders: Record<string, string>) {
@@ -286,13 +300,14 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
 
   /**
    * Send a generation request and iterate over the responses.
+   *
+   * This function captures events for the context until it returns (do not use in parallel with TTSWSContext.receive).
    */
   async *generate(request: TTSAPI.GenerationRequest): AsyncGenerator<TTSAPI.WebsocketResponse> {
+    await this.connect();
+
     const contextId = request.context_id ?? uuid4();
     request = { ...request, context_id: contextId };
-    // ws.generate uses its own listener to collect events — drop the
-    // per-context queue so events aren't double-buffered.
-    this._unregisterContext(contextId);
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
     let error: CartesiaError | null = null;
@@ -312,10 +327,26 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
       resolve?.();
     };
 
-    this.on('event', onEvent);
+    const onDisconnect = () => {
+      // server state is lost on reconnect, so reused context_ids point at a new server-side context
+      this.off('event', onEvent);
+      done = true;
+      resolve?.();
+    };
 
+    const contextEntry = this._contextQueues.get(contextId);
+    if (contextEntry !== undefined) {
+      if (contextEntry.isGenerateFunctionActive) {
+        throw new CartesiaError(
+          `generate() is still running for this context (${contextId}). Use TTSWSContext.send and TTSWSContext.receive to queue multiple GenerationRequests.`,
+        );
+      }
+      contextEntry.isGenerateFunctionActive = true;
+    }
     try {
-      await this.connect();
+      this.once('close', onDisconnect);
+      this.once('reconnecting', onDisconnect);
+      this.on('event', onEvent);
       this.send(request);
 
       while (!done || queue.length > 0) {
@@ -336,19 +367,26 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
       }
     } finally {
       this.off('event', onEvent);
+      this.off('reconnecting', onDisconnect);
+      this.off('close', onDisconnect);
+
+      if (contextEntry !== undefined) {
+        contextEntry.isGenerateFunctionActive = false;
+        contextEntry.resolve?.();
+        contextEntry.resolve = null;
+      }
     }
   }
 
   /**
-   * Send a Cancel request to ask the model to stop generating speech for a context.
+   * Cancel a context to stop generating speech for it.
    */
   async cancelContext(contextId: string) {
-    // Unregister first so receive() unblocks immediately, even if
-    // sending the cancel request to the server fails.
     this._unregisterContext(contextId);
-
-    await this.connect();
-    this.send({ cancel: true, context_id: contextId });
+    // no need to cancel if the socket closed since the context is already gone
+    if (this.socket?.readyState === ReadyState.OPEN || this.socket?.readyState === ReadyState.CONNECTING) {
+      this.send({ cancel: true, context_id: contextId });
+    }
   }
 
   /**
@@ -365,7 +403,7 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
    * Wait for the WebSocket connection to be ready.
    */
   async connect(): Promise<this> {
-    if (this._isClosed) {
+    if (this._intentionallyClosed) {
       throw new CartesiaError('TTS WebSocket cannot connect since it was closed.');
     }
 
@@ -414,10 +452,9 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
 
   /** Register a per-context queue. Called by context(). */
   _registerContext(contextId: string): void {
-    if (this._contextQueues.has(contextId)) {
-      throw new CartesiaError(`Context ${contextId} is already registered`);
+    if (!this._contextQueues.has(contextId)) {
+      this._contextQueues.set(contextId, { queue: [], resolve: null, isGenerateFunctionActive: false });
     }
-    this._contextQueues.set(contextId, { queue: [], resolve: null });
   }
 
   /** Unregister a per-context queue. Called on context completion or cancellation. */

@@ -7,7 +7,7 @@ import { APIPromise } from '../../core/api-promise';
 import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
-import { TTSWS, TTSWSClientOptions } from './ws';
+import { TTSWS, type TTSWSClientOptions } from './ws';
 import { multipartFormRequestOptions } from '../../internal/uploads';
 
 export class TTS extends APIResource {

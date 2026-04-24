@@ -24,8 +24,8 @@ export interface TTSWSReconnectOptions {
    * `parameters` to override query parameters for the next connection.
    */
   onReconnecting?: (
-    event: ReconnectingEvent<Record<never, unknown>>,
-  ) => ReconnectingOverrides<Record<never, unknown>> | void;
+    event: ReconnectingEvent<Record<string, unknown>>,
+  ) => ReconnectingOverrides<Record<string, unknown>> | void;
 
   /**
    * Maximum number of reconnection attempts. Default: 5.
@@ -66,11 +66,11 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
   socket: TSocket | null = null;
 
   protected _client: Cartesia;
-  protected _parameters: Record<never, unknown> | null | undefined;
+  protected _parameters: Record<string, unknown> | null | undefined;
   private _reconnectOptions: TTSWSReconnectOptions | null;
   private _sendQueue: SendQueue<TTSAPI.WebsocketClientEvent>;
-  protected _isReconnecting: boolean = false;
-  private _intentionallyClosed = false;
+  private _isReconnecting: boolean = false;
+  protected _intentionallyClosed = false;
   private _closeCode: number = 1000;
   private _closeReason: string = 'OK';
   protected _lastCloseCode: number = 1006;
@@ -79,14 +79,14 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
   // Necessary to keep the public event interface clean while we manage reconnecting
   private _internalEvents = new InternalEventEmitter<{
     socketSwap: (oldSocket: TSocket, newSocket: TSocket) => void;
-    reconnecting: (event: ReconnectingEvent<Record<never, unknown>>) => void;
+    reconnecting: (event: ReconnectingEvent<Record<string, unknown>>) => void;
     reconnected: () => void;
     close: (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => void;
   }>();
 
   constructor(
     client: Cartesia,
-    parameters?: Record<never, unknown> | undefined,
+    parameters?: Record<string, unknown> | undefined,
     options?: TTSWSBaseOptions | undefined,
   ) {
     super();
@@ -104,7 +104,10 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
 
-    if (this._isReconnecting || this.socket.readyState === ReadyState.CONNECTING) {
+    if (
+      this._isReconnecting ||
+      (this.socket.readyState !== ReadyState.OPEN && this._canReconnect(this._lastCloseCode))
+    ) {
       if (!this._sendQueue.enqueue(event)) {
         this._onError(null, 'send queue is full, message discarded', undefined);
       }
@@ -221,7 +224,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       push({ type: 'open' });
     };
 
-    const onReconnecting = (evt: ReconnectingEvent<Record<never, unknown>>) => {
+    const onReconnecting = (evt: ReconnectingEvent<Record<string, unknown>>) => {
       push({ type: 'reconnecting', reconnect: evt });
     };
 
@@ -382,7 +385,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       if (socket !== this.socket) return;
       if (this._reconnectOptions !== null && this._canReconnect(code)) {
         this._reconnect(code);
-      } else if (!this._isReconnecting && !this._canReconnect(code)) {
+      } else if (!this._isReconnecting) {
         this._emitPermanentClose(code, reason);
       }
     });
@@ -430,7 +433,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       const jitter = 0.75 + Math.random() * 0.25;
       const actualDelay = Math.round(baseDelay * jitter);
 
-      let reconnectingEvent: ReconnectingEvent<Record<never, unknown>> = {
+      let reconnectingEvent: ReconnectingEvent<Record<string, unknown>> = {
         attempt,
         maxAttempts: maxRetries,
         delay: actualDelay,
@@ -438,7 +441,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
         parameters: this._parameters ? { ...this._parameters } : undefined,
       };
 
-      let overrides: ReconnectingOverrides<Record<never, unknown>> | void;
+      let overrides: ReconnectingOverrides<Record<string, unknown>> | void;
       try {
         overrides = this._reconnectOptions?.onReconnecting?.(reconnectingEvent);
       } catch (err) {
