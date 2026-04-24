@@ -23,12 +23,14 @@ export default function WebSocketExample() {
       const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE });
       let nextStartTime = audioCtx.currentTime;
 
-      const resp = ws.generate({
+      const wsCtx = ws.context({
         model_id: 'sonic-3',
-        transcript:
-          'Hello from a WebSocket! Each audio chunk is played the moment it arrives, giving you the lowest possible latency.',
         voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
         output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: SAMPLE_RATE },
+      });
+
+      const resp = wsCtx.generate({
+        transcript: 'Hello from a WebSocket! Each audio chunk is played the moment it arrives.',
       });
 
       for await (const event of resp) {

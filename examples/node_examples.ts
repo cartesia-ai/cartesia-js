@@ -50,15 +50,15 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
   const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
+  const ctx = ws.context({
+    model_id: 'sonic-3',
+    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+  });
   const filename = `tts_websocket_basic_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
 
-  for await (const event of ws.generate({
-    model_id: 'sonic-3',
-    transcript: 'Hello, world!',
-    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
-  })) {
+  for await (const event of ctx.generate({ transcript: 'Hello, world!' })) {
     if (event.type === 'chunk') {
       if (event.audio) file.write(event.audio);
     }
@@ -300,14 +300,16 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
   const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
+  const ctx = ws.context({
+    model_id: 'sonic-3',
+    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+  });
   const filename = `tts_websocket_response_handling_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
 
-  for await (const event of ws.generate({
-    model_id: 'sonic-3',
+  for await (const event of ctx.generate({
     transcript: 'Hello, world!',
-    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
     add_timestamps: true,
   })) {
     if (event.type === 'chunk') {
