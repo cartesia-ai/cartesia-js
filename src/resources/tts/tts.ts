@@ -14,23 +14,14 @@ export class TTS extends APIResource {
    * Text to Speech (Bytes)
    */
   generate(body: TTSGenerateParams, options?: RequestOptions): APIPromise<Response> {
-    return this._client.post('/tts/bytes', {
-      body,
-      ...options,
-      headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
-      __binaryResponse: true,
-    });
+    return this._client.post('/tts/bytes', { body, ...options, headers: buildHeaders([{Accept: 'audio/wav'}, options?.headers]), __binaryResponse: true });
   }
 
   /**
    * Text to Speech (SSE)
    */
   generateSse(body: TTSGenerateSseParams, options?: RequestOptions): APIPromise<void> {
-    return this._client.post('/tts/sse', {
-      body,
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+    return this._client.post('/tts/sse', { body, ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
   }
 
   /**
@@ -55,18 +46,7 @@ export class TTS extends APIResource {
    *   - This helps the model generate more natural transitions
    */
   infill(body: TTSInfillParams, options?: RequestOptions): APIPromise<Response> {
-    return this._client.post(
-      '/infill/bytes',
-      multipartFormRequestOptions(
-        {
-          body,
-          ...options,
-          headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
-          __binaryResponse: true,
-        },
-        this._client,
-      ),
-    );
+    return this._client.post('/infill/bytes', multipartFormRequestOptions({ body, ...options, headers: buildHeaders([{Accept: 'audio/wav'}, options?.headers]), __binaryResponse: true }, this._client));
   }
 }
 
@@ -82,65 +62,7 @@ export interface GenerationConfig {
   /**
    * Guide the emotion of the generated speech.
    */
-  emotion?:
-    | 'neutral'
-    | 'happy'
-    | 'excited'
-    | 'enthusiastic'
-    | 'elated'
-    | 'euphoric'
-    | 'triumphant'
-    | 'amazed'
-    | 'surprised'
-    | 'flirtatious'
-    | 'curious'
-    | 'content'
-    | 'peaceful'
-    | 'serene'
-    | 'calm'
-    | 'grateful'
-    | 'affectionate'
-    | 'trust'
-    | 'sympathetic'
-    | 'anticipation'
-    | 'mysterious'
-    | 'angry'
-    | 'mad'
-    | 'outraged'
-    | 'frustrated'
-    | 'agitated'
-    | 'threatened'
-    | 'disgusted'
-    | 'contempt'
-    | 'envious'
-    | 'sarcastic'
-    | 'ironic'
-    | 'sad'
-    | 'dejected'
-    | 'melancholic'
-    | 'disappointed'
-    | 'hurt'
-    | 'guilty'
-    | 'bored'
-    | 'tired'
-    | 'rejected'
-    | 'nostalgic'
-    | 'wistful'
-    | 'apologetic'
-    | 'hesitant'
-    | 'insecure'
-    | 'confused'
-    | 'resigned'
-    | 'anxious'
-    | 'panicked'
-    | 'alarmed'
-    | 'scared'
-    | 'proud'
-    | 'confident'
-    | 'distant'
-    | 'skeptical'
-    | 'contemplative'
-    | 'determined';
+  emotion?: 'neutral' | 'happy' | 'excited' | 'enthusiastic' | 'elated' | 'euphoric' | 'triumphant' | 'amazed' | 'surprised' | 'flirtatious' | 'curious' | 'content' | 'peaceful' | 'serene' | 'calm' | 'grateful' | 'affectionate' | 'trust' | 'sympathetic' | 'anticipation' | 'mysterious' | 'angry' | 'mad' | 'outraged' | 'frustrated' | 'agitated' | 'threatened' | 'disgusted' | 'contempt' | 'envious' | 'sarcastic' | 'ironic' | 'sad' | 'dejected' | 'melancholic' | 'disappointed' | 'hurt' | 'guilty' | 'bored' | 'tired' | 'rejected' | 'nostalgic' | 'wistful' | 'apologetic' | 'hesitant' | 'insecure' | 'confused' | 'resigned' | 'anxious' | 'panicked' | 'alarmed' | 'scared' | 'proud' | 'confident' | 'distant' | 'skeptical' | 'contemplative' | 'determined';
 
   /**
    * Adjust the speed of the generated speech between 0.6x and 1.5x the original
@@ -271,11 +193,11 @@ export namespace GenerationRequest {
  * all voices. Influences the speed of the generated speech. Faster speeds may
  * reduce hallucination rate.
  */
-export type ModelSpeed = 'slow' | 'normal' | 'fast';
+export type ModelSpeed = 'slow' | 'normal' | 'fast'
 
-export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
+export type OutputFormatContainer = 'raw' | 'wav' | 'mp3'
 
-export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
+export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw'
 
 export interface RawOutputFormat {
   encoding: RawEncoding;
@@ -295,7 +217,7 @@ export interface VoiceSpecifier {
 /**
  * Use this to generate speech for a transcript.
  */
-export type WebsocketClientEvent = GenerationRequest | WebsocketClientEvent.CancelContextRequest;
+export type WebsocketClientEvent = GenerationRequest | WebsocketClientEvent.CancelContextRequest
 
 export namespace WebsocketClientEvent {
   /**
@@ -316,13 +238,7 @@ export namespace WebsocketClientEvent {
   }
 }
 
-export type WebsocketResponse =
-  | WebsocketResponse.Chunk
-  | WebsocketResponse.FlushDone
-  | WebsocketResponse.Done
-  | WebsocketResponse.Timestamps
-  | WebsocketResponse.Error
-  | WebsocketResponse.PhonemeTimestamps;
+export type WebsocketResponse = WebsocketResponse.Chunk | WebsocketResponse.FlushDone | WebsocketResponse.Done | WebsocketResponse.Timestamps | WebsocketResponse.Error | WebsocketResponse.PhonemeTimestamps
 
 export namespace WebsocketResponse {
   export interface Chunk {
@@ -499,10 +415,7 @@ export interface TTSGenerateParams {
    */
   model_id: string;
 
-  output_format:
-    | TTSGenerateParams.RawOutputFormat
-    | TTSGenerateParams.WavOutputFormat
-    | TTSGenerateParams.MP3OutputFormat;
+  output_format: TTSGenerateParams.RawOutputFormat | TTSGenerateParams.WavOutputFormat | TTSGenerateParams.MP3OutputFormat;
 
   transcript: string;
 
@@ -655,10 +568,7 @@ export interface TTSInfillParams {
    */
   model_id?: string;
 
-  output_format?:
-    | TTSInfillParams.RawOutputFormat
-    | TTSInfillParams.WavOutputFormat
-    | TTSInfillParams.MP3OutputFormat;
+  output_format?: TTSInfillParams.RawOutputFormat | TTSInfillParams.WavOutputFormat | TTSInfillParams.MP3OutputFormat;
 
   right_audio?: Uploadable;
 
@@ -704,6 +614,6 @@ export declare namespace TTS {
     type WebsocketResponse as WebsocketResponse,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
-    type TTSInfillParams as TTSInfillParams,
+    type TTSInfillParams as TTSInfillParams
   };
 }

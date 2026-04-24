@@ -87,8 +87,7 @@ export class PagePromise<
     super(
       client,
       request,
-      async (client, props) =>
-        new Page(client, props.response, await defaultParseResponse(client, props), props.options),
+      async (client, props) => new Page(client, props.response, await defaultParseResponse(client, props), props.options)
     );
   }
 
@@ -117,18 +116,10 @@ export interface CursorIDPageParams {
   ending_before?: string;
 }
 
-export class CursorIDPage<Item extends { id: string }>
-  extends AbstractPage<Item>
-  implements CursorIDPageResponse<Item>
-{
+export class CursorIDPage<Item extends { id: string }> extends AbstractPage<Item> implements CursorIDPageResponse<Item> {
   data: Array<Item>;
 
-  constructor(
-    client: Cartesia,
-    response: Response,
-    body: CursorIDPageResponse<Item>,
-    options: FinalRequestOptions,
-  ) {
+  constructor(client: Cartesia, response: Response, body: CursorIDPageResponse<Item>, options: FinalRequestOptions) {
     super(client, response, body, options);
 
     this.data = body.data || [];
@@ -141,9 +132,7 @@ export class CursorIDPage<Item extends { id: string }>
   nextPageRequestOptions(): PageRequestOptions | null {
     const data = this.getPaginatedItems();
 
-    const isForwards = !(
-      typeof this.options.query === 'object' && 'ending_before' in (this.options.query || {})
-    );
+    const isForwards = !(typeof this.options.query === 'object' && 'ending_before' in (this.options.query || {}));
     if (isForwards) {
       const id = data[data.length - 1]?.id;
       if (!id) {
@@ -159,7 +148,7 @@ export class CursorIDPage<Item extends { id: string }>
       };
     }
 
-    const id = data[0]?.id;
+    const id = data[0]?.id
     if (!id) {
       return null;
     }

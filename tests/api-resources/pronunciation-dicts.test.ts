@@ -2,10 +2,7 @@
 
 import Cartesia from '@cartesia/cartesia-js';
 
-const client = new Cartesia({
-  token: 'My Token',
-  baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
-});
+const client = new Cartesia({ token: 'My Token', baseURL: process.env["TEST_API_BASE_URL"] ?? 'http://127.0.0.1:4010' });
 
 describe('resource pronunciationDicts', () => {
   // Mock server tests are disabled
@@ -22,10 +19,7 @@ describe('resource pronunciationDicts', () => {
 
   // Mock server tests are disabled
   test.skip('create: required and optional params', async () => {
-    const response = await client.pronunciationDicts.create({
-      name: 'name',
-      items: [{ alias: 'alias', text: 'text' }],
-    });
+    const response = await client.pronunciationDicts.create({ name: 'name', items: [{ alias: 'alias', text: 'text' }] });
   });
 
   // Mock server tests are disabled
@@ -67,16 +61,13 @@ describe('resource pronunciationDicts', () => {
   // Mock server tests are disabled
   test.skip('list: request options and params are passed correctly', async () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
-    await expect(
-      client.pronunciationDicts.list(
-        {
-          ending_before: 'ending_before',
-          limit: 0,
-          starting_after: 'starting_after',
-        },
-        { path: '/_stainless_unknown_path' },
-      ),
-    ).rejects.toThrow(Cartesia.NotFoundError);
+    await expect(client.pronunciationDicts.list({
+    ending_before: 'ending_before',
+    limit: 0,
+    starting_after: 'starting_after',
+  }, { path: '/_stainless_unknown_path' }))
+      .rejects
+      .toThrow(Cartesia.NotFoundError);
   });
 
   // Mock server tests are disabled

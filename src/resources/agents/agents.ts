@@ -6,15 +6,7 @@ import { AgentCall, AgentCallsCursorIDPage, AgentTranscript, CallListParams, Cal
 import * as DeploymentsAPI from './deployments';
 import { Deployment, DeploymentListResponse, Deployments } from './deployments';
 import * as MetricsAPI from './metrics/metrics';
-import {
-  Metric,
-  MetricAddToAgentParams,
-  MetricCreateParams,
-  MetricListParams,
-  MetricListResponse,
-  MetricRemoveFromAgentParams,
-  Metrics,
-} from './metrics/metrics';
+import { Metric, MetricAddToAgentParams, MetricCreateParams, MetricListParams, MetricListResponse, MetricRemoveFromAgentParams, Metrics } from './metrics/metrics';
 import { APIPromise } from '../../core/api-promise';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
@@ -51,10 +43,7 @@ export class Agents extends APIResource {
    * Delete Agent
    */
   delete(agentID: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/agents/${agentID}`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+    return this._client.delete(path`/agents/${agentID}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
   }
 
   /**
@@ -193,8 +182,7 @@ export interface AgentListResponse {
   summaries: Array<AgentSummary>;
 }
 
-export type AgentListPhoneNumbersResponse =
-  Array<AgentListPhoneNumbersResponse.AgentListPhoneNumbersResponseItem>;
+export type AgentListPhoneNumbersResponse = Array<AgentListPhoneNumbersResponse.AgentListPhoneNumbersResponseItem>
 
 export namespace AgentListPhoneNumbersResponse {
   /**
@@ -322,7 +310,7 @@ export declare namespace Agents {
     type AgentListResponse as AgentListResponse,
     type AgentListPhoneNumbersResponse as AgentListPhoneNumbersResponse,
     type AgentListTemplatesResponse as AgentListTemplatesResponse,
-    type AgentUpdateParams as AgentUpdateParams,
+    type AgentUpdateParams as AgentUpdateParams
   };
 
   export {
@@ -330,7 +318,7 @@ export declare namespace Agents {
     type AgentCall as AgentCall,
     type AgentTranscript as AgentTranscript,
     type AgentCallsCursorIDPage as AgentCallsCursorIDPage,
-    type CallListParams as CallListParams,
+    type CallListParams as CallListParams
   };
 
   export {
@@ -340,12 +328,12 @@ export declare namespace Agents {
     type MetricCreateParams as MetricCreateParams,
     type MetricListParams as MetricListParams,
     type MetricAddToAgentParams as MetricAddToAgentParams,
-    type MetricRemoveFromAgentParams as MetricRemoveFromAgentParams,
+    type MetricRemoveFromAgentParams as MetricRemoveFromAgentParams
   };
 
   export {
     Deployments as Deployments,
     type Deployment as Deployment,
-    type DeploymentListResponse as DeploymentListResponse,
+    type DeploymentListResponse as DeploymentListResponse
   };
 }

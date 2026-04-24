@@ -27,10 +27,7 @@ export class FineTunes extends APIResource {
   /**
    * Paginated list of all fine-tunes for the authenticated user
    */
-  list(
-    query: FineTuneListParams | null | undefined = {},
-    options?: RequestOptions,
-  ): PagePromise<FineTunesCursorIDPage, FineTune> {
+  list(query: FineTuneListParams | null | undefined = {}, options?: RequestOptions): PagePromise<FineTunesCursorIDPage, FineTune> {
     return this._client.getAPIList('/fine-tunes/', CursorIDPage<FineTune>, { query, ...options });
   }
 
@@ -38,28 +35,18 @@ export class FineTunes extends APIResource {
    * Delete a fine-tune
    */
   delete(id: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/fine-tunes/${id}`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+    return this._client.delete(path`/fine-tunes/${id}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
   }
 
   /**
    * List all voices created from a fine-tune
    */
-  listVoices(
-    id: string,
-    query: FineTuneListVoicesParams | null | undefined = {},
-    options?: RequestOptions,
-  ): PagePromise<VoicesCursorIDPage, VoicesAPI.Voice> {
-    return this._client.getAPIList(path`/fine-tunes/${id}/voices`, CursorIDPage<VoicesAPI.Voice>, {
-      query,
-      ...options,
-    });
+  listVoices(id: string, query: FineTuneListVoicesParams | null | undefined = {}, options?: RequestOptions): PagePromise<VoicesCursorIDPage, VoicesAPI.Voice> {
+    return this._client.getAPIList(path`/fine-tunes/${id}/voices`, CursorIDPage<VoicesAPI.Voice>, { query, ...options });
   }
 }
 
-export type FineTunesCursorIDPage = CursorIDPage<FineTune>;
+export type FineTunesCursorIDPage = CursorIDPage<FineTune>
 
 /**
  * Information about a fine-tune
@@ -148,8 +135,8 @@ export declare namespace FineTunes {
     type FineTunesCursorIDPage as FineTunesCursorIDPage,
     type FineTuneCreateParams as FineTuneCreateParams,
     type FineTuneListParams as FineTuneListParams,
-    type FineTuneListVoicesParams as FineTuneListVoicesParams,
+    type FineTuneListVoicesParams as FineTuneListVoicesParams
   };
 }
 
-export { type VoicesCursorIDPage };
+export { type VoicesCursorIDPage }

@@ -112,8 +112,11 @@ export interface Deployment {
   deployment_error?: string | null;
 }
 
-export type DeploymentListResponse = Array<Deployment>;
+export type DeploymentListResponse = Array<Deployment>
 
 export declare namespace Deployments {
-  export { type Deployment as Deployment, type DeploymentListResponse as DeploymentListResponse };
+  export {
+    type Deployment as Deployment,
+    type DeploymentListResponse as DeploymentListResponse
+  };
 }

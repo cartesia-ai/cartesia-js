@@ -27,11 +27,8 @@ export class Stt extends APIResource {
    * </Note>
    */
   transcribe(params: SttTranscribeParams, options?: RequestOptions): APIPromise<SttTranscribeResponse> {
-    const { encoding, sample_rate, ...body } = params;
-    return this._client.post(
-      '/stt',
-      multipartFormRequestOptions({ query: { encoding, sample_rate }, body, ...options }, this._client),
-    );
+    const { encoding, sample_rate, ...body } = params
+    return this._client.post('/stt', multipartFormRequestOptions({ query: { encoding, sample_rate }, body, ...options }, this._client));
   }
 }
 
@@ -108,108 +105,7 @@ export interface SttTranscribeParams {
    * Body param: The language of the input audio in ISO-639-1 format. Defaults to
    * `en`.
    */
-  language?:
-    | 'en'
-    | 'zh'
-    | 'de'
-    | 'es'
-    | 'ru'
-    | 'ko'
-    | 'fr'
-    | 'ja'
-    | 'pt'
-    | 'tr'
-    | 'pl'
-    | 'ca'
-    | 'nl'
-    | 'ar'
-    | 'sv'
-    | 'it'
-    | 'id'
-    | 'hi'
-    | 'fi'
-    | 'vi'
-    | 'he'
-    | 'uk'
-    | 'el'
-    | 'ms'
-    | 'cs'
-    | 'ro'
-    | 'da'
-    | 'hu'
-    | 'ta'
-    | 'no'
-    | 'th'
-    | 'ur'
-    | 'hr'
-    | 'bg'
-    | 'lt'
-    | 'la'
-    | 'mi'
-    | 'ml'
-    | 'cy'
-    | 'sk'
-    | 'te'
-    | 'fa'
-    | 'lv'
-    | 'bn'
-    | 'sr'
-    | 'az'
-    | 'sl'
-    | 'kn'
-    | 'et'
-    | 'mk'
-    | 'br'
-    | 'eu'
-    | 'is'
-    | 'hy'
-    | 'ne'
-    | 'mn'
-    | 'bs'
-    | 'kk'
-    | 'sq'
-    | 'sw'
-    | 'gl'
-    | 'mr'
-    | 'pa'
-    | 'si'
-    | 'km'
-    | 'sn'
-    | 'yo'
-    | 'so'
-    | 'af'
-    | 'oc'
-    | 'ka'
-    | 'be'
-    | 'tg'
-    | 'sd'
-    | 'gu'
-    | 'am'
-    | 'yi'
-    | 'lo'
-    | 'uz'
-    | 'fo'
-    | 'ht'
-    | 'ps'
-    | 'tk'
-    | 'nn'
-    | 'mt'
-    | 'sa'
-    | 'lb'
-    | 'my'
-    | 'bo'
-    | 'tl'
-    | 'mg'
-    | 'as'
-    | 'tt'
-    | 'haw'
-    | 'ln'
-    | 'ha'
-    | 'ba'
-    | 'jw'
-    | 'su'
-    | 'yue'
-    | null;
+  language?: 'en' | 'zh' | 'de' | 'es' | 'ru' | 'ko' | 'fr' | 'ja' | 'pt' | 'tr' | 'pl' | 'ca' | 'nl' | 'ar' | 'sv' | 'it' | 'id' | 'hi' | 'fi' | 'vi' | 'he' | 'uk' | 'el' | 'ms' | 'cs' | 'ro' | 'da' | 'hu' | 'ta' | 'no' | 'th' | 'ur' | 'hr' | 'bg' | 'lt' | 'la' | 'mi' | 'ml' | 'cy' | 'sk' | 'te' | 'fa' | 'lv' | 'bn' | 'sr' | 'az' | 'sl' | 'kn' | 'et' | 'mk' | 'br' | 'eu' | 'is' | 'hy' | 'ne' | 'mn' | 'bs' | 'kk' | 'sq' | 'sw' | 'gl' | 'mr' | 'pa' | 'si' | 'km' | 'sn' | 'yo' | 'so' | 'af' | 'oc' | 'ka' | 'be' | 'tg' | 'sd' | 'gu' | 'am' | 'yi' | 'lo' | 'uz' | 'fo' | 'ht' | 'ps' | 'tk' | 'nn' | 'mt' | 'sa' | 'lb' | 'my' | 'bo' | 'tl' | 'mg' | 'as' | 'tt' | 'haw' | 'ln' | 'ha' | 'ba' | 'jw' | 'su' | 'yue' | null;
 
   /**
    * Body param: ID of the model to use for transcription. Use `ink-whisper` for the
@@ -227,6 +123,6 @@ export interface SttTranscribeParams {
 export declare namespace Stt {
   export {
     type SttTranscribeResponse as SttTranscribeResponse,
-    type SttTranscribeParams as SttTranscribeParams,
+    type SttTranscribeParams as SttTranscribeParams
   };
 }

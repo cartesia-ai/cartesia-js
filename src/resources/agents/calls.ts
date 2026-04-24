@@ -29,14 +29,11 @@ export class Calls extends APIResource {
    * file content (WAV format) to the client.
    */
   downloadAudio(callID: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.get(path`/agents/calls/${callID}/audio`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+    return this._client.get(path`/agents/calls/${callID}/audio`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
   }
 }
 
-export type AgentCallsCursorIDPage = CursorIDPage<AgentCall>;
+export type AgentCallsCursorIDPage = CursorIDPage<AgentCall>
 
 export interface AgentCall {
   /**
@@ -268,6 +265,6 @@ export declare namespace Calls {
     type AgentCall as AgentCall,
     type AgentTranscript as AgentTranscript,
     type AgentCallsCursorIDPage as AgentCallsCursorIDPage,
-    type CallListParams as CallListParams,
+    type CallListParams as CallListParams
   };
 }

@@ -62,6 +62,6 @@ export namespace AccessTokenCreateParams {
 export declare namespace AccessToken {
   export {
     type AccessTokenCreateResponse as AccessTokenCreateResponse,
-    type AccessTokenCreateParams as AccessTokenCreateParams,
+    type AccessTokenCreateParams as AccessTokenCreateParams
   };
 }

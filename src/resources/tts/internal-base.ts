@@ -40,7 +40,7 @@ type WebSocketEvents = Simplify<
     reconnecting: (event: ReconnectingEvent) => void;
     reconnected: () => void;
   } & {
-    [EventType in Exclude<NonNullable<TTSAPI.WebsocketResponse['type']>, 'error'>]: (
+    [EventType in Exclude<NonNullable<TTSAPI.WebsocketResponse['type']>, 'error'> ]: (
       event: Extract<TTSAPI.WebsocketResponse, { type?: EventType }>,
     ) => unknown;
   }
@@ -64,11 +64,7 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
 
   protected _onError(event: null, message: string, cause: any): void;
   protected _onError(event: TTSAPI.WebsocketResponse.Error, message?: string | undefined): void;
-  protected _onError(
-    event: TTSAPI.WebsocketResponse.Error | null,
-    message?: string | undefined,
-    cause?: any,
-  ): void {
+  protected _onError(event: TTSAPI.WebsocketResponse.Error | null, message?: string | undefined, cause?: any): void {
     message = message ?? safeJSONStringify(event) ?? 'unknown error';
 
     if (!this._hasListener('error')) {
@@ -92,9 +88,16 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
 }
 
 export function buildURL(client: Cartesia, parameters: Record<string, unknown>): URL {
-  const { ...query } = parameters;
+  const { ...query } = parameters ;
   const endpoint = '/tts/websocket';
-  const url = new URL(client.buildURL(endpoint, query, undefined));
+  const url = new URL(
+    client.buildURL(
+      endpoint,
+      query,
+      undefined
+      ,
+    ),
+  );
   url.protocol = url.protocol === 'http:' || url.protocol === 'ws:' ? 'ws:' : 'wss:';
   return url;
 }

@@ -25,39 +25,26 @@ export class PronunciationDicts extends APIResource {
   /**
    * Update a pronunciation dictionary
    */
-  update(
-    id: string,
-    body: PronunciationDictUpdateParams,
-    options?: RequestOptions,
-  ): APIPromise<PronunciationDict> {
+  update(id: string, body: PronunciationDictUpdateParams, options?: RequestOptions): APIPromise<PronunciationDict> {
     return this._client.patch(path`/pronunciation-dicts/${id}`, { body, ...options });
   }
 
   /**
    * List all pronunciation dictionaries for the authenticated user
    */
-  list(
-    query: PronunciationDictListParams | null | undefined = {},
-    options?: RequestOptions,
-  ): PagePromise<PronunciationDictsCursorIDPage, PronunciationDict> {
-    return this._client.getAPIList('/pronunciation-dicts/', CursorIDPage<PronunciationDict>, {
-      query,
-      ...options,
-    });
+  list(query: PronunciationDictListParams | null | undefined = {}, options?: RequestOptions): PagePromise<PronunciationDictsCursorIDPage, PronunciationDict> {
+    return this._client.getAPIList('/pronunciation-dicts/', CursorIDPage<PronunciationDict>, { query, ...options });
   }
 
   /**
    * Delete a pronunciation dictionary
    */
   delete(id: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/pronunciation-dicts/${id}`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+    return this._client.delete(path`/pronunciation-dicts/${id}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
   }
 }
 
-export type PronunciationDictsCursorIDPage = CursorIDPage<PronunciationDict>;
+export type PronunciationDictsCursorIDPage = CursorIDPage<PronunciationDict>
 
 /**
  * A dictionary of text-to-alias mappings
@@ -147,6 +134,6 @@ export declare namespace PronunciationDicts {
     type PronunciationDictsCursorIDPage as PronunciationDictsCursorIDPage,
     type PronunciationDictCreateParams as PronunciationDictCreateParams,
     type PronunciationDictUpdateParams as PronunciationDictUpdateParams,
-    type PronunciationDictListParams as PronunciationDictListParams,
+    type PronunciationDictListParams as PronunciationDictListParams
   };
 }
