@@ -9,9 +9,12 @@
  *
  * Additional tests cover correct routing by context_id and receive timeouts.
  */
-import { TTSWS } from '@cartesia/cartesia-js/resources/tts/ws';
+import { TTSWS, type TTSWSClientOptions } from '@cartesia/cartesia-js/resources/tts/ws';
 import { WebSocketTimeoutError } from '@cartesia/cartesia-js/resources/tts/internal-base';
 import type { WebsocketResponse } from '@cartesia/cartesia-js/resources/tts/tts';
+import { ReadyState } from '@cartesia/cartesia-js/internal/ws-adapter';
+import EventEmitter from 'node:events';
+import { NodeWebSocket } from '@cartesia/cartesia-js/internal/ws-adapter-node';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -23,9 +26,27 @@ const CONTEXT_OPTIONS = {
   output_format: { container: 'raw' as const, encoding: 'pcm_f32le' as const, sample_rate: 44100 as const },
 };
 
-/** Create a TTSWS whose underlying socket will fail to connect (that's fine —
- *  we inject messages by emitting directly on the socket). */
-function createTestWS(): TTSWS {
+const REQUEST = { ...CONTEXT_OPTIONS, transcript: 'test' };
+
+/** In-memory stand-in for `ws.WebSocket`. Stays in OPEN so connect()/send()
+ *  are no-ops, but is an EventEmitter so injectEvent() can push 'message' frames. */
+class FakePlatformSocket extends EventEmitter {
+  readyState: number = ReadyState.OPEN;
+  send = jest.fn();
+  close = jest.fn((code: number = 1000) => {
+    this.readyState = ReadyState.CLOSED;
+    // Mirror `ws` library: close() eventually emits 'close' on the emitter.
+    queueMicrotask(() => this.emit('close', code, Buffer.from('')));
+  });
+}
+
+class TestTTSWS extends TTSWS {
+  protected override _createSocket(): NodeWebSocket {
+    return new NodeWebSocket(new FakePlatformSocket() as any);
+  }
+}
+
+function createTestWS(options?: TTSWSClientOptions): TTSWS {
   const fakeClient = {
     baseURL: 'http://127.0.0.1:1',
     token: 'test',
@@ -41,16 +62,15 @@ function createTestWS(): TTSWS {
       return url.toString();
     },
   } as any;
-  const ws = new TTSWS(fakeClient);
-  // Suppress connection‑error noise.
+
+  const ws = new TestTTSWS(fakeClient, options);
+  void ws.connect(); // resolves immediately (fake socket is OPEN)
   ws.on('error', () => {});
-  ws.connect().catch(() => {});
   return ws;
 }
 
-/** Simulate a server‑sent message by emitting directly on the underlying socket. */
 function injectEvent(ws: TTSWS, event: Record<string, unknown>) {
-  if ('emit' in ws.socket.platformSocket) {
+  if (ws.socket !== null && 'emit' in ws.socket.platformSocket) {
     ws.socket.platformSocket.emit('message', Buffer.from(JSON.stringify(event)), false);
   }
 }
@@ -97,7 +117,7 @@ describe('WebSocket multi-context routing', () => {
     // All messages should already be sitting in the context queue.
     const entry = ws._getContextQueue(CTX_ID);
     expect(entry).toBeDefined();
-    expect(entry!.queue.length).toBe(NUM_CHUNKS + 1); // chunks + done
+    expect(entry?.queue.length).toBe(NUM_CHUNKS + 1); // chunks + done
 
     // Now consume via receive() — everything should already be available.
     const chunks: WebsocketResponse[] = [];
@@ -137,17 +157,17 @@ describe('WebSocket multi-context routing', () => {
     }
 
     expect(ctx1Events.filter((e) => e.type === 'chunk').length).toBe(2);
-    expect(ctx1Events[ctx1Events.length - 1]!.type).toBe('done');
+    expect(ctx1Events[ctx1Events.length - 1]?.type).toBe('done');
 
     expect(ctx2Events.filter((e) => e.type === 'chunk').length).toBe(2);
-    expect(ctx2Events[ctx2Events.length - 1]!.type).toBe('done');
+    expect(ctx2Events[ctx2Events.length - 1]?.type).toBe('done');
 
     // Verify context_ids are correct.
     for (const event of ctx1Events) {
-      expect((event as any).context_id).toBe('ctx-1');
+      expect(event.context_id).toBe('ctx-1');
     }
     for (const event of ctx2Events) {
-      expect((event as any).context_id).toBe('ctx-2');
+      expect(event.context_id).toBe('ctx-2');
     }
 
     ws.close();
@@ -268,7 +288,7 @@ describe('WebSocket multi-context routing', () => {
     ws.close();
   });
 
-  test('generate() unregisters context queue to avoid memory leak', async () => {
+  test('generate() diverts messages away from context queue to avoid memory leak', async () => {
     const ws = createTestWS();
 
     const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'gen-leak-test' });
@@ -290,7 +310,7 @@ describe('WebSocket multi-context routing', () => {
     const step = Promise.race([gen.next(), new Promise<void>((r) => setTimeout(r, 50))]);
     await step;
 
-    expect(ws._getContextQueue('gen-leak-test')).toBeUndefined();
+    expect(ws._getContextQueue('gen-leak-test')?.queue.length).toBe(0);
 
     ws.close();
   });
@@ -320,7 +340,7 @@ describe('WebSocket multi-context routing', () => {
     expect(thrownError).toBeInstanceOf(WebSocketTimeoutError);
     // Should have received the one chunk before timing out.
     expect(events.length).toBe(1);
-    expect(events[0]!.type).toBe('chunk');
+    expect(events[0]?.type).toBe('chunk');
 
     ws.close();
   });
@@ -350,6 +370,129 @@ describe('WebSocket multi-context routing', () => {
     expect(thrownError).toBeInstanceOf(WebSocketTimeoutError);
     // Should have timed out after ~100ms, not 10s.
     expect(elapsed).toBeLessThan(1000);
+
+    ws.close();
+  });
+
+  test('generate() rejects a second concurrent generate on the same context', async () => {
+    const ws = createTestWS();
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'concurrent-gen' });
+
+    // Drive gen1 with for-await so we can let it complete naturally via an injected 'done'.
+    // .return() can't cancel a generator suspended at `await new Promise(...)` — the
+    // await never resolves, so we'd hang.
+    const gen1Done = (async () => {
+      for await (const _ of ctx.generate(REQUEST)) void _;
+    })();
+
+    // Let gen1 reach its await-on-empty-queue (isGenerateFunctionActive = true).
+    await sleep(10);
+
+    const gen2 = ctx.generate(REQUEST);
+    await expect(gen2.next()).rejects.toThrow(/generate\(\) is still running/);
+
+    // Wake gen1 with a done event so it can exit and release the flag.
+    injectEvent(ws, makeDone('concurrent-gen'));
+    await gen1Done;
+
+    ws.close();
+  });
+
+  test('generate() pauses context queue; receive() resumes after generate returns', async () => {
+    const ws = createTestWS();
+    const CTX_ID = 'pause-resume';
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: CTX_ID });
+
+    // Pre-generate event — lands in the context queue (flag is false).
+    injectEvent(ws, makeChunk(CTX_ID, 0));
+    expect(ws._getContextQueue(CTX_ID)?.queue.length).toBe(1);
+
+    const genEvents: WebsocketResponse[] = [];
+    const genDone = (async () => {
+      for await (const e of ctx.generate(REQUEST)) genEvents.push(e);
+    })();
+
+    // Let generate() reach its await-on-empty-queue (flag is now true).
+    await sleep(10);
+
+    // During-generate events bypass the context queue and go to generate()'s listener.
+    injectEvent(ws, makeChunk(CTX_ID, 1));
+    injectEvent(ws, makeDone(CTX_ID));
+
+    await genDone;
+
+    expect(genEvents.filter((e) => e.type === 'chunk').length).toBe(1);
+    expect(genEvents[genEvents.length - 1]?.type).toBe('done');
+
+    // Pre-generate chunk 0 is still buffered in the context queue — untouched by generate.
+    expect(ws._getContextQueue(CTX_ID)?.queue.length).toBe(1);
+
+    // Post-generate events flow back into the context queue.
+    injectEvent(ws, makeChunk(CTX_ID, 2));
+    injectEvent(ws, makeDone(CTX_ID));
+
+    const recvEvents: WebsocketResponse[] = [];
+    for await (const e of ctx.receive()) recvEvents.push(e);
+
+    // receive() drains [chunk 0, chunk 2, done].
+    expect(recvEvents.filter((e) => e.type === 'chunk').length).toBe(2);
+    expect(recvEvents[recvEvents.length - 1]?.type).toBe('done');
+
+    ws.close();
+  });
+
+  test('connect() throws after explicit close()', async () => {
+    const ws = createTestWS();
+    ws.close();
+    await expect(ws.connect()).rejects.toThrow(/cannot connect since it was closed/);
+  });
+
+  test('send methods re-register a missing context', async () => {
+    const ws = createTestWS();
+    const CTX_ID = 're-register';
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: CTX_ID });
+
+    ws._unregisterContext(CTX_ID);
+    expect(ws._getContextQueue(CTX_ID)).toBeUndefined();
+
+    await ctx.flush();
+    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
+
+    ws._unregisterContext(CTX_ID);
+    await ctx.no_more_inputs();
+    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
+
+    ws._unregisterContext(CTX_ID);
+    await ctx.push({ transcript: 'hi' });
+    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
+
+    ws._unregisterContext(CTX_ID);
+    await ctx.send(REQUEST);
+    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
+
+    ws.close();
+  });
+
+  test("'reconnecting' event clears all context queues", async () => {
+    const ws = createTestWS({
+      reconnect: { maxRetries: 5, initialDelay: 1, maxDelay: 5 },
+    });
+
+    ws.context({ ...CONTEXT_OPTIONS, contextId: 'a' });
+    ws.context({ ...CONTEXT_OPTIONS, contextId: 'b' });
+
+    expect(ws._getContextQueue('a')).toBeDefined();
+    expect(ws._getContextQueue('b')).toBeDefined();
+
+    // Recoverable close triggers the SDK's reconnect flow — which emits 'reconnecting',
+    // then creates a fresh (fake-OPEN) socket via TestTTSWS._createSocket and emits 'reconnected'.
+    ws.socket?.platformSocket.close(1006);
+
+    // Wait past initialDelay + jitter for the full reconnect cycle.
+    await sleep(50);
+
+    expect(ws._getContextQueue('a')).toBeUndefined();
+    expect(ws._getContextQueue('b')).toBeUndefined();
 
     ws.close();
   });
