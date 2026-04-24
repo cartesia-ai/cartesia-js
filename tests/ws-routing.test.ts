@@ -117,7 +117,7 @@ describe('WebSocket multi-context routing', () => {
     // All messages should already be sitting in the context queue.
     const entry = ws._getContextQueue(CTX_ID);
     expect(entry).toBeDefined();
-    expect(entry!.queue.length).toBe(NUM_CHUNKS + 1); // chunks + done
+    expect(entry?.queue.length).toBe(NUM_CHUNKS + 1); // chunks + done
 
     // Now consume via receive() — everything should already be available.
     const chunks: WebsocketResponse[] = [];
@@ -157,17 +157,17 @@ describe('WebSocket multi-context routing', () => {
     }
 
     expect(ctx1Events.filter((e) => e.type === 'chunk').length).toBe(2);
-    expect(ctx1Events[ctx1Events.length - 1]!.type).toBe('done');
+    expect(ctx1Events[ctx1Events.length - 1]?.type).toBe('done');
 
     expect(ctx2Events.filter((e) => e.type === 'chunk').length).toBe(2);
-    expect(ctx2Events[ctx2Events.length - 1]!.type).toBe('done');
+    expect(ctx2Events[ctx2Events.length - 1]?.type).toBe('done');
 
     // Verify context_ids are correct.
     for (const event of ctx1Events) {
-      expect((event as any).context_id).toBe('ctx-1');
+      expect(event.context_id).toBe('ctx-1');
     }
     for (const event of ctx2Events) {
-      expect((event as any).context_id).toBe('ctx-2');
+      expect(event.context_id).toBe('ctx-2');
     }
 
     ws.close();
@@ -340,7 +340,7 @@ describe('WebSocket multi-context routing', () => {
     expect(thrownError).toBeInstanceOf(WebSocketTimeoutError);
     // Should have received the one chunk before timing out.
     expect(events.length).toBe(1);
-    expect(events[0]!.type).toBe('chunk');
+    expect(events[0]?.type).toBe('chunk');
 
     ws.close();
   });
@@ -405,7 +405,7 @@ describe('WebSocket multi-context routing', () => {
 
     // Pre-generate event — lands in the context queue (flag is false).
     injectEvent(ws, makeChunk(CTX_ID, 0));
-    expect(ws._getContextQueue(CTX_ID)!.queue.length).toBe(1);
+    expect(ws._getContextQueue(CTX_ID)?.queue.length).toBe(1);
 
     const genEvents: WebsocketResponse[] = [];
     const genDone = (async () => {
@@ -422,10 +422,10 @@ describe('WebSocket multi-context routing', () => {
     await genDone;
 
     expect(genEvents.filter((e) => e.type === 'chunk').length).toBe(1);
-    expect(genEvents[genEvents.length - 1]!.type).toBe('done');
+    expect(genEvents[genEvents.length - 1]?.type).toBe('done');
 
     // Pre-generate chunk 0 is still buffered in the context queue — untouched by generate.
-    expect(ws._getContextQueue(CTX_ID)!.queue.length).toBe(1);
+    expect(ws._getContextQueue(CTX_ID)?.queue.length).toBe(1);
 
     // Post-generate events flow back into the context queue.
     injectEvent(ws, makeChunk(CTX_ID, 2));
@@ -436,7 +436,7 @@ describe('WebSocket multi-context routing', () => {
 
     // receive() drains [chunk 0, chunk 2, done].
     expect(recvEvents.filter((e) => e.type === 'chunk').length).toBe(2);
-    expect(recvEvents[recvEvents.length - 1]!.type).toBe('done');
+    expect(recvEvents[recvEvents.length - 1]?.type).toBe('done');
 
     ws.close();
   });
@@ -486,7 +486,7 @@ describe('WebSocket multi-context routing', () => {
 
     // Recoverable close triggers the SDK's reconnect flow — which emits 'reconnecting',
     // then creates a fresh (fake-OPEN) socket via TestTTSWS._createSocket and emits 'reconnected'.
-    (ws.socket!.platformSocket as any).close(1006);
+    ws.socket?.platformSocket.close(1006);
 
     // Wait past initialDelay + jitter for the full reconnect cycle.
     await sleep(50);
