@@ -16,7 +16,6 @@ import {
 import * as TTSAPI from './tts';
 import { Cartesia } from '../../client';
 import { CartesiaError } from '../../core/error';
-import { createWebSocketOpenPromise } from '../../lib/ws';
 
 export interface TTSWSReconnectOptions {
   /**
@@ -74,7 +73,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
   private _closeCode: number = 1000;
   private _closeReason: string = 'OK';
   protected _lastCloseCode: number = 1006;
-  private _lastCloseReason: string = '';
+  protected _lastCloseReason: string = '';
 
   // Necessary to keep the public event interface clean while we manage reconnecting
   private _internalEvents = new InternalEventEmitter<{
@@ -511,7 +510,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
           newSocket.once('close', resolve);
         });
 
-        await createWebSocketOpenPromise(newSocket);
+        await this._awaitOpen(newSocket);
 
         this._internalEvents._emit('socketSwap', oldSocket, newSocket);
         this._isReconnecting = false;
@@ -537,6 +536,34 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
       undefined,
     );
     this._emitPermanentClose(closeCode, `reconnect failed after ${maxRetries} attempts`);
+  }
+
+  /**
+   * Resolves once the socket is open, rejects if it errors or closes first
+   */
+  private _awaitOpen(socket: TSocket): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        socket.off('open', onOpen);
+        socket.off('error', onError);
+        socket.off('close', onFail);
+      };
+      const onOpen = () => {
+        cleanup();
+        resolve();
+      };
+      const onError = (err: Error) => {
+        cleanup();
+        reject(err);
+      };
+      const onFail = () => {
+        cleanup();
+        reject(new Error('socket closed before open'));
+      };
+      socket.once('open', onOpen);
+      socket.once('error', onError);
+      socket.once('close', onFail);
+    });
   }
 
   private _flushSendQueue(): void {

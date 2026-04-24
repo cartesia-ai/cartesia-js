@@ -81,14 +81,16 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
   const audioCtx = new AudioContext({ sampleRate });
 
   const ws = await client.tts.websocket();
+  const ctx = ws.context({
+    model_id: 'sonic-3',
+    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
+  });
 
   const chunks: Float32Array[] = [];
 
-  for await (const event of ws.generate({
-    model_id: 'sonic-3',
+  for await (const event of ctx.generate({
     transcript: 'This is being streamed in real time from a WebSocket connection.',
-    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
   })) {
     if (event.type === 'chunk' && event.audio) {
       // event.audio is a raw buffer of f32le samples
@@ -127,12 +129,14 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
   let nextStartTime = audioCtx.currentTime;
 
   const ws = await client.tts.websocket();
-
-  for await (const event of ws.generate({
+  const ctx = ws.context({
     model_id: 'sonic-3',
-    transcript: 'Low latency streaming. Each chunk plays as soon as it arrives.',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
     output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
+  });
+
+  for await (const event of ctx.generate({
+    transcript: 'Low latency streaming. Each chunk plays as soon as it arrives.',
   })) {
     if (event.type === 'chunk' && event.audio) {
       const floats = new Float32Array(event.audio.buffer, event.audio.byteOffset, event.audio.byteLength / 4);

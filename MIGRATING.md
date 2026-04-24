@@ -96,13 +96,13 @@ ws.disconnect();
 
 // v3.x (new API)
 const ws = await client.tts.websocket();
-
-for await (const event of ws.generate({
+const ctx = new ws.context({
   model_id: 'sonic-2',
-  transcript: 'Hello, world!',
   voice: { mode: 'id', id: 'voice-id' },
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
-})) {
+});
+
+for await (const event of ws.generate({ transcript: 'Hello, world!' })) {
   if (event.type === 'chunk' && event.audio) {
     process(event.audio); // Buffer with decoded audio
   }

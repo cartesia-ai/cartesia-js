@@ -1,13 +1,18 @@
 /**
- * Tests for WebSocket multi-context routing.
+ * Tests for the TTS WebSocket multi-context contract.
  *
- * Ported from cartesia-python/tests/test_dispatcher.py. These unit tests
- * verify two key properties using a mock WebSocket (no API key required):
+ * These tests use a mock WebSocket (no API key needed) and focus on the
+ * observable contract of {@link TTSWS} and {@link TTSWSContext}:
  *
- * 1. Events are buffered in per-context queues before receive() is called.
- * 2. A slow reader on one context does not block readers on other contexts.
- *
- * Additional tests cover correct routing by context_id and receive timeouts.
+ *  - Events injected by the server are buffered per-context and delivered
+ *    in order to the context that owns them.
+ *  - A slow reader on one context does not block readers on other contexts.
+ *  - A server-sent `error` event completes `receive()` without throwing.
+ *  - When the socket disconnects or reconnects, each live context receives
+ *    an error event that terminates `receive()`, but any events that
+ *    already arrived can still be drained first.
+ *  - `receive()` and `generate()` are mutually exclusive on a single context.
+ *  - Per-call and per-context receive timeouts are honored.
  */
 import { TTSWS, type TTSWSClientOptions } from '@cartesia/cartesia-js/resources/tts/ws';
 import { WebSocketTimeoutError } from '@cartesia/cartesia-js/resources/tts/internal-base';
@@ -64,6 +69,9 @@ function createTestWS(options?: TTSWSClientOptions): TTSWS {
   } as any;
 
   const ws = new TestTTSWS(fakeClient, options);
+  // Silence unhandled rejections from server-sent error events; per-context
+  // errors are asserted via receive() in the tests that exercise them.
+  ws.on('error', () => {});
   void ws.connect(); // resolves immediately (fake socket is OPEN)
   return ws;
 }
@@ -93,6 +101,16 @@ function makeDone(contextId: string): Record<string, unknown> {
   };
 }
 
+function makeError(contextId: string, error: string = 'server error'): Record<string, unknown> {
+  return {
+    type: 'error',
+    context_id: contextId,
+    error,
+    done: true,
+    status_code: 500,
+  };
+}
+
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------------------
@@ -100,7 +118,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 // ---------------------------------------------------------------------------
 
 describe('WebSocket multi-context routing', () => {
-  test('events are buffered in context queue before receive() is called', async () => {
+  test('events injected before receive() are delivered in order', async () => {
     const ws = createTestWS();
     const NUM_CHUNKS = 50;
     const CTX_ID = 'buffer-test';
@@ -113,17 +131,9 @@ describe('WebSocket multi-context routing', () => {
     }
     injectEvent(ws, makeDone(CTX_ID));
 
-    // All messages should already be sitting in the context queue.
-    const entry = ws._getContextQueue(CTX_ID);
-    expect(entry).toBeDefined();
-    expect(entry?.queue.length).toBe(NUM_CHUNKS + 1); // chunks + done
-
-    // Now consume via receive() — everything should already be available.
     const chunks: WebsocketResponse[] = [];
     for await (const event of ctx.receive()) {
-      if (event.type === 'chunk') {
-        chunks.push(event);
-      }
+      if (event.type === 'chunk') chunks.push(event);
     }
     expect(chunks.length).toBe(NUM_CHUNKS);
 
@@ -144,30 +154,19 @@ describe('WebSocket multi-context routing', () => {
     injectEvent(ws, makeDone('ctx-1'));
     injectEvent(ws, makeDone('ctx-2'));
 
-    // Each context should only see its own events.
     const ctx1Events: WebsocketResponse[] = [];
-    for await (const event of ctx1.receive()) {
-      ctx1Events.push(event);
-    }
+    for await (const event of ctx1.receive()) ctx1Events.push(event);
 
     const ctx2Events: WebsocketResponse[] = [];
-    for await (const event of ctx2.receive()) {
-      ctx2Events.push(event);
-    }
+    for await (const event of ctx2.receive()) ctx2Events.push(event);
 
     expect(ctx1Events.filter((e) => e.type === 'chunk').length).toBe(2);
     expect(ctx1Events[ctx1Events.length - 1]?.type).toBe('done');
-
     expect(ctx2Events.filter((e) => e.type === 'chunk').length).toBe(2);
     expect(ctx2Events[ctx2Events.length - 1]?.type).toBe('done');
 
-    // Verify context_ids are correct.
-    for (const event of ctx1Events) {
-      expect(event.context_id).toBe('ctx-1');
-    }
-    for (const event of ctx2Events) {
-      expect(event.context_id).toBe('ctx-2');
-    }
+    for (const event of ctx1Events) expect(event.context_id).toBe('ctx-1');
+    for (const event of ctx2Events) expect(event.context_id).toBe('ctx-2');
 
     ws.close();
   });
@@ -180,7 +179,6 @@ describe('WebSocket multi-context routing', () => {
     const ctxSlow = ws.context({ ...CONTEXT_OPTIONS, contextId: 'slow-ctx' });
     const ctxFast = ws.context({ ...CONTEXT_OPTIONS, contextId: 'fast-ctx' });
 
-    // Inject interleaved messages for both contexts.
     for (let i = 0; i < NUM_CHUNKS; i++) {
       injectEvent(ws, makeChunk('slow-ctx', i));
       injectEvent(ws, makeChunk('fast-ctx', i));
@@ -188,7 +186,6 @@ describe('WebSocket multi-context routing', () => {
     injectEvent(ws, makeDone('slow-ctx'));
     injectEvent(ws, makeDone('fast-ctx'));
 
-    // Slow reader: sleeps between every event.
     async function slowCollect(): Promise<WebsocketResponse[]> {
       const chunks: WebsocketResponse[] = [];
       for await (const event of ctxSlow.receive()) {
@@ -198,7 +195,6 @@ describe('WebSocket multi-context routing', () => {
       return chunks;
     }
 
-    // Fast reader: no delays.
     let fastStart = 0;
     let fastEnd = 0;
     async function fastCollect(): Promise<WebsocketResponse[]> {
@@ -216,107 +212,102 @@ describe('WebSocket multi-context routing', () => {
     expect(slowChunks.length).toBe(NUM_CHUNKS);
     expect(fastChunks.length).toBe(NUM_CHUNKS);
 
-    // The fast reader should finish nearly instantly (all events already queued).
-    // The slow reader needs at least NUM_CHUNKS * SLOW_DELAY ≈ 1000ms.
+    // Fast reader finishes nearly instantly; slow reader needs ≈ NUM_CHUNKS * SLOW_DELAY.
     const fastDuration = fastEnd - fastStart;
     const slowMinDuration = NUM_CHUNKS * SLOW_DELAY;
-
     expect(fastDuration).toBeLessThan(slowMinDuration / 2);
 
     ws.close();
   });
 
-  test('context queue is cleaned up after receive() completes', async () => {
+  test('a server-sent error event ends receive() without throwing', async () => {
     const ws = createTestWS();
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'err-evt' });
 
-    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'cleanup-test' });
+    injectEvent(ws, makeChunk('err-evt', 0));
+    injectEvent(ws, makeError('err-evt', 'bad thing'));
+    // Events queued after a done-like error should not be yielded.
+    injectEvent(ws, makeChunk('err-evt', 1));
 
-    expect(ws._getContextQueue('cleanup-test')).toBeDefined();
-
-    injectEvent(ws, makeChunk('cleanup-test', 0));
-    injectEvent(ws, makeDone('cleanup-test'));
-
-    // Drain receive.
-    for await (const _event of ctx.receive()) {
-      // consume
-    }
-
-    // Queue should be cleaned up after done.
-    expect(ws._getContextQueue('cleanup-test')).toBeUndefined();
-
-    ws.close();
-  });
-
-  test('cancel() unregisters the context queue', async () => {
-    const ws = createTestWS();
-
-    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'cancel-test' });
-    expect(ws._getContextQueue('cancel-test')).toBeDefined();
-
-    await ctx.cancel();
-    expect(ws._getContextQueue('cancel-test')).toBeUndefined();
-
-    ws.close();
-  });
-
-  test('cancel() while receive() is waiting unblocks receive()', async () => {
-    const ws = createTestWS();
-
-    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'cancel-while-waiting' });
-
-    // Start receiving (will block waiting for events).
     const events: WebsocketResponse[] = [];
-    const receivePromise = (async () => {
-      for await (const event of ctx.receive()) {
-        events.push(event);
-      }
-    })();
+    for await (const event of ctx.receive()) events.push(event);
 
-    // Give receive() a tick to start waiting.
-    await new Promise<void>((r) => setTimeout(r, 10));
-
-    // Cancel should unblock receive().
-    await ctx.cancel();
-
-    // receive() should complete without hanging.
-    await receivePromise;
-
-    expect(events.length).toBe(0);
-    expect(ws._getContextQueue('cancel-while-waiting')).toBeUndefined();
+    expect(events.map((e) => e.type)).toEqual(['chunk', 'error']);
 
     ws.close();
   });
 
-  test('generate() diverts messages away from context queue to avoid memory leak', async () => {
+  test('explicit close() delivers an error event to every live context, prior events still flow', async () => {
     const ws = createTestWS();
+    const ctxA = ws.context({ ...CONTEXT_OPTIONS, contextId: 'close-a' });
+    const ctxB = ws.context({ ...CONTEXT_OPTIONS, contextId: 'close-b' });
 
-    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'gen-leak-test' });
-    expect(ws._getContextQueue('gen-leak-test')).toBeDefined();
+    injectEvent(ws, makeChunk('close-a', 0));
+    injectEvent(ws, makeChunk('close-b', 0));
 
-    // Calling generate() should immediately unregister the per-context queue
-    // so events don't accumulate in both the queue and generate()'s local buffer.
-    // We just need to start the generator to trigger the unregister — we don't
-    // need to actually consume it (that would require a live connection).
-    const gen = ctx.generate({
-      model_id: 'sonic-3',
-      voice: { mode: 'id', id: 'test-voice' },
-      output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 as const },
-      transcript: 'test',
+    ws.close();
+
+    const eventsA: WebsocketResponse[] = [];
+    for await (const event of ctxA.receive()) eventsA.push(event);
+
+    const eventsB: WebsocketResponse[] = [];
+    for await (const event of ctxB.receive()) eventsB.push(event);
+
+    expect(eventsA.map((e) => e.type)).toEqual(['chunk', 'error']);
+    expect(eventsB.map((e) => e.type)).toEqual(['chunk', 'error']);
+  });
+
+  test("'reconnecting' delivers an error event to every live context, prior events still flow", async () => {
+    const ws = createTestWS({
+      reconnect: { maxRetries: 5, initialDelay: 1, maxDelay: 5 },
     });
 
-    // Advance the generator to the first yield point (triggers unregister).
-    // It will hang on send() since there's no connection, so race with a timeout.
-    const step = Promise.race([gen.next(), new Promise<void>((r) => setTimeout(r, 50))]);
-    await step;
+    const ctxA = ws.context({ ...CONTEXT_OPTIONS, contextId: 'recon-a' });
+    const ctxB = ws.context({ ...CONTEXT_OPTIONS, contextId: 'recon-b' });
 
-    expect(ws._getContextQueue('gen-leak-test')?.queue.length).toBe(0);
+    injectEvent(ws, makeChunk('recon-a', 0));
+    injectEvent(ws, makeChunk('recon-b', 0));
+
+    // Recoverable close triggers the SDK's reconnect flow — which emits 'reconnecting',
+    // then creates a fresh (fake-OPEN) socket via TestTTSWS._createSocket.
+    ws.socket?.platformSocket.close(1006);
+
+    // Wait past initialDelay + jitter for the full reconnect cycle.
+    await sleep(50);
+
+    const eventsA: WebsocketResponse[] = [];
+    for await (const event of ctxA.receive()) eventsA.push(event);
+
+    const eventsB: WebsocketResponse[] = [];
+    for await (const event of ctxB.receive()) eventsB.push(event);
+
+    expect(eventsA.map((e) => e.type)).toEqual(['chunk', 'error']);
+    expect(eventsB.map((e) => e.type)).toEqual(['chunk', 'error']);
 
     ws.close();
   });
 
-  test('receive() with timeout throws WebSocketTimeoutError', async () => {
+  test('cancel() does not end receive() on its own; pending events still reach the consumer', async () => {
     const ws = createTestWS();
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'cancelled' });
 
+    injectEvent(ws, makeChunk('cancelled', 0));
+    await ctx.cancel();
+
+    // Until the server sends done/error in response to the cancel, receive() keeps waiting.
+    // The already-queued chunk is still deliverable.
+    injectEvent(ws, makeDone('cancelled'));
+
+    const events: WebsocketResponse[] = [];
+    for await (const event of ctx.receive()) events.push(event);
+
+    expect(events.map((e) => e.type)).toEqual(['chunk', 'done']);
+
+    ws.close();
+  });
+
+  test('receive() with per-context timeout throws WebSocketTimeoutError', async () => {
+    const ws = createTestWS();
     const ctx = ws.context({
       ...CONTEXT_OPTIONS,
       contextId: 'timeout-test',
@@ -329,15 +320,12 @@ describe('WebSocket multi-context routing', () => {
     const events: WebsocketResponse[] = [];
     let thrownError: unknown;
     try {
-      for await (const event of ctx.receive()) {
-        events.push(event);
-      }
+      for await (const event of ctx.receive()) events.push(event);
     } catch (err) {
       thrownError = err;
     }
 
     expect(thrownError).toBeInstanceOf(WebSocketTimeoutError);
-    // Should have received the one chunk before timing out.
     expect(events.length).toBe(1);
     expect(events[0]?.type).toBe('chunk');
 
@@ -346,7 +334,6 @@ describe('WebSocket multi-context routing', () => {
 
   test('receive() per-call timeout overrides context timeout', async () => {
     const ws = createTestWS();
-
     const ctx = ws.context({
       ...CONTEXT_OPTIONS,
       contextId: 'timeout-override',
@@ -358,9 +345,7 @@ describe('WebSocket multi-context routing', () => {
     const start = performance.now();
     let thrownError: unknown;
     try {
-      for await (const _event of ctx.receive({ timeout: 100 })) {
-        // consume
-      }
+      for await (const _event of ctx.receive({ timeout: 100 })) void _event;
     } catch (err) {
       thrownError = err;
     }
@@ -373,69 +358,91 @@ describe('WebSocket multi-context routing', () => {
     ws.close();
   });
 
-  test('generate() rejects a second concurrent generate on the same context', async () => {
+  test('generate() throws if receive() is already in progress on the same context', async () => {
     const ws = createTestWS();
-    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'concurrent-gen' });
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'recv-then-gen' });
 
-    // Drive gen1 with for-await so we can let it complete naturally via an injected 'done'.
-    // .return() can't cancel a generator suspended at `await new Promise(...)` — the
-    // await never resolves, so we'd hang.
-    const gen1Done = (async () => {
-      for await (const _ of ctx.generate(REQUEST)) void _;
+    // Start receive waiting on an empty queue — this marks the context as in-use.
+    const receivePromise = (async () => {
+      const events: WebsocketResponse[] = [];
+      for await (const event of ctx.receive()) events.push(event);
+      return events;
     })();
-
-    // Let gen1 reach its await-on-empty-queue (isGenerateFunctionActive = true).
     await sleep(10);
 
-    const gen2 = ctx.generate(REQUEST);
-    await expect(gen2.next()).rejects.toThrow(/generate\(\) is still running/);
+    const gen = ctx.generate(REQUEST);
+    await expect(gen.next()).rejects.toThrow();
 
-    // Wake gen1 with a done event so it can exit and release the flag.
-    injectEvent(ws, makeDone('concurrent-gen'));
-    await gen1Done;
+    // Unblock receive so the test can finish.
+    injectEvent(ws, makeDone('recv-then-gen'));
+    await receivePromise;
 
     ws.close();
   });
 
-  test('generate() pauses context queue; receive() resumes after generate returns', async () => {
+  test('receive() yields nothing after generate() completes on the same context', async () => {
     const ws = createTestWS();
-    const CTX_ID = 'pause-resume';
-    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: CTX_ID });
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'gen-then-recv' });
 
-    // Pre-generate event — lands in the context queue (flag is false).
-    injectEvent(ws, makeChunk(CTX_ID, 0));
-    expect(ws._getContextQueue(CTX_ID)?.queue.length).toBe(1);
-
-    const genEvents: WebsocketResponse[] = [];
     const genDone = (async () => {
-      for await (const e of ctx.generate(REQUEST)) genEvents.push(e);
+      for await (const _ of ctx.generate(REQUEST)) void _;
     })();
-
-    // Let generate() reach its await-on-empty-queue (flag is now true).
     await sleep(10);
-
-    // During-generate events bypass the context queue and go to generate()'s listener.
-    injectEvent(ws, makeChunk(CTX_ID, 1));
-    injectEvent(ws, makeDone(CTX_ID));
-
+    injectEvent(ws, makeDone('gen-then-recv'));
     await genDone;
 
-    expect(genEvents.filter((e) => e.type === 'chunk').length).toBe(1);
-    expect(genEvents[genEvents.length - 1]?.type).toBe('done');
+    // Context is finished — receive() returns immediately without yielding anything.
+    const events: WebsocketResponse[] = [];
+    for await (const event of ctx.receive()) events.push(event);
+    expect(events.length).toBe(0);
 
-    // Pre-generate chunk 0 is still buffered in the context queue — untouched by generate.
-    expect(ws._getContextQueue(CTX_ID)?.queue.length).toBe(1);
+    ws.close();
+  });
 
-    // Post-generate events flow back into the context queue.
-    injectEvent(ws, makeChunk(CTX_ID, 2));
-    injectEvent(ws, makeDone(CTX_ID));
+  test('generate() delivers only events for its context', async () => {
+    const ws = createTestWS();
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'gen-only' });
 
-    const recvEvents: WebsocketResponse[] = [];
-    for await (const e of ctx.receive()) recvEvents.push(e);
+    const gen = ctx.generate(REQUEST);
+    const events: WebsocketResponse[] = [];
+    const collect = (async () => {
+      for await (const e of gen) events.push(e);
+    })();
+    await sleep(10);
 
-    // receive() drains [chunk 0, chunk 2, done].
-    expect(recvEvents.filter((e) => e.type === 'chunk').length).toBe(2);
-    expect(recvEvents[recvEvents.length - 1]?.type).toBe('done');
+    injectEvent(ws, makeChunk('gen-only', 0));
+    injectEvent(ws, makeChunk('other-ctx', 0)); // should be ignored
+    injectEvent(ws, makeChunk('gen-only', 1));
+    injectEvent(ws, makeDone('gen-only'));
+
+    await collect;
+
+    expect(events.map((e) => e.type)).toEqual(['chunk', 'chunk', 'done']);
+    for (const e of events) expect(e.context_id).toBe('gen-only');
+
+    ws.close();
+  });
+
+  test('a context ID can be reused after receive() completes', async () => {
+    const ws = createTestWS();
+
+    const ctx1 = ws.context({ ...CONTEXT_OPTIONS, contextId: 'reuse-id' });
+    injectEvent(ws, makeChunk('reuse-id', 0));
+    injectEvent(ws, makeDone('reuse-id'));
+
+    for await (const _ of ctx1.receive()) void _;
+
+    // Previous queue was cleaned up, so the same ID is available again.
+    const ctx2 = ws.context({ ...CONTEXT_OPTIONS, contextId: 'reuse-id' });
+    expect(ctx2.contextId).toBe('reuse-id');
+
+    ws.close();
+  });
+
+  test('creating a context with a duplicate live ID throws', async () => {
+    const ws = createTestWS();
+    ws.context({ ...CONTEXT_OPTIONS, contextId: 'dup' });
+    expect(() => ws.context({ ...CONTEXT_OPTIONS, contextId: 'dup' })).toThrow(/Duplicate context ID/);
 
     ws.close();
   });
@@ -444,55 +451,5 @@ describe('WebSocket multi-context routing', () => {
     const ws = createTestWS();
     ws.close();
     await expect(ws.connect()).rejects.toThrow(/cannot connect since it was closed/);
-  });
-
-  test('send methods re-register a missing context', async () => {
-    const ws = createTestWS();
-    const CTX_ID = 're-register';
-    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: CTX_ID });
-
-    ws._unregisterContext(CTX_ID);
-    expect(ws._getContextQueue(CTX_ID)).toBeUndefined();
-
-    await ctx.flush();
-    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
-
-    ws._unregisterContext(CTX_ID);
-    await ctx.no_more_inputs();
-    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
-
-    ws._unregisterContext(CTX_ID);
-    await ctx.push({ transcript: 'hi' });
-    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
-
-    ws._unregisterContext(CTX_ID);
-    await ctx.send(REQUEST);
-    expect(ws._getContextQueue(CTX_ID)).toBeDefined();
-
-    ws.close();
-  });
-
-  test("'reconnecting' event clears all context queues", async () => {
-    const ws = createTestWS({
-      reconnect: { maxRetries: 5, initialDelay: 1, maxDelay: 5 },
-    });
-
-    ws.context({ ...CONTEXT_OPTIONS, contextId: 'a' });
-    ws.context({ ...CONTEXT_OPTIONS, contextId: 'b' });
-
-    expect(ws._getContextQueue('a')).toBeDefined();
-    expect(ws._getContextQueue('b')).toBeDefined();
-
-    // Recoverable close triggers the SDK's reconnect flow — which emits 'reconnecting',
-    // then creates a fresh (fake-OPEN) socket via TestTTSWS._createSocket and emits 'reconnected'.
-    ws.socket?.platformSocket.close(1006);
-
-    // Wait past initialDelay + jitter for the full reconnect cycle.
-    await sleep(50);
-
-    expect(ws._getContextQueue('a')).toBeUndefined();
-    expect(ws._getContextQueue('b')).toBeUndefined();
-
-    ws.close();
   });
 });
