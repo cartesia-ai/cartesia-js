@@ -40,7 +40,12 @@ export class TTS extends APIResource {
    */
   async websocket(options?: TTSWSClientOptions): Promise<TTSWS> {
     const ws = new TTSWS(this._client, options);
-    return ws.connect();
+    try {
+      return await ws.connect();
+    } catch (error) {
+      ws.close();
+      throw error;
+    }
   }
 
   /**
