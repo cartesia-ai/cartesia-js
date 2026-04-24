@@ -60,7 +60,7 @@ export class TTSWSContext {
       output_format: options.output_format,
     };
     this._timeout = options.timeout;
-    this.contextId = options.contextId ?? uuid4();
+    this.contextId = options.contextId || uuid4();
   }
 
   /**
@@ -69,10 +69,7 @@ export class TTSWSContext {
    * If flush is true, sends an additional flush request after the transcript.
    */
   async push(options: { transcript: string; flush?: boolean }) {
-    await this._ws.connect();
-    this._ws._registerContext(this.contextId);
-
-    this._ws.send({
+    await this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -91,10 +88,7 @@ export class TTSWSContext {
    * Sends an empty transcript with continue: false.
    */
   async no_more_inputs() {
-    await this._ws.connect();
-    this._ws._registerContext(this.contextId);
-
-    this._ws.send({
+    await this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -110,10 +104,7 @@ export class TTSWSContext {
    * The context_id is automatically set.
    */
   async send(request: ContextGenerateRequest) {
-    await this._ws.connect();
-    this._ws._registerContext(this.contextId);
-
-    this._ws.send({
+    await this._ws.send({
       ...request,
       context_id: this.contextId,
     });
@@ -125,10 +116,7 @@ export class TTSWSContext {
    * This is always sent as a separate request per the API requirement.
    */
   async flush() {
-    await this._ws.connect();
-    this._ws._registerContext(this.contextId);
-
-    this._ws.send({
+    await this._ws.send({
       model_id: this._options.model_id,
       voice: this._options.voice,
       output_format: this._options.output_format,
@@ -304,21 +292,42 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
   }
 
   /**
+   * Send a request without waiting for responses.
+   */
+  override async send(event: TTSAPI.WebsocketClientEvent): Promise<void> {
+    if ('cancel' in event && event.cancel) {
+      this._unregisterContext(event.context_id);
+      // no need to cancel if the socket closed since the context is already gone
+      if (this.socket?.readyState === ReadyState.OPEN || this.socket?.readyState === ReadyState.CONNECTING) {
+        super.send(event);
+      }
+      return;
+    }
+    // generation request
+    await this.connect();
+    // FIXME: update aysyncapi.yml to require context_id
+    const eventWithDefaults = {
+      ...event,
+      context_id: event.context_id || uuid4(),
+      ...('continue' in event && event.continue && !event.context_id ? { continue: false } : null),
+    };
+    this._registerContext(eventWithDefaults.context_id);
+    super.send(eventWithDefaults);
+  }
+
+  /**
    * Send a generation request and iterate over the responses.
    *
    * This function captures events for the context until it returns (do not use in parallel with TTSWSContext.receive).
    */
   async *generate(request: TTSAPI.GenerationRequest): AsyncGenerator<TTSAPI.WebsocketResponse> {
-    await this.connect();
-
-    const contextId = request.context_id ?? uuid4();
-    request = { ...request, context_id: contextId };
+    const context_id: string = request.context_id || uuid4();
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
     let resolve: (() => void) | null = null;
 
     const onEvent = (event: TTSAPI.WebsocketResponse) => {
-      if (contextId && 'context_id' in event && event.context_id !== contextId) {
+      if ('context_id' in event && event.context_id !== context_id) {
         return;
       }
       queue.push(event);
@@ -332,11 +341,11 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
       resolve?.();
     };
 
-    const contextEntry = this._contextQueues.get(contextId);
+    const contextEntry = this._contextQueues.get(context_id);
     if (contextEntry !== undefined) {
       if (contextEntry.isGenerateFunctionActive) {
         throw new CartesiaError(
-          `generate() is still running for this context (${contextId}). Use TTSWSContext.send and TTSWSContext.receive to queue multiple GenerationRequests.`,
+          `generate() is still running for this context (${context_id}). Use TTSWSContext.send and TTSWSContext.receive to queue multiple GenerationRequests.`,
         );
       }
       contextEntry.isGenerateFunctionActive = true;
@@ -345,7 +354,7 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
       this.once('close', onDisconnect);
       this.once('reconnecting', onDisconnect);
       this.on('event', onEvent);
-      this.send(request);
+      await this.send({ ...request, context_id });
 
       while (true) {
         const eventMessage = queue.shift();
@@ -386,12 +395,8 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
   /**
    * Cancel a context to stop generating speech for it.
    */
-  async cancelContext(contextId: string) {
-    this._unregisterContext(contextId);
-    // no need to cancel if the socket closed since the context is already gone
-    if (this.socket?.readyState === ReadyState.OPEN || this.socket?.readyState === ReadyState.CONNECTING) {
-      this.send({ cancel: true, context_id: contextId });
-    }
+  async cancelContext(contextId: string): Promise<void> {
+    await this.send({ cancel: true, context_id: contextId });
   }
 
   /**
