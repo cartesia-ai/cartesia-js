@@ -65,7 +65,6 @@ function createTestWS(options?: TTSWSClientOptions): TTSWS {
 
   const ws = new TestTTSWS(fakeClient, options);
   void ws.connect(); // resolves immediately (fake socket is OPEN)
-  ws.on('error', () => {});
   return ws;
 }
 

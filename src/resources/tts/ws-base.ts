@@ -101,7 +101,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
 
   send(event: TTSAPI.WebsocketClientEvent) {
     if (!this.socket) {
-      throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
+      throw new CartesiaError('Connect the socket before sending');
     }
 
     if (
@@ -126,7 +126,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
 
   sendRaw(data: RawWebSocketData) {
     if (!this.socket) {
-      throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
+      throw new CartesiaError('Connect the socket before sending');
     }
 
     if (this._isReconnecting || this.socket.readyState === ReadyState.CONNECTING) {
@@ -147,15 +147,11 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
   }
 
   close(props?: { code: number; reason: string }) {
-    if (!this.socket) {
-      throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
-    }
-
     this._intentionallyClosed = true;
     this._closeCode = props?.code ?? 1000;
     this._closeReason = props?.reason ?? 'OK';
     try {
-      this.socket.close(this._closeCode, this._closeReason);
+      this.socket?.close(this._closeCode, this._closeReason);
     } catch (err) {
       this._onError(null, 'could not close the connection', err);
     }
@@ -184,11 +180,11 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
    * }
    * ```
    */
-  stream(): AsyncIterableIterator<TTSStreamMessage> {
+  protected stream(): AsyncIterableIterator<TTSStreamMessage> {
     return this[Symbol.asyncIterator]();
   }
 
-  [Symbol.asyncIterator](): AsyncIterableIterator<TTSStreamMessage> {
+  protected [Symbol.asyncIterator](): AsyncIterableIterator<TTSStreamMessage> {
     if (!this.socket) {
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }

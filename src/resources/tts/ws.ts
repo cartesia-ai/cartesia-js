@@ -16,7 +16,7 @@ import { BrowserWebSocket } from '../../internal/ws-adapter-browser';
 import { createWebSocketOpenPromise, decodeBase64 } from '../../lib/ws';
 import * as TTSAPI from './tts';
 import type { Cartesia } from '../../client';
-import { CartesiaError } from '../../core/error';
+import { APIError, CartesiaError } from '../../core/error';
 
 export type { TTSWSReconnectOptions } from './ws-base';
 
@@ -164,7 +164,12 @@ export class TTSWSContext {
             return;
           }
           if (eventMessage.type === 'error') {
-            throw new CartesiaError(JSON.stringify(eventMessage));
+            throw APIError.generate(
+              eventMessage.status_code,
+              eventMessage,
+              undefined /* message */,
+              undefined /* headers */,
+            );
           }
         } else {
           // Wait for the next event to be pushed into the queue.
@@ -310,7 +315,6 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
     request = { ...request, context_id: contextId };
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
-    let error: CartesiaError | null = null;
     let resolve: (() => void) | null = null;
 
     const onEvent = (event: TTSAPI.WebsocketResponse) => {
@@ -318,12 +322,6 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
         return;
       }
       queue.push(event);
-      if (event.type === 'done' || event.type === 'error') {
-        done = true;
-        if (event.type === 'error') {
-          error = new CartesiaError(JSON.stringify(event));
-        }
-      }
       resolve?.();
     };
 
@@ -349,20 +347,27 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
       this.on('event', onEvent);
       this.send(request);
 
-      while (!done || queue.length > 0) {
+      while (true) {
         const eventMessage = queue.shift();
         if (eventMessage !== undefined) {
           yield eventMessage;
           if (eventMessage.type === 'done') {
-            return;
+            done = true;
+          } else if (eventMessage.type === 'error') {
+            done = true;
+            throw APIError.generate(
+              eventMessage.status_code,
+              eventMessage,
+              undefined /* message */,
+              undefined /* headers */,
+            );
           }
-          if (eventMessage.type === 'error') {
-            throw error;
-          }
-        } else {
+        } else if (!done) {
           await new Promise<void>((r) => {
             resolve = r;
           });
+        } else {
+          return;
         }
       }
     } finally {
