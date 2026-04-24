@@ -435,19 +435,19 @@ export namespace WebsocketResponse {
   }
 
   export interface Error {
+    done: boolean;
+
+    type: 'error';
+
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
      */
-    context_id: string;
+    context_id?: string;
 
-    done: boolean;
+    error?: string;
 
-    error: string;
-
-    status_code: number;
-
-    type: 'error';
+    status_code?: number;
   }
 
   export interface PhonemeTimestamps {
