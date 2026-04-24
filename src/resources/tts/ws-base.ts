@@ -101,7 +101,7 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
 
   send(event: TTSAPI.WebsocketClientEvent) {
     if (!this.socket) {
-      throw new CartesiaError('Connect the socket before sending');
+      throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
 
     if (
