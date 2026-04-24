@@ -163,8 +163,7 @@ export type SupportedLanguage =
   | 'kn'
   | 'ml'
   | 'mr'
-  | 'pa'
-  | (string & {});
+  | 'pa';
 
 export interface Voice {
   /**
