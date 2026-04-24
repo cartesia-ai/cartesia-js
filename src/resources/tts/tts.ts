@@ -79,6 +79,12 @@ export interface GenerationConfig {
 
 export interface GenerationRequest {
   /**
+   * A unique identifier for the context. You can use any unique identifier, like a
+   * UUID or human ID.
+   */
+  context_id: string;
+
+  /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
@@ -106,15 +112,6 @@ export interface GenerationRequest {
    * events containing word-level timing information.
    */
   add_timestamps?: boolean | null;
-
-  /**
-   * A unique identifier for the context. You can use any unique identifier, like a
-   * UUID or human ID.
-   *
-   * Some customers use unique identifiers from their own systems (such as
-   * conversation IDs) as context IDs.
-   */
-  context_id?: string | null;
 
   /**
    * Whether this input may be followed by more inputs. If not specified, this
@@ -164,10 +161,7 @@ export interface GenerationRequest {
   pronunciation_dict_id?: string | null;
 
   /**
-   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
-   * model. Defaults to `normal`. This feature is experimental and may not work for
-   * all voices. Influences the speed of the generated speech. Faster speeds may
-   * reduce hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3.
    */
   speed?: ModelSpeed;
 
@@ -188,10 +182,7 @@ export namespace GenerationRequest {
 }
 
 /**
- * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
- * model. Defaults to `normal`. This feature is experimental and may not work for
- * all voices. Influences the speed of the generated speech. Faster speeds may
- * reduce hallucination rate.
+ * @deprecated Use `generation_config.speed` for sonic-3.
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast'
 
@@ -242,6 +233,12 @@ export type WebsocketResponse = WebsocketResponse.Chunk | WebsocketResponse.Flus
 
 export namespace WebsocketResponse {
   export interface Chunk {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
+
     data: string;
 
     done: boolean;
@@ -253,15 +250,6 @@ export namespace WebsocketResponse {
     type: 'chunk';
 
     /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
-
-    /**
      * An identifier corresponding to the number of flush commands that have been sent
      * for this context. Starts at 1.
      *
@@ -271,6 +259,12 @@ export namespace WebsocketResponse {
   }
 
   export interface FlushDone {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
+
     done: boolean;
 
     flush_done: boolean;
@@ -286,49 +280,34 @@ export namespace WebsocketResponse {
     status_code: number;
 
     type: 'flush_done';
-
-    /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
   }
 
   export interface Done {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
+
     done: boolean;
 
     status_code: number;
 
     type: 'done';
-
-    /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
   }
 
   export interface Timestamps {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
+
     done: boolean;
 
     status_code: number;
 
     type: 'timestamps';
-
-    /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
 
     /**
      * An identifier corresponding to the number of flush commands that have been sent
@@ -352,6 +331,12 @@ export namespace WebsocketResponse {
   }
 
   export interface Error {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
+
     done: boolean;
 
     error: string;
@@ -359,32 +344,20 @@ export namespace WebsocketResponse {
     status_code: number;
 
     type: 'error';
-
-    /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
   }
 
   export interface PhonemeTimestamps {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
+
     done: boolean;
 
     status_code: number;
 
     type: 'phoneme_timestamps';
-
-    /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
 
     /**
      * An identifier corresponding to the number of flush commands that have been sent
@@ -450,10 +423,7 @@ export interface TTSGenerateParams {
   save?: boolean | null;
 
   /**
-   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
-   * model. Defaults to `normal`. This feature is experimental and may not work for
-   * all voices. Influences the speed of the generated speech. Faster speeds may
-   * reduce hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3.
    */
   speed?: ModelSpeed;
 }
@@ -531,10 +501,7 @@ export interface TTSGenerateSseParams {
   pronunciation_dict_id?: string | null;
 
   /**
-   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
-   * model. Defaults to `normal`. This feature is experimental and may not work for
-   * all voices. Influences the speed of the generated speech. Faster speeds may
-   * reduce hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3.
    */
   speed?: ModelSpeed;
 
