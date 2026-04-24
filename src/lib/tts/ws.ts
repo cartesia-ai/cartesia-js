@@ -330,6 +330,7 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
     // 'event' channel, which fires synchronously before typed events like
     // 'chunk', so consumers see the decoded payload.
     this.on('event', (event) => {
+      if (event.context_id === undefined) return;
       const entry = this._contextQueues.get(event.context_id);
       if (entry === undefined) return;
 
