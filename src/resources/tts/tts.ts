@@ -11,7 +11,13 @@ import { multipartFormRequestOptions } from '../../internal/uploads';
 
 export class TTS extends APIResource {
   /**
-   * Text to Speech (Bytes)
+   * Text-to-Speech (Bytes).
+   *
+   * The simplest way to stream generated audio.
+   *
+   * See
+   * [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+   * for details.
    */
   generate(body: TTSGenerateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post('/tts/bytes', {
@@ -23,7 +29,17 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Text to Speech (SSE)
+   * Text-to-Speech (SSE).
+   *
+   * Supports:
+   *
+   * - Streaming
+   * - Timestamps
+   * - context_id without transcript buffering
+   *
+   * See
+   * [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+   * for details.
    */
   generateSse(body: TTSGenerateSseParams, options?: RequestOptions): APIPromise<void> {
     return this._client.post('/tts/sse', {
@@ -34,6 +50,8 @@ export class TTS extends APIResource {
   }
 
   /**
+   * Infill (Bytes).
+   *
    * Generate audio that smoothly connects two existing audio segments. This is
    * useful for inserting new speech between existing speech segments while
    * maintaining natural transitions.
