@@ -29,17 +29,6 @@ export class WebSocketError extends CartesiaError {
   }
 }
 
-export class WebSocketTimeoutError extends CartesiaError {
-  readonly contextId: string;
-  readonly timeoutMs: number;
-
-  constructor(contextId: string, timeoutMs: number) {
-    super(`Timed out waiting for response on context ${contextId} after ${timeoutMs}ms`);
-    this.contextId = contextId;
-    this.timeoutMs = timeoutMs;
-  }
-}
-
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 type WebSocketEvents = Simplify<
@@ -61,7 +50,7 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
   /**
    * Send an event to the API.
    */
-  abstract send(event: TTSAPI.WebsocketClientEvent): void | Promise<void>;
+  abstract send(event: TTSAPI.WebsocketClientEvent): void;
 
   /**
    * Send raw data over the WebSocket without JSON serialization.
