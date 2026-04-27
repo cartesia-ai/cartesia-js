@@ -17,43 +17,50 @@ export default function WebSocketExample() {
 
       // 2. Connect via WebSocket from the browser
       const client = new Cartesia({ token });
-      const ws = await client.tts.websocket();
+      const ws = client.tts.createContextManager();
+      ws.on('error', (err: Error) => console.error(err.message));
+      try {
+        await ws.connect();
 
-      // 3. Stream audio and play each chunk as it arrives
-      const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE });
-      let nextStartTime = audioCtx.currentTime;
+        // 3. Stream audio and play each chunk as it arrives
+        const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE });
+        let nextStartTime = audioCtx.currentTime;
 
-      const wsCtx = ws.context({
-        model_id: 'sonic-3',
-        voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-        output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: SAMPLE_RATE },
-      });
+        const wsCtx = ws.context({
+          model_id: 'sonic-3',
+          voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+          output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: SAMPLE_RATE },
+        });
 
-      const resp = wsCtx.generate({
-        transcript: 'Hello from a WebSocket! Each audio chunk is played the moment it arrives.',
-      });
+        wsCtx.push({
+          transcript: 'Hello from a WebSocket! Each audio chunk is played the moment it arrives.',
+        });
+        wsCtx.end();
 
-      for await (const event of resp) {
-        if (event.type === 'chunk' && event.audio) {
-          // event.audio is a Uint8Array of f32le samples
-          const aligned = new ArrayBuffer(event.audio.byteLength);
-          new Uint8Array(aligned).set(event.audio);
-          const floats = new Float32Array(aligned);
+        for await (const event of wsCtx.receive()) {
+          if (event.type === 'chunk' && event.audio) {
+            // event.audio is a Uint8Array of f32le samples
+            const aligned = new ArrayBuffer(event.audio.byteLength);
+            new Uint8Array(aligned).set(event.audio);
+            const floats = new Float32Array(aligned);
 
-          const buf = audioCtx.createBuffer(1, floats.length, SAMPLE_RATE);
-          buf.getChannelData(0).set(floats);
+            const buf = audioCtx.createBuffer(1, floats.length, SAMPLE_RATE);
+            buf.getChannelData(0).set(floats);
 
-          const source = audioCtx.createBufferSource();
-          source.buffer = buf;
-          source.connect(audioCtx.destination);
+            const source = audioCtx.createBufferSource();
+            source.buffer = buf;
+            source.connect(audioCtx.destination);
 
-          const startTime = Math.max(nextStartTime, audioCtx.currentTime);
-          source.start(startTime);
-          nextStartTime = startTime + buf.duration;
+            const startTime = Math.max(nextStartTime, audioCtx.currentTime);
+            source.start(startTime);
+            nextStartTime = startTime + buf.duration;
+          } else if (event.type === 'error') {
+            console.error(event.error);
+          }
         }
+      } finally {
+        ws.close();
       }
-
-      ws.close();
     } finally {
       setLoading(false);
     }

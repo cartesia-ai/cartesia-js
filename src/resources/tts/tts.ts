@@ -7,12 +7,16 @@ import { APIPromise } from '../../core/api-promise';
 import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
-import { TTSWS, type TTSWSClientOptions } from './ws';
 import { multipartFormRequestOptions } from '../../internal/uploads';
+import { TTSWS } from '../../lib/tts/ws/3-0-0';
+import { TTSContextManager, TTSContexts } from '../../lib/tts/ws/context-manager';
+import { TTSWSClientOptions } from './ws';
 
 export class TTS extends APIResource {
   /**
-   * Text to Speech (Bytes)
+   * Text-to-Speech (Bytes).
+   *
+   * The simplest way to stream generated audio. See {@link TTS.createContextManager} and {@link TTS.generateSse} for more features.
    */
   generate(body: TTSGenerateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post('/tts/bytes', {
@@ -24,7 +28,14 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Text to Speech (SSE)
+   * Text-to-Speech (SSE).
+   *
+   * Supports:
+   * - Streaming
+   * - Timestamps
+   * - context_id without transcript buffering
+   *
+   * Use {@link TTS.createContextManager} if you require continuations to buffer a transcript over multiple chunks to the same context.
    */
   generateSse(body: TTSGenerateSseParams, options?: RequestOptions): APIPromise<void> {
     return this._client.post('/tts/sse', {
@@ -35,17 +46,36 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Create a WebSocket connection for streaming TTS.
-   * Returns a promise that resolves when the connection is open.
+   * Text-to-Speech with context management.
+   *
+   * Supports:
+   * - Streaming
+   * - Long-lived connections allow for lower latency by reusing a live network connection
+   * - Timestamps
+   * - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+   * - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+   * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+   * - Event listeners
    */
-  async websocket(options?: TTSWSClientOptions): Promise<TTSWS> {
+  createContextManager(options?: TTSWSClientOptions): TTSContexts.IManager {
+    return new TTSContextManager(this._client, options);
+  }
+
+  /**
+   * Text-to-Speech (WebSocket).
+   * @returns A promise that resolves when the connection is open.
+   *
+   * @deprecated This method is no longer maintained and is kept for backward compatibility.
+   * Use {@link TTS.createContextManager} instead.
+   *
+   * Note: {@link TTS.createContextManager} returns {@link TTSContexts.IManager}, which behaves differently in these ways:
+   * - {@link TTSContexts.IManager.context } returns {@link TTSContexts.IContext}
+   * - {@link TTSContexts.IContext.receive} yields errors rather than throwing them
+   * - {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush} throw errors when the context has already been cleaned up by the client.
+   */
+  websocket(options?: ConstructorParameters<typeof TTSWS>[1]): Promise<TTSWS> {
     const ws = new TTSWS(this._client, options);
-    try {
-      return await ws.connect();
-    } catch (error) {
-      ws.close();
-      throw error;
-    }
+    return ws.connect();
   }
 
   /**

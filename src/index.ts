@@ -5,7 +5,7 @@ export { Cartesia as default } from './client';
 export { type Uploadable, toFile } from './core/uploads';
 export { APIPromise } from './core/api-promise';
 export { Cartesia, type ClientOptions } from './client';
-export * from './backcompat';
+export * from './lib/backcompat';
 export { PagePromise } from './core/pagination';
 export {
   CartesiaError,

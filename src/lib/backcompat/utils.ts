@@ -1,4 +1,4 @@
-import { APIConnectionTimeoutError, APIError } from '../core/error';
+import { APIConnectionTimeoutError, APIError } from '../../core/error';
 import { CartesiaClientError, CartesiaTimeoutError } from './errors';
 
 /** Convert snake_case keys to camelCase, recursively. Only transforms plain objects. */

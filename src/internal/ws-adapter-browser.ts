@@ -10,7 +10,7 @@ type DOMEventHandler = (ev: any) => void;
 declare class WebSocket {
   readonly readyState: number;
   binaryType: string;
-  send(data: string | ArrayBufferLike | ArrayBufferView): void;
+  send(data: string | ArrayBufferLike | ArrayBufferView | Blob): void;
   close(code?: number, reason?: string): void;
   addEventListener(type: string, listener: DOMEventHandler): void;
   removeEventListener(type: string, listener: DOMEventHandler): void;
