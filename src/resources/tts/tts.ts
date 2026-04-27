@@ -8,15 +8,14 @@ import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { multipartFormRequestOptions } from '../../internal/uploads';
+import type { TTSWSClientOptions } from './ws';
+
 import { TTSWS } from '../../lib/tts/ws/3-0-0';
 import { TTSContextManager, TTSContexts } from '../../lib/tts/ws/context-manager';
-import { TTSWSClientOptions } from './ws';
 
 export class TTS extends APIResource {
   /**
-   * Text-to-Speech (Bytes).
-   *
-   * The simplest way to stream generated audio. See {@link TTS.createContextManager} and {@link TTS.generateSse} for more features.
+   * Text to Speech (Bytes)
    */
   generate(body: TTSGenerateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post('/tts/bytes', {
@@ -28,14 +27,7 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Text-to-Speech (SSE).
-   *
-   * Supports:
-   * - Streaming
-   * - Timestamps
-   * - context_id without transcript buffering
-   *
-   * Use {@link TTS.createContextManager} if you require continuations to buffer a transcript over multiple chunks to the same context.
+   * Text to Speech (SSE)
    */
   generateSse(body: TTSGenerateSseParams, options?: RequestOptions): APIPromise<void> {
     return this._client.post('/tts/sse', {
@@ -63,6 +55,7 @@ export class TTS extends APIResource {
 
   /**
    * Text-to-Speech (WebSocket).
+   *
    * @returns A promise that resolves when the connection is open.
    *
    * @deprecated This method is no longer maintained and is kept for backward compatibility.

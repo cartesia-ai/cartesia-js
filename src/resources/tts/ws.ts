@@ -1,17 +1,17 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import type * as WS from 'ws';
-import { BrowserWebSocket } from '../../internal/ws-adapter-browser';
-import { NodeWebSocket } from '../../internal/ws-adapter-node';
-import { TTSWSBase, type TTSWSBaseOptions } from './ws-base';
-import { Cartesia } from '../../client';
-
 let _ws: typeof import('ws') | undefined;
 try {
   _ws = require('ws');
 } catch {
   // Optional — in browsers, we use the native WebSocket API instead.
 }
+
+import type * as WS from 'ws';
+import { BrowserWebSocket } from '../../internal/ws-adapter-browser';
+import { NodeWebSocket } from '../../internal/ws-adapter-node';
+import { TTSWSBase, type TTSWSBaseOptions } from './ws-base';
+import { Cartesia } from '../../client';
 
 export type { TTSWSReconnectOptions } from './ws-base';
 

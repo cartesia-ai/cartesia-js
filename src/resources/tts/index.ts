@@ -17,6 +17,7 @@ export {
 } from './tts';
 export { type TTSWSClientOptions } from './ws';
 export { type TTSWSReconnectOptions } from './ws-base';
+
 export {
   TTSWS,
   TTSWSContext,
