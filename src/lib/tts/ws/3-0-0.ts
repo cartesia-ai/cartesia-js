@@ -1,5 +1,7 @@
 // TTS WS Implementation from v3.0.0. Kept for backward compatibility
 
+/// <reference lib="dom" />
+
 import type * as WS from 'ws';
 
 let _ws: typeof import('ws') | undefined;
