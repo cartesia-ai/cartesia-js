@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { Cartesia } from '../client';
+import { Cartesia } from '../../client';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
 import { Readable } from 'stream';

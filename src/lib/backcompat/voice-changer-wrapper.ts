@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { Cartesia } from '../client';
-import { type Uploadable } from '../core/uploads';
-import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
+import { Cartesia } from '../../client';
+import { type Uploadable } from '../../core/uploads';
+import { type RequestOptions as InternalRequestOptions } from '../../internal/request-options';
 import { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';

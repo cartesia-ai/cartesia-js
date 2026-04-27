@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import { Cartesia } from '../client';
-import { type Uploadable } from '../core/uploads';
+import { Cartesia } from '../../client';
+import { type Uploadable } from '../../core/uploads';
 import {
   type VoiceCloneParams,
   type SupportedLanguage,
@@ -8,8 +8,8 @@ import {
   type VoiceUpdateParams,
   type VoiceLocalizeParams,
   type VoiceListParams,
-} from '../resources/voices';
-import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
+} from '../../resources/voices';
+import { type RequestOptions as InternalRequestOptions } from '../../internal/request-options';
 import { BackCompatRequestOptions } from './types';
 import { wrap, snakeToCamel } from './utils';
 
