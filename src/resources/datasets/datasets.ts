@@ -2,7 +2,14 @@
 
 import { APIResource } from '../../core/resource';
 import * as FilesAPI from './files';
-import { FileDeleteParams, FileListParams, FileListResponse, FileListResponsesCursorIDPage, FileUploadParams, Files } from './files';
+import {
+  FileDeleteParams,
+  FileListParams,
+  FileListResponse,
+  FileListResponsesCursorIDPage,
+  FileUploadParams,
+  Files,
+} from './files';
 import { APIPromise } from '../../core/api-promise';
 import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../../core/pagination';
 import { buildHeaders } from '../../internal/headers';
@@ -30,13 +37,20 @@ export class Datasets extends APIResource {
    * Update an existing dataset
    */
   update(id: string, body: DatasetUpdateParams, options?: RequestOptions): APIPromise<void> {
-    return this._client.patch(path`/datasets/${id}`, { body, ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
+    return this._client.patch(path`/datasets/${id}`, {
+      body,
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 
   /**
    * Paginated list of datasets
    */
-  list(query: DatasetListParams | null | undefined = {}, options?: RequestOptions): PagePromise<DatasetsCursorIDPage, Dataset> {
+  list(
+    query: DatasetListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): PagePromise<DatasetsCursorIDPage, Dataset> {
     return this._client.getAPIList('/datasets/', CursorIDPage<Dataset>, { query, ...options });
   }
 
@@ -44,11 +58,14 @@ export class Datasets extends APIResource {
    * Delete a dataset
    */
   delete(id: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/datasets/${id}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
+    return this._client.delete(path`/datasets/${id}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 }
 
-export type DatasetsCursorIDPage = CursorIDPage<Dataset>
+export type DatasetsCursorIDPage = CursorIDPage<Dataset>;
 
 /**
  * A collection of files used for fine-tuning models
@@ -114,7 +131,7 @@ export declare namespace Datasets {
     type DatasetsCursorIDPage as DatasetsCursorIDPage,
     type DatasetCreateParams as DatasetCreateParams,
     type DatasetUpdateParams as DatasetUpdateParams,
-    type DatasetListParams as DatasetListParams
+    type DatasetListParams as DatasetListParams,
   };
 
   export {
@@ -123,6 +140,6 @@ export declare namespace Datasets {
     type FileListResponsesCursorIDPage as FileListResponsesCursorIDPage,
     type FileListParams as FileListParams,
     type FileDeleteParams as FileDeleteParams,
-    type FileUploadParams as FileUploadParams
+    type FileUploadParams as FileUploadParams,
   };
 }

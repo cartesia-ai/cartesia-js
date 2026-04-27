@@ -16,14 +16,31 @@ export class VoiceChanger extends APIResource {
    * This endpoint is priced at 15 characters per second of input audio.
    */
   changeVoiceBytes(body: VoiceChangerChangeVoiceBytesParams, options?: RequestOptions): APIPromise<Response> {
-    return this._client.post('/voice-changer/bytes', multipartFormRequestOptions({ body, ...options, headers: buildHeaders([{Accept: 'audio/wav'}, options?.headers]), __binaryResponse: true }, this._client));
+    return this._client.post(
+      '/voice-changer/bytes',
+      multipartFormRequestOptions(
+        {
+          body,
+          ...options,
+          headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
+          __binaryResponse: true,
+        },
+        this._client,
+      ),
+    );
   }
 
   /**
    * Voice Changer (SSE)
    */
   changeVoiceSse(body: VoiceChangerChangeVoiceSseParams, options?: RequestOptions): APIPromise<void> {
-    return this._client.post('/voice-changer/sse', multipartFormRequestOptions({ body, ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) }, this._client));
+    return this._client.post(
+      '/voice-changer/sse',
+      multipartFormRequestOptions(
+        { body, ...options, headers: buildHeaders([{ Accept: '*/*' }, options?.headers]) },
+        this._client,
+      ),
+    );
   }
 }
 
@@ -70,6 +87,6 @@ export interface VoiceChangerChangeVoiceSseParams {
 export declare namespace VoiceChanger {
   export {
     type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
-    type VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams
+    type VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
   };
 }

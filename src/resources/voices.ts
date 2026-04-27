@@ -38,7 +38,10 @@ export class Voices extends APIResource {
    * }
    * ```
    */
-  list(query: VoiceListParams | null | undefined = {}, options?: RequestOptions): PagePromise<VoicesCursorIDPage, Voice> {
+  list(
+    query: VoiceListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): PagePromise<VoicesCursorIDPage, Voice> {
     return this._client.getAPIList('/voices', CursorIDPage<Voice>, { query, ...options });
   }
 
@@ -51,7 +54,10 @@ export class Voices extends APIResource {
    * ```
    */
   delete(id: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/voices/${id}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
+    return this._client.delete(path`/voices/${id}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 
   /**
@@ -65,7 +71,10 @@ export class Voices extends APIResource {
    * ```
    */
   clone(body: VoiceCloneParams, options?: RequestOptions): APIPromise<VoiceMetadata> {
-    return this._client.post('/voices/clone', multipartFormRequestOptions({ body, ...options }, this._client));
+    return this._client.post(
+      '/voices/clone',
+      multipartFormRequestOptions({ body, ...options }, this._client),
+    );
   }
 
   /**
@@ -76,7 +85,11 @@ export class Voices extends APIResource {
    * const voice = await client.voices.get('id');
    * ```
    */
-  get(id: string, query: VoiceGetParams | null | undefined = {}, options?: RequestOptions): APIPromise<Voice> {
+  get(
+    id: string,
+    query: VoiceGetParams | null | undefined = {},
+    options?: RequestOptions,
+  ): APIPromise<Voice> {
     return this._client.get(path`/voices/${id}`, { query, ...options });
   }
 
@@ -100,15 +113,57 @@ export class Voices extends APIResource {
   }
 }
 
-export type VoicesCursorIDPage = CursorIDPage<Voice>
+export type VoicesCursorIDPage = CursorIDPage<Voice>;
 
-export type GenderPresentation = 'masculine' | 'feminine' | 'gender_neutral'
+export type GenderPresentation = 'masculine' | 'feminine' | 'gender_neutral';
 
 /**
  * The language that the given voice should speak the transcript in. For valid
  * options, see [Models](/build-with-cartesia/tts-models).
  */
-export type SupportedLanguage = 'en' | 'fr' | 'de' | 'es' | 'pt' | 'zh' | 'ja' | 'hi' | 'it' | 'ko' | 'nl' | 'pl' | 'ru' | 'sv' | 'tr' | 'tl' | 'bg' | 'ro' | 'ar' | 'cs' | 'el' | 'fi' | 'hr' | 'ms' | 'sk' | 'da' | 'ta' | 'uk' | 'hu' | 'no' | 'vi' | 'bn' | 'th' | 'he' | 'ka' | 'id' | 'te' | 'gu' | 'kn' | 'ml' | 'mr' | 'pa'
+export type SupportedLanguage =
+  | 'en'
+  | 'fr'
+  | 'de'
+  | 'es'
+  | 'pt'
+  | 'zh'
+  | 'ja'
+  | 'hi'
+  | 'it'
+  | 'ko'
+  | 'nl'
+  | 'pl'
+  | 'ru'
+  | 'sv'
+  | 'tr'
+  | 'tl'
+  | 'bg'
+  | 'ro'
+  | 'ar'
+  | 'cs'
+  | 'el'
+  | 'fi'
+  | 'hr'
+  | 'ms'
+  | 'sk'
+  | 'da'
+  | 'ta'
+  | 'uk'
+  | 'hu'
+  | 'no'
+  | 'vi'
+  | 'bn'
+  | 'th'
+  | 'he'
+  | 'ka'
+  | 'id'
+  | 'te'
+  | 'gu'
+  | 'kn'
+  | 'ml'
+  | 'mr'
+  | 'pa';
 
 export interface Voice {
   /**
@@ -285,7 +340,22 @@ export interface VoiceLocalizeParams {
    * Portuguese (pt), Chinese (zh), Hindi (hi), Italian (it), Korean (ko), Dutch
    * (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
    */
-  language: 'en' | 'de' | 'es' | 'fr' | 'ja' | 'pt' | 'zh' | 'hi' | 'it' | 'ko' | 'nl' | 'pl' | 'ru' | 'sv' | 'tr';
+  language:
+    | 'en'
+    | 'de'
+    | 'es'
+    | 'fr'
+    | 'ja'
+    | 'pt'
+    | 'zh'
+    | 'hi'
+    | 'it'
+    | 'ko'
+    | 'nl'
+    | 'pl'
+    | 'ru'
+    | 'sv'
+    | 'tr';
 
   /**
    * The name of the new localized voice.
@@ -317,6 +387,6 @@ export declare namespace Voices {
     type VoiceListParams as VoiceListParams,
     type VoiceCloneParams as VoiceCloneParams,
     type VoiceGetParams as VoiceGetParams,
-    type VoiceLocalizeParams as VoiceLocalizeParams
+    type VoiceLocalizeParams as VoiceLocalizeParams,
   };
 }

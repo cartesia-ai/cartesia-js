@@ -1,6 +1,5 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-
 export interface GetStatusResponse {
   ok: boolean;
 
@@ -8,7 +7,5 @@ export interface GetStatusResponse {
 }
 
 export declare namespace TopLevel {
-  export {
-    type GetStatusResponse as GetStatusResponse
-  };
+  export { type GetStatusResponse as GetStatusResponse };
 }

@@ -2,7 +2,10 @@
 
 import Cartesia from '@cartesia/cartesia-js';
 
-const client = new Cartesia({ token: 'My Token', baseURL: process.env["TEST_API_BASE_URL"] ?? 'http://127.0.0.1:4010' });
+const client = new Cartesia({
+  token: 'My Token',
+  baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
+});
 
 describe('resource metrics', () => {
   // Mock server tests are disabled
@@ -20,10 +23,10 @@ describe('resource metrics', () => {
   // Mock server tests are disabled
   test.skip('create: required and optional params', async () => {
     const response = await client.agents.metrics.create({
-    name: 'name',
-    prompt: 'prompt',
-    display_name: 'display_name',
-  });
+      name: 'name',
+      prompt: 'prompt',
+      display_name: 'display_name',
+    });
   });
 
   // Mock server tests are disabled
@@ -53,9 +56,12 @@ describe('resource metrics', () => {
   // Mock server tests are disabled
   test.skip('list: request options and params are passed correctly', async () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
-    await expect(client.agents.metrics.list({ limit: 0, starting_after: 'starting_after' }, { path: '/_stainless_unknown_path' }))
-      .rejects
-      .toThrow(Cartesia.NotFoundError);
+    await expect(
+      client.agents.metrics.list(
+        { limit: 0, starting_after: 'starting_after' },
+        { path: '/_stainless_unknown_path' },
+      ),
+    ).rejects.toThrow(Cartesia.NotFoundError);
   });
 
   // Mock server tests are disabled

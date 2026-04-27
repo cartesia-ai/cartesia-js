@@ -4,7 +4,15 @@ import { TTSEmitter, TTSStreamMessage, WebSocketError, buildURL } from './intern
 import { InternalEventEmitter } from '../../core/EventEmitter';
 import { sleep } from '../../internal/utils/sleep';
 import { type WebSocketLike, ReadyState } from '../../internal/ws-adapter';
-import { SendQueue, flattenRawData, isRecoverableClose, type RawWebSocketData, type ReconnectingEvent, type ReconnectingOverrides, type UnsentMessage } from '../../internal/ws';
+import {
+  SendQueue,
+  flattenRawData,
+  isRecoverableClose,
+  type RawWebSocketData,
+  type ReconnectingEvent,
+  type ReconnectingOverrides,
+  type UnsentMessage,
+} from '../../internal/ws';
 import * as TTSAPI from './tts';
 import { Cartesia } from '../../client';
 import { CartesiaError } from '../../core/error';
@@ -14,7 +22,9 @@ export interface TTSWSReconnectOptions {
    * Called before each reconnect attempt. Return an object with
    * `parameters` to override query parameters for the next connection.
    */
-  onReconnecting(event: ReconnectingEvent<Record<string, unknown>>): ReconnectingOverrides<Record<string, unknown>> | void;
+  onReconnecting(
+    event: ReconnectingEvent<Record<string, unknown>>,
+  ): ReconnectingOverrides<Record<string, unknown>> | void;
 
   /**
    * Maximum number of reconnection attempts. Default: 5.
@@ -73,9 +83,11 @@ export abstract class TTSWSBase<TSocket extends WebSocketLike> extends TTSEmitte
     close: (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => void;
   }>();
 
-  constructor(client: Cartesia,
-parameters?: Record<string, unknown> | undefined,
-options?: TTSWSBaseOptions | undefined) {
+  constructor(
+    client: Cartesia,
+    parameters?: Record<string, unknown> | undefined,
+    options?: TTSWSBaseOptions | undefined,
+  ) {
     super();
     this._client = client;
     this._parameters = undefined;
@@ -281,7 +293,12 @@ options?: TTSWSBaseOptions | undefined) {
           push({ type: 'closing' });
           break;
         case ReadyState.CLOSED:
-          push({ type: 'close', code: this._lastCloseCode, reason: this._lastCloseReason, unsent: this._sendQueue.drain() });
+          push({
+            type: 'close',
+            code: this._lastCloseCode,
+            reason: this._lastCloseReason,
+            unsent: this._sendQueue.drain(),
+          });
           done = true;
           cleanup();
           break;
@@ -404,9 +421,16 @@ options?: TTSWSBaseOptions | undefined) {
       if (!this._canReconnect(closeCode)) {
         this._isReconnecting = false;
         if (!this._intentionallyClosed) {
-          this._onError(null, `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`, undefined);
+          this._onError(
+            null,
+            `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`,
+            undefined,
+          );
         }
-        this._emitPermanentClose(this._intentionallyClosed ? this._closeCode : closeCode, this._intentionallyClosed ? this._closeReason : 'reconnect aborted');
+        this._emitPermanentClose(
+          this._intentionallyClosed ? this._closeCode : closeCode,
+          this._intentionallyClosed ? this._closeReason : 'reconnect aborted',
+        );
         return;
       }
 
@@ -454,9 +478,16 @@ options?: TTSWSBaseOptions | undefined) {
       if (!this._canReconnect(closeCode)) {
         this._isReconnecting = false;
         if (!this._intentionallyClosed) {
-          this._onError(null, `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`, undefined);
+          this._onError(
+            null,
+            `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`,
+            undefined,
+          );
         }
-        this._emitPermanentClose(this._intentionallyClosed ? this._closeCode : closeCode, this._intentionallyClosed ? this._closeReason : 'reconnect aborted');
+        this._emitPermanentClose(
+          this._intentionallyClosed ? this._closeCode : closeCode,
+          this._intentionallyClosed ? this._closeReason : 'reconnect aborted',
+        );
         return;
       }
 
@@ -465,9 +496,16 @@ options?: TTSWSBaseOptions | undefined) {
       if (!this._canReconnect(closeCode)) {
         this._isReconnecting = false;
         if (!this._intentionallyClosed) {
-          this._onError(null, `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`, undefined);
+          this._onError(
+            null,
+            `WebSocket reconnect aborted: non-recoverable close code ${closeCode}`,
+            undefined,
+          );
         }
-        this._emitPermanentClose(this._intentionallyClosed ? this._closeCode : closeCode, this._intentionallyClosed ? this._closeReason : 'reconnect aborted');
+        this._emitPermanentClose(
+          this._intentionallyClosed ? this._closeCode : closeCode,
+          this._intentionallyClosed ? this._closeReason : 'reconnect aborted',
+        );
         return;
       }
 
@@ -502,7 +540,11 @@ options?: TTSWSBaseOptions | undefined) {
     // All retries exhausted — surface an error so consumers can
     // distinguish retry failure from a clean close.
     this._isReconnecting = false;
-    this._onError(null, `WebSocket reconnect failed after ${maxRetries} attempts (close code: ${closeCode})`, undefined);
+    this._onError(
+      null,
+      `WebSocket reconnect failed after ${maxRetries} attempts (close code: ${closeCode})`,
+      undefined,
+    );
     this._emitPermanentClose(closeCode, `reconnect failed after ${maxRetries} attempts`);
   }
 
@@ -562,11 +604,11 @@ options?: TTSWSBaseOptions | undefined) {
 
   protected _authHeaders(): Record<string, string> {
     if (this._client.token) {
-      return { 'Authorization': `Bearer ${this._client.token}` }
+      return { Authorization: `Bearer ${this._client.token}` };
     }
 
     if (this._client.apiKey) {
-      return { 'Authorization': `Bearer ${this._client.apiKey}` }
+      return { Authorization: `Bearer ${this._client.apiKey}` };
     }
     return {};
   }

@@ -2,7 +2,14 @@
 
 import { APIResource } from '../../../core/resource';
 import * as ResultsAPI from './results';
-import { ResultExportParams, ResultExportResponse, ResultListParams, ResultListResponse, ResultListResponsesCursorIDPage, Results } from './results';
+import {
+  ResultExportParams,
+  ResultExportResponse,
+  ResultListParams,
+  ResultListResponse,
+  ResultListResponsesCursorIDPage,
+  Results,
+} from './results';
 import { APIPromise } from '../../../core/api-promise';
 import { buildHeaders } from '../../../internal/headers';
 import { RequestOptions } from '../../../internal/request-options';
@@ -28,7 +35,10 @@ export class Metrics extends APIResource {
   /**
    * List of all LLM-as-a-Judge metrics owned by your account.
    */
-  list(query: MetricListParams | null | undefined = {}, options?: RequestOptions): APIPromise<MetricListResponse> {
+  list(
+    query: MetricListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): APIPromise<MetricListResponse> {
     return this._client.get('/agents/metrics', { query, ...options });
   }
 
@@ -37,8 +47,11 @@ export class Metrics extends APIResource {
    * made to the agent automatically from that point onwards.
    */
   addToAgent(metricID: string, params: MetricAddToAgentParams, options?: RequestOptions): APIPromise<void> {
-    const { agent_id } = params
-    return this._client.post(path`/agents/${agent_id}/metrics/${metricID}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
+    const { agent_id } = params;
+    return this._client.post(path`/agents/${agent_id}/metrics/${metricID}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 
   /**
@@ -46,9 +59,16 @@ export class Metrics extends APIResource {
    * run on all calls made to the agent automatically from that point onwards.
    * Existing metric results will remain.
    */
-  removeFromAgent(metricID: string, params: MetricRemoveFromAgentParams, options?: RequestOptions): APIPromise<void> {
-    const { agent_id } = params
-    return this._client.delete(path`/agents/${agent_id}/metrics/${metricID}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
+  removeFromAgent(
+    metricID: string,
+    params: MetricRemoveFromAgentParams,
+    options?: RequestOptions,
+  ): APIPromise<void> {
+    const { agent_id } = params;
+    return this._client.delete(path`/agents/${agent_id}/metrics/${metricID}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 }
 
@@ -154,7 +174,7 @@ export declare namespace Metrics {
     type MetricCreateParams as MetricCreateParams,
     type MetricListParams as MetricListParams,
     type MetricAddToAgentParams as MetricAddToAgentParams,
-    type MetricRemoveFromAgentParams as MetricRemoveFromAgentParams
+    type MetricRemoveFromAgentParams as MetricRemoveFromAgentParams,
   };
 
   export {
@@ -163,6 +183,6 @@ export declare namespace Metrics {
     type ResultExportResponse as ResultExportResponse,
     type ResultListResponsesCursorIDPage as ResultListResponsesCursorIDPage,
     type ResultListParams as ResultListParams,
-    type ResultExportParams as ResultExportParams
+    type ResultExportParams as ResultExportParams,
   };
 }

@@ -13,27 +13,43 @@ export class Files extends APIResource {
   /**
    * Paginated list of files in a dataset
    */
-  list(id: string, query: FileListParams | null | undefined = {}, options?: RequestOptions): PagePromise<FileListResponsesCursorIDPage, FileListResponse> {
-    return this._client.getAPIList(path`/datasets/${id}/files`, CursorIDPage<FileListResponse>, { query, ...options });
+  list(
+    id: string,
+    query: FileListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): PagePromise<FileListResponsesCursorIDPage, FileListResponse> {
+    return this._client.getAPIList(path`/datasets/${id}/files`, CursorIDPage<FileListResponse>, {
+      query,
+      ...options,
+    });
   }
 
   /**
    * Remove a file from a dataset
    */
   delete(fileID: string, params: FileDeleteParams, options?: RequestOptions): APIPromise<void> {
-    const { id } = params
-    return this._client.delete(path`/datasets/${id}/files/${fileID}`, { ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) });
+    const { id } = params;
+    return this._client.delete(path`/datasets/${id}/files/${fileID}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
   }
 
   /**
    * Upload a new file to a dataset
    */
   upload(id: string, body: FileUploadParams, options?: RequestOptions): APIPromise<void> {
-    return this._client.post(path`/datasets/${id}/files`, multipartFormRequestOptions({ body, ...options, headers: buildHeaders([{Accept: '*/*'}, options?.headers]) }, this._client));
+    return this._client.post(
+      path`/datasets/${id}/files`,
+      multipartFormRequestOptions(
+        { body, ...options, headers: buildHeaders([{ Accept: '*/*' }, options?.headers]) },
+        this._client,
+      ),
+    );
   }
 }
 
-export type FileListResponsesCursorIDPage = CursorIDPage<FileListResponse>
+export type FileListResponsesCursorIDPage = CursorIDPage<FileListResponse>;
 
 /**
  * File stored in a dataset
@@ -89,6 +105,6 @@ export declare namespace Files {
     type FileListResponsesCursorIDPage as FileListResponsesCursorIDPage,
     type FileListParams as FileListParams,
     type FileDeleteParams as FileDeleteParams,
-    type FileUploadParams as FileUploadParams
+    type FileUploadParams as FileUploadParams,
   };
 }

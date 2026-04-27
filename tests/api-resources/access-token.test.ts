@@ -2,7 +2,10 @@
 
 import Cartesia from '@cartesia/cartesia-js';
 
-const client = new Cartesia({ token: 'My Token', baseURL: process.env["TEST_API_BASE_URL"] ?? 'http://127.0.0.1:4010' });
+const client = new Cartesia({
+  token: 'My Token',
+  baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
+});
 
 describe('resource accessToken', () => {
   // Mock server tests are disabled

@@ -2,7 +2,10 @@
 
 import Cartesia from '@cartesia/cartesia-js';
 
-const client = new Cartesia({ token: 'My Token', baseURL: process.env["TEST_API_BASE_URL"] ?? 'http://127.0.0.1:4010' });
+const client = new Cartesia({
+  token: 'My Token',
+  baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
+});
 
 describe('resource calls', () => {
   // Mock server tests are disabled
@@ -32,12 +35,12 @@ describe('resource calls', () => {
   // Mock server tests are disabled
   test.skip('list: required and optional params', async () => {
     const response = await client.agents.calls.list({
-    agent_id: 'agent_id',
-    ending_before: 'ending_before',
-    expand: 'expand',
-    limit: 0,
-    starting_after: 'starting_after',
-  });
+      agent_id: 'agent_id',
+      ending_before: 'ending_before',
+      expand: 'expand',
+      limit: 0,
+      starting_after: 'starting_after',
+    });
   });
 
   // Mock server tests are disabled

@@ -12,8 +12,14 @@ export class Results extends APIResource {
   /**
    * Paginated list of metric results. Filter results using the query parameters,
    */
-  list(query: ResultListParams | null | undefined = {}, options?: RequestOptions): PagePromise<ResultListResponsesCursorIDPage, ResultListResponse> {
-    return this._client.getAPIList('/agents/metrics/results', CursorIDPage<ResultListResponse>, { query, ...options });
+  list(
+    query: ResultListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): PagePromise<ResultListResponsesCursorIDPage, ResultListResponse> {
+    return this._client.getAPIList('/agents/metrics/results', CursorIDPage<ResultListResponse>, {
+      query,
+      ...options,
+    });
   }
 
   /**
@@ -22,11 +28,15 @@ export class Results extends APIResource {
    * the results to export.
    */
   export(query: ResultExportParams | null | undefined = {}, options?: RequestOptions): APIPromise<string> {
-    return this._client.get('/agents/metrics/results/export', { query, ...options, headers: buildHeaders([{Accept: 'text/csv'}, options?.headers]) });
+    return this._client.get('/agents/metrics/results/export', {
+      query,
+      ...options,
+      headers: buildHeaders([{ Accept: 'text/csv' }, options?.headers]),
+    });
   }
 }
 
-export type ResultListResponsesCursorIDPage = CursorIDPage<ResultListResponse>
+export type ResultListResponsesCursorIDPage = CursorIDPage<ResultListResponse>;
 
 export interface ResultListResponse {
   /**
@@ -100,7 +110,7 @@ export interface ResultListResponse {
   value?: unknown;
 }
 
-export type ResultExportResponse = Uploadable
+export type ResultExportResponse = Uploadable;
 
 export interface ResultListParams extends CursorIDPageParams {
   /**
@@ -181,6 +191,6 @@ export declare namespace Results {
     type ResultExportResponse as ResultExportResponse,
     type ResultListResponsesCursorIDPage as ResultListResponsesCursorIDPage,
     type ResultListParams as ResultListParams,
-    type ResultExportParams as ResultExportParams
+    type ResultExportParams as ResultExportParams,
   };
 }
