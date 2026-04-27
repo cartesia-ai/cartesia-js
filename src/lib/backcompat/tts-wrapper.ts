@@ -387,7 +387,7 @@ export class TTSWrapper {
       throw new Error('Response body is null');
     }
 
-    return Readable.fromWeb(response.body);
+    return Readable.fromWeb(response.body as any);
   }
 
   /** @deprecated Use {@link Cartesia.tts.generate} instead. */
@@ -429,6 +429,6 @@ export class TTSWrapper {
       throw new Error('Response body is null');
     }
 
-    return Readable.fromWeb(response.body);
+    return Readable.fromWeb(response.body as any);
   }
 }
