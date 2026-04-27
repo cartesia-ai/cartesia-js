@@ -1,5 +1,8 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
+
 import { isReadonlyArray } from './utils/values';
 
 type HeaderValue = string | undefined | null;
