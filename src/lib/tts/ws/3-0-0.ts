@@ -268,6 +268,11 @@ export class TTSWSContext {
  *
  * @deprecated This class is no longer maintained and kept for backward compatibility.
  * Use {@link TTSContextManager } instead.
+ *
+ * Note: {@link TTSContextManager.context } returns {@link TTSContexts.IContext},
+ * which does not throw errors in {@link TTSContexts.IContext.receive},
+ * but does throw errors in {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush}
+ * when the context has already been cleaned up by the client.
  */
 export class TTSWS extends EventEmitter<WebsocketEvents> {
   url: URL;

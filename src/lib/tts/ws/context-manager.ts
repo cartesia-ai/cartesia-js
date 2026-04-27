@@ -10,7 +10,7 @@ import { TTSWS, type TTSWSClientOptions } from '../../../resources/tts/ws';
 import { decodeBase64 } from '../utils';
 
 type TTSContextEvents = {
-  close: (code: number) => void;
+  close: () => void;
 };
 
 // Note: ContextOptions is only exported for backward compatibility since it was included in src/resources/tts/index.ts
@@ -20,7 +20,12 @@ export type ContextOptions = {
   voice: TTSAPI.VoiceSpecifier;
   output_format: TTSAPI.GenerationRequest['output_format'];
   contextId?: string;
-  /** Receive timeout in milliseconds. If set, {@link TTSTTSContext.receive} will close itself after this duration of inactivity. */
+  /**
+   * How long to wait for events in milliseconds.
+   *
+   * If set, {@link TTSContext.receive} will yield {@link TTSAPI.WebsocketResponse.Error}
+   * and return early if no server events for the context were seen within the timeout.
+   */
   timeout?: number;
 };
 
@@ -63,24 +68,40 @@ export namespace TTSContexts {
     /**
      * Creates a context. TTSContexts are short-lived and designed to generate audio for a single transcript.
      *
-     * The transcript can broken up into chunks and streamed over time using continuations, which is useful if you're still in the middle of generating your transcript.
+     * The transcript can broken up into chunks and streamed over time using continuations,
+     * which is useful if you're still in the middle of generating your transcript.
      *
      * See https://docs.cartesia.ai/use-the-api/tts-websocket/contexts for details.
      *
      * @param options.context_id - Must be unique per WebSocket connection if provided.
      *
-     * @throws If an instance of {@link TTSTTSContext} exists with the same context ID: {@link CartesiaError}. Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context ID is a duplicate even if this method did not throw.
+     * @throws If an instance of {@link TTSContext} exists with the same context ID: {@link CartesiaError}.
+     * Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context ID is a duplicate even if this method did not throw.
      */
     context(options: ContextOptions): IContext;
 
+    /**
+     * Gets the context returned by {@link IManager.context}.
+     *
+     * @returns The context, unless it was cleaned up. Contexts are removed some time after they close.
+     */
     getContext(contextId: string): IContext | undefined;
 
+    /**
+     * Lists all contexts.
+     *
+     * Contexts are cleaned up automatically some time after they close,
+     * so this method does not return all contexts that were ever created.
+     *
+     * Open contexts are guaranteed to be returned.
+     */
     listContexts(): IContext[];
   }
   /**
    * Contexts are short-lived and designed to generate audio for a single transcript.
    *
-   * The transcript can broken up into chunks and streamed over time using continuations, which is useful if you're still in the middle of generating your transcript.
+   * The transcript can broken up into chunks and streamed over time using continuations,
+   * which is useful if you're still in the middle of generating your transcript.
    *
    * See https://docs.cartesia.ai/use-the-api/tts-websocket/contexts for details.
    *
@@ -88,6 +109,10 @@ export namespace TTSContexts {
    */
   export interface IContext extends EventEmitter<TTSContextEvents> {
     readonly contextId: string;
+    /**
+     * If true, {@link IContext.push} and {@link IContext.flush} will throw.
+     * Once a context is closed, a new one must be created to generated more audio.
+     */
     readonly isClosed: boolean;
 
     /**
@@ -109,9 +134,6 @@ export namespace TTSContexts {
      * You must call this method if you are relying on Cartesia to manage buffering (default behavior).
      *
      * See [Buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering) for details.
-     *
-     * @throws If the context is closed: {@link CartesiaError}.
-     * Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context closed due to inactivity even if this method did not throw.
      */
     end(): void;
 
@@ -135,6 +157,7 @@ export namespace TTSContexts {
      *
      * Completes when any of the following events occur:
      * - A {@link TTSAPI.WebsocketResponse.Done} event is received
+     * - A terminal {@link TTSAPI.WebsocketResponse.Error} event is received
      * - The context automatically closed due to inactivity
      * - The WebSocket connection was lost
      * - Timeout was reached
@@ -152,16 +175,14 @@ export namespace TTSContexts {
 
 class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.IContext {
   private _ws: TTSWS;
-  private _send: (
-    clientEvent: TTSAPI.WebsocketClientEvent,
-    doNotInitConnection?: boolean,
-  ) => CartesiaError | null;
-  private _cleanup: () => void;
+  private _send: (clientEvent: TTSAPI.WebsocketClientEvent) => CartesiaError | null;
+  private _cleanupAndEmitClose: () => void;
   private _modelId: string;
   private _voice: TTSAPI.VoiceSpecifier;
   private _outputFormat: TTSAPI.GenerationRequest['output_format'];
   private _timeout: number | undefined;
   private _isActive: boolean = true;
+  private _isCloseEmitted: boolean = false;
   private _queue: TTSAPI.WebsocketResponse[] | null = [];
   private _wakeOnEventListeners: ((val: 'event') => void)[] = [];
   readonly contextId: string;
@@ -169,7 +190,7 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
   constructor(
     options: ContextOptions,
     ws: TTSWS,
-    send: (clientEvent: TTSAPI.WebsocketClientEvent, doNotInitConnection?: boolean) => CartesiaError | null,
+    send: (clientEvent: TTSAPI.WebsocketClientEvent) => CartesiaError | null,
   ) {
     super();
     this._ws = ws;
@@ -180,9 +201,8 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
     this.contextId = options.contextId || uuid4();
     this._timeout = options.timeout;
 
-    const onClose = (code: number): void => {
-      this._cleanup();
-      this._emit('close', code);
+    const onClose = (): void => {
+      this._cleanupAndEmitClose();
     };
 
     const onEvent = (e: TTSAPI.WebsocketResponse): void => {
@@ -196,16 +216,17 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
       }
     };
 
-    const onReconnecting = (e: ReconnectingEvent): void => {
-      this._cleanup();
-      this._emit('close', e.closeCode);
+    const onReconnecting = (): void => {
+      this._cleanupAndEmitClose();
     };
 
     ws.on('close', onClose);
     ws.on('event', onEvent);
     ws.on('reconnecting', onReconnecting);
 
-    this._cleanup = () => {
+    this._cleanupAndEmitClose = () => {
+      if (this._isCloseEmitted) return;
+      this._isCloseEmitted = true;
       this._isActive = false;
       ws.off('close', onClose);
       ws.off('event', onEvent);
@@ -216,11 +237,13 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
       for (const resolve of resolves) {
         resolve('event');
       }
+
+      this._emit('close');
     };
   }
 
   push(request: Omit<TTSAPI.GenerationRequest, 'model_id' | 'voice' | 'output_format' | 'context_id'>) {
-    if (!this._isActive) {
+    if (this.isClosed) {
       throw new CartesiaError(`Cannot push to closed context (${this.contextId}).`);
     }
 
@@ -239,11 +262,11 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
   }
 
   end() {
-    if (!this._isActive) {
-      throw new CartesiaError(`Cannot push to closed context (${this.contextId}).`);
+    if (this.isClosed) {
+      return;
     }
 
-    const error = this._send({
+    this._send({
       transcript: '',
       continue: false,
       model_id: this._modelId,
@@ -251,15 +274,11 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
       output_format: this._outputFormat,
       context_id: this.contextId,
     });
-
-    if (error !== null) {
-      throw error satisfies CartesiaError;
-    }
   }
 
   flush() {
-    if (!this._isActive) {
-      throw new CartesiaError(`Cannot push to closed context (${this.contextId}).`);
+    if (this.isClosed) {
+      throw new CartesiaError(`Cannot flush closed context (${this.contextId}).`);
     }
 
     const error = this._send({
@@ -282,12 +301,13 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
     this._queue = null;
 
     const onEvent = (e: TTSAPI.WebsocketResponse): void => {
-      queue?.push(e);
+      if (e.context_id !== this.contextId) return;
+      queue.push(e);
     };
 
     try {
       this._ws.on('event', onEvent);
-      while (this._isActive || queue?.length > 0) {
+      while (this._isActive || queue.length > 0) {
         const eventMessage = queue.shift();
         if (eventMessage === undefined) {
           // Wait for the next event to be pushed into the queue
@@ -312,6 +332,13 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
             clearTimeout(timer);
           }
           if (result === 'timeout') {
+            this._isActive = false;
+            yield {
+              type: 'error',
+              done: true,
+              context_id: this.contextId,
+              error: `Client-side timeout of ${this._timeout}ms reached with no events from the server.`,
+            };
             return;
           }
         } else {
@@ -331,13 +358,17 @@ class TTSContext extends EventEmitter<TTSContextEvents> implements TTSContexts.I
       }
     } finally {
       this._ws.off('event', onEvent);
-      this._cleanup();
+      this._cleanupAndEmitClose();
     }
   }
 
   cancel() {
-    this._send({ cancel: true, context_id: this.contextId }, true /* doNotInitConnection */);
-    // rely on event listeners to trigger _cleanup()
+    if (this.isClosed) {
+      return;
+    }
+
+    this._send({ cancel: true, context_id: this.contextId });
+    // rely on event listeners to trigger _cleanupAndEmitClose()
   }
 
   get isClosed(): boolean {
@@ -421,21 +452,12 @@ export class TTSContextManager extends EventEmitter<TTSContextManagerEvents> imp
    * Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context ID is a duplicate even if this method did not throw.
    */
   context(options: ContextOptions) {
-    let isFirstSendCall = true;
+    // Synchronously validate that the manager is open and ensure _ws is at
+    // minimum CONNECTING. This way the context captures a live ws and the
+    // codegen send queue handles messages sent before the socket opens.
+    this._prepareConnection();
 
-    const ctx = new TTSContext(options, this._ws, (clientEvent, doNotInitConnection) => {
-      if (isFirstSendCall && !doNotInitConnection) {
-        try {
-          void this.connect();
-        } catch (e) {
-          if (e instanceof CartesiaError) {
-            return e;
-          }
-          throw e;
-        }
-      }
-      isFirstSendCall = false;
-
+    const ctx = new TTSContext(options, this._ws, (clientEvent) => {
       let error: CartesiaError | null = null;
       const onSendError = (e: WebSocketError) => {
         // we are only trying to capture an error in sending the message
@@ -464,7 +486,42 @@ export class TTSContextManager extends EventEmitter<TTSContextManagerEvents> imp
       );
     }
     this._contexts.set(ctx.contextId, ctx);
+
+    // Drop the context from our map when it closes naturally so long-running
+    // managers don't accumulate references to dead contexts. Identity check
+    // guards against context_id reuse after a reconnect.
+    ctx.on('close', () => {
+      if (this._contexts.get(ctx.contextId) === ctx) {
+        this._contexts.delete(ctx.contextId);
+      }
+    });
+
     return ctx;
+  }
+
+  /**
+   * Synchronously ensure the underlying ws is at minimum CONNECTING and
+   * the manager is not permanently closed. Replaces _ws if it has already
+   * closed; in that case any tracked contexts pointed at the old ws are
+   * dropped from the map (their listeners on the old ws will still clean
+   * them up when its close event fires).
+   *
+   * @throws If the context manager was closed: {@link CartesiaError}.
+   */
+  private _prepareConnection(): void {
+    if (this._permanentlyClosed) {
+      throw new CartesiaError('TTSContextManager cannot connect since it was closed.');
+    }
+    const state = this._ws.socket.readyState;
+    if (state === ReadyState.OPEN || state === ReadyState.CONNECTING) {
+      return;
+    }
+    // create a new TTSWS to force a reconnection
+    this._contexts.clear();
+    this._cleanupWSListeners?.();
+    this._ws.close();
+    this._ws = new TTSWS(this._client, undefined /* parameters */, this._wsOptions);
+    this._initTTSWS();
   }
 
   /**
@@ -473,19 +530,9 @@ export class TTSContextManager extends EventEmitter<TTSContextManagerEvents> imp
    * @throws If the WebSocket could not be connected: {@link CartesiaError}.
    */
   async connect() {
-    if (this._permanentlyClosed) {
-      throw new CartesiaError('TTSContextManager cannot connect since it was closed.');
-    }
+    this._prepareConnection();
     if (this._ws.socket.readyState === ReadyState.OPEN) {
       return this;
-    }
-
-    if (this._ws.socket.readyState !== ReadyState.CONNECTING) {
-      // create a new TTSWS to force a reconnection
-      this._cleanupWSListeners?.();
-      this._ws.close();
-      this._ws = new TTSWS(this._client, undefined /* parameters */, this._wsOptions);
-      this._initTTSWS();
     }
 
     const socket = this._ws.socket;

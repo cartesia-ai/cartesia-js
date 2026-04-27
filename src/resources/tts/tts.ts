@@ -67,6 +67,11 @@ export class TTS extends APIResource {
    *
    * @deprecated This method is no longer maintained and is kept for backward compatibility.
    * Use {@link TTS.createContextManager} instead.
+   *
+   * Note: {@link TTS.createContextManager} returns {@link TTSContexts.IManager}, which behaves differently in these ways:
+   * - {@link TTSContexts.IManager.context } returns {@link TTSContexts.IContext}
+   * - {@link TTSContexts.IContext.receive} yields errors rather than throwing them
+   * - {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush} throw errors when the context has already been cleaned up by the client.
    */
   websocket(options?: ConstructorParameters<typeof TTSWS>[1]): Promise<TTSWS> {
     const ws = new TTSWS(this._client, options);
