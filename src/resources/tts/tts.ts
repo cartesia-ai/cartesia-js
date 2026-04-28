@@ -486,9 +486,20 @@ export namespace WebsocketResponse {
      */
     context_id?: string;
 
-    error?: string;
+    doc_url?: string;
+
+    error_code?: string;
+
+    message?: string;
+
+    /**
+     * A unique identifier for the network connection.
+     */
+    request_id?: string;
 
     status_code?: number;
+
+    title?: string;
   }
 
   export interface PhonemeTimestamps {
