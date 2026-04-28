@@ -33,7 +33,7 @@ export class TTSWS extends TTSWSBase<NodeWebSocket> {
     const ws = new WS.WebSocket(url, {
       ...this._wsOptions,
       headers: {
-        'cartesia-version': '2025-11-04',
+        'cartesia-version': '2026-03-01',
         ...authHeaders,
         ...this._wsOptions?.headers,
       },
