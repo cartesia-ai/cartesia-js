@@ -153,6 +153,7 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
       // Log every response, but redact audio data to avoid swamping the console.
       const loggable = { ...(event as any) };
       if (loggable.data) loggable.data = '[...]';
+      if (loggable.audio) loggable.audio = '[...]';
       console.log('Event:', JSON.stringify(loggable));
 
       if (event.type === 'chunk' && event.audio) {

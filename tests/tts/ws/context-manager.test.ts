@@ -266,29 +266,6 @@ describe('TTSContextManager context-map pruning', () => {
     emitSocketClose(manager);
     expect(manager.listContexts()).toHaveLength(0);
   });
-
-  test('a fresh context that reuses a previously-used id is preserved when the old context fires close late', async () => {
-    // Identity check at ctx.on('close', ...) ensures we only delete our own entry.
-    const manager = createTestManager();
-    const oldCtx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'reused' });
-
-    // Simulate the old context closing naturally.
-    injectEvent(manager, makeDone('reused'));
-    for await (const _e of oldCtx.receive()) {
-      /* drain */
-    }
-    expect(manager.getContext('reused')).toBeUndefined();
-
-    // Create a fresh context with the same id.
-    const fresh = manager.context({ ...CONTEXT_OPTIONS, contextId: 'reused' });
-    expect(manager.getContext('reused')).toBe(fresh);
-
-    // If the old ctx were to emit close again (it won't, due to the
-    // _isCloseEmitted guard), the identity check would protect `fresh`.
-    // We can simulate by manually invoking the listener path:
-    (oldCtx as any)._emit('close');
-    expect(manager.getContext('reused')).toBe(fresh);
-  });
 });
 
 // =========================================================================
@@ -464,9 +441,6 @@ describe('TTSContext.receive() — basic semantics', () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'early' });
 
-    let closeCount = 0;
-    ctx.on('close', () => closeCount++);
-
     injectEvent(manager, makeChunk('early', 0));
     injectEvent(manager, makeChunk('early', 1));
 
@@ -477,8 +451,8 @@ describe('TTSContext.receive() — basic semantics', () => {
     }
 
     expect(events).toHaveLength(1);
-    expect(closeCount).toBe(1);
     expect(ctx.isClosed).toBe(true);
+    expect(manager.getContext(ctx.contextId)).toBeUndefined();
   });
 
   test('events for other contexts are filtered out (constructor-side)', async () => {
@@ -598,104 +572,69 @@ describe('TTSContext.receive() — multi-context routing', () => {
   });
 });
 
-describe('TTSContext close emission', () => {
-  test('emits "close" once when receive() completes via done', async () => {
+describe('TTSContext.isClosed — set as soon as a terminal event is observed', () => {
+  test('is false before any events arrive', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'close-done' });
-    let closeCount = 0;
-    ctx.on('close', () => closeCount++);
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'fresh' });
+    expect(ctx.isClosed).toBe(false);
+  });
 
-    injectEvent(manager, makeDone('close-done'));
-    for await (const _e of ctx.receive()) {
-      /* drain */
-    }
-
-    expect(closeCount).toBe(1);
+  test('flips to true synchronously on done event, before receive() runs', () => {
+    const manager = createTestManager();
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'd-sync' });
+    expect(ctx.isClosed).toBe(false);
+    injectEvent(manager, makeDone('d-sync'));
     expect(ctx.isClosed).toBe(true);
   });
 
-  test('emits "close" once when receive() completes via timeout', async () => {
+  test('flips to true synchronously on terminal error event, before receive() runs', () => {
     const manager = createTestManager();
-    const ctx = manager.context({
-      ...CONTEXT_OPTIONS,
-      contextId: 'close-timeout',
-      timeout: 30,
-    });
-    let closeCount = 0;
-    ctx.on('close', () => closeCount++);
-
-    for await (const _e of ctx.receive()) {
-      /* drain */
-    }
-
-    expect(closeCount).toBe(1);
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'err-sync' });
+    expect(ctx.isClosed).toBe(false);
+    injectEvent(manager, makeError('err-sync'));
     expect(ctx.isClosed).toBe(true);
   });
 
-  test('emits "close" once when the underlying ws closes', () => {
+  test('stays open on non-terminal error event (done=false)', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'close-ws' });
-    let closeCount = 0;
-    ctx.on('close', () => closeCount++);
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'warn-sync' });
+    injectEvent(manager, makeError('warn-sync', { done: false }));
+    expect(ctx.isClosed).toBe(false);
+  });
 
-    emitSocketClose(manager);
-    expect(closeCount).toBe(1);
+  test('stays open on chunk events', () => {
+    const manager = createTestManager();
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'chunk-sync' });
+    injectEvent(manager, makeChunk('chunk-sync', 0));
+    injectEvent(manager, makeChunk('chunk-sync', 1));
+    expect(ctx.isClosed).toBe(false);
+  });
+
+  test('done event for a different context does not close this one', () => {
+    const manager = createTestManager();
+    const ctxA = manager.context({ ...CONTEXT_OPTIONS, contextId: 'A-iso' });
+    manager.context({ ...CONTEXT_OPTIONS, contextId: 'B-iso' });
+    injectEvent(manager, makeDone('B-iso'));
+    expect(ctxA.isClosed).toBe(false);
+  });
+
+  test('is true mid-iteration after the done event has been observed', async () => {
+    // Two chunks then done are buffered. We pull the first chunk and assert
+    // isClosed is already true — the constructor-side listener saw the done
+    // event before receive() yielded anything.
+    const manager = createTestManager();
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'mid' });
+
+    injectEvent(manager, makeChunk('mid', 0));
+    injectEvent(manager, makeChunk('mid', 1));
+    injectEvent(manager, makeDone('mid'));
+
     expect(ctx.isClosed).toBe(true);
-  });
 
-  test('emits "close" once when a reconnect starts', () => {
-    const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'close-reconnect' });
-    let closeCount = 0;
-    ctx.on('close', () => closeCount++);
-
-    (manager as any)._ws._emit('reconnecting', {
-      attempt: 1,
-      maxAttempts: 5,
-      delay: 0,
-      closeCode: 1006,
-    });
-
-    expect(closeCount).toBe(1);
+    const events: WebsocketResponse[] = [];
+    for await (const e of ctx.receive()) events.push(e);
+    expect(events.map((e) => e.type)).toEqual(['chunk', 'chunk', 'done']);
     expect(ctx.isClosed).toBe(true);
-  });
-
-  test('only fires once when ws close follows a done-driven close (idempotence guard)', async () => {
-    const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'idempotent-1' });
-    let closeCount = 0;
-    ctx.on('close', () => closeCount++);
-
-    injectEvent(manager, makeDone('idempotent-1'));
-    for await (const _e of ctx.receive()) {
-      /* drain */
-    }
-    expect(closeCount).toBe(1);
-
-    // A subsequent ws close would re-enter cleanup; the guard prevents a 2nd emit.
-    emitSocketClose(manager);
-    expect(closeCount).toBe(1);
-  });
-
-  test('only fires once when ws close happens during an active receive()', async () => {
-    const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'race' });
-    let closeCount = 0;
-    ctx.on('close', () => closeCount++);
-
-    const p = (async () => {
-      for await (const _e of ctx.receive()) {
-        /* drain */
-      }
-    })();
-    await sleep(10); // let receive() enter the await
-
-    // ws close runs cleanup. receive's finally would also try to run cleanup,
-    // but the idempotence guard ensures close emits only once.
-    emitSocketClose(manager);
-    await p;
-
-    expect(closeCount).toBe(1);
   });
 });
 
