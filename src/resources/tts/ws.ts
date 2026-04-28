@@ -54,7 +54,7 @@ export class TTSWS extends TTSWSBase<NodeWebSocket | BrowserWebSocket> {
     // Browser: use native WebSocket with auth in URL query params.
     const browserUrl = new URL(url);
     if (!browserUrl.searchParams.has('cartesia_version')) {
-      browserUrl.searchParams.set('cartesia_version', '2025-11-04');
+      browserUrl.searchParams.set('cartesia_version', '2026-03-01');
     }
     if (this._client.token && !browserUrl.searchParams.has('access_token')) {
       browserUrl.searchParams.set('access_token', this._client.token);

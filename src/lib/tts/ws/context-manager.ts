@@ -19,7 +19,7 @@ export type ContextOptions = {
   /**
    * How long to wait for events in milliseconds.
    *
-   * If set, {@link TTSContext.receive} will yield {@link TTSAPI.WebsocketResponse.Error}
+   * If set, {@link TTSContext.receive} will yield {@link TTSAPI.WebsocketResponse.Error.error_code} `"client_timeout"`
    * and return early if no server events for the context were seen within the timeout.
    */
   timeout?: number;
@@ -158,7 +158,7 @@ export namespace TTSContexts {
      * - A terminal {@link TTSAPI.WebsocketResponse.Error} event is received
      * - The context automatically closed due to inactivity
      * - The WebSocket connection was lost
-     * - Timeout was reached
+     * - Timeout was reached: will yield {@link TTSAPI.WebsocketResponse.Error.error_code} `"client_timeout"` and return
      *
      * Once complete, {@link IContext} will close and a new context must be created using {@link TTSContextManager.context}.
      */
@@ -337,7 +337,9 @@ class TTSContext implements TTSContexts.IContext {
               type: 'error',
               done: true,
               context_id: this.contextId,
-              error: `Client-side timeout of ${this._timeout}ms reached with no events from the server.`,
+              title: 'Timeout',
+              message: `Client-side timeout of ${this._timeout}ms reached with no events from the server.`,
+              error_code: 'client_timeout',
             };
             return;
           }

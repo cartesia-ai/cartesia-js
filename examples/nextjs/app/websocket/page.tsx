@@ -55,7 +55,7 @@ export default function WebSocketExample() {
             source.start(startTime);
             nextStartTime = startTime + buf.duration;
           } else if (event.type === 'error') {
-            console.error(event.error);
+            console.error(event.title, event.message);
           }
         }
       } finally {
