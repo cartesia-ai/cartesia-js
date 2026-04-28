@@ -43,17 +43,19 @@ export {
   type OutputFormatContainer,
   type RawEncoding,
   type RawOutputFormat,
+  type TTSSSEEvent,
   type VoiceSpecifier,
   type WebsocketClientEvent,
   type WebsocketResponse,
   type TTSGenerateParams,
-  type TTSGenerateSseParams,
+  type TTSGenerateSSEParams,
   type TTSInfillParams,
 } from './tts';
 export {
   VoiceChanger,
+  type VoiceChangerSSEEvent,
   type VoiceChangerChangeVoiceBytesParams,
-  type VoiceChangerChangeVoiceSseParams,
+  type VoiceChangerChangeVoiceSSEParams,
 } from './voice-changer';
 export {
   Voices,

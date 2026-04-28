@@ -32,8 +32,8 @@ describe('resource tts', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('generateSse: only required params', async () => {
-    const responsePromise = client.tts.generateSse({
+  test.skip('generateSSE: only required params', async () => {
+    const responsePromise = client.tts.generateSSE({
       model_id: 'model_id',
       output_format: {
         container: 'raw',
@@ -53,8 +53,8 @@ describe('resource tts', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('generateSse: required and optional params', async () => {
-    const response = await client.tts.generateSse({
+  test.skip('generateSSE: required and optional params', async () => {
+    const response = await client.tts.generateSSE({
       model_id: 'model_id',
       output_format: {
         container: 'raw',

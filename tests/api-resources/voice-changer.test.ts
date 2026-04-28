@@ -9,8 +9,8 @@ const client = new Cartesia({
 
 describe('resource voiceChanger', () => {
   // Mock server tests are disabled
-  test.skip('changeVoiceSse', async () => {
-    const responsePromise = client.voiceChanger.changeVoiceSse({});
+  test.skip('changeVoiceSSE', async () => {
+    const responsePromise = client.voiceChanger.changeVoiceSSE({});
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;

@@ -4,6 +4,7 @@ import { APIResource } from '../../core/resource';
 import * as TTSAPI from './tts';
 import * as VoicesAPI from '../voices';
 import { APIPromise } from '../../core/api-promise';
+import { Stream } from '../../core/streaming';
 import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
@@ -41,12 +42,13 @@ export class TTS extends APIResource {
    * [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
    * for details.
    */
-  generateSse(body: TTSGenerateSseParams, options?: RequestOptions): APIPromise<void> {
+  generateSSE(body: TTSGenerateSSEParams, options?: RequestOptions): APIPromise<Stream<TTSSSEEvent>> {
     return this._client.post('/tts/sse', {
       body,
       ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+      headers: buildHeaders([{ Accept: 'text/event-stream' }, options?.headers]),
+      stream: true,
+    }) as APIPromise<Stream<TTSSSEEvent>>;
   }
 
   /**
@@ -292,6 +294,230 @@ export interface RawOutputFormat {
   sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
 
+/**
+ * An event emitted by the TTS SSE stream.
+ */
+export type TTSSSEEvent =
+  | TTSSSEEvent.TTSSSEChunkEvent
+  | TTSSSEEvent.TTSSSETimestampsEvent
+  | TTSSSEEvent.TTSSSEPhonemeTimestampsEvent
+  | TTSSSEEvent.TTSSSEDoneEvent
+  | TTSSSEEvent.TTSSSEErrorEvent;
+
+export namespace TTSSSEEvent {
+  /**
+   * Audio data chunk.
+   */
+  export interface TTSSSEChunkEvent {
+    /**
+     * Base64-encoded audio data.
+     */
+    data: string;
+
+    /**
+     * Whether this is the final event for the request. Always `false` for chunk
+     * events.
+     */
+    done: false;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Server-side processing time for this chunk in milliseconds.
+     */
+    step_time: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'chunk';
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  /**
+   * Word-level timing information.
+   */
+  export interface TTSSSETimestampsEvent {
+    /**
+     * Whether this is the final event for the request. Always `false` for timestamps
+     * events.
+     */
+    done: false;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'timestamps';
+
+    /**
+     * Word-level timing information.
+     */
+    word_timestamps: TTSSSETimestampsEvent.WordTimestamps;
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  export namespace TTSSSETimestampsEvent {
+    /**
+     * Word-level timing information.
+     */
+    export interface WordTimestamps {
+      /**
+       * End times in seconds for each word.
+       */
+      end: Array<number>;
+
+      /**
+       * Start times in seconds for each word.
+       */
+      start: Array<number>;
+
+      /**
+       * List of words in order.
+       */
+      words: Array<string>;
+    }
+  }
+
+  /**
+   * Phoneme-level timing information.
+   */
+  export interface TTSSSEPhonemeTimestampsEvent {
+    /**
+     * Whether this is the final event for the request. Always `false` for
+     * phoneme_timestamps events.
+     */
+    done: false;
+
+    /**
+     * Phoneme-level timing information.
+     */
+    phoneme_timestamps: TTSSSEPhonemeTimestampsEvent.PhonemeTimestamps;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'phoneme_timestamps';
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  export namespace TTSSSEPhonemeTimestampsEvent {
+    /**
+     * Phoneme-level timing information.
+     */
+    export interface PhonemeTimestamps {
+      /**
+       * End times in seconds for each phoneme.
+       */
+      end: Array<number>;
+
+      /**
+       * List of phonemes in order.
+       */
+      phonemes: Array<string>;
+
+      /**
+       * Start times in seconds for each phoneme.
+       */
+      start: Array<number>;
+    }
+  }
+
+  /**
+   * Generation completion signal. Final event in the stream.
+   */
+  export interface TTSSSEDoneEvent {
+    /**
+     * Whether generation is complete. Always `true` for done events.
+     */
+    done: true;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'done';
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  /**
+   * Error information for the TTS SSE request.
+   */
+  export interface TTSSSEErrorEvent {
+    /**
+     * Whether generation is complete.
+     */
+    done: boolean;
+
+    /**
+     * Human-readable error message.
+     */
+    message: string;
+
+    /**
+     * Unique identifier for this request.
+     */
+    request_id: string;
+
+    /**
+     * An HTTP response status code.
+     */
+    status_code: number;
+
+    /**
+     * Human-readable error title.
+     */
+    title: string;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'error';
+
+    /**
+     * URL to relevant documentation.
+     */
+    doc_url?: string | null;
+
+    /**
+     * Machine-readable error code.
+     */
+    error_code?: string | null;
+  }
+}
+
 export interface VoiceSpecifier {
   /**
    * The ID of the voice.
@@ -347,6 +573,9 @@ export namespace WebsocketResponse {
 
     status_code: number;
 
+    /**
+     * Server-side processing time for this chunk in milliseconds
+     */
     step_time: number;
 
     type: 'chunk';
@@ -562,14 +791,14 @@ export namespace TTSGenerateParams {
   }
 }
 
-export interface TTSGenerateSseParams {
+export interface TTSGenerateSSEParams {
   /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
   model_id: string;
 
-  output_format: TTSGenerateSseParams.OutputFormat;
+  output_format: TTSGenerateSSEParams.OutputFormat;
 
   transcript: string;
 
@@ -627,7 +856,7 @@ export interface TTSGenerateSseParams {
   use_normalized_timestamps?: boolean | null;
 }
 
-export namespace TTSGenerateSseParams {
+export namespace TTSGenerateSSEParams {
   export interface OutputFormat {
     container: 'raw';
 
@@ -695,11 +924,12 @@ export declare namespace TTS {
     type OutputFormatContainer as OutputFormatContainer,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
+    type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
     type TTSGenerateParams as TTSGenerateParams,
-    type TTSGenerateSseParams as TTSGenerateSseParams,
+    type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
   };
 }
