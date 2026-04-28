@@ -13,7 +13,12 @@ export interface BackCompatWebSocketOptions {
 
 export type BackCompatTtsRequestVoiceSpecifier =
   | { mode: 'id'; id: string }
-  | { mode: 'embedding'; embedding: number[] };
+  | {
+      /** @deprecated Voice embeddings stop working effective 2026-06-01. Use mode: 'id' instead */
+      mode: 'embedding';
+      /** @deprecated Voice embeddings stop working effective 2026-06-01. Use mode: 'id' instead */
+      embedding: number[];
+    };
 
 export interface BackCompatGenerationConfig {
   volume?: number;
@@ -172,7 +177,7 @@ export class WebSocketWrapper {
     const url = new URL(urlStr);
 
     const headers: any = {
-      'cartesia-version': '2025-11-04',
+      'cartesia-version': '2026-03-01',
     };
     if (this.client.apiKey) {
       headers['Authorization'] = `Bearer ${this.client.apiKey}`;

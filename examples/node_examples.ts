@@ -69,7 +69,7 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
       if (event.type === 'chunk') {
         if (event.audio) file.write(event.audio);
       } else if (event.type === 'error') {
-        throw new Error(event.error);
+        throw new Error(`${event.title}: ${event.message}`);
       }
     }
 
@@ -107,7 +107,7 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
       if (event.type === 'chunk') {
         if (event.audio) file.write(event.audio);
       } else if (event.type === 'error') {
-        throw new Error(event.error);
+        throw new Error(`${event.title}: ${event.message}`);
       }
     }
 
@@ -164,7 +164,7 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
         }
         files.get(flushId)!.write(event.audio);
       } else if (event.type === 'error') {
-        throw new Error(event.error);
+        throw new Error(`${event.title}: ${event.message}`);
       }
     }
 
@@ -210,7 +210,7 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
       if (event.type === 'chunk') {
         if (event.audio) file.write(event.audio);
       } else if (event.type === 'error') {
-        throw new Error(event.error);
+        throw new Error(`${event.title}: ${event.message}`);
       }
     }
 
@@ -254,7 +254,7 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
       if (event.type === 'chunk') {
         if (event.audio) file.write(event.audio);
       } else if (event.type === 'error') {
-        throw new Error(event.error);
+        throw new Error(`${event.title}: ${event.message}`);
       }
     }
 
@@ -311,7 +311,7 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
         if (event.type === 'chunk' && event.audio) {
           file.write(event.audio);
         } else if (event.type === 'error') {
-          throw new Error(event.error);
+          throw new Error(`${event.title}: ${event.message}`);
         }
       }
       file.end();
@@ -364,7 +364,7 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
           console.log(`Words: ${wt.words}, Starts: ${wt.start}, Ends: ${wt.end}`);
         }
       } else if (event.type === 'error') {
-        throw new Error(event.error);
+        throw new Error(`${event.title}: ${event.message}`);
       }
     }
 

@@ -107,7 +107,7 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
         );
         chunks.push(floats);
       } else if (event.type === 'error') {
-        console.error(event.error);
+        console.error(event.title, event.message);
       }
     }
   } finally {
@@ -176,7 +176,7 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
         source.start(startTime);
         nextStartTime = startTime + audioBuffer.duration;
       } else if (event.type === 'error') {
-        console.error(event.error);
+        console.error(event.title, event.message);
       }
     }
   } finally {

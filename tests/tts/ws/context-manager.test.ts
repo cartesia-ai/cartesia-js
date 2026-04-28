@@ -125,7 +125,7 @@ function makeError(contextId: string, opts?: { done?: boolean }): Record<string,
     type: 'error',
     context_id: contextId,
     done: opts?.done ?? true,
-    error: 'test error',
+    title: 'test error',
     status_code: 400,
   };
 }
@@ -395,6 +395,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     expect(events.map((e) => e.type)).toEqual(['error']);
     expect(events.map((e) => e.context_id)).toEqual(['timeout']);
     expect(events.map((e) => e.done)).toEqual([true]);
+    expect(events.map((e) => e.type === 'error' && e.error_code)).toEqual(['client_timeout']);
     expect(ctx.isClosed).toBe(true);
   });
 
@@ -711,7 +712,7 @@ describe('TTSContextManager events', () => {
 
     (manager as any)._ws._emit('error', {
       message: 'context-scoped error',
-      error: { context_id: 'some-ctx', type: 'error', error: 'oops', done: true, status_code: 400 },
+      error: { context_id: 'some-ctx', type: 'error', title: 'oops', done: true, status_code: 400 },
     });
 
     expect(errors).toHaveLength(0);

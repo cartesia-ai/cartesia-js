@@ -299,7 +299,7 @@ export class TTSWS extends EventEmitter<WebsocketEvents> {
       this.socket = new _ws.WebSocket(this.url, {
         ...options,
         headers: {
-          'cartesia-version': '2025-11-04',
+          'cartesia-version': '2026-03-01',
           ...this.authHeaders(),
           ...options?.headers,
         },
@@ -307,7 +307,7 @@ export class TTSWS extends EventEmitter<WebsocketEvents> {
     } else if (typeof WebSocket !== 'undefined') {
       // Browser: use native WebSocket with auth in URL query params
       const url = new URL(this.url.toString());
-      url.searchParams.set('cartesia_version', '2025-11-04');
+      url.searchParams.set('cartesia_version', '2026-03-01');
       const authToken = this.client.token || this.client.apiKey;
       if (authToken) {
         url.searchParams.set('api_key', authToken);
