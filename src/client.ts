@@ -42,8 +42,8 @@ import {
 import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt';
 import {
   VoiceChanger,
-  VoiceChangerChangeVoiceBytesParams,
-  VoiceChangerChangeVoiceSSEParams,
+  VoiceChangerGenerateParams,
+  VoiceChangerGenerateSSEParams,
   VoiceChangerSSEEvent,
 } from './resources/voice-changer';
 import {
@@ -80,6 +80,7 @@ import {
   GenerationRequest,
   ModelSpeed,
   OutputFormatContainer,
+  PhonemeTimestamps,
   RawEncoding,
   RawOutputFormat,
   TTS,
@@ -90,6 +91,7 @@ import {
   VoiceSpecifier,
   WebsocketClientEvent,
   WebsocketResponse,
+  WordTimestamps,
 } from './resources/tts/tts';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
@@ -948,12 +950,14 @@ export declare namespace Cartesia {
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
     type OutputFormatContainer as OutputFormatContainer,
+    type PhonemeTimestamps as PhonemeTimestamps,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
     type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
+    type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
@@ -962,8 +966,8 @@ export declare namespace Cartesia {
   export {
     VoiceChanger as VoiceChanger,
     type VoiceChangerSSEEvent as VoiceChangerSSEEvent,
-    type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
-    type VoiceChangerChangeVoiceSSEParams as VoiceChangerChangeVoiceSSEParams,
+    type VoiceChangerGenerateParams as VoiceChangerGenerateParams,
+    type VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams,
   };
 
   export {

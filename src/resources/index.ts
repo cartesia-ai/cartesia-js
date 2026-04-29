@@ -41,12 +41,14 @@ export {
   type GenerationRequest,
   type ModelSpeed,
   type OutputFormatContainer,
+  type PhonemeTimestamps,
   type RawEncoding,
   type RawOutputFormat,
   type TTSSSEEvent,
   type VoiceSpecifier,
   type WebsocketClientEvent,
   type WebsocketResponse,
+  type WordTimestamps,
   type TTSGenerateParams,
   type TTSGenerateSSEParams,
   type TTSInfillParams,
@@ -54,8 +56,8 @@ export {
 export {
   VoiceChanger,
   type VoiceChangerSSEEvent,
-  type VoiceChangerChangeVoiceBytesParams,
-  type VoiceChangerChangeVoiceSSEParams,
+  type VoiceChangerGenerateParams,
+  type VoiceChangerGenerateSSEParams,
 } from './voice-changer';
 export {
   Voices,

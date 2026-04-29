@@ -18,7 +18,7 @@ export class VoiceChanger extends APIResource {
    *
    * This endpoint is priced at 15 characters per second of input audio.
    */
-  changeVoiceBytes(body: VoiceChangerChangeVoiceBytesParams, options?: RequestOptions): APIPromise<Response> {
+  generate(body: VoiceChangerGenerateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post(
       '/voice-changer/bytes',
       multipartFormRequestOptions(
@@ -36,8 +36,8 @@ export class VoiceChanger extends APIResource {
   /**
    * Voice Changer (SSE)
    */
-  changeVoiceSSE(
-    body: VoiceChangerChangeVoiceSSEParams,
+  generateSSE(
+    body: VoiceChangerGenerateSSEParams,
     options?: RequestOptions,
   ): APIPromise<Stream<VoiceChangerSSEEvent>> {
     return this._client.post(
@@ -156,7 +156,7 @@ export namespace VoiceChangerSSEEvent {
   }
 }
 
-export interface VoiceChangerChangeVoiceBytesParams {
+export interface VoiceChangerGenerateParams {
   clip?: Uploadable;
 
   /**
@@ -176,7 +176,7 @@ export interface VoiceChangerChangeVoiceBytesParams {
   'voice[id]'?: string;
 }
 
-export interface VoiceChangerChangeVoiceSSEParams {
+export interface VoiceChangerGenerateSSEParams {
   clip?: Uploadable;
 
   /**
@@ -199,7 +199,7 @@ export interface VoiceChangerChangeVoiceSSEParams {
 export declare namespace VoiceChanger {
   export {
     type VoiceChangerSSEEvent as VoiceChangerSSEEvent,
-    type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
-    type VoiceChangerChangeVoiceSSEParams as VoiceChangerChangeVoiceSSEParams,
+    type VoiceChangerGenerateParams as VoiceChangerGenerateParams,
+    type VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams,
   };
 }
