@@ -161,12 +161,14 @@ Types:
 - <code><a href="./src/resources/tts.ts">GenerationRequest</a></code>
 - <code><a href="./src/resources/tts.ts">ModelSpeed</a></code>
 - <code><a href="./src/resources/tts.ts">OutputFormatContainer</a></code>
+- <code><a href="./src/resources/tts.ts">PhonemeTimestamps</a></code>
 - <code><a href="./src/resources/tts.ts">RawEncoding</a></code>
 - <code><a href="./src/resources/tts.ts">RawOutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">TTSSSEEvent</a></code>
 - <code><a href="./src/resources/tts.ts">VoiceSpecifier</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketClientEvent</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketResponse</a></code>
+- <code><a href="./src/resources/tts.ts">WordTimestamps</a></code>
 
 Methods:
 
@@ -182,8 +184,8 @@ Types:
 
 Methods:
 
-- <code title="post /voice-changer/bytes">client.voiceChanger.<a href="./src/resources/voice-changer.ts">changeVoiceBytes</a>({ ...params }) -> Response</code>
-- <code title="post /voice-changer/sse">client.voiceChanger.<a href="./src/resources/voice-changer.ts">changeVoiceSSE</a>({ ...params }) -> VoiceChangerSSEEvent</code>
+- <code title="post /voice-changer/bytes">client.voiceChanger.<a href="./src/resources/voice-changer.ts">generate</a>({ ...params }) -> Response</code>
+- <code title="post /voice-changer/sse">client.voiceChanger.<a href="./src/resources/voice-changer.ts">generateSSE</a>({ ...params }) -> VoiceChangerSSEEvent</code>
 
 # Voices
 

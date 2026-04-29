@@ -286,6 +286,26 @@ export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
 export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
 
+/**
+ * Phoneme-level timing information.
+ */
+export interface PhonemeTimestamps {
+  /**
+   * End times in seconds for each phoneme.
+   */
+  end: Array<number>;
+
+  /**
+   * List of phonemes in order.
+   */
+  phonemes: Array<string>;
+
+  /**
+   * Start times in seconds for each phoneme.
+   */
+  start: Array<number>;
+}
+
 export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
 
 export interface RawOutputFormat {
@@ -364,34 +384,12 @@ export namespace TTSSSEEvent {
     /**
      * Word-level timing information.
      */
-    word_timestamps: TTSSSETimestampsEvent.WordTimestamps;
+    word_timestamps: TTSAPI.WordTimestamps;
 
     /**
      * The context ID echoed back from the request, if one was provided.
      */
     context_id?: string | null;
-  }
-
-  export namespace TTSSSETimestampsEvent {
-    /**
-     * Word-level timing information.
-     */
-    export interface WordTimestamps {
-      /**
-       * End times in seconds for each word.
-       */
-      end: Array<number>;
-
-      /**
-       * Start times in seconds for each word.
-       */
-      start: Array<number>;
-
-      /**
-       * List of words in order.
-       */
-      words: Array<string>;
-    }
   }
 
   /**
@@ -407,7 +405,7 @@ export namespace TTSSSEEvent {
     /**
      * Phoneme-level timing information.
      */
-    phoneme_timestamps: TTSSSEPhonemeTimestampsEvent.PhonemeTimestamps;
+    phoneme_timestamps: TTSAPI.PhonemeTimestamps;
 
     /**
      * HTTP-style status code.
@@ -423,28 +421,6 @@ export namespace TTSSSEEvent {
      * The context ID echoed back from the request, if one was provided.
      */
     context_id?: string | null;
-  }
-
-  export namespace TTSSSEPhonemeTimestampsEvent {
-    /**
-     * Phoneme-level timing information.
-     */
-    export interface PhonemeTimestamps {
-      /**
-       * End times in seconds for each phoneme.
-       */
-      end: Array<number>;
-
-      /**
-       * List of phonemes in order.
-       */
-      phonemes: Array<string>;
-
-      /**
-       * Start times in seconds for each phoneme.
-       */
-      start: Array<number>;
-    }
   }
 
   /**
@@ -567,10 +543,19 @@ export namespace WebsocketResponse {
      */
     context_id: string;
 
+    /**
+     * Base64-encoded audio data
+     */
     data: string;
 
+    /**
+     * Whether this is the final chunk for this context
+     */
     done: boolean;
 
+    /**
+     * HTTP-style status code
+     */
     status_code: number;
 
     /**
@@ -596,8 +581,14 @@ export namespace WebsocketResponse {
      */
     context_id: string;
 
+    /**
+     * Whether generation is complete
+     */
     done: boolean;
 
+    /**
+     * Whether the flush is complete
+     */
     flush_done: boolean;
 
     /**
@@ -608,6 +599,9 @@ export namespace WebsocketResponse {
      */
     flush_id: number;
 
+    /**
+     * HTTP-style status code
+     */
     status_code: number;
 
     type: 'flush_done';
@@ -620,8 +614,14 @@ export namespace WebsocketResponse {
      */
     context_id: string;
 
-    done: boolean;
+    /**
+     * Whether generation is complete. Always `true` for done events.
+     */
+    done: true;
 
+    /**
+     * HTTP-style status code
+     */
     status_code: number;
 
     type: 'done';
@@ -634,8 +634,14 @@ export namespace WebsocketResponse {
      */
     context_id: string;
 
+    /**
+     * Whether generation is complete
+     */
     done: boolean;
 
+    /**
+     * HTTP-style status code
+     */
     status_code: number;
 
     type: 'timestamps';
@@ -648,20 +654,16 @@ export namespace WebsocketResponse {
      */
     flush_id?: number | null;
 
-    word_timestamps?: Timestamps.WordTimestamps | null;
-  }
-
-  export namespace Timestamps {
-    export interface WordTimestamps {
-      end: Array<number>;
-
-      start: Array<number>;
-
-      words: Array<string>;
-    }
+    /**
+     * Word-level timing information.
+     */
+    word_timestamps?: TTSAPI.WordTimestamps | null;
   }
 
   export interface Error {
+    /**
+     * Whether generation is complete
+     */
     done: boolean;
 
     type: 'error';
@@ -672,10 +674,19 @@ export namespace WebsocketResponse {
      */
     context_id?: string;
 
+    /**
+     * URL to relevant documentation
+     */
     doc_url?: string;
 
+    /**
+     * Machine-readable error code.
+     */
     error_code?: string;
 
+    /**
+     * Human-readable error message.
+     */
     message?: string;
 
     /**
@@ -683,8 +694,14 @@ export namespace WebsocketResponse {
      */
     request_id?: string;
 
+    /**
+     * An HTTP response status code.
+     */
     status_code?: number;
 
+    /**
+     * Human-readable error title.
+     */
     title?: string;
   }
 
@@ -695,8 +712,14 @@ export namespace WebsocketResponse {
      */
     context_id: string;
 
+    /**
+     * Whether generation is complete
+     */
     done: boolean;
 
+    /**
+     * HTTP-style status code
+     */
     status_code: number;
 
     type: 'phoneme_timestamps';
@@ -709,18 +732,31 @@ export namespace WebsocketResponse {
      */
     flush_id?: number | null;
 
-    phoneme_timestamps?: PhonemeTimestamps.PhonemeTimestamps | null;
+    /**
+     * Phoneme-level timing information.
+     */
+    phoneme_timestamps?: TTSAPI.PhonemeTimestamps | null;
   }
+}
 
-  export namespace PhonemeTimestamps {
-    export interface PhonemeTimestamps {
-      end: Array<number>;
+/**
+ * Word-level timing information.
+ */
+export interface WordTimestamps {
+  /**
+   * End times in seconds for each word.
+   */
+  end: Array<number>;
 
-      phonemes: Array<string>;
+  /**
+   * Start times in seconds for each word.
+   */
+  start: Array<number>;
 
-      start: Array<number>;
-    }
-  }
+  /**
+   * List of words in order.
+   */
+  words: Array<string>;
 }
 
 export interface TTSGenerateParams {
@@ -922,12 +958,14 @@ export declare namespace TTS {
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
     type OutputFormatContainer as OutputFormatContainer,
+    type PhonemeTimestamps as PhonemeTimestamps,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
     type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
+    type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
