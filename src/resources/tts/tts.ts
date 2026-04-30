@@ -794,6 +794,16 @@ export namespace WebsocketResponse {
      */
     phoneme_timestamps?: TTSAPI.PhonemeTimestamps | null;
   }
+
+  /** Alias for backward compatibility */
+  export namespace Timestamps {
+    export type WordTimestamps = TTSAPI.WordTimestamps
+  }
+
+  /** Alias for backward compatibility */
+  export namespace PhonemeTimestamps {
+    export type PhonemeTimestamps = TTSAPI.PhonemeTimestamps;
+  }
 }
 
 /**
