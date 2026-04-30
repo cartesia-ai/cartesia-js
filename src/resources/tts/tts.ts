@@ -72,24 +72,6 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Text-to-Speech (WebSocket).
-   *
-   * @returns A promise that resolves when the connection is open.
-   *
-   * @deprecated This method is no longer maintained and is kept for backward compatibility.
-   * Use {@link TTS.createContextManager} instead.
-   *
-   * Note: {@link TTS.createContextManager} returns {@link TTSContexts.IManager}, which behaves differently in these ways:
-   * - {@link TTSContexts.IManager.context } returns {@link TTSContexts.IContext}
-   * - {@link TTSContexts.IContext.receive} yields errors rather than throwing them
-   * - {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush} throw errors when the context has already been cleaned up by the client.
-   */
-  websocket(options?: ConstructorParameters<typeof TTSWS>[1]): Promise<TTSWS> {
-    const ws = new TTSWS(this._client, options);
-    return ws.connect();
-  }
-
-  /**
    * Infill (Bytes).
    *
    * Generate audio that smoothly connects two existing audio segments. This is
@@ -125,6 +107,37 @@ export class TTS extends APIResource {
         this._client,
       ),
     );
+  }
+
+  /**
+   * Make a Text-to-Speech (SSE) request without any added response handling.
+   *
+   * @deprecated Use {@link TTS.generateSSE } to have events parsed and generated for you.
+   */
+  generateSse(body: TTSGenerateSSEParams, options?: RequestOptions): APIPromise<void> {
+    return this._client.post('/tts/sse', {
+      body,
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
+  }
+
+  /**
+   * Text-to-Speech (WebSocket).
+   *
+   * @returns A promise that resolves when the connection is open.
+   *
+   * @deprecated This method is no longer maintained and is kept for backward compatibility.
+   * Use {@link TTS.createContextManager} instead.
+   *
+   * Note: {@link TTS.createContextManager} returns {@link TTSContexts.IManager}, which behaves differently in these ways:
+   * - {@link TTSContexts.IManager.context } returns {@link TTSContexts.IContext}
+   * - {@link TTSContexts.IContext.receive} yields errors rather than throwing them
+   * - {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush} throw errors when the context has already been cleaned up by the client.
+   */
+  websocket(options?: ConstructorParameters<typeof TTSWS>[1]): Promise<TTSWS> {
+    const ws = new TTSWS(this._client, options);
+    return ws.connect();
   }
 }
 
@@ -586,7 +599,8 @@ export namespace WebsocketResponse {
      */
     data: string;
 
-    /** Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt.
+    /**
+     * Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt.
      * NB: this is a manually-added helper, not auto-generated.
      */
     audio: Uint8Array | null;
