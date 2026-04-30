@@ -227,11 +227,9 @@ export type VoiceChangerChangeVoiceSseParams = VoiceChangerGenerateSSEParams;
 export declare namespace VoiceChanger {
   export {
     type VoiceChangerSSEEvent as VoiceChangerSSEEvent,
+    type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
+    type VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
     type VoiceChangerGenerateParams as VoiceChangerGenerateParams,
     type VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams,
-    /** Type alias for backward compatibility */
-    type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
-    /** Type alias for backward compatibility */
-    type VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
   };
 }

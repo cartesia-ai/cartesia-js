@@ -42,6 +42,8 @@ import {
 import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt';
 import {
   VoiceChanger,
+  VoiceChangerChangeVoiceBytesParams,
+  VoiceChangerChangeVoiceSseParams,
   VoiceChangerGenerateParams,
   VoiceChangerGenerateSSEParams,
   VoiceChangerSSEEvent,
@@ -85,6 +87,7 @@ import {
   RawOutputFormat,
   TTS,
   TTSGenerateParams,
+  TTSGenerateSseParams,
   TTSGenerateSSEParams,
   TTSInfillParams,
   TTSSSEEvent,
@@ -959,12 +962,15 @@ export declare namespace Cartesia {
     type WebsocketResponse as WebsocketResponse,
     type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
+    type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
   };
 
   export {
     VoiceChanger as VoiceChanger,
+    type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
+    type VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
     type VoiceChangerSSEEvent as VoiceChangerSSEEvent,
     type VoiceChangerGenerateParams as VoiceChangerGenerateParams,
     type VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams,

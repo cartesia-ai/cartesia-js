@@ -1019,6 +1019,9 @@ export namespace TTSInfillParams {
   }
 }
 
+/** Type alias for backward compatibility */
+export type TTSGenerateSseParams = TTSGenerateSSEParams;
+
 export declare namespace TTS {
   export {
     type GenerationConfig as GenerationConfig,
@@ -1034,6 +1037,7 @@ export declare namespace TTS {
     type WebsocketResponse as WebsocketResponse,
     type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
+    type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
   };
