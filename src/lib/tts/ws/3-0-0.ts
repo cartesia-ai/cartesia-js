@@ -17,7 +17,7 @@ import { CartesiaError } from '../../../core/error';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { WebSocketError } from '../../../resources/tts/internal-base';
 import { decodeBase64 } from '../utils';
-import type { ContextOptions } from './context-manager';
+import type { ContextOptions, TTSContexts, TTSContextManager } from './context-manager';
 
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
@@ -264,6 +264,13 @@ export class TTSWSContext {
     }
   }
 }
+
+/**
+ * Hack to make `pnpm fix` not remove these type imports.
+ *
+ * They're necessary for doc strings.
+ */
+undefined satisfies TTSContexts.IContext | TTSContextManager | undefined;
 
 /**
  * Represents a single Text-to-Speech WebSocket connection.

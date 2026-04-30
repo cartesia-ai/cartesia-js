@@ -797,7 +797,7 @@ export namespace WebsocketResponse {
 
   /** Alias for backward compatibility */
   export namespace Timestamps {
-    export type WordTimestamps = TTSAPI.WordTimestamps
+    export type WordTimestamps = TTSAPI.WordTimestamps;
   }
 
   /** Alias for backward compatibility */
