@@ -22,7 +22,7 @@ export class VoiceChangerWrapper {
     this.client = client;
   }
 
-  /** @deprecated Use {@link Cartesia.voiceChanger.changeVoiceBytes} instead. */
+  /** @deprecated Use {@link Cartesia.voiceChanger.generate} instead. */
   async bytes(
     clip: File | fs.ReadStream | Blob,
     request: BackCompatVoiceChangerBytesRequest,
@@ -55,7 +55,7 @@ export class VoiceChangerWrapper {
     }
 
     const response = await wrap(
-      this.client.voiceChanger.changeVoiceBytes(params, {
+      this.client.voiceChanger.generate(params, {
         ...options,
         __binaryResponse: true,
       } as any),

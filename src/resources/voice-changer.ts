@@ -53,6 +53,28 @@ export class VoiceChanger extends APIResource {
       ),
     ) as APIPromise<Stream<VoiceChangerSSEEvent>>;
   }
+
+  /**
+   * Alias of {@link VoiceChanger.generate } for backward compatibility.
+   */
+  changeVoiceBytes(...args: Parameters<VoiceChanger['generate']>): ReturnType<VoiceChanger['generate']> {
+    return this.generate(...args);
+  }
+
+  /**
+   * Make a Voice Changer (SSE) request without any added response handling.
+   *
+   * @deprecated Use {@link VoiceChanger.generateSSE } to have events parsed and generated for you.
+   */
+  changeVoiceSse(body: VoiceChangerGenerateSSEParams, options?: RequestOptions): APIPromise<void> {
+    return this._client.post(
+      '/voice-changer/sse',
+      multipartFormRequestOptions(
+        { body, ...options, headers: buildHeaders([{ Accept: '*/*' }, options?.headers]) },
+        this._client,
+      ),
+    );
+  }
 }
 
 /**
