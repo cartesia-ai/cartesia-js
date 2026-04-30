@@ -16,8 +16,9 @@ export {
   type WordTimestamps,
   type TTSGenerateParams,
   type TTSGenerateSSEParams,
-  type TTSGenerateSSEParams as TTSGenerateSseParams,
   type TTSInfillParams,
+  /** Type alias for backward compatibility */
+  type TTSGenerateSSEParams as TTSGenerateSseParams,
 } from './tts';
 export { type TTSWSClientOptions } from './ws';
 export { type TTSWSReconnectOptions } from './ws-base';
