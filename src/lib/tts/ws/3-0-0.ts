@@ -15,7 +15,7 @@ import * as TTSAPI from '../../../resources/tts/tts';
 import type { Cartesia } from '../../../client';
 import { CartesiaError } from '../../../core/error';
 import { EventEmitter } from '../../../core/EventEmitter';
-import { WebSocketError } from '../../../resources/tts/internal-base';
+import { buildURL, WebSocketError } from '../../../resources/tts/internal-base';
 import { decodeBase64 } from '../utils';
 import type { ContextOptions, TTSContexts, TTSContextManager } from './context-manager';
 
@@ -44,14 +44,6 @@ export class WebSocketTimeoutError extends CartesiaError {
     this.contextId = contextId;
     this.timeoutMs = timeoutMs;
   }
-}
-
-function buildURL(client: Cartesia): URL {
-  const path = '/tts/websocket';
-  const baseURL = client.baseURL;
-  const url = new URL(baseURL + (baseURL.endsWith('/') ? path.slice(1) : path));
-  url.protocol = 'wss';
-  return url;
 }
 
 function safeJSONStringify(value: unknown): string | null {
@@ -295,7 +287,7 @@ export class TTSWS extends EventEmitter<WebsocketEvents> {
     super();
     this.client = client;
     this._wsOptions = options;
-    this.url = buildURL(client);
+    this.url = buildURL(client, {} /* parameters */);
     this._ready = Promise.resolve();
     this._initSocket(options);
   }
