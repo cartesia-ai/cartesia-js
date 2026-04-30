@@ -16,6 +16,7 @@ export {
   type WordTimestamps,
   type TTSGenerateParams,
   type TTSGenerateSSEParams,
+  type TTSGenerateSSEParams as TTSGenerateSseParams,
   type TTSInfillParams,
 } from './tts';
 export { type TTSWSClientOptions } from './ws';

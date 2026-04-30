@@ -51,16 +51,16 @@ export {
   type WordTimestamps,
   type TTSGenerateParams,
   type TTSGenerateSSEParams,
-  type TTSGenerateSSEParams as TTSGenerateSseParams,
+  type TTSGenerateSseParams,
   type TTSInfillParams,
 } from './tts';
 export {
   VoiceChanger,
   type VoiceChangerSSEEvent,
   type VoiceChangerGenerateParams,
-  type VoiceChangerGenerateParams as VoiceChangerChangeVoiceBytesParams,
+  type VoiceChangerChangeVoiceBytesParams,
   type VoiceChangerGenerateSSEParams,
-  type VoiceChangerGenerateSSEParams as VoiceChangerChangeVoiceSseParams,
+  type VoiceChangerChangeVoiceSseParams,
 } from './voice-changer';
 export {
   Voices,
