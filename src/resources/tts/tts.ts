@@ -72,7 +72,7 @@ export class TTS extends APIResource {
    *
    * See {@link contextsWS} for the same API with client-side context management.
    */
-  generateWS(parameters?: Record<string, unknown> | undefined, options?: TTSWSClientOptions) {
+  generateWS(parameters?: Record<string, unknown>, options?: TTSWSClientOptions) {
     return new TTSWS(this._client, parameters, options);
   }
 
@@ -88,12 +88,16 @@ export class TTS extends APIResource {
    * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
    * - Event listeners
    *
+   * @param parameters - Reserved for future use.
    * @param options - WebSocket client options and reconnect behavior.
    *
    * See {@link generateWS} for the same API without the added client-side context management features.
    */
-  contextsWS(options?: TTSWSClientOptions): TTSWSContexts.WSConnectionInterface {
-    return new TTSContextsWSConnection(this._client, options);
+  contextsWS(
+    parameters?: Record<string, unknown>,
+    options?: TTSWSClientOptions,
+  ): TTSWSContexts.WSConnectionInterface {
+    return new TTSContextsWSConnection(this._client, parameters, options);
   }
 
   /**

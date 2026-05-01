@@ -434,11 +434,15 @@ export class TTSContextsWSConnection
   private _permanentlyClosed: boolean = false;
   private _cleanupWSListeners: (() => void) | null = null;
 
-  constructor(client: Cartesia, options?: TTSWSClientOptions | null | undefined) {
+  constructor(
+    client: Cartesia,
+    parameters?: Record<string, unknown>,
+    options?: TTSWSClientOptions | null | undefined,
+  ) {
     super();
     this._client = client;
     this._wsOptions = options;
-    this._ws = new TTSWS(client, undefined /* parameters */, options);
+    this._ws = new TTSWS(client, parameters, options);
     this._initTTSWS();
   }
 
