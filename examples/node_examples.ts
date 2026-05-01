@@ -48,7 +48,7 @@ async function ttsGenerateToFile(client: Cartesia): Promise<void> {
 
 /** Basic WebSocket usage with generate(). */
 async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_websocket_basic_${timestamp()}.pcm`;
@@ -85,7 +85,7 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
 
 /** Streaming a transcript split into multiple parts, using continuations. */
 async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_websocket_continuations_${timestamp()}.pcm`;
@@ -124,7 +124,7 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
 
 /** Demonstrates manual flushing to separate audio from different transcripts. */
 async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const files: Map<number, fs.WriteStream> = new Map();
@@ -184,7 +184,7 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
 
 /** Demonstrates changing emotion mid-stream using generation_config. */
 async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_emotion_${timestamp()}.pcm`;
@@ -229,7 +229,7 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
 
 /** Demonstrates changing speed mid-stream using generation_config. */
 async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_speed_${timestamp()}.pcm`;
@@ -274,7 +274,7 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
 
 /** Two contexts on one connection, received concurrently via Promise.all(). */
 async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   try {
@@ -428,7 +428,7 @@ async function ttsGenerateWSConcurrentContexts(client: Cartesia): Promise<void> 
 
 /** WebSocket response type handling with timestamps. */
 async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_websocket_response_handling_${timestamp()}.pcm`;

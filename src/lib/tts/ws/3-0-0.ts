@@ -17,7 +17,7 @@ import { CartesiaError } from '../../../core/error';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { buildURL, WebSocketError } from '../../../resources/tts/internal-base';
 import { decodeBase64String } from '../../utils';
-import type { TTSContexts, TTSContextManager } from './context-manager';
+import type { TTSWSContexts, TTSContextsWSConnection } from './contexts';
 
 type WebSocketResponseWithDecodedAudio =
   | Exclude<TTSAPI.WebsocketResponse, { type: 'chunk' }>
@@ -42,9 +42,9 @@ type WebsocketEvents = Simplify<
 >;
 
 /**
- * @deprecated Thrown by {@link TTSWSContext.receive}, which is also deprecated.
+ * @deprecated Thrown by {@link TTSWSContext_3_0_0.receive}, which is also deprecated.
  */
-export class WebSocketTimeoutError extends CartesiaError {
+export class WebSocketTimeoutError_3_0_0 extends CartesiaError {
   readonly contextId: string;
   readonly timeoutMs: number;
 
@@ -79,9 +79,9 @@ interface WebSocketLike {
 /**
  * Default options to apply to all generation requests on the context.
  *
- * @deprecated Accepted by {@link TTSWS.context}, which is also deprecated.
+ * @deprecated Accepted by {@link TTSWS_3_0_0.context}, which is also deprecated.
  */
-export type ContextOptions = {
+export type ContextOptions_3_0_0 = {
   model_id: string;
   voice: TTSAPI.VoiceSpecifier;
   output_format: TTSAPI.GenerationRequest['output_format'];
@@ -89,18 +89,18 @@ export type ContextOptions = {
   /**
    * How long to wait for events in milliseconds.
    *
-   * If set, {@link TTSWSContext.receive } will throw {@link WebSocketError }
+   * If set, {@link TTSWSContext_3_0_0.receive } will throw {@link WebSocketError }
    * if no server events for the context were seen within the timeout.
    */
   timeout?: number;
 };
 
 /**
- * Request parameters for {@link TTSWSContext.generate}, same as {@link TTSAPI.GenerationRequest} but without context_id.
+ * Request parameters for {@link TTSWSContext_3_0_0.generate}, same as {@link TTSAPI.GenerationRequest} but without context_id.
  *
- * @deprecated Accepted by {@link TTSWSContext.generate}, which is also deprecated.
+ * @deprecated Accepted by {@link TTSWSContext_3_0_0.generate}, which is also deprecated.
  */
-export type ContextGenerateRequest = Omit<TTSAPI.GenerationRequest, 'context_id'>;
+export type ContextGenerateRequest_3_0_0 = Omit<TTSAPI.GenerationRequest, 'context_id'>;
 
 interface ContextQueueEntry {
   queue: TTSAPI.WebsocketResponse[];
@@ -110,15 +110,15 @@ interface ContextQueueEntry {
 /**
  * A context helper for managing WebSocket conversations with automatic context_id handling.
  *
- * @deprecated Returned by {@link TTSWS.context}, which is also deprecated.
+ * @deprecated Returned by {@link TTSWS_3_0_0.context}, which is also deprecated.
  */
-export class TTSWSContext {
-  private _ws: TTSWS;
-  private _options: Omit<ContextOptions, 'contextId' | 'timeout'>;
+export class TTSWSContext_3_0_0 {
+  private _ws: TTSWS_3_0_0;
+  private _options: Omit<ContextOptions_3_0_0, 'contextId' | 'timeout'>;
   private _timeout: number | undefined;
   readonly contextId: string;
 
-  constructor(ws: TTSWS, options: ContextOptions) {
+  constructor(ws: TTSWS_3_0_0, options: ContextOptions_3_0_0) {
     this._ws = ws;
     this._options = {
       model_id: options.model_id,
@@ -131,7 +131,7 @@ export class TTSWSContext {
 
   /**
    * Send a transcript chunk with continue: true.
-   * Call this multiple times to stream transcript chunks, then call {@link TTSWSContext.no_more_inputs} to finish.
+   * Call this multiple times to stream transcript chunks, then call {@link TTSWSContext_3_0_0.no_more_inputs} to finish.
    * If flush is true, sends an additional flush request after the transcript.
    */
   async push(options: { transcript: string; flush?: boolean }) {
@@ -168,7 +168,7 @@ export class TTSWSContext {
    * Send a generation request without waiting for responses.
    * Use this for streaming multiple transcript chunks.
    */
-  async send(request: ContextGenerateRequest) {
+  async send(request: ContextGenerateRequest_3_0_0) {
     await this._ws.send({
       ...request,
       context_id: this.contextId,
@@ -200,7 +200,7 @@ export class TTSWSContext {
    * @param options.timeout - Override the context-level timeout (ms) for this receive call.
    *
    * @throws When a {@link TTSAPI.WebsocketResponse.Error} event is received: {@link Error}.
-   * @throws When timeout is reached with no events: {@link WebSocketTimeoutError}.
+   * @throws When timeout is reached with no events: {@link WebSocketTimeoutError_3_0_0}.
    */
   async *receive(options?: { timeout?: number }): AsyncGenerator<TTSAPI.WebsocketResponse> {
     const timeout = options?.timeout ?? this._timeout;
@@ -240,7 +240,7 @@ export class TTSWSContext {
 
             if (result === 'timeout') {
               entry.resolve = null;
-              throw new WebSocketTimeoutError(this.contextId, timeout);
+              throw new WebSocketTimeoutError_3_0_0(this.contextId, timeout);
             }
           } else {
             await waitPromise;
@@ -256,11 +256,11 @@ export class TTSWSContext {
    * Send a generation request and iterate over the responses.
    * The context_id is automatically set.
    *
-   * Note: this uses {@link TTSWS.generate | TTSWS.generate's} own EventEmitter-based collection,
+   * Note: this uses {@link TTSWS_3_0_0.generate | TTSWS_3_0_0.generate's} own EventEmitter-based collection,
    * so the per-context queue is unregistered to avoid accumulating events
    * in both places.
    */
-  async *generate(request: ContextGenerateRequest): AsyncGenerator<TTSAPI.WebsocketResponse> {
+  async *generate(request: ContextGenerateRequest_3_0_0): AsyncGenerator<TTSAPI.WebsocketResponse> {
     // Unregister our queue — ws.generate() uses its own EventEmitter listener
     // and would cause events to accumulate in both places (memory leak).
     this._ws._unregisterContext(this.contextId);
@@ -290,20 +290,20 @@ export class TTSWSContext {
  *
  * They're necessary for doc strings.
  */
-undefined satisfies TTSContexts.IContext | TTSContextManager | undefined;
+undefined satisfies TTSWSContexts.ContextInterface | TTSContextsWSConnection | undefined;
 
 /**
  * Represents a single Text-to-Speech WebSocket connection.
  *
  * @deprecated This class is no longer maintained and kept for backward compatibility.
- * Use {@link TTSContextManager } instead.
+ * Use {@link TTSContextsWSConnection } instead.
  *
- * Note: {@link TTSContextManager.context } returns {@link TTSContexts.IContext},
- * which does not throw errors in {@link TTSContexts.IContext.receive},
- * but does throw errors in {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush}
- * when the context has already been cleaned up by the client.
+ * Note: {@link TTSContextsWSConnection.context } returns {@link TTSWSContexts.ContextInterface},
+ * which does not throw errors in {@link TTSWSContexts.ContextInterface.receive},
+ * but does throw errors in {@link TTSWSContexts.ContextInterface.push}
+ * and {@link TTSWSContexts.ContextInterface.flush} when the context has already been cleaned up by the client.
  */
-export class TTSWS extends EventEmitter<WebsocketEvents> {
+export class TTSWS_3_0_0 extends EventEmitter<WebsocketEvents> {
   url: URL;
   socket!: WebSocketLike;
   private client: Cartesia;
@@ -515,8 +515,8 @@ export class TTSWS extends EventEmitter<WebsocketEvents> {
    * Create a new context with the given options.
    * Registers a per-context event queue for proper multi-context routing.
    */
-  context(options: ContextOptions): TTSWSContext {
-    const ctx = new TTSWSContext(this, options);
+  context(options: ContextOptions_3_0_0): TTSWSContext_3_0_0 {
+    const ctx = new TTSWSContext_3_0_0(this, options);
     this._registerContext(ctx.contextId);
     return ctx;
   }

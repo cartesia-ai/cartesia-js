@@ -6,7 +6,7 @@ import { type Uploadable } from '../core/uploads';
 import { RequestOptions } from '../internal/request-options';
 import { multipartFormRequestOptions } from '../internal/uploads';
 
-export class Stt extends APIResource {
+export class STT extends APIResource {
   /**
    * Transcribes audio files into text using Cartesia's Speech-to-Text API.
    *
@@ -26,7 +26,7 @@ export class Stt extends APIResource {
    * For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](/api-reference/stt/migrate-from-open-ai).
    * </Note>
    */
-  transcribe(params: SttTranscribeParams, options?: RequestOptions): APIPromise<SttTranscribeResponse> {
+  transcribe(params: STTTranscribeParams, options?: RequestOptions): APIPromise<STTTranscribeResponse> {
     const { encoding, sample_rate, ...body } = params;
     return this._client.post(
       '/stt',
@@ -35,7 +35,7 @@ export class Stt extends APIResource {
   }
 }
 
-export interface SttTranscribeResponse {
+export interface STTTranscribeResponse {
   /**
    * The transcribed text.
    */
@@ -55,10 +55,10 @@ export interface SttTranscribeResponse {
    * Word-level timestamps showing the start and end time of each word. Only included
    * when `[word]` is passed into `timestamp_granularities[]`.
    */
-  words?: Array<SttTranscribeResponse.Word> | null;
+  words?: Array<STTTranscribeResponse.Word> | null;
 }
 
-export namespace SttTranscribeResponse {
+export namespace STTTranscribeResponse {
   export interface Word {
     /**
      * End time of the word in seconds.
@@ -77,7 +77,7 @@ export namespace SttTranscribeResponse {
   }
 }
 
-export interface SttTranscribeParams {
+export interface STTTranscribeParams {
   /**
    * Query param: The encoding format to process the audio as. If not specified, the
    * audio file will be decoded automatically.
@@ -222,6 +222,25 @@ export interface SttTranscribeParams {
    * Currently only `word` level timestamps are supported.
    */
   timestamp_granularities?: Array<'word'> | null;
+}
+
+/** Type alias for backward compatibility */
+export type SttTranscribeResponse = STTTranscribeResponse;
+
+/** Type alias for backward compatibility */
+export type SttTranscribeParams = STTTranscribeParams;
+
+/** @deprecated Use {@link STT} instead. */
+export const Stt = STT;
+
+/** @deprecated Use {@link STT} instead. */
+export type Stt = STT;
+
+export declare namespace STT {
+  export {
+    type STTTranscribeResponse as STTTranscribeResponse,
+    type STTTranscribeParams as STTTranscribeParams,
+  };
 }
 
 export declare namespace Stt {

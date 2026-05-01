@@ -17,7 +17,7 @@ export default function WebSocketExample() {
 
       // 2. Connect via WebSocket from the browser
       const client = new Cartesia({ token });
-      const ws = client.tts.createContextManager();
+      const ws = client.tts.contextsWS();
       ws.on('error', (err: Error) => console.error(err.message));
       try {
         await ws.connect();

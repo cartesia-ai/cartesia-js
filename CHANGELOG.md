@@ -1,5 +1,31 @@
 # Changelog
 
+## 3.1.0-b2 (2026-05-01)
+
+Full Changelog: [v3.1.0-b1...v3.1.0-b2](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b1...v3.1.0-b2)
+
+### Bug Fixes
+
+* **stt:** make stt an initialism ([ab322a0](https://github.com/cartesia-ai/cartesia-js/commit/ab322a0ca94d0826f92653aa7d170ba97fd6cd2a))
+
+
+### Chores
+
+* **manual:** export cleanup ([9d8ba10](https://github.com/cartesia-ai/cartesia-js/commit/9d8ba109579ae07f941216f0ef7c6c66dcab336d))
+* **tts:** rename context manager to contexts ws ([a701f47](https://github.com/cartesia-ai/cartesia-js/commit/a701f47482b6933e0f71c915f9e65f4c556daddf))
+* **tts:** rename deprecated variables ([09d9a9a](https://github.com/cartesia-ai/cartesia-js/commit/09d9a9ae6e506a1151a3a0ccc563270a5b0c9486))
+
+
+### Documentation
+
+* **tts:** cleanup old context manager names ([56cb088](https://github.com/cartesia-ai/cartesia-js/commit/56cb08811c1d6105c230865da6878eda9e61fdfe))
+
+
+### Refactors
+
+* **tts:** add parameters to contextsWS ([29136d0](https://github.com/cartesia-ai/cartesia-js/commit/29136d0d7b93e90db7f8f98eb38c5cc86f871a94))
+* **tts:** remove confusing TTSWS_3_0_0 exports ([5aab791](https://github.com/cartesia-ai/cartesia-js/commit/5aab7914e343f309f5e11696e21cd66bcbf975e8))
+
 ## 3.1.0-b1 (2026-05-01)
 
 Full Changelog: [v3.0.0...v3.1.0-b1](https://github.com/cartesia-ai/cartesia-js/compare/v3.0.0...v3.1.0-b1)

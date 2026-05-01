@@ -83,7 +83,7 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
   const audioCtx = new AudioContext({ sampleRate });
 
   const chunks: Float32Array[] = [];
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error(err.message));
 
   try {
@@ -144,8 +144,9 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
   const audioCtx = new AudioContext({ sampleRate });
   let nextStartTime = audioCtx.currentTime;
 
-  const ws = client.tts.createContextManager();
+  const ws = client.tts.contextsWS();
   ws.on('error', (err) => console.error(err.message));
+
   try {
     await ws.connect();
     const ctx = ws.context({

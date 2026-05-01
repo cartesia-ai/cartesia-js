@@ -1,5 +1,5 @@
 /**
- * Tests for WebSocket multi-context routing.
+ * Tests for {@link TTSWS_3_0_0}.
  *
  * Ported from cartesia-python/tests/test_dispatcher.py. These unit tests
  * verify two key properties using a mock WebSocket (no API key required):
@@ -11,11 +11,8 @@
  */
 
 import { WebSocket } from 'ws';
-import {
-  TTSWS,
-  WebSocketTimeoutError,
-  type WebsocketResponse,
-} from '@cartesia/cartesia-js/resources/tts/index';
+import Cartesia from '@cartesia/cartesia-js';
+import { TTSWS_3_0_0, WebSocketTimeoutError_3_0_0 } from '@cartesia/cartesia-js/lib/tts/ws/3-0-0';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -27,9 +24,9 @@ const CONTEXT_OPTIONS = {
   output_format: { container: 'raw' as const, encoding: 'pcm_f32le' as const, sample_rate: 44100 as const },
 };
 
-/** Create a TTSWS whose underlying socket will fail to connect (that's fine —
+/** Create a TTSWS_3_0_0 whose underlying socket will fail to connect (that's fine —
  *  we inject messages by emitting directly on the socket). */
-function createTestWS(): TTSWS {
+function createTestWS(): TTSWS_3_0_0 {
   const fakeClient = {
     baseURL: 'http://127.0.0.1:1',
     token: 'test',
@@ -45,7 +42,7 @@ function createTestWS(): TTSWS {
       return url.toString();
     },
   } as any;
-  const ws = new TTSWS(fakeClient);
+  const ws = new TTSWS_3_0_0(fakeClient);
   // Suppress connection‑error noise.
   ws.on('error', () => {});
   ws.connect().catch(() => {});
@@ -53,7 +50,7 @@ function createTestWS(): TTSWS {
 }
 
 /** Simulate a server‑sent message by emitting directly on the socket. */
-function injectEvent(ws: TTSWS, event: Record<string, unknown>) {
+function injectEvent(ws: TTSWS_3_0_0, event: Record<string, unknown>) {
   (ws.socket as WebSocket).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
@@ -102,7 +99,7 @@ describe('WebSocket multi-context routing', () => {
     expect(entry!.queue.length).toBe(NUM_CHUNKS + 1); // chunks + done
 
     // Now consume via receive() — everything should already be available.
-    const chunks: WebsocketResponse[] = [];
+    const chunks: Cartesia.TTS.WebsocketResponse[] = [];
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk') {
         chunks.push(event);
@@ -128,12 +125,12 @@ describe('WebSocket multi-context routing', () => {
     injectEvent(ws, makeDone('ctx-2'));
 
     // Each context should only see its own events.
-    const ctx1Events: WebsocketResponse[] = [];
+    const ctx1Events: Cartesia.TTS.WebsocketResponse[] = [];
     for await (const event of ctx1.receive()) {
       ctx1Events.push(event);
     }
 
-    const ctx2Events: WebsocketResponse[] = [];
+    const ctx2Events: Cartesia.TTS.WebsocketResponse[] = [];
     for await (const event of ctx2.receive()) {
       ctx2Events.push(event);
     }
@@ -172,8 +169,8 @@ describe('WebSocket multi-context routing', () => {
     injectEvent(ws, makeDone('fast-ctx'));
 
     // Slow reader: sleeps between every event.
-    async function slowCollect(): Promise<WebsocketResponse[]> {
-      const chunks: WebsocketResponse[] = [];
+    async function slowCollect(): Promise<Cartesia.TTS.WebsocketResponse[]> {
+      const chunks: Cartesia.TTS.WebsocketResponse[] = [];
       for await (const event of ctxSlow.receive()) {
         if (event.type === 'chunk') chunks.push(event);
         await sleep(SLOW_DELAY);
@@ -184,9 +181,9 @@ describe('WebSocket multi-context routing', () => {
     // Fast reader: no delays.
     let fastStart = 0;
     let fastEnd = 0;
-    async function fastCollect(): Promise<WebsocketResponse[]> {
+    async function fastCollect(): Promise<Cartesia.TTS.WebsocketResponse[]> {
       fastStart = performance.now();
-      const chunks: WebsocketResponse[] = [];
+      const chunks: Cartesia.TTS.WebsocketResponse[] = [];
       for await (const event of ctxFast.receive()) {
         if (event.type === 'chunk') chunks.push(event);
       }
@@ -248,7 +245,7 @@ describe('WebSocket multi-context routing', () => {
     const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'cancel-while-waiting' });
 
     // Start receiving (will block waiting for events).
-    const events: WebsocketResponse[] = [];
+    const events: Cartesia.TTS.WebsocketResponse[] = [];
     const receivePromise = (async () => {
       for await (const event of ctx.receive()) {
         events.push(event);
@@ -309,7 +306,7 @@ describe('WebSocket multi-context routing', () => {
     // Inject one chunk but no done event — receive will wait and timeout.
     injectEvent(ws, makeChunk('timeout-test', 0));
 
-    const events: WebsocketResponse[] = [];
+    const events: Cartesia.TTS.WebsocketResponse[] = [];
     let thrownError: unknown;
     try {
       for await (const event of ctx.receive()) {
@@ -319,7 +316,7 @@ describe('WebSocket multi-context routing', () => {
       thrownError = err;
     }
 
-    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError);
+    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError_3_0_0);
     // Should have received the one chunk before timing out.
     expect(events.length).toBe(1);
     expect(events[0]!.type).toBe('chunk');
@@ -349,7 +346,7 @@ describe('WebSocket multi-context routing', () => {
     }
     const elapsed = performance.now() - start;
 
-    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError);
+    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError_3_0_0);
     // Should have timed out after ~100ms, not 10s.
     expect(elapsed).toBeLessThan(1000);
 

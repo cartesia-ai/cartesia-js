@@ -39,7 +39,14 @@ import {
   PronunciationDicts,
   PronunciationDictsCursorIDPage,
 } from './resources/pronunciation-dicts';
-import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt';
+import {
+  STT,
+  STTTranscribeParams,
+  STTTranscribeResponse,
+  Stt,
+  SttTranscribeParams,
+  SttTranscribeResponse,
+} from './resources/stt';
 import {
   VoiceChanger,
   VoiceChangerChangeVoiceBytesParams,
@@ -108,7 +115,7 @@ import {
   parseLogLevel,
 } from './internal/utils/log';
 import { isEmptyObj } from './internal/utils/values';
-import { TTSContexts } from './resources/index';
+import { TTSWSContexts } from './resources/index';
 
 export interface ClientOptions {
   apiKey?: string | null | undefined;
@@ -872,7 +879,7 @@ export class Cartesia {
   datasets: API.Datasets = new API.Datasets(this);
   fineTunes: API.FineTunes = new API.FineTunes(this);
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
-  stt: API.Stt = new API.Stt(this);
+  stt: API.STT = new API.STT(this);
   tts: API.TTS = new API.TTS(this);
   voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
   voices: API.Voices = new API.Voices(this);
@@ -883,6 +890,7 @@ Cartesia.AccessToken = AccessToken;
 Cartesia.Datasets = Datasets;
 Cartesia.FineTunes = FineTunes;
 Cartesia.PronunciationDicts = PronunciationDicts;
+Cartesia.STT = STT;
 Cartesia.Stt = Stt;
 Cartesia.TTS = TTS;
 Cartesia.VoiceChanger = VoiceChanger;
@@ -943,7 +951,10 @@ export declare namespace Cartesia {
   };
 
   export {
+    STT as STT,
     Stt as Stt,
+    type STTTranscribeResponse as STTTranscribeResponse,
+    type STTTranscribeParams as STTTranscribeParams,
     type SttTranscribeResponse as SttTranscribeResponse,
     type SttTranscribeParams as SttTranscribeParams,
   };
@@ -966,7 +977,7 @@ export declare namespace Cartesia {
     type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
-    type TTSContexts as TTSContexts,
+    type TTSWSContexts as TTSWSContexts,
   };
 
   export {

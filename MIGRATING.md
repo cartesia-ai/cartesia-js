@@ -95,13 +95,15 @@ while (true) {
 ws.disconnect();
 
 // v3.x (new API)
-const ws = client.tts.createContextManager();
+const ws = client.tts.contextsWS();
 await ws.connect();
-const ctx = new ws.context({
+
+const ctx = ws.context({
   model_id: 'sonic-2',
   voice: { mode: 'id', id: 'voice-id' },
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
+
 ctx.push({ transcript: 'Hello, world!' });
 ctx.end();
 
@@ -139,7 +141,7 @@ await ws.continue({
 ws.disconnect();
 
 // v3.x (new API)
-const ws = client.tts.createContextManager();
+const ws = client.tts.contextsWS();
 await ws.connect();
 
 const ctx = ws.context({
@@ -314,6 +316,6 @@ try {
 | TTS batch method      | `client.tts.bytes(...)`                                    | `client.tts.generate(...)`                                              |
 | Parameter naming      | camelCase (`modelId`)                                      | snake_case (`model_id`)                                                 |
 | Response naming       | camelCase (`createdAt`)                                    | snake_case (`created_at`)                                               |
-| WebSocket connect     | `ws = client.tts.websocket({...})`                         | `ws = client.tts.createContextManager()`                                |
+| WebSocket connect     | `ws = client.tts.websocket({...})`                         | `ws = client.tts.contextsWS()`                                          |
 | WebSocket generations | `ws.send({..., continue: true})` then `ws.continue({...})` | `ctx = ws.context({...})` then `ctx.push({transcript})` and `ctx.end()` |
 | WebSocket disconnect  | `ws.disconnect()`                                          | `ws.close()`                                                            |
