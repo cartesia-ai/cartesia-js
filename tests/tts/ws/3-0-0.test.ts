@@ -1,5 +1,5 @@
 /**
- * Tests for WebSocket multi-context routing.
+ * Tests for {@link TTSWS_3_0_0}.
  *
  * Ported from cartesia-python/tests/test_dispatcher.py. These unit tests
  * verify two key properties using a mock WebSocket (no API key required):
