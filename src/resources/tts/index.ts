@@ -26,6 +26,7 @@ export {
   TTSWS,
   TTSWSContext,
   WebSocketTimeoutError,
+  type ContextOptions,
   type ContextGenerateRequest,
 } from '../../lib/tts/ws/3-0-0';
-export { TTSContexts, type ContextOptions } from '../../lib/tts/ws/context-manager';
+export { TTSContexts } from '../../lib/tts/ws/context-manager';

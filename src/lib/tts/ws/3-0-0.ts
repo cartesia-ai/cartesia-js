@@ -17,7 +17,7 @@ import { CartesiaError } from '../../../core/error';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { buildURL, WebSocketError } from '../../../resources/tts/internal-base';
 import { decodeBase64 } from '../utils';
-import type { ContextOptions, TTSContexts, TTSContextManager } from './context-manager';
+import type { TTSContexts, TTSContextManager } from './context-manager';
 
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
@@ -66,6 +66,25 @@ interface WebSocketLike {
   addEventListener(type: string, listener: (event: any) => void): void;
   removeEventListener(type: string, listener: (event: any) => void): void;
 }
+
+/**
+ * Default options to apply to all generation requests on the context.
+ *
+ * @deprecated Accepted by {@link TTSWS.context}, which is also deprecated.
+ */
+export type ContextOptions = {
+  model_id: string;
+  voice: TTSAPI.VoiceSpecifier;
+  output_format: TTSAPI.GenerationRequest['output_format'];
+  contextId?: string;
+  /**
+   * How long to wait for events in milliseconds.
+   *
+   * If set, {@link TTSWSContext.receive } will throw {@link WebSocketError }
+   * if no server events for the context were seen within the timeout.
+   */
+  timeout?: number;
+};
 
 /**
  * Request parameters for {@link TTSWSContext.generate}, same as {@link TTSAPI.GenerationRequest} but without context_id.

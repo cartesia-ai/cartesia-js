@@ -12,7 +12,7 @@ import { WebSocketServer, WebSocket as WS } from 'ws';
 import type { AddressInfo } from 'net';
 import { Cartesia } from '@cartesia/cartesia-js';
 import { CartesiaError } from '@cartesia/cartesia-js/core/error';
-import { TTSContextManager, type ContextOptions } from '@cartesia/cartesia-js/lib/tts/ws/context-manager';
+import { TTSContextManager, type TTSContexts } from '@cartesia/cartesia-js/lib/tts/ws/context-manager';
 import { ReadyState } from '@cartesia/cartesia-js/internal/ws-adapter';
 import type { WebsocketResponse } from '@cartesia/cartesia-js/resources/tts/index';
 
@@ -90,7 +90,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // ---- Event factories -----------------------------------------------------
 
-const CONTEXT_OPTIONS: Omit<ContextOptions, 'contextId'> = {
+const CONTEXT_OPTIONS: Omit<TTSContexts.ContextParams, 'contextId'> = {
   model_id: 'sonic-3',
   voice: { id: 'test-voice', mode: 'id' as const },
   output_format: {
@@ -137,7 +137,7 @@ function makeError(contextId: string, opts?: { done?: boolean }): Record<string,
 describe('TTSContextManager.context()', () => {
   test('uses the provided contextId', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'my-id' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'my-id' });
     expect(ctx.contextId).toBe('my-id');
     expect(ctx.isClosed).toBe(false);
   });
@@ -151,8 +151,8 @@ describe('TTSContextManager.context()', () => {
 
   test('throws on duplicate contextId', () => {
     const manager = createTestManager();
-    manager.context({ ...CONTEXT_OPTIONS, contextId: 'dup' });
-    expect(() => manager.context({ ...CONTEXT_OPTIONS, contextId: 'dup' })).toThrow(CartesiaError);
+    manager.context({ ...CONTEXT_OPTIONS, context_id: 'dup' });
+    expect(() => manager.context({ ...CONTEXT_OPTIONS, context_id: 'dup' })).toThrow(CartesiaError);
   });
 
   test('throws synchronously after manager.close()', () => {
@@ -163,7 +163,7 @@ describe('TTSContextManager.context()', () => {
 
   test('tracks the new context in the internal map', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'tracked' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'tracked' });
     expect(manager.getContext('tracked')).toBe(ctx);
     expect(manager.listContexts()).toContain(ctx);
   });
@@ -236,8 +236,8 @@ describe('TTSContextManager.getContext / listContexts', () => {
 
   test('listContexts returns all currently tracked contexts', () => {
     const manager = createTestManager();
-    const a = manager.context({ ...CONTEXT_OPTIONS, contextId: 'a' });
-    const b = manager.context({ ...CONTEXT_OPTIONS, contextId: 'b' });
+    const a = manager.context({ ...CONTEXT_OPTIONS, context_id: 'a' });
+    const b = manager.context({ ...CONTEXT_OPTIONS, context_id: 'b' });
     expect(manager.listContexts()).toHaveLength(2);
     expect(manager.listContexts()).toEqual(expect.arrayContaining([a, b]));
   });
@@ -246,7 +246,7 @@ describe('TTSContextManager.getContext / listContexts', () => {
 describe('TTSContextManager context-map pruning', () => {
   test('removes a context from the map after a natural done close', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'pruned' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'pruned' });
     expect(manager.getContext('pruned')).toBe(ctx);
 
     injectEvent(manager, makeDone('pruned'));
@@ -259,8 +259,8 @@ describe('TTSContextManager context-map pruning', () => {
 
   test('clears all contexts from the map when the ws closes', () => {
     const manager = createTestManager();
-    manager.context({ ...CONTEXT_OPTIONS, contextId: 'a' });
-    manager.context({ ...CONTEXT_OPTIONS, contextId: 'b' });
+    manager.context({ ...CONTEXT_OPTIONS, context_id: 'a' });
+    manager.context({ ...CONTEXT_OPTIONS, context_id: 'b' });
     expect(manager.listContexts()).toHaveLength(2);
 
     emitSocketClose(manager);
@@ -275,35 +275,35 @@ describe('TTSContextManager context-map pruning', () => {
 describe('TTSContext.push / end / flush — when closed', () => {
   test('push throws CartesiaError after close', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'p' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'p' });
     emitSocketClose(manager);
     expect(() => ctx.push({ transcript: 'hi' })).toThrow(CartesiaError);
   });
 
   test('end does nothing after close', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'e' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'e' });
     emitSocketClose(manager);
     expect(() => ctx.end()).not.toThrow();
   });
 
   test('flush throws CartesiaError after close', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'f' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'f' });
     emitSocketClose(manager);
     expect(() => ctx.flush()).toThrow(CartesiaError);
   });
 
   test('cancel does nothing after close', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'e' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'e' });
     emitSocketClose(manager);
     expect(() => ctx.cancel()).not.toThrow();
   });
 
   test('does not throw while context is active', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'active' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'active' });
     expect(() => ctx.push({ transcript: 'hi' })).not.toThrow();
     expect(() => ctx.flush()).not.toThrow();
     expect(() => ctx.end()).not.toThrow();
@@ -313,7 +313,7 @@ describe('TTSContext.push / end / flush — when closed', () => {
 describe('TTSContext.receive() — basic semantics', () => {
   test('yields events buffered before receive() was called', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'buf' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'buf' });
 
     injectEvent(manager, makeChunk('buf', 0));
     injectEvent(manager, makeChunk('buf', 1));
@@ -327,7 +327,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
   test('terminates on done event and marks context closed', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'd' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'd' });
 
     injectEvent(manager, makeChunk('d', 0));
     injectEvent(manager, makeDone('d'));
@@ -349,7 +349,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
   test('terminates on error event with done!=false', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'err' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'err' });
 
     injectEvent(manager, makeError('err'));
 
@@ -363,7 +363,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
   test('continues past an error event with done==false', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'err-warn' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'err-warn' });
 
     injectEvent(manager, makeError('err-warn', { done: false }));
     injectEvent(manager, makeChunk('err-warn', 0));
@@ -379,7 +379,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     const manager = createTestManager();
     const ctx = manager.context({
       ...CONTEXT_OPTIONS,
-      contextId: 'timeout',
+      context_id: 'timeout',
       timeout: 50,
     });
 
@@ -401,7 +401,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
   test('decodes audio for chunk events', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'audio' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'audio' });
 
     injectEvent(manager, makeChunk('audio', 0));
     injectEvent(manager, makeDone('audio'));
@@ -419,7 +419,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
   test('chunk with empty data has audio=null', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'empty-audio' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'empty-audio' });
 
     injectEvent(manager, {
       type: 'chunk',
@@ -440,7 +440,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
   test('cleanup runs when consumer breaks early from for-await', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'early' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'early' });
 
     injectEvent(manager, makeChunk('early', 0));
     injectEvent(manager, makeChunk('early', 1));
@@ -459,7 +459,7 @@ describe('TTSContext.receive() — basic semantics', () => {
   test('events for other contexts are filtered out (constructor-side)', async () => {
     // Buffered case: events for other contexts arrive before receive() runs.
     const manager = createTestManager();
-    const ctxA = manager.context({ ...CONTEXT_OPTIONS, contextId: 'A' });
+    const ctxA = manager.context({ ...CONTEXT_OPTIONS, context_id: 'A' });
 
     injectEvent(manager, makeChunk('A', 0));
     injectEvent(manager, makeChunk('OTHER', 0));
@@ -477,8 +477,8 @@ describe('TTSContext.receive() — basic semantics', () => {
 describe('TTSContext.receive() — multi-context routing', () => {
   test('two contexts only see their own buffered events', async () => {
     const manager = createTestManager();
-    const ctxA = manager.context({ ...CONTEXT_OPTIONS, contextId: 'A' });
-    const ctxB = manager.context({ ...CONTEXT_OPTIONS, contextId: 'B' });
+    const ctxA = manager.context({ ...CONTEXT_OPTIONS, context_id: 'A' });
+    const ctxB = manager.context({ ...CONTEXT_OPTIONS, context_id: 'B' });
 
     injectEvent(manager, makeChunk('A', 0));
     injectEvent(manager, makeChunk('B', 0));
@@ -502,8 +502,8 @@ describe('TTSContext.receive() — multi-context routing', () => {
     // Regression test for the bug where receive()'s local onEvent forgot to
     // filter by context_id, causing both contexts to see each other's events.
     const manager = createTestManager();
-    const ctxA = manager.context({ ...CONTEXT_OPTIONS, contextId: 'A' });
-    const ctxB = manager.context({ ...CONTEXT_OPTIONS, contextId: 'B' });
+    const ctxA = manager.context({ ...CONTEXT_OPTIONS, context_id: 'A' });
+    const ctxB = manager.context({ ...CONTEXT_OPTIONS, context_id: 'B' });
 
     const aResult: WebsocketResponse[] = [];
     const bResult: WebsocketResponse[] = [];
@@ -534,8 +534,8 @@ describe('TTSContext.receive() — multi-context routing', () => {
 
   test('a slow consumer does not block a fast consumer', async () => {
     const manager = createTestManager();
-    const slow = manager.context({ ...CONTEXT_OPTIONS, contextId: 'slow' });
-    const fast = manager.context({ ...CONTEXT_OPTIONS, contextId: 'fast' });
+    const slow = manager.context({ ...CONTEXT_OPTIONS, context_id: 'slow' });
+    const fast = manager.context({ ...CONTEXT_OPTIONS, context_id: 'fast' });
 
     const N = 20;
     for (let i = 0; i < N; i++) {
@@ -576,13 +576,13 @@ describe('TTSContext.receive() — multi-context routing', () => {
 describe('TTSContext.isClosed — set as soon as a terminal event is observed', () => {
   test('is false before any events arrive', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'fresh' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'fresh' });
     expect(ctx.isClosed).toBe(false);
   });
 
   test('flips to true synchronously on done event, before receive() runs', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'd-sync' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'd-sync' });
     expect(ctx.isClosed).toBe(false);
     injectEvent(manager, makeDone('d-sync'));
     expect(ctx.isClosed).toBe(true);
@@ -590,7 +590,7 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
 
   test('flips to true synchronously on terminal error event, before receive() runs', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'err-sync' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'err-sync' });
     expect(ctx.isClosed).toBe(false);
     injectEvent(manager, makeError('err-sync'));
     expect(ctx.isClosed).toBe(true);
@@ -598,14 +598,14 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
 
   test('stays open on non-terminal error event (done=false)', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'warn-sync' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'warn-sync' });
     injectEvent(manager, makeError('warn-sync', { done: false }));
     expect(ctx.isClosed).toBe(false);
   });
 
   test('stays open on chunk events', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'chunk-sync' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'chunk-sync' });
     injectEvent(manager, makeChunk('chunk-sync', 0));
     injectEvent(manager, makeChunk('chunk-sync', 1));
     expect(ctx.isClosed).toBe(false);
@@ -613,8 +613,8 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
 
   test('done event for a different context does not close this one', () => {
     const manager = createTestManager();
-    const ctxA = manager.context({ ...CONTEXT_OPTIONS, contextId: 'A-iso' });
-    manager.context({ ...CONTEXT_OPTIONS, contextId: 'B-iso' });
+    const ctxA = manager.context({ ...CONTEXT_OPTIONS, context_id: 'A-iso' });
+    manager.context({ ...CONTEXT_OPTIONS, context_id: 'B-iso' });
     injectEvent(manager, makeDone('B-iso'));
     expect(ctxA.isClosed).toBe(false);
   });
@@ -624,7 +624,7 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
     // isClosed is already true — the constructor-side listener saw the done
     // event before receive() yielded anything.
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'mid' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'mid' });
 
     injectEvent(manager, makeChunk('mid', 0));
     injectEvent(manager, makeChunk('mid', 1));
@@ -642,7 +642,7 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
 describe('TTSContext.cancel()', () => {
   test('does not throw and does not synchronously close the context', () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'cancel-1' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'cancel-1' });
     expect(() => ctx.cancel()).not.toThrow();
     // Cancel relies on the server's response to actually close the context.
     expect(ctx.isClosed).toBe(false);
@@ -650,7 +650,7 @@ describe('TTSContext.cancel()', () => {
 
   test('a server done after cancel closes the context', async () => {
     const manager = createTestManager();
-    const ctx = manager.context({ ...CONTEXT_OPTIONS, contextId: 'cancel-2' });
+    const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'cancel-2' });
 
     ctx.cancel();
     injectEvent(manager, makeDone('cancel-2'));

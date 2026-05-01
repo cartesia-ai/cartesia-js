@@ -5,25 +5,9 @@ import { uuid4 } from '../../../internal/utils/uuid';
 import type { ReconnectingEvent, UnsentMessage } from '../../../internal/ws';
 import { ReadyState } from '../../../internal/ws-adapter';
 import { WebSocketError } from '../../../resources/tts/internal-base';
-import * as TTSAPI from '../../../resources/tts/tts';
+import type * as TTSAPI from '../../../resources/tts/tts';
 import { TTSWS, type TTSWSClientOptions } from '../../../resources/tts/ws';
 import { decodeBase64 } from '../utils';
-
-// Note: ContextOptions is only exported for backward compatibility since it was included in src/resources/tts/index.ts
-/** Accepted by {@link TTSContextManager.context} */
-export type ContextOptions = {
-  model_id: string;
-  voice: TTSAPI.VoiceSpecifier;
-  output_format: TTSAPI.GenerationRequest['output_format'];
-  contextId?: string;
-  /**
-   * How long to wait for events in milliseconds.
-   *
-   * If set, {@link TTSContext.receive} will yield {@link TTSAPI.WebsocketResponse.Error.error_code} `"client_timeout"`
-   * and return early if no server events for the context were seen within the timeout.
-   */
-  timeout?: number;
-};
 
 type TTSContextManagerEvents = {
   error: (error: WebSocketError) => void;
@@ -45,6 +29,28 @@ type TTSContextManagerEvents = {
  * - Event listeners
  */
 export namespace TTSContexts {
+  /** Accepted by {@link IManager.context} */
+  export type ContextParams = Pick<
+    TTSAPI.GenerationRequest,
+    'model_id' | 'voice' | 'output_format' | 'language' | 'add_timestamps' | 'add_phoneme_timestamps'
+  > & {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     *
+     * If not set, one will be generated for you.
+     */
+    context_id?: string | null;
+
+    /**
+     * How long to wait for events in milliseconds.
+     *
+     * If set, {@link TTSContext.receive} will yield {@link TTSAPI.WebsocketResponse.Error.error_code} `"client_timeout"`
+     * and return early if no server events for the context were seen within the timeout.
+     */
+    timeout?: number;
+  };
+
   /**
    * Manages instances of {@link IContext}.
    */
@@ -69,12 +75,12 @@ export namespace TTSContexts {
      *
      * See https://docs.cartesia.ai/use-the-api/tts-websocket/contexts for details.
      *
-     * @param options.context_id - Must be unique per WebSocket connection if provided.
+     * @param params.context_id - Must be unique per WebSocket connection if provided.
      *
      * @throws If an instance of {@link TTSContext} exists with the same context ID: {@link CartesiaError}.
      * Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context ID is a duplicate even if this method did not throw.
      */
-    context(options: ContextOptions): IContext;
+    context(params: ContextParams): IContext;
 
     /**
      * Gets the context returned by {@link IManager.context}.
@@ -123,7 +129,10 @@ export namespace TTSContexts {
      * Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context closed due to inactivity even if this method did not throw.
      */
     push(
-      request: Omit<TTSAPI.GenerationRequest, 'model_id' | 'voice' | 'output_format' | 'context_id'>,
+      request: Omit<
+        TTSAPI.GenerationRequest,
+        'model_id' | 'voice' | 'output_format' | 'context_id' | 'language'
+      >,
     ): void;
 
     /**
@@ -175,28 +184,26 @@ class TTSContext implements TTSContexts.IContext {
   private _ws: TTSWS;
   private _send: (clientEvent: TTSAPI.WebsocketClientEvent) => CartesiaError | null;
   private _cleanup: () => void;
-  private _modelId: string;
-  private _voice: TTSAPI.VoiceSpecifier;
-  private _outputFormat: TTSAPI.GenerationRequest['output_format'];
-  private _timeout: number | undefined;
+  private readonly _params: Readonly<Omit<TTSContexts.ContextParams, 'context_id'>>;
   private _isActive: boolean = true;
   private _queue: TTSAPI.WebsocketResponse[] | null = [];
   private _wakeOnEventListeners: ((val: 'event') => void)[] = [];
   readonly contextId: string;
 
   constructor(
-    options: ContextOptions,
+    { voice, output_format, context_id, ...params }: TTSContexts.ContextParams,
     ws: TTSWS,
     send: (clientEvent: TTSAPI.WebsocketClientEvent) => CartesiaError | null,
     removeFromManager: () => void,
   ) {
     this._ws = ws;
     this._send = send;
-    this._modelId = options.model_id;
-    this._voice = { ...options.voice };
-    this._outputFormat = { ...options.output_format };
-    this.contextId = options.contextId || uuid4();
-    this._timeout = options.timeout;
+    this.contextId = context_id || uuid4();
+    this._params = {
+      ...params,
+      output_format: { ...output_format },
+      voice: { ...voice },
+    };
 
     const onClose = (): void => {
       this._cleanup();
@@ -242,16 +249,19 @@ class TTSContext implements TTSContexts.IContext {
     };
   }
 
-  push(request: Omit<TTSAPI.GenerationRequest, 'model_id' | 'voice' | 'output_format' | 'context_id'>) {
+  push(
+    request: Omit<
+      TTSAPI.GenerationRequest,
+      'model_id' | 'voice' | 'output_format' | 'context_id' | 'language'
+    >,
+  ) {
     if (this.isClosed) {
       throw new CartesiaError(`Cannot push to closed context (${this.contextId}).`);
     }
 
     const error = this._send({
-      model_id: this._modelId,
-      voice: this._voice,
-      output_format: this._outputFormat,
       context_id: this.contextId,
+      ...this._params,
       ...request,
       continue: request.continue ?? true,
     });
@@ -269,9 +279,9 @@ class TTSContext implements TTSContexts.IContext {
     this._send({
       transcript: '',
       continue: false,
-      model_id: this._modelId,
-      voice: this._voice,
-      output_format: this._outputFormat,
+      model_id: this._params.model_id,
+      voice: this._params.voice,
+      output_format: this._params.output_format,
       context_id: this.contextId,
     });
   }
@@ -285,9 +295,9 @@ class TTSContext implements TTSContexts.IContext {
       transcript: '',
       continue: true,
       flush: true,
-      model_id: this._modelId,
-      voice: this._voice,
-      output_format: this._outputFormat,
+      model_id: this._params.model_id,
+      voice: this._params.voice,
+      output_format: this._params.output_format,
       context_id: this.contextId,
     });
 
@@ -319,10 +329,10 @@ class TTSContext implements TTSContexts.IContext {
             }),
           ];
 
-          if (this._timeout !== undefined) {
+          if (this._params.timeout !== undefined) {
             promises.push(
               new Promise((r) => {
-                timer = setTimeout(() => r('timeout'), this._timeout);
+                timer = setTimeout(() => r('timeout'), this._params.timeout);
               }),
             );
           }
@@ -338,7 +348,7 @@ class TTSContext implements TTSContexts.IContext {
               done: true,
               context_id: this.contextId,
               title: 'Timeout',
-              message: `Client-side timeout of ${this._timeout}ms reached with no events from the server.`,
+              message: `Client-side timeout of ${this._params.timeout}ms reached with no events from the server.`,
               error_code: 'client_timeout',
             };
             return;
@@ -442,19 +452,19 @@ export class TTSContextManager extends EventEmitter<TTSContextManagerEvents> imp
    *
    * See https://docs.cartesia.ai/use-the-api/tts-websocket/contexts for details.
    *
-   * @param options.context_id - Must be unique per WebSocket connection if provided.
+   * @param params.context_id - Must be unique per WebSocket connection if provided.
    *
    * @throws If an instance of {@link TTSContext} exists with the same context ID: {@link CartesiaError}.
    * Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context ID is a duplicate even if this method did not throw.
    */
-  context(options: ContextOptions) {
+  context(params: TTSContexts.ContextParams) {
     // Synchronously validate that the manager is open and ensure _ws is at
     // minimum CONNECTING. This way the context captures a live ws and the
     // codegen send queue handles messages sent before the socket opens.
     this._prepareConnection();
 
     const ctx = new TTSContext(
-      options,
+      params,
       this._ws,
       (clientEvent) => {
         let error: CartesiaError | null = null;
