@@ -34,7 +34,7 @@ export {
   type PronunciationDictListParams,
   type PronunciationDictsCursorIDPage,
 } from './pronunciation-dicts';
-export { Stt, type SttTranscribeResponse, type SttTranscribeParams } from './stt';
+export { STT, type STTTranscribeResponse, type STTTranscribeParams } from './stt';
 export {
   TTS,
   type GenerationConfig,
