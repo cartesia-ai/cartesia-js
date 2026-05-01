@@ -444,7 +444,7 @@ export class TTSContextsWSConnection
 
   private _initTTSWS(): void {
     const onError = (error: WebSocketError): void => {
-      // ignore errors with a context ID since they are handled by TTSContext
+      // ignore errors with a context ID since they are handled by TTSWSContext
       if (error?.error?.context_id) return;
 
       this._emit('error', error);
@@ -489,7 +489,7 @@ export class TTSContextsWSConnection
   }
 
   /**
-   * Creates a context. TTSWSContextsare short-lived and designed to generate audio for a single transcript.
+   * Creates a context. TTSWSContexts are short-lived and designed to generate audio for a single transcript.
    *
    * The transcript can be broken up into chunks and streamed over time using continuations,
    * which is useful if you're still in the middle of generating your transcript.

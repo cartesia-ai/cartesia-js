@@ -98,7 +98,7 @@ ws.disconnect();
 const ws = client.tts.contextsWS();
 await ws.connect();
 
-const ctx = new ws.context({
+const ctx = ws.context({
   model_id: 'sonic-2',
   voice: { mode: 'id', id: 'voice-id' },
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },

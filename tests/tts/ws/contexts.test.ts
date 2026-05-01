@@ -1,5 +1,5 @@
 /**
- * Unit tests for TTSContextsWSConnection.
+ * Unit tests for TTSContextsWSConnection and TTSWSContext.
  *
  * Tests run against a real local ws server so the underlying socket actually
  * opens (avoiding flakiness from connection-refused timing). Server-sent
@@ -271,10 +271,10 @@ describe('TTSContextsWSConnection context-map pruning', () => {
 });
 
 // =========================================================================
-// TTSContext
+// TTSWSContext
 // =========================================================================
 
-describe('TTSContext.push / end / flush — when closed', () => {
+describe('TTSWSContext.push / end / flush — when closed', () => {
   test('push throws Cartesia.CartesiaError after close', () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'p' });
@@ -312,7 +312,7 @@ describe('TTSContext.push / end / flush — when closed', () => {
   });
 });
 
-describe('TTSContext.receive() — basic semantics', () => {
+describe('TTSWSContext.receive() — basic semantics', () => {
   test('yields events buffered before receive() was called', async () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'buf' });
@@ -478,7 +478,7 @@ describe('TTSContext.receive() — basic semantics', () => {
   });
 });
 
-describe('TTSContext.receive() — multi-context routing', () => {
+describe('TTSWSContext.receive() — multi-context routing', () => {
   test('two contexts only see their own buffered events', async () => {
     const manager = createTestManager();
     const ctxA = manager.context({ ...CONTEXT_OPTIONS, context_id: 'A' });
@@ -577,7 +577,7 @@ describe('TTSContext.receive() — multi-context routing', () => {
   });
 });
 
-describe('TTSContext.isClosed — set as soon as a terminal event is observed', () => {
+describe('TTSWSContext.isClosed — set as soon as a terminal event is observed', () => {
   test('is false before any events arrive', () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'fresh' });
@@ -643,7 +643,7 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
   });
 });
 
-describe('TTSContext.cancel()', () => {
+describe('TTSWSContext.cancel()', () => {
   test('does not throw and does not synchronously close the context', () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'cancel-1' });
