@@ -1,5 +1,9 @@
-/** Decode a base64 string to bytes. Works in both Node and browsers. */
-export function decodeBase64(data: string): Uint8Array {
+/**
+ * Decode a base64 string to bytes.
+ *
+ * In Node.js, this is just a wrapper for `Buffer.from(data, 'base64')`.
+ */
+export function decodeBase64String(data: string): Uint8Array {
   if (typeof Buffer !== 'undefined') {
     return Buffer.from(data, 'base64');
   }

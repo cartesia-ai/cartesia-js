@@ -9,9 +9,9 @@ import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { multipartFormRequestOptions } from '../../internal/uploads';
-import type { TTSWSClientOptions } from './ws';
+import { TTSWS, type TTSWSClientOptions } from './ws';
 
-import { TTSWS } from '../../lib/tts/ws/3-0-0';
+import { TTSWS as TTSWS_3_0_0 } from '../../lib/tts/ws/3-0-0';
 import { TTSContextManager, TTSContexts } from '../../lib/tts/ws/context-manager';
 
 export class TTS extends APIResource {
@@ -56,7 +56,7 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Text-to-Speech with context management.
+   * Text-to-Speech (WebSocket).
    *
    * Supports:
    * - Streaming
@@ -66,6 +66,31 @@ export class TTS extends APIResource {
    * - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
    * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
    * - Event listeners
+   *
+   * @param parameters - Reserved for future use.
+   * @param options - WebSocket client options and reconnect behavior.
+   *
+   * See {@link createContextManager} for the same API with client-side context management.
+   */
+  generateWS(parameters?: Record<string, unknown> | undefined, options?: TTSWSClientOptions) {
+    return new TTSWS(this._client, parameters, options);
+  }
+
+  /**
+   * Text-to-Speech (WebSocket) with built-in context management.
+   *
+   * Supports:
+   * - Streaming
+   * - Long-lived connections allow for lower latency by reusing a live network connection
+   * - Timestamps
+   * - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+   * - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+   * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+   * - Event listeners
+   *
+   * @param options - WebSocket client options and reconnect behavior.
+   *
+   * See {@link generateWS} for the same API without the added client-side context management features.
    */
   createContextManager(options?: TTSWSClientOptions): TTSContexts.IManager {
     return new TTSContextManager(this._client, options);
@@ -110,9 +135,9 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Make a Text-to-Speech (SSE) request without any added response handling.
+   * Make a raw Text-to-Speech (SSE) request without any response handling.
    *
-   * @deprecated Use {@link TTS.generateSSE } to have events parsed and generated for you.
+   * @deprecated Use {@link TTS.generateSSE } for built-in event parsing and streaming.
    */
   generateSse(body: TTSGenerateSSEParams, options?: RequestOptions): APIPromise<void> {
     return this._client.post('/tts/sse', {
@@ -135,8 +160,8 @@ export class TTS extends APIResource {
    * - {@link TTSContexts.IContext.receive} yields errors rather than throwing them
    * - {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush} throw errors when the context has already been cleaned up by the client.
    */
-  websocket(options?: ConstructorParameters<typeof TTSWS>[1]): Promise<TTSWS> {
-    const ws = new TTSWS(this._client, options);
+  websocket(options?: ConstructorParameters<typeof TTSWS_3_0_0>[1]): Promise<TTSWS_3_0_0> {
+    const ws = new TTSWS_3_0_0(this._client, options);
     return ws.connect();
   }
 }
@@ -598,12 +623,6 @@ export namespace WebsocketResponse {
      * Base64-encoded audio data
      */
     data: string;
-
-    /**
-     * Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt.
-     * NB: this is a manually-added helper, not auto-generated.
-     */
-    audio: Uint8Array | null;
 
     /**
      * Whether this is the final chunk for this context
