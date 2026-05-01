@@ -16,18 +16,27 @@ import type { Cartesia } from '../../../client';
 import { CartesiaError } from '../../../core/error';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { buildURL, WebSocketError } from '../../../resources/tts/internal-base';
-import { decodeBase64 } from '../utils';
+import { decodeBase64String } from '../../utils';
 import type { TTSContexts, TTSContextManager } from './context-manager';
+
+type WebSocketResponseWithDecodedAudio =
+  | Exclude<TTSAPI.WebsocketResponse, { type: 'chunk' }>
+  | (TTSAPI.WebsocketResponse.Chunk & {
+      /**
+       * Decoded audio data as a Buffer.
+       */
+      audio: Uint8Array;
+    });
 
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 type WebsocketEvents = Simplify<
   {
-    event: (event: TTSAPI.WebsocketResponse) => void;
+    event: (event: WebSocketResponseWithDecodedAudio) => void;
     error: (error: WebSocketError) => void;
   } & {
-    [EventType in Exclude<NonNullable<TTSAPI.WebsocketResponse['type']>, 'error'>]: (
-      event: Extract<TTSAPI.WebsocketResponse, { type?: EventType }>,
+    [EventType in Exclude<NonNullable<WebSocketResponseWithDecodedAudio['type']>, 'error'>]: (
+      event: Extract<WebSocketResponseWithDecodedAudio, { type?: EventType }>,
     ) => unknown;
   }
 >;
@@ -365,19 +374,15 @@ export class TTSWS extends EventEmitter<WebsocketEvents> {
 
       if (event) {
         // Decode audio for chunk events (mirrors Python SDK's .audio property).
-        if (event.type === 'chunk') {
-          const chunk = event as TTSAPI.WebsocketResponse.Chunk;
-          chunk.audio = chunk.data ? (decodeBase64(chunk.data) as any) : null;
-        }
+        const transformedEvent: WebSocketResponseWithDecodedAudio =
+          event.type === 'chunk' ? { ...event, audio: decodeBase64String(event.data) } : event;
 
-        // Always emit on EventEmitter for backwards compatibility and global listeners.
-        this._emit('event', event);
-
-        if (event.type === 'error') {
-          this._onError(event);
+        this._emit('event', transformedEvent);
+        if (transformedEvent.type === 'error') {
+          this._onError(transformedEvent);
         } else {
           // @ts-ignore TS isn't smart enough to get the relationship right here
-          this._emit(event.type, event);
+          this._emit(transformedEvent.type, transformedEvent);
         }
 
         // Route to per-context queue if registered.

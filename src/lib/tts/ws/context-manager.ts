@@ -7,7 +7,7 @@ import { ReadyState } from '../../../internal/ws-adapter';
 import { WebSocketError } from '../../../resources/tts/internal-base';
 import type * as TTSAPI from '../../../resources/tts/tts';
 import { TTSWS, type TTSWSClientOptions } from '../../../resources/tts/ws';
-import { decodeBase64 } from '../utils';
+import { decodeBase64String } from '../../utils';
 
 type TTSContextManagerEvents = {
   error: (error: WebSocketError) => void;
@@ -29,6 +29,28 @@ type TTSContextManagerEvents = {
  * - Event listeners
  */
 export namespace TTSContexts {
+  export type WebSocketResponse =
+    | WebSocketResponse.Chunk
+    | WebSocketResponse.FlushDone
+    | WebSocketResponse.Done
+    | WebSocketResponse.Timestamps
+    | WebSocketResponse.Error
+    | WebSocketResponse.PhonemeTimestamps;
+
+  export namespace WebSocketResponse {
+    export type Chunk = TTSAPI.WebsocketResponse.Chunk & {
+      /**
+       * Decoded audio data as a Buffer.
+       */
+      audio: Uint8Array;
+    };
+    export type FlushDone = TTSAPI.WebsocketResponse.FlushDone;
+    export type Done = TTSAPI.WebsocketResponse.Done;
+    export type Timestamps = TTSAPI.WebsocketResponse.Timestamps;
+    export type Error = TTSAPI.WebsocketResponse.Error;
+    export type PhonemeTimestamps = TTSAPI.WebsocketResponse.PhonemeTimestamps;
+  }
+
   /** Accepted by {@link IManager.context} */
   export type ContextParams = Pick<
     TTSAPI.GenerationRequest,
@@ -172,7 +194,7 @@ export namespace TTSContexts {
      *
      * Once complete, {@link IContext} will close and a new context must be created using {@link TTSContextManager.context}.
      */
-    receive(): AsyncGenerator<TTSAPI.WebsocketResponse>;
+    receive(): AsyncGenerator<TTSContexts.WebSocketResponse>;
 
     /**
      * Cancel this context to stop generating speech.
@@ -308,7 +330,7 @@ class TTSContext implements TTSContexts.IContext {
     }
   }
 
-  async *receive(): AsyncGenerator<TTSAPI.WebsocketResponse> {
+  async *receive(): AsyncGenerator<TTSContexts.WebSocketResponse> {
     const queue = this._queue ?? [];
     this._queue = null;
 
@@ -359,9 +381,10 @@ class TTSContext implements TTSContexts.IContext {
           // Decode audio for chunk events (mirrors Python SDK's .audio property)
           // and route events to per-context queues.
           if (eventMessage.type === 'chunk') {
-            eventMessage.audio = eventMessage.data ? decodeBase64(eventMessage.data) : null;
+            yield { ...eventMessage, audio: decodeBase64String(eventMessage.data) };
+          } else {
+            yield eventMessage;
           }
-          yield eventMessage;
         }
       }
     } finally {

@@ -340,6 +340,92 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
   }
 }
 
+/**
+ * Demonstrates using a single WebSocket connection (via generateWS) to manage
+ * multiple contexts concurrently.
+ *
+ * We spawn separate tasks to push audio to 3 different contexts.
+ * We use a single receiver loop to de-multiplex the responses to the correct files.
+ */
+async function ttsGenerateWSConcurrentContexts(client: Cartesia): Promise<void> {
+  const conn = client.tts.generateWS();
+  conn.on('error', (err) => console.error('WS error:', err.message));
+
+  const allQuotes = [
+    ['Ask not what your country can do for you, ', 'ask what you can do ', 'for your country.'],
+    ['I have a dream ', 'that one day this nation ', 'will rise up.'],
+    ["In the end, it's not the years in your life that count. ", "It's the life ", 'in your years.'],
+  ];
+
+  const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  // Sender task: pushes the parts of one quote, in order, to a single context_id.
+  async function sendTranscript(ctxIndex: number): Promise<void> {
+    const transcripts = allQuotes[ctxIndex]!;
+    for (let partIdx = 0; partIdx < transcripts.length; partIdx++) {
+      const part = transcripts[partIdx]!;
+      console.log(`Sending '${part.trim()}' to context ${ctxIndex}`);
+      conn.send({
+        model_id: 'sonic-3',
+        voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+        output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+        context_id: String(ctxIndex),
+        transcript: part,
+        language: 'en',
+        continue: partIdx + 1 < transcripts.length,
+      });
+      // Small delay to simulate real-time input and interleave requests.
+      await sleep(100);
+    }
+    console.log(`Finished sending to context ${ctxIndex}`);
+  }
+
+  const sendTasks = allQuotes.map((_, i) => sendTranscript(i));
+
+  const files = new Map<number, fs.WriteStream>();
+  const ts = timestamp();
+
+  console.log('Starting receiver loop...');
+  let doneCount = 0;
+
+  try {
+    for await (const event of conn) {
+      if (event.type !== 'message') continue;
+      const msg = event.message;
+
+      if (msg.type === 'chunk') {
+        const ctxIndex = Number(msg.context_id);
+        if (!files.has(ctxIndex)) {
+          const filename = `tts_concurrent_${ctxIndex}_${ts}.pcm`;
+          files.set(ctxIndex, fs.createWriteStream(filename));
+          console.log(`Created file for context ${ctxIndex}: ${filename}`);
+        }
+        files.get(ctxIndex)?.write(Buffer.from(msg.data, 'base64'));
+      } else if (msg.type === 'done') {
+        console.log(`Context ${msg.context_id} finished.`);
+        doneCount++;
+        if (doneCount === allQuotes.length) {
+          console.log('All contexts finished.');
+          break;
+        }
+      } else if (msg.type === 'error') {
+        throw new Error(`${msg.title ?? 'error'}: ${msg.message ?? ''}`);
+      }
+    }
+
+    await Promise.all(sendTasks);
+  } finally {
+    for (const f of files.values()) f.end();
+    conn.close();
+  }
+
+  console.log('\nFinished.');
+  console.log('You can play the generated audio files with these commands:');
+  for (const [ctxIndex, f] of files) {
+    console.log(`  Context ${ctxIndex}: ffplay -f f32le -ar 44100 ${(f as any).path}`);
+  }
+}
+
 /** WebSocket response type handling with timestamps. */
 async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
   const ws = client.tts.createContextManager();
@@ -383,6 +469,78 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
     file.end();
     ws.close();
   }
+}
+
+// =============================================================================
+// TTS SSE
+// =============================================================================
+
+/** SSE streaming. */
+async function ttsSSEBasic(client: Cartesia): Promise<void> {
+  const stream = await client.tts.generateSSE({
+    model_id: 'sonic-3',
+    transcript: 'Hello, world!',
+    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+    language: 'en',
+  });
+
+  const filename = `tts_sse_${timestamp()}.pcm`;
+  const file = fs.createWriteStream(filename);
+
+  try {
+    for await (const event of stream) {
+      if (event.type === 'chunk') {
+        file.write(Buffer.from(event.data, 'base64'));
+      } else if (event.type === 'done') {
+        break;
+      } else if (event.type === 'error') {
+        throw new Error(`${event.title}: ${event.message}`);
+      }
+    }
+  } finally {
+    file.end();
+  }
+
+  console.log(`Saved audio to ${filename}`);
+  console.log(`Play with: ffplay -f f32le -ar 44100 ${filename}`);
+}
+
+/** SSE streaming with timestamps. */
+async function ttsSSEWithTimestamps(client: Cartesia): Promise<void> {
+  const stream = await client.tts.generateSSE({
+    model_id: 'sonic-3',
+    transcript: 'Hello, world!',
+    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+    output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+    language: 'en',
+    add_timestamps: true,
+  });
+
+  const filename = `tts_sse_timestamps_${timestamp()}.pcm`;
+  const file = fs.createWriteStream(filename);
+
+  try {
+    for await (const event of stream) {
+      if (event.type === 'timestamps') {
+        const wt = event.word_timestamps;
+        if (wt) {
+          console.log(`Words: ${wt.words}, Starts: ${wt.start}, Ends: ${wt.end}`);
+        }
+      } else if (event.type === 'chunk') {
+        file.write(Buffer.from(event.data, 'base64'));
+      } else if (event.type === 'done') {
+        break;
+      } else if (event.type === 'error') {
+        throw new Error(`${event.title}: ${event.message}`);
+      }
+    }
+  } finally {
+    file.end();
+  }
+
+  console.log(`Saved audio to ${filename}`);
+  console.log(`Play with: ffplay -f f32le -ar 44100 ${filename}`);
 }
 
 // =============================================================================
@@ -495,7 +653,10 @@ const examples: Record<string, (client: Cartesia) => Promise<void>> = {
   ttsWebsocketEmotion,
   ttsWebsocketSpeed,
   ttsWebsocketConcurrentContexts,
+  ttsGenerateWSConcurrentContexts,
   ttsWebsocketResponseHandling,
+  ttsSSEBasic,
+  ttsSSEWithTimestamps,
   voicesList,
   voicesGet,
   voicesClone,

@@ -62,9 +62,9 @@ export class VoiceChanger extends APIResource {
   }
 
   /**
-   * Make a Voice Changer (SSE) request without any added response handling.
+   * Make a raw Voice Changer (SSE) request without any response handling.
    *
-   * @deprecated Use {@link VoiceChanger.generateSSE } to have events parsed and generated for you.
+   * @deprecated Use {@link VoiceChanger.generateSSE } for built-in event parsing and streaming.
    */
   changeVoiceSse(body: VoiceChangerGenerateSSEParams, options?: RequestOptions): APIPromise<void> {
     return this._client.post(

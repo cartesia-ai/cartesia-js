@@ -12,9 +12,9 @@ import { WebSocketServer, WebSocket as WS } from 'ws';
 import type { AddressInfo } from 'net';
 import { Cartesia } from '@cartesia/cartesia-js';
 import { CartesiaError } from '@cartesia/cartesia-js/core/error';
-import { TTSContextManager, type TTSContexts } from '@cartesia/cartesia-js/lib/tts/ws/context-manager';
+import { type TTSContexts } from '@cartesia/cartesia-js/resources';
 import { ReadyState } from '@cartesia/cartesia-js/internal/ws-adapter';
-import type { WebsocketResponse } from '@cartesia/cartesia-js/resources/tts/index';
+import { TTSContextManager } from '@cartesia/cartesia-js/lib/tts/ws/context-manager';
 
 // ---- Local ws server -----------------------------------------------------
 
@@ -51,7 +51,7 @@ afterAll(
 
 // ---- Per-test manager tracking -------------------------------------------
 
-const managers: TTSContextManager[] = [];
+const managers: TTSContexts.IManager[] = [];
 
 afterEach(() => {
   for (const m of managers) {
@@ -62,7 +62,7 @@ afterEach(() => {
   managers.length = 0;
 });
 
-function createTestManager(): TTSContextManager {
+function createTestManager(): TTSContexts.IManager {
   const client = new Cartesia({
     apiKey: 'test',
     baseURL: `http://127.0.0.1:${serverPort}`,
@@ -74,15 +74,15 @@ function createTestManager(): TTSContextManager {
   return manager;
 }
 
-function platformSocket(manager: TTSContextManager): WS {
+function platformSocket(manager: TTSContexts.IManager): WS {
   return (manager as any)._ws.socket.platformSocket;
 }
 
-function injectEvent(manager: TTSContextManager, event: Record<string, unknown>) {
+function injectEvent(manager: TTSContexts.IManager, event: Record<string, unknown>) {
   platformSocket(manager).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
-function emitSocketClose(manager: TTSContextManager, code = 1006, reason = 'test') {
+function emitSocketClose(manager: TTSContexts.IManager, code = 1006, reason = 'test') {
   platformSocket(manager).emit('close', code, Buffer.from(reason));
 }
 
@@ -319,7 +319,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('buf', 1));
     injectEvent(manager, makeDone('buf'));
 
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events.map((e) => e.type)).toEqual(['chunk', 'chunk', 'done']);
@@ -332,7 +332,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('d', 0));
     injectEvent(manager, makeDone('d'));
 
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events.map((e) => e.type)).toEqual(['chunk', 'done']);
@@ -342,7 +342,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     // so trailing events are dropped rather than buffered for a future
     // receive() call.
     injectEvent(manager, makeChunk('d', 99));
-    const trailing: WebsocketResponse[] = [];
+    const trailing: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) trailing.push(e);
     expect(trailing).toHaveLength(0);
   });
@@ -353,7 +353,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
     injectEvent(manager, makeError('err'));
 
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events).toHaveLength(1);
@@ -369,7 +369,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('err-warn', 0));
     injectEvent(manager, makeDone('err-warn'));
 
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events.map((e) => e.type)).toEqual(['error', 'chunk', 'done']);
@@ -384,7 +384,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     });
 
     let threw: unknown;
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     try {
       for await (const e of ctx.receive()) events.push(e);
     } catch (err) {
@@ -406,18 +406,20 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('audio', 0));
     injectEvent(manager, makeDone('audio'));
 
-    const chunks: WebsocketResponse[] = [];
+    const chunks: TTSContexts.WebSocketResponse.Chunk[] = [];
     for await (const e of ctx.receive()) {
       if (e.type === 'chunk') chunks.push(e);
     }
 
     expect(chunks).toHaveLength(1);
-    const chunk = chunks[0]! as WebsocketResponse.Chunk;
-    expect(chunk.audio).toBeInstanceOf(Uint8Array);
-    expect(Buffer.from(chunk.audio!).toString()).toBe('audio_0');
+    const chunk = chunks[0];
+    if (chunk !== undefined) {
+      expect(chunk.audio).toBeInstanceOf(Uint8Array);
+      expect(Buffer.from(chunk.audio!).toString()).toBe('audio_0');
+    }
   });
 
-  test('chunk with empty data has audio=null', async () => {
+  test('chunk with empty data has empty buffer on audio property', async () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'empty-audio' });
 
@@ -431,11 +433,11 @@ describe('TTSContext.receive() — basic semantics', () => {
     });
     injectEvent(manager, makeDone('empty-audio'));
 
-    const chunks: WebsocketResponse[] = [];
+    const chunks: TTSContexts.WebSocketResponse.Chunk[] = [];
     for await (const e of ctx.receive()) {
       if (e.type === 'chunk') chunks.push(e);
     }
-    expect((chunks[0] as any).audio).toBeNull();
+    expect(chunks[0]?.audio.length).toBe(0);
   });
 
   test('cleanup runs when consumer breaks early from for-await', async () => {
@@ -445,7 +447,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('early', 0));
     injectEvent(manager, makeChunk('early', 1));
 
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) {
       events.push(e);
       break; // exits early — for-await calls generator.return(), runs finally.
@@ -466,7 +468,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('A', 1));
     injectEvent(manager, makeDone('A'));
 
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctxA.receive()) events.push(e);
 
     for (const e of events) expect((e as any).context_id).toBe('A');
@@ -487,9 +489,9 @@ describe('TTSContext.receive() — multi-context routing', () => {
     injectEvent(manager, makeDone('A'));
     injectEvent(manager, makeDone('B'));
 
-    const aEvents: WebsocketResponse[] = [];
+    const aEvents: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctxA.receive()) aEvents.push(e);
-    const bEvents: WebsocketResponse[] = [];
+    const bEvents: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctxB.receive()) bEvents.push(e);
 
     for (const e of aEvents) expect((e as any).context_id).toBe('A');
@@ -505,8 +507,8 @@ describe('TTSContext.receive() — multi-context routing', () => {
     const ctxA = manager.context({ ...CONTEXT_OPTIONS, context_id: 'A' });
     const ctxB = manager.context({ ...CONTEXT_OPTIONS, context_id: 'B' });
 
-    const aResult: WebsocketResponse[] = [];
-    const bResult: WebsocketResponse[] = [];
+    const aResult: TTSContexts.WebSocketResponse[] = [];
+    const bResult: TTSContexts.WebSocketResponse[] = [];
     const pa = (async () => {
       for await (const e of ctxA.receive()) aResult.push(e);
     })();
@@ -547,7 +549,7 @@ describe('TTSContext.receive() — multi-context routing', () => {
 
     const SLOW_DELAY = 25; // ms per yield
     async function readSlow() {
-      const out: WebsocketResponse[] = [];
+      const out: TTSContexts.WebSocketResponse[] = [];
       for await (const e of slow.receive()) {
         if (e.type === 'chunk') out.push(e);
         await sleep(SLOW_DELAY);
@@ -557,7 +559,7 @@ describe('TTSContext.receive() — multi-context routing', () => {
 
     let fastDuration = 0;
     async function readFast() {
-      const out: WebsocketResponse[] = [];
+      const out: TTSContexts.WebSocketResponse[] = [];
       const start = performance.now();
       for await (const e of fast.receive()) {
         if (e.type === 'chunk') out.push(e);
@@ -632,7 +634,7 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
 
     expect(ctx.isClosed).toBe(true);
 
-    const events: WebsocketResponse[] = [];
+    const events: TTSContexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
     expect(events.map((e) => e.type)).toEqual(['chunk', 'chunk', 'done']);
     expect(ctx.isClosed).toBe(true);
