@@ -33,6 +33,7 @@ async function ttsGenerateToFile(client: Cartesia): Promise<void> {
     transcript: 'Hello, world!',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
     output_format: { container: 'wav', encoding: 'pcm_f32le', sample_rate: 44100 },
+    language: 'en',
   });
 
   const buffer = Buffer.from(await response.arrayBuffer());
@@ -60,6 +61,7 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     ctx.push({ transcript: 'Hello, world!' });
@@ -96,6 +98,7 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     for (const part of ['The road ', 'goes ever ', 'on and ', 'on.']) {
@@ -131,6 +134,7 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     // 1. Send first transcript
@@ -193,6 +197,7 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     console.log('Sending neutral text...');
@@ -237,6 +242,7 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     console.log('Sending normal speed text...');
@@ -278,12 +284,14 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     const ctx2 = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     // Send to both contexts before receiving.
@@ -347,6 +355,7 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
 
     ctx.push({
@@ -451,6 +460,7 @@ async function errorHandling(client: Cartesia): Promise<void> {
       transcript: 'Hello, world!',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'wav', encoding: 'pcm_f32le', sample_rate: 44100 },
+      language: 'en',
     });
   } catch (e) {
     if (e instanceof BadRequestError) {

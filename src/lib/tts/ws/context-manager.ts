@@ -132,7 +132,8 @@ export namespace TTSContexts {
       request: Omit<
         TTSAPI.GenerationRequest,
         'model_id' | 'voice' | 'output_format' | 'context_id' | 'language'
-      > & Record<string, unknown>,
+      > &
+        Record<string, unknown>,
     ): void;
 
     /**
@@ -253,7 +254,8 @@ class TTSContext implements TTSContexts.IContext {
     request: Omit<
       TTSAPI.GenerationRequest,
       'model_id' | 'voice' | 'output_format' | 'context_id' | 'language'
-    > & Record<string, unknown>,
+    > &
+      Record<string, unknown>,
   ) {
     if (this.isClosed) {
       throw new CartesiaError(`Cannot push to closed context (${this.contextId}).`);
