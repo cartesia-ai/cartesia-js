@@ -428,9 +428,6 @@ export class TTSWS extends EventEmitter<WebsocketEvents> {
 
   /**
    * Send a generation request and iterate over the responses.
-   *
-   * @param event The TTS request. context_id is made optional and nullable for backward compatibility,
-   * but sending a request without context_id will cause an error to be emitted.
    */
   async *generate(
     request: Omit<TTSAPI.GenerationRequest, 'context_id'> & { context_id?: string | null },
