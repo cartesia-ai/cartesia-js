@@ -12,7 +12,7 @@ import { multipartFormRequestOptions } from '../../internal/uploads';
 import { TTSWS, type TTSWSClientOptions } from './ws';
 
 import { TTSWS_3_0_0 } from '../../lib/tts/ws/3-0-0';
-import { TTSContextManager, TTSContexts } from '../../lib/tts/ws/context-manager';
+import { TTSContextsWSConnection, TTSWSContexts } from '../../lib/tts/ws/contexts';
 
 export class TTS extends APIResource {
   /**
@@ -70,7 +70,7 @@ export class TTS extends APIResource {
    * @param parameters - Reserved for future use.
    * @param options - WebSocket client options and reconnect behavior.
    *
-   * See {@link createContextManager} for the same API with client-side context management.
+   * See {@link contextsWS} for the same API with client-side context management.
    */
   generateWS(parameters?: Record<string, unknown> | undefined, options?: TTSWSClientOptions) {
     return new TTSWS(this._client, parameters, options);
@@ -92,8 +92,8 @@ export class TTS extends APIResource {
    *
    * See {@link generateWS} for the same API without the added client-side context management features.
    */
-  createContextManager(options?: TTSWSClientOptions): TTSContexts.IManager {
-    return new TTSContextManager(this._client, options);
+  contextsWS(options?: TTSWSClientOptions): TTSWSContexts.WSConnectionInterface {
+    return new TTSContextsWSConnection(this._client, options);
   }
 
   /**
@@ -153,12 +153,12 @@ export class TTS extends APIResource {
    * @returns A promise that resolves when the connection is open.
    *
    * @deprecated This method is no longer maintained and is kept for backward compatibility.
-   * Use {@link TTS.createContextManager} instead.
+   * Use {@link TTS.contextsWS} instead.
    *
-   * Note: {@link TTS.createContextManager} returns {@link TTSContexts.IManager}, which behaves differently in these ways:
-   * - {@link TTSContexts.IManager.context } returns {@link TTSContexts.IContext}
-   * - {@link TTSContexts.IContext.receive} yields errors rather than throwing them
-   * - {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush} throw errors when the context has already been cleaned up by the client.
+   * Note: {@link TTS.contextsWS} returns {@link TTSWSContexts.WSConnectionInterface}, which behaves differently in these ways:
+   * - {@link TTSWSContexts.WSConnectionInterface.context } returns {@link TTSWSContexts.ContextInterface}
+   * - {@link TTSWSContexts.ContextInterface.receive} yields errors rather than throwing them
+   * - {@link TTSWSContexts.ContextInterface.push} and {@link TTSWSContexts.ContextInterface.flush} throw errors when the context has already been cleaned up by the client.
    */
   websocket(options?: ConstructorParameters<typeof TTSWS_3_0_0>[1]): Promise<TTSWS_3_0_0> {
     const ws = new TTSWS_3_0_0(this._client, options);
@@ -1059,6 +1059,6 @@ export declare namespace TTS {
     type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
-    type TTSContexts as Contexts,
+    type TTSWSContexts as WSContexts,
   };
 }

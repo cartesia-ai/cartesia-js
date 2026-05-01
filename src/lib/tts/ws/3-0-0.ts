@@ -17,7 +17,7 @@ import { CartesiaError } from '../../../core/error';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { buildURL, WebSocketError } from '../../../resources/tts/internal-base';
 import { decodeBase64String } from '../../utils';
-import type { TTSContexts, TTSContextManager } from './context-manager';
+import type { TTSWSContexts, TTSContextsWSConnection } from './contexts';
 
 type WebSocketResponseWithDecodedAudio =
   | Exclude<TTSAPI.WebsocketResponse, { type: 'chunk' }>
@@ -290,18 +290,18 @@ export class TTSWSContext_3_0_0 {
  *
  * They're necessary for doc strings.
  */
-undefined satisfies TTSContexts.IContext | TTSContextManager | undefined;
+undefined satisfies TTSWSContexts.ContextInterface | TTSContextsWSConnection | undefined;
 
 /**
  * Represents a single Text-to-Speech WebSocket connection.
  *
  * @deprecated This class is no longer maintained and kept for backward compatibility.
- * Use {@link TTSContextManager } instead.
+ * Use {@link TTSContextsWSConnection } instead.
  *
- * Note: {@link TTSContextManager.context } returns {@link TTSContexts.IContext},
- * which does not throw errors in {@link TTSContexts.IContext.receive},
- * but does throw errors in {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush}
- * when the context has already been cleaned up by the client.
+ * Note: {@link TTSContextsWSConnection.context } returns {@link TTSWSContexts.ContextInterface},
+ * which does not throw errors in {@link TTSWSContexts.ContextInterface.receive},
+ * but does throw errors in {@link TTSWSContexts.ContextInterface.push}
+ * and {@link TTSWSContexts.ContextInterface.flush} when the context has already been cleaned up by the client.
  */
 export class TTSWS_3_0_0 extends EventEmitter<WebsocketEvents> {
   url: URL;

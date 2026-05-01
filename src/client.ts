@@ -115,7 +115,7 @@ import {
   parseLogLevel,
 } from './internal/utils/log';
 import { isEmptyObj } from './internal/utils/values';
-import { TTSContexts } from './resources/index';
+import { TTSWSContexts } from './resources/index';
 
 export interface ClientOptions {
   apiKey?: string | null | undefined;
@@ -977,7 +977,7 @@ export declare namespace Cartesia {
     type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
-    type TTSContexts as TTSContexts,
+    type TTSWSContexts as TTSWSContexts,
   };
 
   export {

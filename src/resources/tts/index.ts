@@ -29,4 +29,4 @@ export {
   type ContextOptions_3_0_0 as ContextOptions,
   type ContextGenerateRequest_3_0_0 as ContextGenerateRequest,
 } from '../../lib/tts/ws/3-0-0';
-export { TTSContexts } from '../../lib/tts/ws/context-manager';
+export { TTSWSContexts } from '../../lib/tts/ws/contexts';
