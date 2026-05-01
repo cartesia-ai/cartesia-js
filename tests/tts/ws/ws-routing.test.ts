@@ -11,11 +11,7 @@
  */
 
 import { WebSocket } from 'ws';
-import {
-  TTSWS,
-  WebSocketTimeoutError,
-  type WebsocketResponse,
-} from '@cartesia/cartesia-js/resources/tts/index';
+import { TTSWS, WebSocketTimeoutError, type WebsocketResponse } from '@cartesia/cartesia-js/resources/tts';
 
 // ---------------------------------------------------------------------------
 // Test helpers

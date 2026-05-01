@@ -11,7 +11,7 @@ import { RequestOptions } from '../../internal/request-options';
 import { multipartFormRequestOptions } from '../../internal/uploads';
 import { TTSWS, type TTSWSClientOptions } from './ws';
 
-import { TTSWS as TTSWS_3_0_0 } from '../../lib/tts/ws/3-0-0';
+import { TTSWS_3_0_0 } from '../../lib/tts/ws/3-0-0';
 import { TTSContextManager, TTSContexts } from '../../lib/tts/ws/context-manager';
 
 export class TTS extends APIResource {

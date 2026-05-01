@@ -23,10 +23,10 @@ export { type TTSWSClientOptions } from './ws';
 export { type TTSWSReconnectOptions } from './ws-base';
 
 export {
-  TTSWS,
-  TTSWSContext,
-  WebSocketTimeoutError,
-  type ContextOptions,
-  type ContextGenerateRequest,
+  TTSWS_3_0_0 as TTSWS,
+  TTSWSContext_3_0_0 as TTSWSContext,
+  WebSocketTimeoutError_3_0_0 as WebSocketTimeoutError,
+  type ContextOptions_3_0_0 as ContextOptions,
+  type ContextGenerateRequest_3_0_0 as ContextGenerateRequest,
 } from '../../lib/tts/ws/3-0-0';
 export { TTSContexts } from '../../lib/tts/ws/context-manager';

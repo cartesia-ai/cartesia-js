@@ -10,8 +10,7 @@
 
 import { WebSocketServer, WebSocket as WS } from 'ws';
 import type { AddressInfo } from 'net';
-import { Cartesia } from '@cartesia/cartesia-js';
-import { CartesiaError } from '@cartesia/cartesia-js/core/error';
+import { Cartesia, CartesiaError } from '@cartesia/cartesia-js';
 import { type TTSContexts } from '@cartesia/cartesia-js/resources';
 import { ReadyState } from '@cartesia/cartesia-js/internal/ws-adapter';
 import { TTSContextManager } from '@cartesia/cartesia-js/lib/tts/ws/context-manager';
