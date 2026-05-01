@@ -319,9 +319,6 @@ class TTSContext implements TTSContexts.IContext {
       ...this._generationParams,
       transcript: '',
       continue: false,
-      model_id: this._generationParams.model_id,
-      voice: this._generationParams.voice,
-      output_format: this._generationParams.output_format,
       context_id: this.contextId,
     });
   }
@@ -336,9 +333,6 @@ class TTSContext implements TTSContexts.IContext {
       transcript: '',
       continue: true,
       flush: true,
-      model_id: this._generationParams.model_id,
-      voice: this._generationParams.voice,
-      output_format: this._generationParams.output_format,
       context_id: this.contextId,
     });
 
