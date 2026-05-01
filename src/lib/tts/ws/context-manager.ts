@@ -262,9 +262,9 @@ class TTSContext implements TTSContexts.IContext {
     }
 
     const error = this._send({
-      context_id: this.contextId,
-      ...this._params,
       ...request,
+      ...this._params,
+      context_id: this.contextId,
       continue: request.continue ?? true,
     });
 

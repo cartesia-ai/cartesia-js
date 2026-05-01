@@ -90,7 +90,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // ---- Event factories -----------------------------------------------------
 
-const CONTEXT_OPTIONS: Omit<TTSContexts.ContextParams, 'contextId'> = {
+const CONTEXT_OPTIONS: TTSContexts.ContextParams = {
   model_id: 'sonic-3',
   voice: { id: 'test-voice', mode: 'id' as const },
   output_format: {
