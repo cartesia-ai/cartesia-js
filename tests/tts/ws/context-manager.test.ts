@@ -10,8 +10,7 @@
 
 import { WebSocketServer, WebSocket as WS } from 'ws';
 import type { AddressInfo } from 'net';
-import { Cartesia, CartesiaError } from '@cartesia/cartesia-js';
-import { type TTSContexts } from '@cartesia/cartesia-js/resources';
+import Cartesia from '@cartesia/cartesia-js';
 import { ReadyState } from '@cartesia/cartesia-js/internal/ws-adapter';
 import { TTSContextManager } from '@cartesia/cartesia-js/lib/tts/ws/context-manager';
 
@@ -50,7 +49,7 @@ afterAll(
 
 // ---- Per-test manager tracking -------------------------------------------
 
-const managers: TTSContexts.IManager[] = [];
+const managers: Cartesia.TTS.Contexts.IManager[] = [];
 
 afterEach(() => {
   for (const m of managers) {
@@ -61,7 +60,7 @@ afterEach(() => {
   managers.length = 0;
 });
 
-function createTestManager(): TTSContexts.IManager {
+function createTestManager(): Cartesia.TTS.Contexts.IManager {
   const client = new Cartesia({
     apiKey: 'test',
     baseURL: `http://127.0.0.1:${serverPort}`,
@@ -73,15 +72,15 @@ function createTestManager(): TTSContexts.IManager {
   return manager;
 }
 
-function platformSocket(manager: TTSContexts.IManager): WS {
+function platformSocket(manager: Cartesia.TTS.Contexts.IManager): WS {
   return (manager as any)._ws.socket.platformSocket;
 }
 
-function injectEvent(manager: TTSContexts.IManager, event: Record<string, unknown>) {
+function injectEvent(manager: Cartesia.TTS.Contexts.IManager, event: Record<string, unknown>) {
   platformSocket(manager).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
-function emitSocketClose(manager: TTSContexts.IManager, code = 1006, reason = 'test') {
+function emitSocketClose(manager: Cartesia.TTS.Contexts.IManager, code = 1006, reason = 'test') {
   platformSocket(manager).emit('close', code, Buffer.from(reason));
 }
 
@@ -89,7 +88,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // ---- Event factories -----------------------------------------------------
 
-const CONTEXT_OPTIONS: TTSContexts.ContextParams = {
+const CONTEXT_OPTIONS: Cartesia.TTS.Contexts.ContextParams = {
   model_id: 'sonic-3',
   voice: { id: 'test-voice', mode: 'id' as const },
   output_format: {
@@ -151,13 +150,13 @@ describe('TTSContextManager.context()', () => {
   test('throws on duplicate contextId', () => {
     const manager = createTestManager();
     manager.context({ ...CONTEXT_OPTIONS, context_id: 'dup' });
-    expect(() => manager.context({ ...CONTEXT_OPTIONS, context_id: 'dup' })).toThrow(CartesiaError);
+    expect(() => manager.context({ ...CONTEXT_OPTIONS, context_id: 'dup' })).toThrow(Cartesia.CartesiaError);
   });
 
   test('throws synchronously after manager.close()', () => {
     const manager = createTestManager();
     manager.close();
-    expect(() => manager.context(CONTEXT_OPTIONS)).toThrow(CartesiaError);
+    expect(() => manager.context(CONTEXT_OPTIONS)).toThrow(Cartesia.CartesiaError);
   });
 
   test('tracks the new context in the internal map', () => {
@@ -178,7 +177,7 @@ describe('TTSContextManager.connect()', () => {
   test('throws synchronously after manager.close()', async () => {
     const manager = createTestManager();
     manager.close();
-    await expect(manager.connect()).rejects.toThrow(CartesiaError);
+    await expect(manager.connect()).rejects.toThrow(Cartesia.CartesiaError);
   });
 
   test('returns immediately if socket is already OPEN (no replacement)', async () => {
@@ -211,7 +210,7 @@ describe('TTSContextManager.close()', () => {
   test('marks the manager permanently closed', () => {
     const manager = createTestManager();
     manager.close();
-    expect(() => manager.context(CONTEXT_OPTIONS)).toThrow(CartesiaError);
+    expect(() => manager.context(CONTEXT_OPTIONS)).toThrow(Cartesia.CartesiaError);
   });
 
   test('initiates close on the underlying ws', () => {
@@ -272,11 +271,11 @@ describe('TTSContextManager context-map pruning', () => {
 // =========================================================================
 
 describe('TTSContext.push / end / flush — when closed', () => {
-  test('push throws CartesiaError after close', () => {
+  test('push throws Cartesia.CartesiaError after close', () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'p' });
     emitSocketClose(manager);
-    expect(() => ctx.push({ transcript: 'hi' })).toThrow(CartesiaError);
+    expect(() => ctx.push({ transcript: 'hi' })).toThrow(Cartesia.CartesiaError);
   });
 
   test('end does nothing after close', () => {
@@ -286,11 +285,11 @@ describe('TTSContext.push / end / flush — when closed', () => {
     expect(() => ctx.end()).not.toThrow();
   });
 
-  test('flush throws CartesiaError after close', () => {
+  test('flush throws Cartesia.CartesiaError after close', () => {
     const manager = createTestManager();
     const ctx = manager.context({ ...CONTEXT_OPTIONS, context_id: 'f' });
     emitSocketClose(manager);
-    expect(() => ctx.flush()).toThrow(CartesiaError);
+    expect(() => ctx.flush()).toThrow(Cartesia.CartesiaError);
   });
 
   test('cancel does nothing after close', () => {
@@ -318,7 +317,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('buf', 1));
     injectEvent(manager, makeDone('buf'));
 
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events.map((e) => e.type)).toEqual(['chunk', 'chunk', 'done']);
@@ -331,7 +330,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('d', 0));
     injectEvent(manager, makeDone('d'));
 
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events.map((e) => e.type)).toEqual(['chunk', 'done']);
@@ -341,7 +340,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     // so trailing events are dropped rather than buffered for a future
     // receive() call.
     injectEvent(manager, makeChunk('d', 99));
-    const trailing: TTSContexts.WebSocketResponse[] = [];
+    const trailing: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) trailing.push(e);
     expect(trailing).toHaveLength(0);
   });
@@ -352,7 +351,7 @@ describe('TTSContext.receive() — basic semantics', () => {
 
     injectEvent(manager, makeError('err'));
 
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events).toHaveLength(1);
@@ -368,7 +367,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('err-warn', 0));
     injectEvent(manager, makeDone('err-warn'));
 
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
 
     expect(events.map((e) => e.type)).toEqual(['error', 'chunk', 'done']);
@@ -383,7 +382,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     });
 
     let threw: unknown;
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     try {
       for await (const e of ctx.receive()) events.push(e);
     } catch (err) {
@@ -405,7 +404,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('audio', 0));
     injectEvent(manager, makeDone('audio'));
 
-    const chunks: TTSContexts.WebSocketResponse.Chunk[] = [];
+    const chunks: Cartesia.TTS.Contexts.WebSocketResponse.Chunk[] = [];
     for await (const e of ctx.receive()) {
       if (e.type === 'chunk') chunks.push(e);
     }
@@ -432,7 +431,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     });
     injectEvent(manager, makeDone('empty-audio'));
 
-    const chunks: TTSContexts.WebSocketResponse.Chunk[] = [];
+    const chunks: Cartesia.TTS.Contexts.WebSocketResponse.Chunk[] = [];
     for await (const e of ctx.receive()) {
       if (e.type === 'chunk') chunks.push(e);
     }
@@ -446,7 +445,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('early', 0));
     injectEvent(manager, makeChunk('early', 1));
 
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) {
       events.push(e);
       break; // exits early — for-await calls generator.return(), runs finally.
@@ -467,7 +466,7 @@ describe('TTSContext.receive() — basic semantics', () => {
     injectEvent(manager, makeChunk('A', 1));
     injectEvent(manager, makeDone('A'));
 
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctxA.receive()) events.push(e);
 
     for (const e of events) expect((e as any).context_id).toBe('A');
@@ -488,9 +487,9 @@ describe('TTSContext.receive() — multi-context routing', () => {
     injectEvent(manager, makeDone('A'));
     injectEvent(manager, makeDone('B'));
 
-    const aEvents: TTSContexts.WebSocketResponse[] = [];
+    const aEvents: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctxA.receive()) aEvents.push(e);
-    const bEvents: TTSContexts.WebSocketResponse[] = [];
+    const bEvents: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctxB.receive()) bEvents.push(e);
 
     for (const e of aEvents) expect((e as any).context_id).toBe('A');
@@ -506,8 +505,8 @@ describe('TTSContext.receive() — multi-context routing', () => {
     const ctxA = manager.context({ ...CONTEXT_OPTIONS, context_id: 'A' });
     const ctxB = manager.context({ ...CONTEXT_OPTIONS, context_id: 'B' });
 
-    const aResult: TTSContexts.WebSocketResponse[] = [];
-    const bResult: TTSContexts.WebSocketResponse[] = [];
+    const aResult: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
+    const bResult: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     const pa = (async () => {
       for await (const e of ctxA.receive()) aResult.push(e);
     })();
@@ -548,7 +547,7 @@ describe('TTSContext.receive() — multi-context routing', () => {
 
     const SLOW_DELAY = 25; // ms per yield
     async function readSlow() {
-      const out: TTSContexts.WebSocketResponse[] = [];
+      const out: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
       for await (const e of slow.receive()) {
         if (e.type === 'chunk') out.push(e);
         await sleep(SLOW_DELAY);
@@ -558,7 +557,7 @@ describe('TTSContext.receive() — multi-context routing', () => {
 
     let fastDuration = 0;
     async function readFast() {
-      const out: TTSContexts.WebSocketResponse[] = [];
+      const out: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
       const start = performance.now();
       for await (const e of fast.receive()) {
         if (e.type === 'chunk') out.push(e);
@@ -633,7 +632,7 @@ describe('TTSContext.isClosed — set as soon as a terminal event is observed', 
 
     expect(ctx.isClosed).toBe(true);
 
-    const events: TTSContexts.WebSocketResponse[] = [];
+    const events: Cartesia.TTS.Contexts.WebSocketResponse[] = [];
     for await (const e of ctx.receive()) events.push(e);
     expect(events.map((e) => e.type)).toEqual(['chunk', 'chunk', 'done']);
     expect(ctx.isClosed).toBe(true);

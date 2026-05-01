@@ -1059,5 +1059,6 @@ export declare namespace TTS {
     type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
+    type TTSContexts as Contexts,
   };
 }

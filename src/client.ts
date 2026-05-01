@@ -39,7 +39,14 @@ import {
   PronunciationDicts,
   PronunciationDictsCursorIDPage,
 } from './resources/pronunciation-dicts';
-import { STT, STTTranscribeParams, STTTranscribeResponse } from './resources/stt';
+import {
+  STT,
+  STTTranscribeParams,
+  STTTranscribeResponse,
+  Stt,
+  SttTranscribeParams,
+  SttTranscribeResponse,
+} from './resources/stt';
 import {
   VoiceChanger,
   VoiceChangerChangeVoiceBytesParams,
@@ -884,6 +891,7 @@ Cartesia.Datasets = Datasets;
 Cartesia.FineTunes = FineTunes;
 Cartesia.PronunciationDicts = PronunciationDicts;
 Cartesia.STT = STT;
+Cartesia.Stt = Stt;
 Cartesia.TTS = TTS;
 Cartesia.VoiceChanger = VoiceChanger;
 Cartesia.Voices = Voices;
@@ -944,8 +952,11 @@ export declare namespace Cartesia {
 
   export {
     STT as STT,
+    Stt as Stt,
     type STTTranscribeResponse as STTTranscribeResponse,
     type STTTranscribeParams as STTTranscribeParams,
+    type SttTranscribeResponse as SttTranscribeResponse,
+    type SttTranscribeParams as SttTranscribeParams,
   };
 
   export {

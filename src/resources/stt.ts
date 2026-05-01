@@ -224,9 +224,28 @@ export interface STTTranscribeParams {
   timestamp_granularities?: Array<'word'> | null;
 }
 
+/** Type alias for backward compatibility */
+export type SttTranscribeResponse = STTTranscribeResponse;
+
+/** Type alias for backward compatibility */
+export type SttTranscribeParams = STTTranscribeParams;
+
+/** @deprecated Use {@link STT} instead. */
+export const Stt = STT;
+
+/** @deprecated Use {@link STT} instead. */
+export type Stt = STT;
+
 export declare namespace STT {
   export {
     type STTTranscribeResponse as STTTranscribeResponse,
     type STTTranscribeParams as STTTranscribeParams,
+  };
+}
+
+export declare namespace Stt {
+  export {
+    type SttTranscribeResponse as SttTranscribeResponse,
+    type SttTranscribeParams as SttTranscribeParams,
   };
 }
