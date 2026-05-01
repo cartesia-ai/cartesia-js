@@ -30,6 +30,7 @@ export default function WebSocketExample() {
           model_id: 'sonic-3',
           voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
           output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: SAMPLE_RATE },
+          language: 'en',
         });
 
         wsCtx.push({
