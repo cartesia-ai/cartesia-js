@@ -39,7 +39,7 @@ import {
   PronunciationDicts,
   PronunciationDictsCursorIDPage,
 } from './resources/pronunciation-dicts';
-import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt';
+import { STT, STTTranscribeParams, STTTranscribeResponse } from './resources/stt';
 import {
   VoiceChanger,
   VoiceChangerChangeVoiceBytesParams,
@@ -872,7 +872,7 @@ export class Cartesia {
   datasets: API.Datasets = new API.Datasets(this);
   fineTunes: API.FineTunes = new API.FineTunes(this);
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
-  stt: API.Stt = new API.Stt(this);
+  stt: API.STT = new API.STT(this);
   tts: API.TTS = new API.TTS(this);
   voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
   voices: API.Voices = new API.Voices(this);
@@ -883,7 +883,7 @@ Cartesia.AccessToken = AccessToken;
 Cartesia.Datasets = Datasets;
 Cartesia.FineTunes = FineTunes;
 Cartesia.PronunciationDicts = PronunciationDicts;
-Cartesia.Stt = Stt;
+Cartesia.STT = STT;
 Cartesia.TTS = TTS;
 Cartesia.VoiceChanger = VoiceChanger;
 Cartesia.Voices = Voices;
@@ -943,9 +943,9 @@ export declare namespace Cartesia {
   };
 
   export {
-    Stt as Stt,
-    type SttTranscribeResponse as SttTranscribeResponse,
-    type SttTranscribeParams as SttTranscribeParams,
+    STT as STT,
+    type STTTranscribeResponse as STTTranscribeResponse,
+    type STTTranscribeParams as STTTranscribeParams,
   };
 
   export {

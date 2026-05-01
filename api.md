@@ -143,15 +143,15 @@ Methods:
 - <code title="get /pronunciation-dicts/">client.pronunciationDicts.<a href="./src/resources/pronunciation-dicts.ts">list</a>({ ...params }) -> PronunciationDictsCursorIDPage</code>
 - <code title="delete /pronunciation-dicts/{id}">client.pronunciationDicts.<a href="./src/resources/pronunciation-dicts.ts">delete</a>(id) -> void</code>
 
-# Stt
+# STT
 
 Types:
 
-- <code><a href="./src/resources/stt.ts">SttTranscribeResponse</a></code>
+- <code><a href="./src/resources/stt.ts">STTTranscribeResponse</a></code>
 
 Methods:
 
-- <code title="post /stt">client.stt.<a href="./src/resources/stt.ts">transcribe</a>({ ...params }) -> SttTranscribeResponse</code>
+- <code title="post /stt">client.stt.<a href="./src/resources/stt.ts">transcribe</a>({ ...params }) -> STTTranscribeResponse</code>
 
 # TTS
 
