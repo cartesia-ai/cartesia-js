@@ -44,6 +44,9 @@ import {
   VoiceChanger,
   VoiceChangerChangeVoiceBytesParams,
   VoiceChangerChangeVoiceSseParams,
+  VoiceChangerGenerateParams,
+  VoiceChangerGenerateSSEParams,
+  VoiceChangerSSEEvent,
 } from './resources/voice-changer';
 import {
   GenderPresentation,
@@ -79,15 +82,19 @@ import {
   GenerationRequest,
   ModelSpeed,
   OutputFormatContainer,
+  PhonemeTimestamps,
   RawEncoding,
   RawOutputFormat,
   TTS,
   TTSGenerateParams,
   TTSGenerateSseParams,
+  TTSGenerateSSEParams,
   TTSInfillParams,
+  TTSSSEEvent,
   VoiceSpecifier,
   WebsocketClientEvent,
   WebsocketResponse,
+  WordTimestamps,
 } from './resources/tts/tts';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
@@ -101,6 +108,7 @@ import {
   parseLogLevel,
 } from './internal/utils/log';
 import { isEmptyObj } from './internal/utils/values';
+import { TTSContexts } from './resources/index';
 
 export interface ClientOptions {
   apiKey?: string | null | undefined;
@@ -236,6 +244,18 @@ export class Cartesia {
     this.fetch = options.fetch ?? Shims.getDefaultFetch();
     this.#encoder = Opts.FallbackEncoder;
 
+    const customHeadersEnv = readEnv('CARTESIA_CUSTOM_HEADERS');
+    if (customHeadersEnv) {
+      const parsed: Record<string, string> = {};
+      for (const line of customHeadersEnv.split('\n')) {
+        const colon = line.indexOf(':');
+        if (colon >= 0) {
+          parsed[line.substring(0, colon).trim()] = line.substring(colon + 1).trim();
+        }
+      }
+      options.defaultHeaders = { ...parsed, ...options.defaultHeaders };
+    }
+
     this._options = options;
 
     this.apiKey = apiKey;
@@ -351,8 +371,9 @@ export class Cartesia {
       : new URL(baseURL + (baseURL.endsWith('/') && path.startsWith('/') ? path.slice(1) : path));
 
     const defaultQuery = this.defaultQuery();
-    if (!isEmptyObj(defaultQuery)) {
-      query = { ...defaultQuery, ...query };
+    const pathQuery = Object.fromEntries(url.searchParams);
+    if (!isEmptyObj(defaultQuery) || !isEmptyObj(pathQuery)) {
+      query = { ...pathQuery, ...defaultQuery, ...query };
     }
 
     if (typeof query === 'object' && query && !Array.isArray(query)) {
@@ -685,9 +706,9 @@ export class Cartesia {
       }
     }
 
-    // If the API asks us to wait a certain amount of time (and it's a reasonable amount),
-    // just do what it says, but otherwise calculate a default
-    if (!(timeoutMillis && 0 <= timeoutMillis && timeoutMillis < 60 * 1000)) {
+    // If the API asks us to wait a certain amount of time, just do what it
+    // says, but otherwise calculate a default
+    if (timeoutMillis === undefined) {
       const maxRetries = options.maxRetries ?? this.maxRetries;
       timeoutMillis = this.calculateDefaultRetryTimeoutMillis(retriesRemaining, maxRetries);
     }
@@ -763,7 +784,7 @@ export class Cartesia {
         'X-Stainless-Retry-Count': String(retryCount),
         ...(options.timeout ? { 'X-Stainless-Timeout': String(Math.trunc(options.timeout / 1000)) } : {}),
         ...getPlatformHeaders(),
-        'cartesia-version': '2025-11-04',
+        'cartesia-version': '2026-03-01',
       },
       await this.authHeaders(options),
       this._options.defaultHeaders,
@@ -933,20 +954,28 @@ export declare namespace Cartesia {
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
     type OutputFormatContainer as OutputFormatContainer,
+    type PhonemeTimestamps as PhonemeTimestamps,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
+    type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
+    type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
+    type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
+    type TTSContexts as TTSContexts,
   };
 
   export {
     VoiceChanger as VoiceChanger,
     type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
     type VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
+    type VoiceChangerSSEEvent as VoiceChangerSSEEvent,
+    type VoiceChangerGenerateParams as VoiceChangerGenerateParams,
+    type VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams,
   };
 
   export {

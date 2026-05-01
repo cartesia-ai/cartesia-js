@@ -10,9 +10,12 @@
  * Additional tests cover correct routing by context_id and receive timeouts.
  */
 
-import { TTSWS } from '@cartesia/cartesia-js/resources/tts/ws';
-import { WebSocketTimeoutError } from '@cartesia/cartesia-js/resources/tts/internal-base';
-import type { WebsocketResponse } from '@cartesia/cartesia-js/resources/tts/tts';
+import { WebSocket } from 'ws';
+import {
+  TTSWS,
+  WebSocketTimeoutError,
+  type WebsocketResponse,
+} from '@cartesia/cartesia-js/resources/tts/index';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -27,7 +30,21 @@ const CONTEXT_OPTIONS = {
 /** Create a TTSWS whose underlying socket will fail to connect (that's fine —
  *  we inject messages by emitting directly on the socket). */
 function createTestWS(): TTSWS {
-  const fakeClient = { baseURL: 'http://127.0.0.1:1', token: 'test' } as any;
+  const fakeClient = {
+    baseURL: 'http://127.0.0.1:1',
+    token: 'test',
+    buildURL(path: string, query: Record<string, unknown> | null | undefined): string {
+      const url = new URL(
+        this.baseURL + (this.baseURL.endsWith('/') && path.startsWith('/') ? path.slice(1) : path),
+      );
+      if (query && typeof query === 'object' && !Array.isArray(query)) {
+        for (const [k, v] of Object.entries(query)) {
+          if (v !== undefined) url.searchParams.set(k, String(v));
+        }
+      }
+      return url.toString();
+    },
+  } as any;
   const ws = new TTSWS(fakeClient);
   // Suppress connection‑error noise.
   ws.on('error', () => {});
@@ -37,7 +54,7 @@ function createTestWS(): TTSWS {
 
 /** Simulate a server‑sent message by emitting directly on the socket. */
 function injectEvent(ws: TTSWS, event: Record<string, unknown>) {
-  ws.socket.emit('message', Buffer.from(JSON.stringify(event)), false);
+  (ws.socket as WebSocket).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
 function makeChunk(contextId: string, seq: number): Record<string, unknown> {

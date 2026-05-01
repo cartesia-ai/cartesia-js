@@ -161,24 +161,31 @@ Types:
 - <code><a href="./src/resources/tts.ts">GenerationRequest</a></code>
 - <code><a href="./src/resources/tts.ts">ModelSpeed</a></code>
 - <code><a href="./src/resources/tts.ts">OutputFormatContainer</a></code>
+- <code><a href="./src/resources/tts.ts">PhonemeTimestamps</a></code>
 - <code><a href="./src/resources/tts.ts">RawEncoding</a></code>
 - <code><a href="./src/resources/tts.ts">RawOutputFormat</a></code>
+- <code><a href="./src/resources/tts.ts">TTSSSEEvent</a></code>
 - <code><a href="./src/resources/tts.ts">VoiceSpecifier</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketClientEvent</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketResponse</a></code>
+- <code><a href="./src/resources/tts.ts">WordTimestamps</a></code>
 
 Methods:
 
 - <code title="post /tts/bytes">client.tts.<a href="./src/resources/tts.ts">generate</a>({ ...params }) -> Response</code>
-- <code title="post /tts/sse">client.tts.<a href="./src/resources/tts.ts">generateSse</a>({ ...params }) -> void</code>
+- <code title="post /tts/sse">client.tts.<a href="./src/resources/tts.ts">generateSSE</a>({ ...params }) -> TTSSSEEvent</code>
 - <code title="post /infill/bytes">client.tts.<a href="./src/resources/tts.ts">infill</a>({ ...params }) -> Response</code>
 
 # VoiceChanger
 
+Types:
+
+- <code><a href="./src/resources/voice-changer.ts">VoiceChangerSSEEvent</a></code>
+
 Methods:
 
-- <code title="post /voice-changer/bytes">client.voiceChanger.<a href="./src/resources/voice-changer.ts">changeVoiceBytes</a>({ ...params }) -> Response</code>
-- <code title="post /voice-changer/sse">client.voiceChanger.<a href="./src/resources/voice-changer.ts">changeVoiceSse</a>({ ...params }) -> void</code>
+- <code title="post /voice-changer/bytes">client.voiceChanger.<a href="./src/resources/voice-changer.ts">generate</a>({ ...params }) -> Response</code>
+- <code title="post /voice-changer/sse">client.voiceChanger.<a href="./src/resources/voice-changer.ts">generateSSE</a>({ ...params }) -> VoiceChangerSSEEvent</code>
 
 # Voices
 

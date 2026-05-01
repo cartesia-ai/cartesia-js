@@ -20,20 +20,20 @@ If you want to upgrade with minimal code changes, import `CartesiaClient` instea
 
 ```typescript
 // v2.x
-import { CartesiaClient } from "@cartesia/cartesia-js";
+import { CartesiaClient } from '@cartesia/cartesia-js';
 
 // v3.x — same import, same API
-import { CartesiaClient } from "@cartesia/cartesia-js";
+import { CartesiaClient } from '@cartesia/cartesia-js';
 
-const client = new CartesiaClient({ apiKey: "your-api-key" });
+const client = new CartesiaClient({ apiKey: 'your-api-key' });
 ```
 
 For the new snake_case API with full TypeScript types, use the `Cartesia` class:
 
 ```typescript
-import Cartesia from "@cartesia/cartesia-js";
+import Cartesia from '@cartesia/cartesia-js';
 
-const client = new Cartesia({ apiKey: "your-api-key" });
+const client = new Cartesia({ apiKey: 'your-api-key' });
 ```
 
 ## TTS Bytes (Batch Generation)
@@ -43,10 +43,10 @@ For backwards compatibility, `client.tts.bytes()` is included on the `CartesiaCl
 ```typescript
 // v2.x
 const stream = await client.tts.bytes({
-  modelId: "sonic-2",
-  transcript: "Hello, world!",
-  voice: { mode: "id", id: "voice-id" },
-  outputFormat: { container: "wav", encoding: "pcm_f32le", sampleRate: 44100 },
+  modelId: 'sonic-2',
+  transcript: 'Hello, world!',
+  voice: { mode: 'id', id: 'voice-id' },
+  outputFormat: { container: 'wav', encoding: 'pcm_f32le', sampleRate: 44100 },
 });
 
 const chunks = [];
@@ -57,10 +57,10 @@ const audio = Buffer.concat(chunks);
 
 // v3.x (new API)
 const response = await client.tts.generate({
-  model_id: "sonic-2",
-  transcript: "Hello, world!",
-  voice: { mode: "id", id: "voice-id" },
-  output_format: { container: "wav", encoding: "pcm_f32le", sample_rate: 44100 },
+  model_id: 'sonic-2',
+  transcript: 'Hello, world!',
+  voice: { mode: 'id', id: 'voice-id' },
+  output_format: { container: 'wav', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
 
 const audio = Buffer.from(await response.arrayBuffer());
@@ -74,14 +74,14 @@ const audio = Buffer.from(await response.arrayBuffer());
 // v2.x
 const ws = client.tts.websocket({
   sampleRate: 44100,
-  container: "raw",
-  encoding: "pcm_f32le",
+  container: 'raw',
+  encoding: 'pcm_f32le',
 });
 
 const { source } = await ws.send({
-  modelId: "sonic-2",
-  transcript: "Hello, world!",
-  voice: { mode: "id", id: "voice-id" },
+  modelId: 'sonic-2',
+  transcript: 'Hello, world!',
+  voice: { mode: 'id', id: 'voice-id' },
 });
 
 // Read audio from source
@@ -95,15 +95,18 @@ while (true) {
 ws.disconnect();
 
 // v3.x (new API)
-const ws = await client.tts.websocket();
+const ws = client.tts.createContextManager();
+await ws.connect();
+const ctx = new ws.context({
+  model_id: 'sonic-2',
+  voice: { mode: 'id', id: 'voice-id' },
+  output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
+});
+ctx.push({ transcript: 'Hello, world!' });
+ctx.end();
 
-for await (const event of ws.generate({
-  model_id: "sonic-2",
-  transcript: "Hello, world!",
-  voice: { mode: "id", id: "voice-id" },
-  output_format: { container: "raw", encoding: "pcm_f32le", sample_rate: 44100 },
-})) {
-  if (event.type === "chunk" && event.audio) {
+for await (const event of ws.receive()) {
+  if (event.type === 'chunk' && event.audio) {
     process(event.audio); // Buffer with decoded audio
   }
 }
@@ -119,37 +122,38 @@ const ws = client.tts.websocket({ sampleRate: 44100 });
 await ws.connect();
 
 await ws.send({
-  modelId: "sonic-2",
-  transcript: "First part. ",
-  voice: { mode: "id", id: "voice-id" },
+  modelId: 'sonic-2',
+  transcript: 'First part. ',
+  voice: { mode: 'id', id: 'voice-id' },
   continue: true,
-  contextId: "my-context",
+  contextId: 'my-context',
 });
 
 await ws.continue({
-  modelId: "sonic-2",
-  transcript: "Second part.",
-  voice: { mode: "id", id: "voice-id" },
-  contextId: "my-context",
+  modelId: 'sonic-2',
+  transcript: 'Second part.',
+  voice: { mode: 'id', id: 'voice-id' },
+  contextId: 'my-context',
 });
 
 ws.disconnect();
 
 // v3.x (new API)
-const ws = await client.tts.websocket();
+const ws = client.tts.createContextManager();
+await ws.connect();
 
 const ctx = ws.context({
-  model_id: "sonic-2",
-  voice: { mode: "id", id: "voice-id" },
-  output_format: { container: "raw", encoding: "pcm_f32le", sample_rate: 44100 },
+  model_id: 'sonic-2',
+  voice: { mode: 'id', id: 'voice-id' },
+  output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
 
-await ctx.push({ transcript: "First part. " });
-await ctx.push({ transcript: "Second part." });
-await ctx.no_more_inputs();
+ctx.push({ transcript: 'First part. ' });
+ctx.push({ transcript: 'Second part.' });
+ctx.end();
 
 for await (const event of ctx.receive()) {
-  if (event.type === "chunk" && event.audio) {
+  if (event.type === 'chunk' && event.audio) {
     process(event.audio);
   }
 }
@@ -162,18 +166,18 @@ ws.close();
 ```typescript
 // v3.x (new API)
 const ctx = ws.context({
-  model_id: "sonic-2",
-  voice: { mode: "id", id: "voice-id" },
-  output_format: { container: "raw", encoding: "pcm_f32le", sample_rate: 44100 },
+  model_id: 'sonic-2',
+  voice: { mode: 'id', id: 'voice-id' },
+  output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
 
-await ctx.push({ transcript: "First sentence. " });
+await ctx.push({ transcript: 'First sentence. ' });
 await ctx.flush(); // Force generation of buffered text
-await ctx.push({ transcript: "Second sentence." });
-await ctx.no_more_inputs();
+await ctx.push({ transcript: 'Second sentence.' });
+await ctx.end();
 
 for await (const event of ctx.receive()) {
-  if (event.type === "chunk") {
+  if (event.type === 'chunk') {
     // event.flush_id indicates which flush the audio belongs to
     process(event.audio, event.flush_id);
   }
@@ -204,18 +208,18 @@ console.log(voices[0].createdAt); // camelCase, same as v2.x
 ```typescript
 // v2.x
 const voice = await client.voices.clone(clip, {
-  name: "My Voice",
-  description: "A custom voice",
-  language: "en",
-  mode: "similarity",
+  name: 'My Voice',
+  description: 'A custom voice',
+  language: 'en',
+  mode: 'similarity',
 });
 
 // v3.x (new API)
 const voice = await client.voices.clone({
   clip: clip,
-  name: "My Voice",
-  description: "A custom voice",
-  language: "en",
+  name: 'My Voice',
+  description: 'A custom voice',
+  language: 'en',
 });
 ```
 
@@ -233,24 +237,24 @@ The `CartesiaClient` class uses camelCase, as it did in v2.x.
 
 Moving forward, the `Cartesia` class returns snake_case fields matching the HTTP and Websockets APIs. This is to minimize confusion when comparing SDK code with the API reference.
 
-| CartesiaClient (camelCase) | Cartesia (snake_case) |
-|---|---|
-| `voice.createdAt` | `voice.created_at` |
-| `voice.isPublic` | `voice.is_public` |
-| `voice.isOwner` | `voice.is_owner` |
-| `voice.userId` | `voice.user_id` |
-| `voice.previewFileUrl` | `voice.preview_file_url` |
+| CartesiaClient (camelCase) | Cartesia (snake_case)    |
+| -------------------------- | ------------------------ |
+| `voice.createdAt`          | `voice.created_at`       |
+| `voice.isPublic`           | `voice.is_public`        |
+| `voice.isOwner`            | `voice.is_owner`         |
+| `voice.userId`             | `voice.user_id`          |
+| `voice.previewFileUrl`     | `voice.preview_file_url` |
 
-| CartesiaClient (camelCase) | Cartesia (snake_case) |
-|---|---|
-| `modelId` | `model_id` |
-| `outputFormat` | `output_format` |
-| `sampleRate` | `sample_rate` |
-| `bitRate` | `bit_rate` |
-| `generationConfig` | `generation_config` |
-| `pronunciationDictId` | `pronunciation_dict_id` |
-| `addTimestamps` | `add_timestamps` |
-| `contextId` | `context_id` |
+| CartesiaClient (camelCase) | Cartesia (snake_case)   |
+| -------------------------- | ----------------------- |
+| `modelId`                  | `model_id`              |
+| `outputFormat`             | `output_format`         |
+| `sampleRate`               | `sample_rate`           |
+| `bitRate`                  | `bit_rate`              |
+| `generationConfig`         | `generation_config`     |
+| `pronunciationDictId`      | `pronunciation_dict_id` |
+| `addTimestamps`            | `add_timestamps`        |
+| `contextId`                | `context_id`            |
 
 ## Error Handling
 
@@ -297,20 +301,19 @@ try {
 
 ## Summary of Breaking Changes
 
-| Feature | v2.x | v3.x |
-|---------|------|------|
-| Voice creation from embedding | `client.voices.create(...)` | Removed — use `client.voices.clone(clip)` |
-| Voice mixing | `client.voices.mix(...)` | Removed |
-| WebSocket streaming | `ws.send()` returns `{ source }` | `ws.generate()` returns async iterator |
+| Feature                       | v2.x                             | v3.x                                      |
+| ----------------------------- | -------------------------------- | ----------------------------------------- |
+| Voice creation from embedding | `client.voices.create(...)`      | Removed — use `client.voices.clone(clip)` |
+| Voice mixing                  | `client.voices.mix(...)`         | Removed                                   |
+| WebSocket streaming           | `ws.send()` returns `{ source }` | `ws.generate()` returns async iterator    |
 
 ## Changes for migrating from deprecated `CartesiaClient` to `Cartesia`
 
-| Feature | CartesiaClient | Cartesia |
-|---------|------|------|
-| TTS batch method | `client.tts.bytes(...)` | `client.tts.generate(...)` |
-| Parameter naming | camelCase (`modelId`) | snake_case (`model_id`) |
-| Response naming | camelCase (`createdAt`) | snake_case (`created_at`) |
-| WebSocket connect | `ws = client.tts.websocket({...}); await ws.connect()` | `ws = await client.tts.websocket()` |
-| WebSocket single generation | `ws.send({transcript, ...})` returns `{ source }` | `ws.generate({transcript, ...})` returns async iterator |
-| WebSocket continuations | `ws.send({..., continue: true})`  then `ws.continue({...})` | `ctx = ws.context({...})` then `ctx.push({transcript})` and `ctx.no_more_inputs()` |
-| WebSocket disconnect | `ws.disconnect()` | `ws.close()` |
+| Feature               | CartesiaClient                                             | Cartesia                                                                |
+| --------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| TTS batch method      | `client.tts.bytes(...)`                                    | `client.tts.generate(...)`                                              |
+| Parameter naming      | camelCase (`modelId`)                                      | snake_case (`model_id`)                                                 |
+| Response naming       | camelCase (`createdAt`)                                    | snake_case (`created_at`)                                               |
+| WebSocket connect     | `ws = client.tts.websocket({...})`                         | `ws = client.tts.createContextManager()`                                |
+| WebSocket generations | `ws.send({..., continue: true})` then `ws.continue({...})` | `ctx = ws.context({...})` then `ctx.push({transcript})` and `ctx.end()` |
+| WebSocket disconnect  | `ws.disconnect()`                                          | `ws.close()`                                                            |

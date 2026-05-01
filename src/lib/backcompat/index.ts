@@ -1,8 +1,8 @@
-import { Cartesia, type ClientOptions } from '../client';
+import { Cartesia, type ClientOptions } from '../../client';
 import { TTSWrapper } from './tts-wrapper';
 import { VoicesWrapper } from './voices-wrapper';
 import { VoiceChangerWrapper } from './voice-changer-wrapper';
-import { buildHeaders, type NullableHeaders } from '../internal/headers';
+import { buildHeaders, type NullableHeaders } from '../../internal/headers';
 import type { CartesiaClientOptions, Supplier } from './types';
 
 async function resolveSupplier<T>(supplier: Supplier<T>): Promise<T> {

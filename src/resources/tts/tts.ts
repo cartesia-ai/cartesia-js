@@ -1,19 +1,28 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import type * as WS from 'ws';
 import { APIResource } from '../../core/resource';
 import * as TTSAPI from './tts';
 import * as VoicesAPI from '../voices';
 import { APIPromise } from '../../core/api-promise';
+import { Stream } from '../../core/streaming';
 import { type Uploadable } from '../../core/uploads';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
-import { TTSWS } from './ws';
 import { multipartFormRequestOptions } from '../../internal/uploads';
+import { TTSWS, type TTSWSClientOptions } from './ws';
+
+import { TTSWS as TTSWS_3_0_0 } from '../../lib/tts/ws/3-0-0';
+import { TTSContextManager, TTSContexts } from '../../lib/tts/ws/context-manager';
 
 export class TTS extends APIResource {
   /**
-   * Text to Speech (Bytes)
+   * Text-to-Speech (Bytes).
+   *
+   * The simplest way to stream generated audio.
+   *
+   * See
+   * [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+   * for details.
    */
   generate(body: TTSGenerateParams, options?: RequestOptions): APIPromise<Response> {
     return this._client.post('/tts/bytes', {
@@ -25,26 +34,71 @@ export class TTS extends APIResource {
   }
 
   /**
-   * Text to Speech (SSE)
+   * Text-to-Speech (SSE).
+   *
+   * Supports:
+   *
+   * - Streaming
+   * - Timestamps
+   * - context_id without transcript buffering
+   *
+   * See
+   * [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+   * for details.
    */
-  generateSse(body: TTSGenerateSseParams, options?: RequestOptions): APIPromise<void> {
+  generateSSE(body: TTSGenerateSSEParams, options?: RequestOptions): APIPromise<Stream<TTSSSEEvent>> {
     return this._client.post('/tts/sse', {
       body,
       ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+      headers: buildHeaders([{ Accept: 'text/event-stream' }, options?.headers]),
+      stream: true,
+    }) as APIPromise<Stream<TTSSSEEvent>>;
   }
 
   /**
-   * Create a WebSocket connection for streaming TTS.
-   * Returns a promise that resolves when the connection is open.
+   * Text-to-Speech (WebSocket).
+   *
+   * Supports:
+   * - Streaming
+   * - Long-lived connections allow for lower latency by reusing a live network connection
+   * - Timestamps
+   * - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+   * - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+   * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+   * - Event listeners
+   *
+   * @param parameters - Reserved for future use.
+   * @param options - WebSocket client options and reconnect behavior.
+   *
+   * See {@link createContextManager} for the same API with client-side context management.
    */
-  async websocket(options?: WS.ClientOptions): Promise<TTSWS> {
-    const ws = new TTSWS(this._client, options);
-    return ws.connect();
+  generateWS(parameters?: Record<string, unknown> | undefined, options?: TTSWSClientOptions) {
+    return new TTSWS(this._client, parameters, options);
   }
 
   /**
+   * Text-to-Speech (WebSocket) with built-in context management.
+   *
+   * Supports:
+   * - Streaming
+   * - Long-lived connections allow for lower latency by reusing a live network connection
+   * - Timestamps
+   * - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+   * - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+   * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+   * - Event listeners
+   *
+   * @param options - WebSocket client options and reconnect behavior.
+   *
+   * See {@link generateWS} for the same API without the added client-side context management features.
+   */
+  createContextManager(options?: TTSWSClientOptions): TTSContexts.IManager {
+    return new TTSContextManager(this._client, options);
+  }
+
+  /**
+   * Infill (Bytes).
+   *
    * Generate audio that smoothly connects two existing audio segments. This is
    * useful for inserting new speech between existing speech segments while
    * maintaining natural transitions.
@@ -78,6 +132,37 @@ export class TTS extends APIResource {
         this._client,
       ),
     );
+  }
+
+  /**
+   * Make a raw Text-to-Speech (SSE) request without any response handling.
+   *
+   * @deprecated Use {@link TTS.generateSSE } for built-in event parsing and streaming.
+   */
+  generateSse(body: TTSGenerateSSEParams, options?: RequestOptions): APIPromise<void> {
+    return this._client.post('/tts/sse', {
+      body,
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
+  }
+
+  /**
+   * Text-to-Speech (WebSocket).
+   *
+   * @returns A promise that resolves when the connection is open.
+   *
+   * @deprecated This method is no longer maintained and is kept for backward compatibility.
+   * Use {@link TTS.createContextManager} instead.
+   *
+   * Note: {@link TTS.createContextManager} returns {@link TTSContexts.IManager}, which behaves differently in these ways:
+   * - {@link TTSContexts.IManager.context } returns {@link TTSContexts.IContext}
+   * - {@link TTSContexts.IContext.receive} yields errors rather than throwing them
+   * - {@link TTSContexts.IContext.push} and {@link TTSContexts.IContext.flush} throw errors when the context has already been cleaned up by the client.
+   */
+  websocket(options?: ConstructorParameters<typeof TTSWS_3_0_0>[1]): Promise<TTSWS_3_0_0> {
+    const ws = new TTSWS_3_0_0(this._client, options);
+    return ws.connect();
   }
 }
 
@@ -168,6 +253,12 @@ export interface GenerationConfig {
 
 export interface GenerationRequest {
   /**
+   * A unique identifier for the context. You can use any unique identifier, like a
+   * UUID or human ID.
+   */
+  context_id: string;
+
+  /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
@@ -195,15 +286,6 @@ export interface GenerationRequest {
    * events containing word-level timing information.
    */
   add_timestamps?: boolean | null;
-
-  /**
-   * A unique identifier for the context. You can use any unique identifier, like a
-   * UUID or human ID.
-   *
-   * Some customers use unique identifiers from their own systems (such as
-   * conversation IDs) as context IDs.
-   */
-  context_id?: string | null;
 
   /**
    * Whether this input may be followed by more inputs. If not specified, this
@@ -253,10 +335,7 @@ export interface GenerationRequest {
   pronunciation_dict_id?: string | null;
 
   /**
-   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
-   * model. Defaults to `normal`. This feature is experimental and may not work for
-   * all voices. Influences the speed of the generated speech. Faster speeds may
-   * reduce hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3.
    */
   speed?: ModelSpeed;
 
@@ -277,14 +356,31 @@ export namespace GenerationRequest {
 }
 
 /**
- * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
- * model. Defaults to `normal`. This feature is experimental and may not work for
- * all voices. Influences the speed of the generated speech. Faster speeds may
- * reduce hallucination rate.
+ * @deprecated Use `generation_config.speed` for sonic-3.
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
 export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
+
+/**
+ * Phoneme-level timing information.
+ */
+export interface PhonemeTimestamps {
+  /**
+   * End times in seconds for each phoneme.
+   */
+  end: Array<number>;
+
+  /**
+   * List of phonemes in order.
+   */
+  phonemes: Array<string>;
+
+  /**
+   * Start times in seconds for each phoneme.
+   */
+  start: Array<number>;
+}
 
 export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
 
@@ -292,6 +388,186 @@ export interface RawOutputFormat {
   encoding: RawEncoding;
 
   sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
+}
+
+/**
+ * An event emitted by the TTS SSE stream.
+ */
+export type TTSSSEEvent =
+  | TTSSSEEvent.TTSSSEChunkEvent
+  | TTSSSEEvent.TTSSSETimestampsEvent
+  | TTSSSEEvent.TTSSSEPhonemeTimestampsEvent
+  | TTSSSEEvent.TTSSSEDoneEvent
+  | TTSSSEEvent.TTSSSEErrorEvent;
+
+export namespace TTSSSEEvent {
+  /**
+   * Audio data chunk.
+   */
+  export interface TTSSSEChunkEvent {
+    /**
+     * Base64-encoded audio data.
+     */
+    data: string;
+
+    /**
+     * Whether this is the final event for the request. Always `false` for chunk
+     * events.
+     */
+    done: false;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Server-side processing time for this chunk in milliseconds.
+     */
+    step_time: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'chunk';
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  /**
+   * Word-level timing information.
+   */
+  export interface TTSSSETimestampsEvent {
+    /**
+     * Whether this is the final event for the request. Always `false` for timestamps
+     * events.
+     */
+    done: false;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'timestamps';
+
+    /**
+     * Word-level timing information.
+     */
+    word_timestamps: TTSAPI.WordTimestamps;
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  /**
+   * Phoneme-level timing information.
+   */
+  export interface TTSSSEPhonemeTimestampsEvent {
+    /**
+     * Whether this is the final event for the request. Always `false` for
+     * phoneme_timestamps events.
+     */
+    done: false;
+
+    /**
+     * Phoneme-level timing information.
+     */
+    phoneme_timestamps: TTSAPI.PhonemeTimestamps;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'phoneme_timestamps';
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  /**
+   * Generation completion signal. Final event in the stream.
+   */
+  export interface TTSSSEDoneEvent {
+    /**
+     * Whether generation is complete. Always `true` for done events.
+     */
+    done: true;
+
+    /**
+     * HTTP-style status code.
+     */
+    status_code: number;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'done';
+
+    /**
+     * The context ID echoed back from the request, if one was provided.
+     */
+    context_id?: string | null;
+  }
+
+  /**
+   * Error information for the TTS SSE request.
+   */
+  export interface TTSSSEErrorEvent {
+    /**
+     * Whether generation is complete.
+     */
+    done: boolean;
+
+    /**
+     * Human-readable error message.
+     */
+    message: string;
+
+    /**
+     * Unique identifier for this request.
+     */
+    request_id: string;
+
+    /**
+     * An HTTP response status code.
+     */
+    status_code: number;
+
+    /**
+     * Human-readable error title.
+     */
+    title: string;
+
+    /**
+     * Event type identifier.
+     */
+    type: 'error';
+
+    /**
+     * URL to relevant documentation.
+     */
+    doc_url?: string | null;
+
+    /**
+     * Machine-readable error code.
+     */
+    error_code?: string | null;
+  }
 }
 
 export interface VoiceSpecifier {
@@ -337,29 +613,33 @@ export type WebsocketResponse =
 
 export namespace WebsocketResponse {
   export interface Chunk {
-    data: string;
-
-    /** Decoded audio data as a Buffer. Base64-decodes `data`. Set by the SDK on receipt. 
-     * NB: this is a manually-added helper, not auto-generated.
-     */
-    audio: Buffer | null;
-
-    done: boolean;
-
-    status_code: number;
-
-    step_time: number;
-
-    type: 'chunk';
-
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
      */
-    context_id?: string | null;
+    context_id: string;
+
+    /**
+     * Base64-encoded audio data
+     */
+    data: string;
+
+    /**
+     * Whether this is the final chunk for this context
+     */
+    done: boolean;
+
+    /**
+     * HTTP-style status code
+     */
+    status_code: number;
+
+    /**
+     * Server-side processing time for this chunk in milliseconds
+     */
+    step_time: number;
+
+    type: 'chunk';
 
     /**
      * An identifier corresponding to the number of flush commands that have been sent
@@ -371,8 +651,20 @@ export namespace WebsocketResponse {
   }
 
   export interface FlushDone {
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
+
+    /**
+     * Whether generation is complete
+     */
     done: boolean;
 
+    /**
+     * Whether the flush is complete
+     */
     flush_done: boolean;
 
     /**
@@ -383,52 +675,52 @@ export namespace WebsocketResponse {
      */
     flush_id: number;
 
+    /**
+     * HTTP-style status code
+     */
     status_code: number;
 
     type: 'flush_done';
-
-    /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
   }
 
   export interface Done {
-    done: boolean;
+    /**
+     * A unique identifier for the context. You can use any unique identifier, like a
+     * UUID or human ID.
+     */
+    context_id: string;
 
+    /**
+     * Whether generation is complete. Always `true` for done events.
+     */
+    done: true;
+
+    /**
+     * HTTP-style status code
+     */
     status_code: number;
 
     type: 'done';
-
-    /**
-     * A unique identifier for the context. You can use any unique identifier, like a
-     * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
-     */
-    context_id?: string | null;
   }
 
   export interface Timestamps {
-    done: boolean;
-
-    status_code: number;
-
-    type: 'timestamps';
-
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
      */
-    context_id?: string | null;
+    context_id: string;
+
+    /**
+     * Whether generation is complete
+     */
+    done: boolean;
+
+    /**
+     * HTTP-style status code
+     */
+    status_code: number;
+
+    type: 'timestamps';
 
     /**
      * An identifier corresponding to the number of flush commands that have been sent
@@ -438,53 +730,75 @@ export namespace WebsocketResponse {
      */
     flush_id?: number | null;
 
-    word_timestamps?: Timestamps.WordTimestamps | null;
-  }
-
-  export namespace Timestamps {
-    export interface WordTimestamps {
-      end: Array<number>;
-
-      start: Array<number>;
-
-      words: Array<string>;
-    }
+    /**
+     * Word-level timing information.
+     */
+    word_timestamps?: TTSAPI.WordTimestamps | null;
   }
 
   export interface Error {
+    /**
+     * Whether generation is complete
+     */
     done: boolean;
-
-    error: string;
-
-    status_code: number;
 
     type: 'error';
 
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
      */
-    context_id?: string | null;
+    context_id?: string;
+
+    /**
+     * URL to relevant documentation
+     */
+    doc_url?: string;
+
+    /**
+     * Machine-readable error code.
+     */
+    error_code?: string;
+
+    /**
+     * Human-readable error message.
+     */
+    message?: string;
+
+    /**
+     * A unique identifier for the network connection.
+     */
+    request_id?: string;
+
+    /**
+     * An HTTP response status code.
+     */
+    status_code?: number;
+
+    /**
+     * Human-readable error title.
+     */
+    title?: string;
   }
 
   export interface PhonemeTimestamps {
-    done: boolean;
-
-    status_code: number;
-
-    type: 'phoneme_timestamps';
-
     /**
      * A unique identifier for the context. You can use any unique identifier, like a
      * UUID or human ID.
-     *
-     * Some customers use unique identifiers from their own systems (such as
-     * conversation IDs) as context IDs.
      */
-    context_id?: string | null;
+    context_id: string;
+
+    /**
+     * Whether generation is complete
+     */
+    done: boolean;
+
+    /**
+     * HTTP-style status code
+     */
+    status_code: number;
+
+    type: 'phoneme_timestamps';
 
     /**
      * An identifier corresponding to the number of flush commands that have been sent
@@ -494,18 +808,41 @@ export namespace WebsocketResponse {
      */
     flush_id?: number | null;
 
-    phoneme_timestamps?: PhonemeTimestamps.PhonemeTimestamps | null;
+    /**
+     * Phoneme-level timing information.
+     */
+    phoneme_timestamps?: TTSAPI.PhonemeTimestamps | null;
   }
 
+  /** Alias for backward compatibility */
+  export namespace Timestamps {
+    export type WordTimestamps = TTSAPI.WordTimestamps;
+  }
+
+  /** Alias for backward compatibility */
   export namespace PhonemeTimestamps {
-    export interface PhonemeTimestamps {
-      end: Array<number>;
-
-      phonemes: Array<string>;
-
-      start: Array<number>;
-    }
+    export type PhonemeTimestamps = TTSAPI.PhonemeTimestamps;
   }
+}
+
+/**
+ * Word-level timing information.
+ */
+export interface WordTimestamps {
+  /**
+   * End times in seconds for each word.
+   */
+  end: Array<number>;
+
+  /**
+   * Start times in seconds for each word.
+   */
+  start: Array<number>;
+
+  /**
+   * List of words in order.
+   */
+  words: Array<string>;
 }
 
 export interface TTSGenerateParams {
@@ -553,10 +890,7 @@ export interface TTSGenerateParams {
   save?: boolean | null;
 
   /**
-   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
-   * model. Defaults to `normal`. This feature is experimental and may not work for
-   * all voices. Influences the speed of the generated speech. Faster speeds may
-   * reduce hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3.
    */
   speed?: ModelSpeed;
 }
@@ -579,14 +913,14 @@ export namespace TTSGenerateParams {
   }
 }
 
-export interface TTSGenerateSseParams {
+export interface TTSGenerateSSEParams {
   /**
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
   model_id: string;
 
-  output_format: TTSGenerateSseParams.OutputFormat;
+  output_format: TTSGenerateSSEParams.OutputFormat;
 
   transcript: string;
 
@@ -634,10 +968,7 @@ export interface TTSGenerateSseParams {
   pronunciation_dict_id?: string | null;
 
   /**
-   * @deprecated Use `generation_config.speed` for sonic-3. Speed setting for the
-   * model. Defaults to `normal`. This feature is experimental and may not work for
-   * all voices. Influences the speed of the generated speech. Faster speeds may
-   * reduce hallucination rate.
+   * @deprecated Use `generation_config.speed` for sonic-3.
    */
   speed?: ModelSpeed;
 
@@ -647,7 +978,7 @@ export interface TTSGenerateSseParams {
   use_normalized_timestamps?: boolean | null;
 }
 
-export namespace TTSGenerateSseParams {
+export namespace TTSGenerateSSEParams {
   export interface OutputFormat {
     container: 'raw';
 
@@ -707,19 +1038,26 @@ export namespace TTSInfillParams {
   }
 }
 
+/** Type alias for backward compatibility */
+export type TTSGenerateSseParams = TTSGenerateSSEParams;
+
 export declare namespace TTS {
   export {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type ModelSpeed as ModelSpeed,
     type OutputFormatContainer as OutputFormatContainer,
+    type PhonemeTimestamps as PhonemeTimestamps,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
+    type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
+    type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
+    type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
   };
 }

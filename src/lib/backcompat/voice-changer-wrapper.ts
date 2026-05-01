@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { Cartesia } from '../client';
-import { type Uploadable } from '../core/uploads';
-import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
+import { Cartesia } from '../../client';
+import { type Uploadable } from '../../core/uploads';
+import { type RequestOptions as InternalRequestOptions } from '../../internal/request-options';
 import { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
@@ -22,7 +22,7 @@ export class VoiceChangerWrapper {
     this.client = client;
   }
 
-  /** @deprecated Use {@link Cartesia.voiceChanger.changeVoiceBytes} instead. */
+  /** @deprecated Use {@link Cartesia.voiceChanger.generate} instead. */
   async bytes(
     clip: File | fs.ReadStream | Blob,
     request: BackCompatVoiceChangerBytesRequest,
@@ -55,7 +55,7 @@ export class VoiceChangerWrapper {
     }
 
     const response = await wrap(
-      this.client.voiceChanger.changeVoiceBytes(params, {
+      this.client.voiceChanger.generate(params, {
         ...options,
         __binaryResponse: true,
       } as any),

@@ -2,9 +2,19 @@
 
 import * as TTSAPI from './tts';
 import { Cartesia } from '../../client';
-
 import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
+
+import type { RawWebSocketData, ReconnectingEvent, UnsentMessage } from '../../internal/ws';
+
+export type TTSStreamMessage =
+  | { type: 'connecting' | 'open' | 'closing' }
+  | { type: 'close'; code: number; reason: string; unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[] }
+  | { type: 'reconnecting'; reconnect: ReconnectingEvent }
+  | { type: 'reconnected' }
+  | { type: 'message'; message: TTSAPI.WebsocketResponse }
+  | { type: 'raw'; data: RawWebSocketData }
+  | { type: 'error'; error: WebSocketError };
 
 export class WebSocketError extends CartesiaError {
   /**
@@ -19,23 +29,16 @@ export class WebSocketError extends CartesiaError {
   }
 }
 
-export class WebSocketTimeoutError extends CartesiaError {
-  readonly contextId: string;
-  readonly timeoutMs: number;
-
-  constructor(contextId: string, timeoutMs: number) {
-    super(`Timed out waiting for response on context ${contextId} after ${timeoutMs}ms`);
-    this.contextId = contextId;
-    this.timeoutMs = timeoutMs;
-  }
-}
-
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-type WebsocketEvents = Simplify<
+type WebSocketEvents = Simplify<
   {
     event: (event: TTSAPI.WebsocketResponse) => void;
+    raw: (data: RawWebSocketData) => void;
     error: (error: WebSocketError) => void;
+    close: (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => void;
+    reconnecting: (event: ReconnectingEvent) => void;
+    reconnected: () => void;
   } & {
     [EventType in Exclude<NonNullable<TTSAPI.WebsocketResponse['type']>, 'error'>]: (
       event: Extract<TTSAPI.WebsocketResponse, { type?: EventType }>,
@@ -43,14 +46,19 @@ type WebsocketEvents = Simplify<
   }
 >;
 
-export abstract class TTSEmitter extends EventEmitter<WebsocketEvents> {
+export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
   /**
    * Send an event to the API.
    */
-  abstract send(event: TTSAPI.WebsocketClientEvent): void | Promise<void>;
+  abstract send(event: TTSAPI.WebsocketClientEvent): void;
 
   /**
-   * Close the websocket connection.
+   * Send raw data over the WebSocket without JSON serialization.
+   */
+  abstract sendRaw(data: RawWebSocketData): void;
+
+  /**
+   * Close the WebSocket connection.
    */
   abstract close(props?: { code: number; reason: string }): void;
 
@@ -83,11 +91,11 @@ export abstract class TTSEmitter extends EventEmitter<WebsocketEvents> {
   }
 }
 
-export function buildURL(client: Cartesia): URL {
-  const path = '/tts/websocket';
-  const baseURL = client.baseURL;
-  const url = new URL(baseURL + (baseURL.endsWith('/') ? path.slice(1) : path));
-  url.protocol = 'wss';
+export function buildURL(client: Cartesia, parameters: Record<string, unknown>): URL {
+  const { ...query } = parameters;
+  const endpoint = '/tts/websocket';
+  const url = new URL(client.buildURL(endpoint, query, undefined));
+  url.protocol = url.protocol === 'http:' || url.protocol === 'ws:' ? 'ws:' : 'wss:';
   return url;
 }
 
