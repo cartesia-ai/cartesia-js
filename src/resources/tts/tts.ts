@@ -11,7 +11,7 @@ import { RequestOptions } from '../../internal/request-options';
 import { multipartFormRequestOptions } from '../../internal/uploads';
 import { TTSWS, type TTSWSClientOptions } from './ws';
 
-import { TTSWS_3_0_0 } from '../../lib/tts/ws/3-0-0';
+import { TTSWS_3_0 } from '../../lib/tts/ws/3-0';
 import { TTSContextsWSConnection, TTSWSContexts } from '../../lib/tts/ws/contexts';
 
 export class TTS extends APIResource {
@@ -164,8 +164,8 @@ export class TTS extends APIResource {
    * - {@link TTSWSContexts.ContextInterface.receive} yields errors rather than throwing them
    * - {@link TTSWSContexts.ContextInterface.push} and {@link TTSWSContexts.ContextInterface.flush} throw errors when the context has already been cleaned up by the client.
    */
-  websocket(options?: ConstructorParameters<typeof TTSWS_3_0_0>[1]): Promise<TTSWS_3_0_0> {
-    const ws = new TTSWS_3_0_0(this._client, options);
+  websocket(options?: ConstructorParameters<typeof TTSWS_3_0>[1]): Promise<TTSWS_3_0> {
+    const ws = new TTSWS_3_0(this._client, options);
     return ws.connect();
   }
 }
