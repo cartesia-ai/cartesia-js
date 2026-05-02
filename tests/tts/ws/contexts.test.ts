@@ -12,7 +12,7 @@ import { WebSocketServer, WebSocket as WS } from 'ws';
 import type { AddressInfo } from 'net';
 import Cartesia from '@cartesia/cartesia-js';
 import { ReadyState } from '@cartesia/cartesia-js/internal/ws-adapter';
-import { TTSContextsWSConnection } from '@cartesia/cartesia-js/lib/tts/ws/contexts';
+import { TTSContextsWSConnection } from '@cartesia/cartesia-js/lib/internal/tts/ws/contexts';
 
 // ---- Local ws server -----------------------------------------------------
 

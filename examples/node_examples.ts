@@ -442,11 +442,11 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
+      add_timestamps: true,
     });
 
     ctx.push({
       transcript: 'Hello, world!',
-      add_timestamps: true,
     });
     ctx.end();
 

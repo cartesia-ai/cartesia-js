@@ -12,7 +12,8 @@ import { multipartFormRequestOptions } from '../../internal/uploads';
 import { TTSWS, type TTSWSClientOptions } from './ws';
 
 import { TTSWS_3_0 } from '../../lib/tts/ws/3-0';
-import { TTSContextsWSConnection, TTSWSContexts } from '../../lib/tts/ws/contexts';
+import { TTSWSContexts } from '../../lib/tts/ws/contexts';
+import { TTSContextsWSConnection } from '../../lib/internal/tts/ws/contexts';
 
 export class TTS extends APIResource {
   /**
@@ -818,13 +819,13 @@ export namespace WebsocketResponse {
     phoneme_timestamps?: TTSAPI.PhonemeTimestamps | null;
   }
 
-  /** Alias for backward compatibility */
   export namespace Timestamps {
+    /** Alias for backward compatibility */
     export type WordTimestamps = TTSAPI.WordTimestamps;
   }
 
-  /** Alias for backward compatibility */
   export namespace PhonemeTimestamps {
+    /** Alias for backward compatibility */
     export type PhonemeTimestamps = TTSAPI.PhonemeTimestamps;
   }
 }

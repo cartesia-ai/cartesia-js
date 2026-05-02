@@ -17,7 +17,7 @@ import { CartesiaError } from '../../../core/error';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { buildURL, WebSocketError } from '../../../resources/tts/internal-base';
 import { decodeBase64String } from '../../utils';
-import type { TTSWSContexts, TTSContextsWSConnection } from './contexts';
+import type { TTSWSContexts } from './contexts';
 
 type WebSocketResponseWithDecodedAudio =
   | Exclude<TTSAPI.WebsocketResponse, { type: 'chunk' }>
@@ -290,13 +290,13 @@ export class TTSWSContext_3_0 {
  *
  * They're necessary for doc strings.
  */
-undefined satisfies TTSWSContexts.ContextInterface | TTSContextsWSConnection | undefined;
+undefined satisfies TTSWSContexts.ContextInterface | undefined;
 
 /**
  * Represents a single Text-to-Speech WebSocket connection.
  *
  * @deprecated This class is no longer maintained and kept for backward compatibility.
- * Use {@link TTSContextsWSConnection } instead.
+ * Use {@link TTSWSContexts.WSConnectionInterface } instead.
  *
  * Note: {@link TTSContextsWSConnection.context } returns {@link TTSWSContexts.ContextInterface},
  * which does not throw errors in {@link TTSWSContexts.ContextInterface.receive},
