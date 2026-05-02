@@ -4,8 +4,11 @@ import { type Uploadable } from '../../core/uploads';
 import { type RequestOptions as InternalRequestOptions } from '../../internal/request-options';
 import { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
-import { wrap } from './utils';
+import { backCompatWrap } from './utils';
 
+/**
+ * @deprecated Used {@link Cartesia } instead.
+ */
 export interface BackCompatVoiceChangerBytesRequest {
   voiceId: string;
   outputFormatContainer: 'raw' | 'wav' | 'mp3';
@@ -15,7 +18,7 @@ export interface BackCompatVoiceChangerBytesRequest {
 }
 
 /** @deprecated Use the new SDK's voice changer methods on the {@link Cartesia} instance instead. */
-export class VoiceChangerWrapper {
+export class BackCompatVoiceChangerWrapper {
   private client: Cartesia;
 
   constructor(client: Cartesia) {
@@ -54,7 +57,7 @@ export class VoiceChangerWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    const response = await wrap(
+    const response = await backCompatWrap(
       this.client.voiceChanger.generate(params, {
         ...options,
         __binaryResponse: true,

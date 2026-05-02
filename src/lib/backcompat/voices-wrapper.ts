@@ -11,8 +11,11 @@ import {
 } from '../../resources/voices';
 import { type RequestOptions as InternalRequestOptions } from '../../internal/request-options';
 import { BackCompatRequestOptions } from './types';
-import { wrap, snakeToCamel } from './utils';
+import { backCompatWrap, backCompatSnakeToCamel } from './utils';
 
+/**
+ * @deprecated Used {@link Cartesia } instead.
+ */
 export interface BackCompatVoice {
   id: string;
   createdAt: string;
@@ -25,6 +28,9 @@ export interface BackCompatVoice {
   previewFileUrl?: string | null;
 }
 
+/**
+ * @deprecated Used {@link Cartesia } instead.
+ */
 export interface BackCompatVoiceMetadata {
   id: string;
   createdAt: string;
@@ -35,6 +41,9 @@ export interface BackCompatVoiceMetadata {
   userId: string;
 }
 
+/**
+ * @deprecated Used {@link Cartesia } instead.
+ */
 export interface BackCompatVoiceListOptions {
   gender?: 'masculine' | 'feminine' | 'gender_neutral' | null;
   isOwner?: boolean | null;
@@ -43,6 +52,9 @@ export interface BackCompatVoiceListOptions {
   expand?: Array<'preview_file_url'> | null;
 }
 
+/**
+ * @deprecated Used {@link Cartesia } instead.
+ */
 export interface BackCompatCloneVoiceRequest {
   name: string;
   description?: string;
@@ -52,11 +64,17 @@ export interface BackCompatCloneVoiceRequest {
   baseVoiceId?: string;
 }
 
+/**
+ * @deprecated Used {@link Cartesia } instead.
+ */
 export interface BackCompatUpdateVoiceRequest {
   name: string;
   description: string;
 }
 
+/**
+ * @deprecated Used {@link Cartesia } instead.
+ */
 export interface BackCompatLocalizeVoiceRequest {
   voiceId: string;
   name: string;
@@ -82,7 +100,7 @@ export interface BackCompatLocalizeVoiceRequest {
 }
 
 /** @deprecated Use the new SDK's voices methods on the {@link Cartesia} instance instead. */
-export class VoicesWrapper {
+export class BackCompatVoicesWrapper {
   private client: Cartesia;
 
   constructor(client: Cartesia) {
@@ -120,7 +138,7 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap<any, BackCompatVoiceMetadata>(this.client.voices.clone(params, options));
+    return backCompatWrap<any, BackCompatVoiceMetadata>(this.client.voices.clone(params, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.update} instead. */
@@ -146,7 +164,7 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap<any, BackCompatVoice>(this.client.voices.update(id, params, options));
+    return backCompatWrap<any, BackCompatVoice>(this.client.voices.update(id, params, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.localize} instead. */
@@ -178,7 +196,7 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap<any, BackCompatVoiceMetadata>(this.client.voices.localize(params, options));
+    return backCompatWrap<any, BackCompatVoiceMetadata>(this.client.voices.localize(params, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.get} instead. */
@@ -195,7 +213,7 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap<any, BackCompatVoice>(this.client.voices.get(id, {}, options));
+    return backCompatWrap<any, BackCompatVoice>(this.client.voices.get(id, {}, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.list} instead. */
@@ -227,7 +245,7 @@ export class VoicesWrapper {
     // The new SDK returns a paginated result, we collect all pages
     const voices: BackCompatVoice[] = [];
     for await (const voice of this.client.voices.list(params, options)) {
-      voices.push(snakeToCamel(voice) as BackCompatVoice);
+      voices.push(backCompatSnakeToCamel(voice) as BackCompatVoice);
     }
     return voices;
   }
@@ -246,6 +264,6 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return wrap(this.client.voices.delete(id, options));
+    return backCompatWrap(this.client.voices.delete(id, options));
   }
 }

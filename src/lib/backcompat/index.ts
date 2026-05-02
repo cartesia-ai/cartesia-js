@@ -1,11 +1,11 @@
 import { Cartesia, type ClientOptions } from '../../client';
-import { TTSWrapper } from './tts-wrapper';
-import { VoicesWrapper } from './voices-wrapper';
-import { VoiceChangerWrapper } from './voice-changer-wrapper';
+import { BackCompatTTSWrapper } from './tts-wrapper';
+import { BackCompatVoicesWrapper } from './voices-wrapper';
+import { BackCompatVoiceChangerWrapper } from './voice-changer-wrapper';
 import { buildHeaders, type NullableHeaders } from '../../internal/headers';
-import type { CartesiaClientOptions, Supplier } from './types';
+import type { BackCompatCartesiaClientOptions, BackCompatSupplier } from './types';
 
-async function resolveSupplier<T>(supplier: Supplier<T>): Promise<T> {
+async function resolveSupplier<T>(supplier: BackCompatSupplier<T>): Promise<T> {
   if (typeof supplier === 'function') {
     return (supplier as () => T | Promise<T>)();
   }
@@ -13,9 +13,9 @@ async function resolveSupplier<T>(supplier: Supplier<T>): Promise<T> {
 }
 
 class DynamicCartesia extends Cartesia {
-  private apiKeySupplier?: Supplier<string | undefined>;
+  private apiKeySupplier?: BackCompatSupplier<string | undefined>;
 
-  constructor(options: ClientOptions & { apiKeySupplier?: Supplier<string | undefined> }) {
+  constructor(options: ClientOptions & { apiKeySupplier?: BackCompatSupplier<string | undefined> }) {
     super(options);
     this.apiKeySupplier = options.apiKeySupplier;
   }
@@ -49,13 +49,13 @@ class DynamicCartesia extends Cartesia {
  */
 export class CartesiaClient {
   private client: Cartesia;
-  public tts: TTSWrapper;
-  public voices: VoicesWrapper;
-  public voiceChanger: VoiceChangerWrapper;
+  public tts: BackCompatTTSWrapper;
+  public voices: BackCompatVoicesWrapper;
+  public voiceChanger: BackCompatVoiceChangerWrapper;
 
-  constructor(options: CartesiaClientOptions = {}) {
+  constructor(options: BackCompatCartesiaClientOptions = {}) {
     const newOptions: ClientOptions = {};
-    let apiKeySupplier: Supplier<string | undefined> | undefined;
+    let apiKeySupplier: BackCompatSupplier<string | undefined> | undefined;
 
     if (options.apiKey) {
       if (typeof options.apiKey === 'function') {
@@ -72,15 +72,28 @@ export class CartesiaClient {
     }
 
     this.client = new DynamicCartesia({ ...newOptions, apiKeySupplier });
-    this.tts = new TTSWrapper(this.client);
-    this.voices = new VoicesWrapper(this.client);
-    this.voiceChanger = new VoiceChangerWrapper(this.client);
+    this.tts = new BackCompatTTSWrapper(this.client);
+    this.voices = new BackCompatVoicesWrapper(this.client);
+    this.voiceChanger = new BackCompatVoiceChangerWrapper(this.client);
   }
 }
 
-export * from './tts-wrapper';
-export * from './voices-wrapper';
-export * from './voice-changer-wrapper';
-export * from './types';
-export * from './errors';
-export * from './utils';
+export {
+  BackCompatGenerationConfig,
+  BackCompatTtsGenerateOptions,
+  BackCompatTtsRequest,
+  BackCompatTtsRequestVoiceSpecifier,
+  BackCompatWebSocketOptions,
+  BackCompatWebSocketTtsRequest,
+} from './tts-wrapper';
+export {
+  BackCompatCloneVoiceRequest,
+  BackCompatLocalizeVoiceRequest,
+  BackCompatUpdateVoiceRequest,
+  BackCompatVoice,
+  BackCompatVoiceListOptions,
+  BackCompatVoiceMetadata,
+} from './voices-wrapper';
+export { BackCompatVoiceChangerBytesRequest } from './voice-changer-wrapper';
+export { BackCompatCartesiaClientOptions, BackCompatRequestOptions, BackCompatSupplier } from './types';
+export { CartesiaClientError, CartesiaTimeoutError } from './errors';
