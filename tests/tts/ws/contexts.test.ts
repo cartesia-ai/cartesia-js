@@ -49,7 +49,7 @@ afterAll(
 
 // ---- Per-test manager tracking -------------------------------------------
 
-const managers: Cartesia.TTS.WSContexts.WSConnectionInterface[] = [];
+const managers: Cartesia.TTS.WSContexts.WSConnection[] = [];
 
 afterEach(() => {
   for (const m of managers) {
@@ -60,7 +60,7 @@ afterEach(() => {
   managers.length = 0;
 });
 
-function createTestManager(): Cartesia.TTS.WSContexts.WSConnectionInterface {
+function createTestManager(): Cartesia.TTS.WSContexts.WSConnection {
   const client = new Cartesia({
     apiKey: 'test',
     baseURL: `http://127.0.0.1:${serverPort}`,
@@ -72,19 +72,15 @@ function createTestManager(): Cartesia.TTS.WSContexts.WSConnectionInterface {
   return manager;
 }
 
-function platformSocket(manager: Cartesia.TTS.WSContexts.WSConnectionInterface): WS {
+function platformSocket(manager: Cartesia.TTS.WSContexts.WSConnection): WS {
   return (manager as any)._ws.socket.platformSocket;
 }
 
-function injectEvent(manager: Cartesia.TTS.WSContexts.WSConnectionInterface, event: Record<string, unknown>) {
+function injectEvent(manager: Cartesia.TTS.WSContexts.WSConnection, event: Record<string, unknown>) {
   platformSocket(manager).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
-function emitSocketClose(
-  manager: Cartesia.TTS.WSContexts.WSConnectionInterface,
-  code = 1006,
-  reason = 'test',
-) {
+function emitSocketClose(manager: Cartesia.TTS.WSContexts.WSConnection, code = 1006, reason = 'test') {
   platformSocket(manager).emit('close', code, Buffer.from(reason));
 }
 

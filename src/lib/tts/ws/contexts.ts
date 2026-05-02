@@ -28,7 +28,7 @@ export namespace TTSWSContexts {
     | WebSocketResponse.Error
     | WebSocketResponse.PhonemeTimestamps;
 
-  /** Messages yielded by {@link ContextInterface.receive} */
+  /** Messages yielded by {@link Context.receive} */
   export namespace WebSocketResponse {
     export type Chunk = TTSAPI.WebsocketResponse.Chunk & {
       /**
@@ -44,7 +44,7 @@ export namespace TTSWSContexts {
   }
 
   /**
-   * Events emitted by {@link WSConnectionInterface}
+   * Events emitted by {@link WSConnection}
    */
   export type WSConnectionEvents = {
     error: (error: WebSocketError) => void;
@@ -53,7 +53,7 @@ export namespace TTSWSContexts {
     reconnected: () => void;
   };
 
-  /** Accepted by {@link WSConnectionInterface.context} */
+  /** Accepted by {@link WSConnection.context} */
   export type ContextParams = Pick<
     TTSAPI.GenerationRequest,
     'model_id' | 'voice' | 'output_format' | 'add_phoneme_timestamps' | 'add_timestamps' | 'language'
@@ -76,7 +76,7 @@ export namespace TTSWSContexts {
   };
 
   /**
-   * A generation request accepted by {@link ContextInterface.push}.
+   * A generation request accepted by {@link Context.push}.
    */
   export type ContextPushRequest = Omit<
     TTSAPI.GenerationRequest,
@@ -90,25 +90,25 @@ export namespace TTSWSContexts {
   >;
 
   /**
-   * Manages instances of {@link ContextInterface}.
+   * Manages instances of {@link Context}.
    */
-  export interface WSConnectionInterface extends EventEmitter<WSConnectionEvents> {
+  export interface WSConnection extends EventEmitter<WSConnectionEvents> {
     /**
      * Connect or reconnect the underlying WebSocket.
      *
      * You can call this method ahead of time to reduce latency for the first audio chunk.
      */
-    connect(): Promise<WSConnectionInterface>;
+    connect(): Promise<WSConnection>;
 
     /**
-     * Close all resources and cleans up all contexts created by {@link WSConnectionInterface.context}.
+     * Close all resources and cleans up all contexts created by {@link WSConnection.context}.
      */
     close(): void;
 
     /**
      * Creates a context.
      *
-     * {@link ContextInterface} is short-lived and designed to generate audio for a single transcript.
+     * {@link Context} is short-lived and designed to generate audio for a single transcript.
      *
      * The transcript can broken up into chunks and streamed over time using continuations,
      * which is useful if you're still in the middle of generating your transcript.
@@ -117,29 +117,29 @@ export namespace TTSWSContexts {
      *
      * @param params.context_id - Must be unique per WebSocket connection if provided.
      *
-     * @throws If an instance of {@link ContextInterface} exists with the same context ID: {@link CartesiaError}.
+     * @throws If an instance of {@link Context} exists with the same context ID: {@link CartesiaError}.
      * Note that a {@link TTSAPI.WebsocketResponse.Error} event may be sent by the server if the context ID is a duplicate even if this method did not throw.
      */
-    context(params: ContextParams): ContextInterface;
+    context(params: ContextParams): Context;
 
     /**
-     * Gets the context returned by {@link WSConnectionInterface.context}.
+     * Gets the context returned by {@link WSConnection.context}.
      *
      * @returns The context, unless it was cleaned up.
-     * Contexts are cleaned up once {@link WSConnectionInterface} emits 'close' or 'reconnecting';
-     * or when {@link ContextInterface.receive} returns.
+     * Contexts are cleaned up once {@link WSConnection} emits 'close' or 'reconnecting';
+     * or when {@link Context.receive} returns.
      */
-    getContext(contextId: string): ContextInterface | undefined;
+    getContext(contextId: string): Context | undefined;
 
     /**
      * Lists all contexts.
      *
-     * Contexts are cleaned up and removed from this list once {@link WSConnectionInterface} emits 'close' or 'reconnecting';
-     * or when {@link ContextInterface.receive} returns.
+     * Contexts are cleaned up and removed from this list once {@link WSConnection} emits 'close' or 'reconnecting';
+     * or when {@link Context.receive} returns.
      *
      * Open contexts are guaranteed to be returned.
      */
-    listContexts(): ContextInterface[];
+    listContexts(): Context[];
   }
   /**
    * Contexts are short-lived and designed to generate audio for a single transcript.
@@ -149,22 +149,22 @@ export namespace TTSWSContexts {
    *
    * See [the API docs](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) for details.
    *
-   * Created by {@link WSConnectionInterface.context}.
+   * Created by {@link WSConnection.context}.
    */
-  export interface ContextInterface {
+  export interface Context {
     readonly contextId: string;
     /**
-     * If true, {@link ContextInterface.push} and {@link ContextInterface.flush} will throw.
+     * If true, {@link Context.push} and {@link Context.flush} will throw.
      * Once a context is closed, a new one must be created to generated more audio.
      */
     readonly isClosed: boolean;
 
     /**
-     * Call this multiple times to stream transcript chunks, then call {@link ContextInterface.end} to finish.
+     * Call this multiple times to stream transcript chunks, then call {@link Context.end} to finish.
      *
      * @param request The generation request to add to the context.
      * @param request.continue If set to false, signal that the transcript is complete.
-     * You do not need to call {@link ContextInterface.end} if you send a request with `continue: false`.
+     * You do not need to call {@link Context.end} if you send a request with `continue: false`.
      * @param extraProperties Properties to add to {@link request}.
      * This can be useful if you'd like to override properties or leverage new API capabilities without updating this SDK.
      *
@@ -186,7 +186,7 @@ export namespace TTSWSContexts {
      * Flushes the context. You should ignore this method unless you need flushes.
      *
      * Useful if you need to know when transcript chunks finished generating.
-     * You will receive {@link TTSAPI.WebsocketResponse.FlushDone} once the transcript pushed to this context so far by {@link ContextInterface.push} is done generating.
+     * You will receive {@link TTSAPI.WebsocketResponse.FlushDone} once the transcript pushed to this context so far by {@link Context.push} is done generating.
      *
      * See [Context Flushing and Flush IDs](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds) for details.
      *
@@ -207,7 +207,7 @@ export namespace TTSWSContexts {
      * - The WebSocket connection was lost
      * - Timeout was reached: will yield {@link TTSAPI.WebsocketResponse.Error.error_code} `"client_timeout"` and return
      *
-     * Once complete, {@link ContextInterface} will close and a new context must be created using {@link TTSContextsWSConnection.context}.
+     * Once complete, {@link Context} will close and a new context must be created using {@link WSConnection.context}.
      */
     receive(): AsyncGenerator<TTSWSContexts.WebSocketResponse>;
 

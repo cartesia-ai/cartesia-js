@@ -10,7 +10,7 @@ import type * as TTSAPI from '../../../../resources/tts/tts';
 import { TTSWS, type TTSWSClientOptions } from '../../../../resources/tts/ws';
 import { decodeBase64String } from '../../../utils';
 
-class TTSWSContext implements TTSWSContexts.ContextInterface {
+class TTSWSContext implements TTSWSContexts.Context {
   private _ws: TTSWS;
   private _send: (clientEvent: TTSAPI.WebsocketClientEvent) => CartesiaError | null;
   private _cleanup: () => void;
@@ -221,7 +221,7 @@ class TTSWSContext implements TTSWSContexts.ContextInterface {
 
 export class TTSContextsWSConnection
   extends EventEmitter<TTSWSContexts.WSConnectionEvents>
-  implements TTSWSContexts.WSConnectionInterface
+  implements TTSWSContexts.WSConnection
 {
   private _client: Cartesia;
   private _wsOptions: TTSWSClientOptions | null | undefined;

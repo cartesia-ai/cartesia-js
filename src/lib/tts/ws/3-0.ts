@@ -290,18 +290,18 @@ export class TTSWSContext_3_0 {
  *
  * They're necessary for doc strings.
  */
-undefined satisfies TTSWSContexts.ContextInterface | undefined;
+undefined satisfies TTSWSContexts.Context | undefined;
 
 /**
  * Represents a single Text-to-Speech WebSocket connection.
  *
  * @deprecated This class is no longer maintained and kept for backward compatibility.
- * Use {@link TTSWSContexts.WSConnectionInterface } instead.
+ * Use {@link TTSWSContexts.WSConnection } instead.
  *
- * Note: {@link TTSContextsWSConnection.context } returns {@link TTSWSContexts.ContextInterface},
- * which does not throw errors in {@link TTSWSContexts.ContextInterface.receive},
- * but does throw errors in {@link TTSWSContexts.ContextInterface.push}
- * and {@link TTSWSContexts.ContextInterface.flush} when the context has already been cleaned up by the client.
+ * Note: {@link TTSWSContexts.WSConnection.context } returns {@link TTSWSContexts.Context},
+ * which does not throw errors in {@link TTSWSContexts.Context.receive},
+ * but does throw errors in {@link TTSWSContexts.Context.push}
+ * and {@link TTSWSContexts.Context.flush} when the context has already been cleaned up by the client.
  */
 export class TTSWS_3_0 extends EventEmitter<WebsocketEvents> {
   url: URL;

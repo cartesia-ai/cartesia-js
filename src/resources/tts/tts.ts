@@ -94,10 +94,7 @@ export class TTS extends APIResource {
    *
    * See {@link generateWS} for the same API without the added client-side context management features.
    */
-  contextsWS(
-    parameters?: Record<string, unknown>,
-    options?: TTSWSClientOptions,
-  ): TTSWSContexts.WSConnectionInterface {
+  contextsWS(parameters?: Record<string, unknown>, options?: TTSWSClientOptions): TTSWSContexts.WSConnection {
     return new TTSContextsWSConnection(this._client, parameters, options);
   }
 
@@ -160,10 +157,10 @@ export class TTS extends APIResource {
    * @deprecated This method is no longer maintained and is kept for backward compatibility.
    * Use {@link TTS.contextsWS} instead.
    *
-   * Note: {@link TTS.contextsWS} returns {@link TTSWSContexts.WSConnectionInterface}, which behaves differently in these ways:
-   * - {@link TTSWSContexts.WSConnectionInterface.context } returns {@link TTSWSContexts.ContextInterface}
-   * - {@link TTSWSContexts.ContextInterface.receive} yields errors rather than throwing them
-   * - {@link TTSWSContexts.ContextInterface.push} and {@link TTSWSContexts.ContextInterface.flush} throw errors when the context has already been cleaned up by the client.
+   * Note: {@link TTS.contextsWS} returns {@link TTSWSContexts.WSConnection}, which behaves differently in these ways:
+   * - {@link TTSWSContexts.WSConnection.context } returns {@link TTSWSContexts.Context}
+   * - {@link TTSWSContexts.Context.receive} yields errors rather than throwing them
+   * - {@link TTSWSContexts.Context.push} and {@link TTSWSContexts.Context.flush} throw errors when the context has already been cleaned up by the client.
    */
   websocket(options?: ConstructorParameters<typeof TTSWS_3_0>[1]): Promise<TTSWS_3_0> {
     const ws = new TTSWS_3_0(this._client, options);
