@@ -2,6 +2,10 @@ import type { WebSocketError } from '../../../resources/tts/internal-base';
 import type { EventEmitter } from '../../../core/EventEmitter';
 import type * as TTSAPI from '../../../resources/tts/tts';
 import type { ReconnectingEvent, UnsentMessage } from '../../../internal/ws';
+import type { CartesiaError } from '../../../error';
+
+// hack to prevent format form removing imports used in doc strings
+undefined satisfies CartesiaError | undefined;
 
 /**
  * Text-to-Speech (WebSocket) with client-side context management.
