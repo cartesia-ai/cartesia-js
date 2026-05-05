@@ -73,7 +73,10 @@ export class TTS extends APIResource {
    *
    * See {@link contextsWS} for the same API with client-side context management.
    */
-  generateWS(parameters?: Record<string, unknown>, options?: TTSWSClientOptions) {
+  generateWS(
+    parameters?: Record<string, unknown> | undefined,
+    options?: TTSWSClientOptions | null | undefined,
+  ) {
     return new TTSWS(this._client, parameters, options);
   }
 
@@ -94,7 +97,10 @@ export class TTS extends APIResource {
    *
    * See {@link generateWS} for the same API without the added client-side context management features.
    */
-  contextsWS(parameters?: Record<string, unknown>, options?: TTSWSClientOptions): TTSWSContexts.WSConnection {
+  contextsWS(
+    parameters?: Record<string, unknown> | undefined,
+    options?: TTSWSClientOptions | null | undefined,
+  ): TTSWSContexts.WSConnection {
     return new TTSContextsWSConnection(this._client, parameters, options);
   }
 

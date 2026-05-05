@@ -232,7 +232,7 @@ export class TTSContextsWSConnection
 
   constructor(
     client: Cartesia,
-    parameters?: Record<string, unknown>,
+    parameters?: Record<string, unknown> | undefined,
     options?: TTSWSClientOptions | null | undefined,
   ) {
     super();
