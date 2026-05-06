@@ -194,15 +194,15 @@ export class TTSWSContext_3_0 {
 
   /**
    * Iterate over responses for this context.
-   * Completes when a {@link TTSAPI.WebsocketResponse.Done} event is received.
+   * Completes when a {@link WebSocketResponseWithDecodedAudio.Done} event is received.
    * Events for other contexts are properly routed to their queues, not dropped.
    *
    * @param options.timeout - Override the context-level timeout (ms) for this receive call.
    *
-   * @throws When a {@link TTSAPI.WebsocketResponse.Error} event is received: {@link Error}.
+   * @throws When a {@link WebSocketResponseWithDecodedAudio.Error} event is received: {@link Error}.
    * @throws When timeout is reached with no events: {@link WebSocketTimeoutError_3_0}.
    */
-  async *receive(options?: { timeout?: number }): AsyncGenerator<TTSAPI.WebsocketResponse> {
+  async *receive(options?: { timeout?: number }): AsyncGenerator<WebSocketResponseWithDecodedAudio> {
     const timeout = options?.timeout ?? this._timeout;
 
     try {
@@ -215,12 +215,14 @@ export class TTSWSContext_3_0 {
 
         if (entry.queue.length > 0) {
           const event = entry.queue.shift()!;
-          yield event;
-          if (event.type === 'done') {
+          const transformedEvent =
+            event.type === 'chunk' ? { ...event, audio: decodeBase64String(event.data) } : event;
+          yield transformedEvent;
+          if (transformedEvent.type === 'done') {
             return;
           }
-          if (event.type === 'error') {
-            throw new Error(JSON.stringify(event));
+          if (transformedEvent.type === 'error') {
+            throw new Error(JSON.stringify(transformedEvent));
           }
         } else {
           // Wait for the next event to be pushed into the queue.
@@ -260,7 +262,7 @@ export class TTSWSContext_3_0 {
    * so the per-context queue is unregistered to avoid accumulating events
    * in both places.
    */
-  async *generate(request: ContextGenerateRequest_3_0): AsyncGenerator<TTSAPI.WebsocketResponse> {
+  async *generate(request: ContextGenerateRequest_3_0): AsyncGenerator<WebSocketResponseWithDecodedAudio> {
     // Unregister our queue — ws.generate() uses its own EventEmitter listener
     // and would cause events to accumulate in both places (memory leak).
     this._ws._unregisterContext(this.contextId);
@@ -455,7 +457,7 @@ export class TTSWS_3_0 extends EventEmitter<WebsocketEvents> {
    */
   async *generate(
     request: Omit<TTSAPI.GenerationRequest, 'context_id'> & { context_id?: string | null },
-  ): AsyncGenerator<TTSAPI.WebsocketResponse> {
+  ): AsyncGenerator<WebSocketResponseWithDecodedAudio> {
     const contextId = request.context_id ?? uuid4();
     request = { ...request, context_id: contextId };
     const queue: TTSAPI.WebsocketResponse[] = [];
@@ -486,11 +488,13 @@ export class TTSWS_3_0 extends EventEmitter<WebsocketEvents> {
       while (!done || queue.length > 0) {
         if (queue.length > 0) {
           const event = queue.shift()!;
-          yield event;
-          if (event.type === 'done') {
+          const transformedEvent =
+            event.type === 'chunk' ? { ...event, audio: decodeBase64String(event.data) } : event;
+          yield transformedEvent;
+          if (transformedEvent.type === 'done') {
             return;
           }
-          if (event.type === 'error') {
+          if (transformedEvent.type === 'error') {
             throw error;
           }
         } else {
