@@ -2,7 +2,7 @@
  * Node.js examples for Cartesia JS SDK v3.x
  *
  * Run an example:
- *   CARTESIA_API_KEY=... npx ts-node examples/node_examples.ts <functionName>
+ *   pnpm i && CARTESIA_API_KEY=... pnpm tsn examples/node_examples.ts <functionName>
  */
 
 import * as fs from 'fs';

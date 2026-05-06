@@ -10,3 +10,4 @@ dist-deno
 .idea/
 .eslintcache
 *.pcm
+*.wav
