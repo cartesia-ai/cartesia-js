@@ -1,5 +1,5 @@
 /**
- * Tests for {@link TTSWS_3_0_0}.
+ * Tests for {@link TTSWS_3_0}.
  *
  * Ported from cartesia-python/tests/test_dispatcher.py. These unit tests
  * verify two key properties using a mock WebSocket (no API key required):
@@ -12,7 +12,7 @@
 
 import { WebSocket } from 'ws';
 import Cartesia from '@cartesia/cartesia-js';
-import { TTSWS_3_0_0, WebSocketTimeoutError_3_0_0 } from '@cartesia/cartesia-js/lib/tts/ws/3-0-0';
+import { TTSWS_3_0, WebSocketTimeoutError_3_0 } from '@cartesia/cartesia-js/lib/tts/ws/3-0';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -24,9 +24,9 @@ const CONTEXT_OPTIONS = {
   output_format: { container: 'raw' as const, encoding: 'pcm_f32le' as const, sample_rate: 44100 as const },
 };
 
-/** Create a TTSWS_3_0_0 whose underlying socket will fail to connect (that's fine —
+/** Create a TTSWS_3_0 whose underlying socket will fail to connect (that's fine —
  *  we inject messages by emitting directly on the socket). */
-function createTestWS(): TTSWS_3_0_0 {
+function createTestWS(): TTSWS_3_0 {
   const fakeClient = {
     baseURL: 'http://127.0.0.1:1',
     token: 'test',
@@ -42,7 +42,7 @@ function createTestWS(): TTSWS_3_0_0 {
       return url.toString();
     },
   } as any;
-  const ws = new TTSWS_3_0_0(fakeClient);
+  const ws = new TTSWS_3_0(fakeClient);
   // Suppress connection‑error noise.
   ws.on('error', () => {});
   ws.connect().catch(() => {});
@@ -50,7 +50,7 @@ function createTestWS(): TTSWS_3_0_0 {
 }
 
 /** Simulate a server‑sent message by emitting directly on the socket. */
-function injectEvent(ws: TTSWS_3_0_0, event: Record<string, unknown>) {
+function injectEvent(ws: TTSWS_3_0, event: Record<string, unknown>) {
   (ws.socket as WebSocket).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
@@ -316,7 +316,7 @@ describe('WebSocket multi-context routing', () => {
       thrownError = err;
     }
 
-    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError_3_0_0);
+    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError_3_0);
     // Should have received the one chunk before timing out.
     expect(events.length).toBe(1);
     expect(events[0]!.type).toBe('chunk');
@@ -346,7 +346,7 @@ describe('WebSocket multi-context routing', () => {
     }
     const elapsed = performance.now() - start;
 
-    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError_3_0_0);
+    expect(thrownError).toBeInstanceOf(WebSocketTimeoutError_3_0);
     // Should have timed out after ~100ms, not 10s.
     expect(elapsed).toBeLessThan(1000);
 

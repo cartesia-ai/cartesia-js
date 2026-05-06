@@ -11,8 +11,9 @@ import { RequestOptions } from '../../internal/request-options';
 import { multipartFormRequestOptions } from '../../internal/uploads';
 import { TTSWS, type TTSWSClientOptions } from './ws';
 
-import { TTSWS_3_0_0 } from '../../lib/tts/ws/3-0-0';
-import { TTSContextsWSConnection, TTSWSContexts } from '../../lib/tts/ws/contexts';
+import { TTSWS_3_0 } from '../../lib/tts/ws/3-0';
+import { TTSWSContexts } from '../../lib/tts/ws/contexts';
+import { TTSContextsWSConnection } from '../../lib/internal/tts/ws/contexts';
 
 export class TTS extends APIResource {
   /**
@@ -72,7 +73,10 @@ export class TTS extends APIResource {
    *
    * See {@link contextsWS} for the same API with client-side context management.
    */
-  generateWS(parameters?: Record<string, unknown>, options?: TTSWSClientOptions) {
+  generateWS(
+    parameters?: Record<string, unknown> | undefined,
+    options?: TTSWSClientOptions | null | undefined,
+  ) {
     return new TTSWS(this._client, parameters, options);
   }
 
@@ -94,9 +98,9 @@ export class TTS extends APIResource {
    * See {@link generateWS} for the same API without the added client-side context management features.
    */
   contextsWS(
-    parameters?: Record<string, unknown>,
-    options?: TTSWSClientOptions,
-  ): TTSWSContexts.WSConnectionInterface {
+    parameters?: Record<string, unknown> | undefined,
+    options?: TTSWSClientOptions | null | undefined,
+  ): TTSWSContexts.WSConnection {
     return new TTSContextsWSConnection(this._client, parameters, options);
   }
 
@@ -159,13 +163,13 @@ export class TTS extends APIResource {
    * @deprecated This method is no longer maintained and is kept for backward compatibility.
    * Use {@link TTS.contextsWS} instead.
    *
-   * Note: {@link TTS.contextsWS} returns {@link TTSWSContexts.WSConnectionInterface}, which behaves differently in these ways:
-   * - {@link TTSWSContexts.WSConnectionInterface.context } returns {@link TTSWSContexts.ContextInterface}
-   * - {@link TTSWSContexts.ContextInterface.receive} yields errors rather than throwing them
-   * - {@link TTSWSContexts.ContextInterface.push} and {@link TTSWSContexts.ContextInterface.flush} throw errors when the context has already been cleaned up by the client.
+   * Note: {@link TTS.contextsWS} returns {@link TTSWSContexts.WSConnection}, which behaves differently in these ways:
+   * - {@link TTSWSContexts.WSConnection.context } returns {@link TTSWSContexts.Context}
+   * - {@link TTSWSContexts.Context.receive} yields errors rather than throwing them
+   * - {@link TTSWSContexts.Context.push} and {@link TTSWSContexts.Context.flush} throw errors when the context has already been cleaned up by the client.
    */
-  websocket(options?: ConstructorParameters<typeof TTSWS_3_0_0>[1]): Promise<TTSWS_3_0_0> {
-    const ws = new TTSWS_3_0_0(this._client, options);
+  websocket(options?: ConstructorParameters<typeof TTSWS_3_0>[1]): Promise<TTSWS_3_0> {
+    const ws = new TTSWS_3_0(this._client, options);
     return ws.connect();
   }
 }
@@ -818,13 +822,13 @@ export namespace WebsocketResponse {
     phoneme_timestamps?: TTSAPI.PhonemeTimestamps | null;
   }
 
-  /** Alias for backward compatibility */
   export namespace Timestamps {
+    /** Alias for backward compatibility */
     export type WordTimestamps = TTSAPI.WordTimestamps;
   }
 
-  /** Alias for backward compatibility */
   export namespace PhonemeTimestamps {
+    /** Alias for backward compatibility */
     export type PhonemeTimestamps = TTSAPI.PhonemeTimestamps;
   }
 }

@@ -1,6 +1,6 @@
 {
   "include": ["src", "tests", "examples"],
-  "exclude": [],
+  "exclude": ["examples/nextjs"],
   "compilerOptions": {
     "target": "es2020",
     "lib": ["es2020"],

@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.1.0-b3 (2026-05-05)
+
+Full Changelog: [v3.1.0-b2...v3.1.0-b3](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b2...v3.1.0-b3)
+
+### Features
+
+* **tts:** accept null and undefined args for websockets ([73e066b](https://github.com/cartesia-ai/cartesia-js/commit/73e066b600fd39cbc8d8bb6f25b931c29c2971a3))
+
+
+### Documentation
+
+* **tts:** import type for link comment ([d9991f4](https://github.com/cartesia-ai/cartesia-js/commit/d9991f454185e8e578d8bda46813c79ec2477759))
+
+
+### Styles
+
+* **tts:** remove interface suffix ([5d4d801](https://github.com/cartesia-ai/cartesia-js/commit/5d4d801915cd2f5cc33eec8cbf3d3daa3c23d720))
+
+
+### Refactors
+
+* **backcompat:** prefix internal exports with back compat ([079761f](https://github.com/cartesia-ai/cartesia-js/commit/079761ffcedb7318655e6aef32b86f4b7e587e03))
+* **tts:** move internals to lib/internal ([1c5bf69](https://github.com/cartesia-ai/cartesia-js/commit/1c5bf69d910cf6e9a509f041a5a3443606875a56))
+
 ## 3.1.0-b2 (2026-05-01)
 
 Full Changelog: [v3.1.0-b1...v3.1.0-b2](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b1...v3.1.0-b2)
