@@ -83,11 +83,10 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
   const audioCtx = new AudioContext({ sampleRate });
 
   const chunks: Float32Array[] = [];
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error(err.message));
 
   try {
-    await ws.connect();
     const ctx = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
@@ -95,10 +94,10 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
       language: 'en',
     });
 
-    ctx.push({
+    await ctx.push({
       transcript: 'This is being streamed in real time from a WebSocket connection.',
     });
-    ctx.end();
+    await ctx.no_more_inputs();
 
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk' && event.audio) {
@@ -144,7 +143,7 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
   const audioCtx = new AudioContext({ sampleRate });
   let nextStartTime = audioCtx.currentTime;
 
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error(err.message));
 
   try {
@@ -156,10 +155,10 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
       language: 'en',
     });
 
-    ctx.push({
+    await ctx.push({
       transcript: 'Low latency streaming. Each chunk plays as soon as it arrives.',
     });
-    ctx.end();
+    await ctx.no_more_inputs();
 
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk' && event.audio) {

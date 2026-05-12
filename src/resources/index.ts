@@ -60,7 +60,6 @@ export {
   type TTSGenerateSSEParams,
   type TTSGenerateSseParams,
   type TTSInfillParams,
-  type TTSWSContexts,
 } from './tts';
 export {
   VoiceChanger,

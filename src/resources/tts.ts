@@ -1,5 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+import type { ClientOptions as WSClientOptions } from 'ws';
 import { APIResource } from '../core/resource';
 import * as TTSAPI from './tts';
 import * as VoicesAPI from './voices';
@@ -7,6 +8,7 @@ import { APIPromise } from '../core/api-promise';
 import { Stream } from '../core/streaming';
 import { type Uploadable } from '../core/uploads';
 import { buildHeaders } from '../internal/headers';
+import { TTSWS } from '../internal/lib/tts/ws';
 import { RequestOptions } from '../internal/request-options';
 import { multipartFormRequestOptions } from '../internal/uploads';
 
@@ -89,42 +91,37 @@ export class TTS extends APIResource {
     );
   }
 
-    /**
-     * Text-to-Speech (WebSocket).
-     *
-     * Supports:
-     * - Streaming
-     * - Long-lived connections allow for lower latency by reusing a live network connection
-     * - Timestamps
-     * - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
-     * - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
-     * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
-     * - Event listeners
-     *
-     * @param options - WebSocket client options.
-     */
-    // async websocket(options?: ConstructorParameters<typeof TTSWS>[1]): Promise<TTSWS> {
-    //   const ws = new TTSWS(this._client, options);
-    //   try {
-    //     return await ws.connect();
-    //   } catch (e) {
-    //     ws.close();
-    //     throw e;
-    //   }
-    // }
+  /**
+   * Text-to-Speech (WebSocket).
+   *
+   * Supports:
+   * - Streaming
+   * - Long-lived connections allow for lower latency by reusing a live network connection
+   * - Timestamps
+   * - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+   * - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+   * - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+   * - Event listeners
+   *
+   * @param options - WebSocket client options.
+   */
+  websocket(options?: WSClientOptions | undefined): Promise<TTSWS> {
+    const ws = new TTSWS(this._client, options);
+    return ws.connect();
+  }
 
-    /**
-     * Make a raw Text-to-Speech (SSE) request without any response handling.
-     *
-     * @deprecated Use {@link TTS.generateSSE } for built-in event parsing and streaming.
-     */
-    generateSse(body: TTSGenerateSSEParams, options?: RequestOptions): APIPromise<void> {
-      return this._client.post('/tts/sse', {
-        body,
-        ...options,
-        headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-      });
-    }
+  /**
+   * Make a raw Text-to-Speech (SSE) request without any response handling.
+   *
+   * @deprecated Use {@link TTS.generateSSE } for built-in event parsing and streaming.
+   */
+  generateSse(body: TTSGenerateSSEParams, options?: RequestOptions): APIPromise<void> {
+    return this._client.post('/tts/sse', {
+      body,
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
+  }
 }
 
 /**
@@ -609,6 +606,14 @@ export namespace WebsocketResponse {
      * This can be used to map chunks of audio to certain transcript submissions.
      */
     flush_id?: number | null;
+
+    /**
+     * Decoded audio data as a Buffer (base64-decodes {@link Chunk.data}).
+     *
+     * Set by the SDK on receipt; not returned by the API.
+     */
+    // FIXME: These generated types should match our OpenAPI spec exactly. Custom SDK code should export their own types as necessary.
+    audio: Buffer | null;
   }
 
   export interface FlushDone {

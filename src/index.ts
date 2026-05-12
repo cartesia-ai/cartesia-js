@@ -5,7 +5,6 @@ export { Cartesia as default } from './client';
 export { type Uploadable, toFile } from './core/uploads';
 export { APIPromise } from './core/api-promise';
 export { Cartesia, type ClientOptions } from './client';
-export * from './lib/backcompat';
 export { PagePromise } from './core/pagination';
 export {
   CartesiaError,
@@ -22,3 +21,6 @@ export {
   PermissionDeniedError,
   UnprocessableEntityError,
 } from './core/error';
+
+// FIXME: remove backcompat in v4
+export * from './backcompat';

@@ -1,14 +1,11 @@
 import * as fs from 'fs';
-import { Cartesia } from '../../client';
-import { type Uploadable } from '../../core/uploads';
-import { type RequestOptions as InternalRequestOptions } from '../../internal/request-options';
+import { Cartesia } from '../client';
+import { type Uploadable } from '../core/uploads';
+import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
 import { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
-import { backCompatWrap } from './utils';
+import { wrap } from './utils';
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
 export interface BackCompatVoiceChangerBytesRequest {
   voiceId: string;
   outputFormatContainer: 'raw' | 'wav' | 'mp3';
@@ -18,14 +15,14 @@ export interface BackCompatVoiceChangerBytesRequest {
 }
 
 /** @deprecated Use the new SDK's voice changer methods on the {@link Cartesia} instance instead. */
-export class BackCompatVoiceChangerWrapper {
+export class VoiceChangerWrapper {
   private client: Cartesia;
 
   constructor(client: Cartesia) {
     this.client = client;
   }
 
-  /** @deprecated Use {@link Cartesia.voiceChanger.generate} instead. */
+  /** @deprecated Use {@link Cartesia.voiceChanger.changeVoiceBytes} instead. */
   async bytes(
     clip: File | fs.ReadStream | Blob,
     request: BackCompatVoiceChangerBytesRequest,
@@ -57,8 +54,8 @@ export class BackCompatVoiceChangerWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    const response = await backCompatWrap(
-      this.client.voiceChanger.generate(params, {
+    const response = await wrap(
+      this.client.voiceChanger.changeVoiceBytes(params, {
         ...options,
         __binaryResponse: true,
       } as any),
