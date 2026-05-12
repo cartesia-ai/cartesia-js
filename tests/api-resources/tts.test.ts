@@ -13,9 +13,9 @@ describe('resource tts', () => {
     const response = await client.tts.generate({
       model_id: 'model_id',
       output_format: {
+        container: 'raw',
         encoding: 'pcm_f32le',
         sample_rate: 8000,
-        container: 'raw',
       },
       transcript: 'transcript',
       voice: { id: 'id', mode: 'id' },
