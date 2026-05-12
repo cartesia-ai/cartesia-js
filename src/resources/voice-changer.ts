@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../core/resource';
-import * as TTSAPI from './tts/tts';
+import * as TTSAPI from './tts';
 import { APIPromise } from '../core/api-promise';
 import { Stream } from '../core/streaming';
 import { type Uploadable } from '../core/uploads';
