@@ -303,6 +303,11 @@ export interface GenerationRequest {
   use_normalized_timestamps?: boolean | null;
 }
 
+// Alias for backward compatibility
+export namespace GenerationRequest {
+  export type OutputFormat = RawOutputFormat;
+}
+
 /**
  * @deprecated Use `generation_config.speed` for sonic-3.
  */

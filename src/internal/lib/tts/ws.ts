@@ -50,7 +50,7 @@ export interface ContextOptions {
    */
   model_id: string;
 
-  output_format: TTSAPI.GenerationRequest.OutputFormat;
+  output_format: TTSAPI.RawOutputFormat;
 
   voice: TTSAPI.VoiceSpecifier;
 
