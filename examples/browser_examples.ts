@@ -147,7 +147,6 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
   ws.on('error', (err) => console.error(err.message));
 
   try {
-    await ws.connect();
     const ctx = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },

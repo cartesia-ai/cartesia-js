@@ -17,11 +17,9 @@ export default function WebSocketExample() {
 
       // 2. Connect via WebSocket from the browser
       const client = new Cartesia({ token });
-      const ws = client.tts.contextsWS();
+      const ws = await client.tts.websocket();
       ws.on('error', (err: Error) => console.error(err.message));
       try {
-        await ws.connect();
-
         // 3. Stream audio and play each chunk as it arrives
         const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE });
         let nextStartTime = audioCtx.currentTime;
@@ -33,10 +31,10 @@ export default function WebSocketExample() {
           language: 'en',
         });
 
-        wsCtx.push({
+        await wsCtx.push({
           transcript: 'Hello from a WebSocket! Each audio chunk is played the moment it arrives.',
         });
-        wsCtx.end();
+        await wsCtx.no_more_inputs();
 
         for await (const event of wsCtx.receive()) {
           if (event.type === 'chunk' && event.audio) {
