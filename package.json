@@ -51,14 +51,6 @@
     "typescript-eslint": "8.31.1",
     "ws": "^8.18.3"
   },
-  "peerDependencies": {
-    "ws": "^8.18.0"
-  },
-  "peerDependenciesMeta": {
-    "ws": {
-      "optional": true
-    }
-  },
   "overrides": {
     "minimatch": "^9.0.5"
   },

@@ -48,6 +48,25 @@ import {
   SttTranscribeResponse,
 } from './resources/stt';
 import {
+  GenerationConfig,
+  GenerationRequest,
+  ModelSpeed,
+  OutputFormatContainer,
+  PhonemeTimestamps,
+  RawEncoding,
+  RawOutputFormat,
+  TTS,
+  TTSGenerateParams,
+  TTSGenerateSseParams,
+  TTSGenerateSSEParams,
+  TTSInfillParams,
+  TTSSSEEvent,
+  VoiceSpecifier,
+  WebsocketClientEvent,
+  WebsocketResponse,
+  WordTimestamps,
+} from './resources/tts';
+import {
   VoiceChanger,
   VoiceChangerChangeVoiceBytesParams,
   VoiceChangerChangeVoiceSseParams,
@@ -84,25 +103,6 @@ import {
   Datasets,
   DatasetsCursorIDPage,
 } from './resources/datasets/datasets';
-import {
-  GenerationConfig,
-  GenerationRequest,
-  ModelSpeed,
-  OutputFormatContainer,
-  PhonemeTimestamps,
-  RawEncoding,
-  RawOutputFormat,
-  TTS,
-  TTSGenerateParams,
-  TTSGenerateSseParams,
-  TTSGenerateSSEParams,
-  TTSInfillParams,
-  TTSSSEEvent,
-  VoiceSpecifier,
-  WebsocketClientEvent,
-  WebsocketResponse,
-  WordTimestamps,
-} from './resources/tts/tts';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
 import { FinalRequestOptions, RequestOptions } from './internal/request-options';
