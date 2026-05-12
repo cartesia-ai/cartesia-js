@@ -222,7 +222,7 @@ export interface GenerationRequest {
    */
   model_id: string;
 
-  output_format: GenerationRequest.OutputFormat;
+  output_format: RawOutputFormat;
 
   /**
    * The transcript to generate speech for.
@@ -303,16 +303,6 @@ export interface GenerationRequest {
   use_normalized_timestamps?: boolean | null;
 }
 
-export namespace GenerationRequest {
-  export interface OutputFormat {
-    container: 'raw';
-
-    encoding: TTSAPI.RawEncoding;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-  }
-}
-
 /**
  * @deprecated Use `generation_config.speed` for sonic-3.
  */
@@ -343,6 +333,8 @@ export interface PhonemeTimestamps {
 export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
 
 export interface RawOutputFormat {
+  container: 'raw';
+
   encoding: RawEncoding;
 
   sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
@@ -862,11 +854,11 @@ export interface TTSGenerateParams {
 }
 
 export namespace TTSGenerateParams {
-  export interface RawOutputFormat extends TTSAPI.RawOutputFormat {
+  export interface RawOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
     container?: 'raw';
   }
 
-  export interface WavOutputFormat extends TTSAPI.RawOutputFormat {
+  export interface WavOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
     container?: 'wav';
   }
 
@@ -987,11 +979,11 @@ export interface TTSInfillParams {
 }
 
 export namespace TTSInfillParams {
-  export interface RawOutputFormat extends TTSAPI.RawOutputFormat {
+  export interface RawOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
     container?: 'raw';
   }
 
-  export interface WavOutputFormat extends TTSAPI.RawOutputFormat {
+  export interface WavOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
     container?: 'wav';
   }
 
