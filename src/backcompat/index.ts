@@ -9,12 +9,15 @@ import { VoicesWrapper } from './voices-wrapper';
 import { VoiceChangerWrapper } from './voice-changer-wrapper';
 import { buildHeaders, type NullableHeaders } from '../internal/headers';
 import type { CartesiaClientOptions, Supplier } from './types';
+import { FinalRequestOptions } from '../internal/request-options';
 
-async function resolveSupplier<T>(supplier: Supplier<T>): Promise<T> {
+function resolveSupplier<T extends string | number | bigint | boolean | object | symbol | null | undefined>(
+  supplier: Supplier<T>,
+): Promise<T> {
   if (typeof supplier === 'function') {
-    return (supplier as () => T | Promise<T>)();
+    return Promise.resolve(supplier());
   }
-  return supplier;
+  return Promise.resolve(supplier);
 }
 
 class DynamicCartesia extends Cartesia {
@@ -34,7 +37,7 @@ class DynamicCartesia extends Cartesia {
     super.validateHeaders(_headers);
   }
 
-  protected override async authHeaders(opts: any): Promise<NullableHeaders | undefined> {
+  protected override async authHeaders(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
     // If we have a dynamic supplier, resolve it and return the auth header
     if (this.apiKeySupplier) {
       const key = await resolveSupplier(this.apiKeySupplier);
@@ -63,17 +66,17 @@ export class CartesiaClient {
     let apiKeySupplier: Supplier<string | undefined> | undefined;
 
     if (options.apiKey) {
-      if (typeof options.apiKey === 'function') {
-        apiKeySupplier = options.apiKey;
+      if (typeof options.apiKey === 'string') {
+        newOptions.apiKey = options.apiKey;
       } else {
-        newOptions.apiKey = options.apiKey as string;
+        apiKeySupplier = options.apiKey;
       }
     }
 
     if (options.baseUrl) {
-      newOptions.baseURL = options.baseUrl as string;
+      newOptions.baseURL = options.baseUrl;
     } else if (options.environment) {
-      newOptions.baseURL = options.environment as string;
+      newOptions.baseURL = options.environment;
     }
 
     this.client = new DynamicCartesia({ ...newOptions, apiKeySupplier });

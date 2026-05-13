@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import { Cartesia } from '../client';
-import { type Uploadable } from '../core/uploads';
 import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
 import { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
@@ -28,15 +27,21 @@ export class VoiceChangerWrapper {
     request: BackCompatVoiceChangerBytesRequest,
     requestOptions?: BackCompatRequestOptions,
   ): Promise<Readable> {
-    const params: any = {
-      clip: clip as Uploadable,
+    const params: Cartesia.VoiceChanger.VoiceChangerGenerateParams = {
+      clip: clip,
       'voice[id]': request.voiceId,
       'output_format[container]': request.outputFormatContainer,
       'output_format[sample_rate]': request.outputFormatSampleRate,
     };
 
     if (request.outputFormatEncoding) {
-      params['output_format[encoding]'] = request.outputFormatEncoding;
+      if (request.outputFormatEncoding === 'mulaw') {
+        params['output_format[encoding]'] = 'pcm_mulaw';
+      } else if (request.outputFormatEncoding === 'alaw') {
+        params['output_format[encoding]'] = 'pcm_alaw';
+      } else {
+        params['output_format[encoding]'] = request.outputFormatEncoding;
+      }
     }
     if (request.outputFormatBitRate) {
       params['output_format[bit_rate]'] = request.outputFormatBitRate;
@@ -55,19 +60,17 @@ export class VoiceChangerWrapper {
     }
 
     const response = await wrap(
-      this.client.voiceChanger.changeVoiceBytes(params, {
+      this.client.voiceChanger.generate(params, {
         ...options,
         __binaryResponse: true,
-      } as any),
+      }),
     );
 
-    const responseAny = response as any;
-
-    if (!responseAny.body) {
+    if (!response.body) {
       throw new Error('Response body is null');
     }
 
     // @ts-ignore
-    return Readable.fromWeb(responseAny.body);
+    return Readable.fromWeb(response.body);
   }
 }

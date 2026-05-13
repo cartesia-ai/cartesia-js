@@ -30,9 +30,10 @@ interface WebSocketLike {
 }
 
 /**
- * Request parameters for context.generate(), same as GenerationRequest but without context_id.
+ * Request parameters for {@link TTSWSContext.generate}
  */
-export type ContextGenerateRequest = Omit<TTSAPI.GenerationRequest, 'context_id'>;
+export type ContextGenerateRequest = Pick<TTSAPI.GenerationRequest, 'transcript'> &
+  Partial<Omit<TTSAPI.GenerationRequest, 'context_id' | 'transcript'>>;
 
 /**
  * Options for creating a context, including the model, voice, and output format.
@@ -99,7 +100,7 @@ export interface ContextOptions {
    */
   use_normalized_timestamps?: boolean | null;
 
-  /** Receive timeout in milliseconds. If set, receive() will throw WebSocketTimeoutError after this duration of inactivity. */
+  /** Receive timeout in milliseconds. If set, receive() will throw {@link WebSocketTimeoutError} after this duration of inactivity. */
   timeout?: number | undefined;
 }
 
@@ -156,6 +157,7 @@ export class TTSWSContext {
     await this._ws.send({
       ...this._options,
       transcript: options.transcript,
+      ...(options.generation_config === undefined ? null : { generation_config: options.generation_config }),
       context_id: this.contextId,
       continue: true,
     });
@@ -171,9 +173,7 @@ export class TTSWSContext {
    */
   async no_more_inputs() {
     await this._ws.send({
-      model_id: this._options.model_id,
-      voice: this._options.voice,
-      output_format: this._options.output_format,
+      ...this._options,
       transcript: '',
       context_id: this.contextId,
       continue: false,
@@ -187,7 +187,10 @@ export class TTSWSContext {
    */
   async send(request: ContextGenerateRequest) {
     await this._ws.send({
-      ...request,
+      ...this._options,
+      ...(Object.fromEntries(
+        Object.entries(request).filter(([k, v]) => v !== undefined),
+      ) as ContextGenerateRequest),
       context_id: this.contextId,
     });
   }
@@ -199,9 +202,7 @@ export class TTSWSContext {
    */
   async flush() {
     await this._ws.send({
-      model_id: this._options.model_id,
-      voice: this._options.voice,
-      output_format: this._options.output_format,
+      ...this._options,
       transcript: '',
       context_id: this.contextId,
       continue: true,
@@ -227,8 +228,8 @@ export class TTSWSContext {
           return;
         }
 
-        if (entry.queue.length > 0) {
-          const event = entry.queue.shift()!;
+        const event = entry.queue.shift();
+        if (event !== undefined) {
           yield event;
           if (event.type === 'done') {
             return;
@@ -279,7 +280,10 @@ export class TTSWSContext {
     // and would cause events to accumulate in both places (memory leak).
     this._ws._unregisterContext(this.contextId);
     yield* this._ws.generate({
-      ...request,
+      ...this._options,
+      ...(Object.fromEntries(
+        Object.entries(request).filter(([k, v]) => v !== undefined),
+      ) as ContextGenerateRequest),
       context_id: this.contextId,
     });
   }
@@ -322,7 +326,7 @@ export class TTSWS extends TTSEmitter {
       this.socket = new _ws.WebSocket(this.url, {
         ...options,
         headers: {
-          'cartesia-version': '2025-11-04',
+          'cartesia-version': '2026-03-01',
           ...this.authHeaders(),
           ...options?.headers,
         },
@@ -330,7 +334,7 @@ export class TTSWS extends TTSEmitter {
     } else if (typeof WebSocket !== 'undefined') {
       // Browser: use native WebSocket with auth in URL query params
       const url = new URL(this.url.toString());
-      url.searchParams.set('cartesia_version', '2025-11-04');
+      url.searchParams.set('cartesia_version', '2026-03-01');
       const authToken = this.client.token || this.client.apiKey;
       if (authToken) {
         url.searchParams.set('api_key', authToken);
@@ -359,9 +363,9 @@ export class TTSWS extends TTSEmitter {
     this.socket.addEventListener('message', (msgEvent: any) => {
       // With addEventListener, both ws and native WebSocket wrap data in a MessageEvent.
       const raw = msgEvent.data;
-      const event = (() => {
+      const event: TTSAPI.WebsocketResponse | null = (() => {
         try {
-          return JSON.parse(typeof raw === 'string' ? raw : raw.toString()) as TTSAPI.WebsocketResponse;
+          return JSON.parse(typeof raw === 'string' ? raw : raw.toString());
         } catch (err) {
           this._onError(null, 'could not parse websocket event', err);
           return null;
@@ -371,8 +375,7 @@ export class TTSWS extends TTSEmitter {
       if (event) {
         // Decode audio for chunk events (mirrors Python SDK's .audio property).
         if (event.type === 'chunk') {
-          const chunk = event as TTSAPI.WebsocketResponse.Chunk;
-          chunk.audio = chunk.data ? (decodeBase64String(chunk.data) as any) : null;
+          event.audio = decodeBase64String(event.data);
         }
 
         // Always emit on EventEmitter for backwards compatibility and global listeners.
@@ -386,7 +389,7 @@ export class TTSWS extends TTSEmitter {
         }
 
         // Route to per-context queue if registered.
-        const ctxId = 'context_id' in event ? (event as any).context_id : null;
+        const ctxId = event.context_id;
         if (ctxId && this._contextQueues.has(ctxId)) {
           const entry = this._contextQueues.get(ctxId)!;
           entry.queue.push(event);
@@ -415,9 +418,10 @@ export class TTSWS extends TTSEmitter {
   /**
    * Send a generation request and iterate over the responses.
    */
-  async *generate(request: TTSAPI.GenerationRequest): AsyncGenerator<TTSAPI.WebsocketResponse> {
-    const contextId = request.context_id ?? uuid4();
-    request = { ...request, context_id: contextId };
+  async *generate(
+    request: Omit<TTSAPI.GenerationRequest, 'context_id'> & { context_id?: string | null | undefined },
+  ): AsyncGenerator<TTSAPI.WebsocketResponse> {
+    const contextId: string = request.context_id ?? uuid4();
     const queue: TTSAPI.WebsocketResponse[] = [];
     let done = false;
     let error: Error | null = null;
@@ -441,7 +445,7 @@ export class TTSWS extends TTSEmitter {
     this.on('event', onEvent);
 
     try {
-      await this.send(request);
+      await this.send({ ...request, context_id: contextId });
 
       while (!done || queue.length > 0) {
         if (queue.length > 0) {

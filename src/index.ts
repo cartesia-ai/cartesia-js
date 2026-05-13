@@ -1,5 +1,8 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+// FIXME: remove backcompat in v4
+export * from './backcompat';
+
 export { Cartesia as default } from './client';
 
 export { type Uploadable, toFile } from './core/uploads';
@@ -21,6 +24,3 @@ export {
   PermissionDeniedError,
   UnprocessableEntityError,
 } from './core/error';
-
-// FIXME: remove backcompat in v4
-export * from './backcompat';

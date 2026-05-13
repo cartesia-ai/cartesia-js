@@ -193,21 +193,6 @@ while (page.hasNextPage()) {
 }
 ```
 
-## Default Headers
-
-We automatically send the `cartesia-version` header set to `2026-03-01`.
-
-If you need to, you can override it by setting default headers on a per-request basis.
-
-```ts
-import Cartesia from '@cartesia/cartesia-js';
-
-const client = new Cartesia();
-
-const page = await client.voices.list({ headers: { 'cartesia-version': 'My-Custom-Value' } });
-const voice = page.data[0];
-```
-
 ## Advanced Usage
 
 ### Accessing raw Response data (e.g., headers)

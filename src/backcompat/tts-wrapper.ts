@@ -3,6 +3,7 @@ import { Cartesia } from '../client';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
 import { Readable } from 'stream';
+import type { RequestOptions } from '../internal/request-options';
 
 // Define compatible interfaces to match the old SDK types for WebSocket
 export interface BackCompatWebSocketOptions {
@@ -171,33 +172,34 @@ export class WebSocketWrapper {
 
     const url = new URL(urlStr);
 
-    const headers: any = {
-      'cartesia-version': '2025-11-04',
+    const headers: Record<string, string> = {
+      'cartesia-version': '2026-03-01',
     };
     if (this.client.apiKey) {
       headers['Authorization'] = `Bearer ${this.client.apiKey}`;
     }
 
-    this.socket = new WebSocket(url.toString(), {
-      headers: headers,
+    const socket = new WebSocket(url.toString(), {
+      headers,
     });
+    this.socket = socket;
 
     return new Promise<void>((resolve, reject) => {
-      this.socket!.on('open', () => {
+      socket.on('open', () => {
         console.log('WebSocket connected.');
         resolve();
       });
 
-      this.socket!.on('error', (err) => {
+      socket.on('error', (err) => {
         console.error('WebSocket error:', err);
         reject(err);
       });
 
-      this.socket!.on('message', (data) => {
+      socket.on('message', (data) => {
         this.handleMessage(data);
       });
 
-      this.socket!.on('close', () => {
+      socket.on('close', () => {
         console.log('WebSocket closed.');
         this.sources.forEach((s) => {
           s.markDone();
@@ -377,7 +379,7 @@ export class TTSWrapper {
       params.pronunciation_dict_id = options.pronunciationDictId;
     }
 
-    const requestOptions: any = {};
+    const requestOptions: RequestOptions = {};
     if (signal) {
       requestOptions.signal = signal;
     }

@@ -2,7 +2,7 @@ import { APIConnectionTimeoutError, APIError } from '../core/error';
 import { CartesiaClientError, CartesiaTimeoutError } from './errors';
 
 /** Convert snake_case keys to camelCase, recursively. Only transforms plain objects. */
-export function snakeToCamel(obj: any): any {
+export function snakeToCamel(obj: unknown): any {
   if (Array.isArray(obj)) return obj.map(snakeToCamel);
   if (obj !== null && typeof obj === 'object' && Object.getPrototypeOf(obj) === Object.prototype) {
     const result: any = {};

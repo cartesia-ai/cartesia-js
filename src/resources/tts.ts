@@ -610,7 +610,7 @@ export namespace WebsocketResponse {
      * Set by the SDK on receipt; not returned by the API.
      */
     // FIXME: These generated types should match our OpenAPI spec exactly. Custom SDK code should export their own types as necessary.
-    audio: Buffer | null;
+    audio?: Uint8Array;
   }
 
   export interface FlushDone {
