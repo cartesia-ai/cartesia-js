@@ -195,7 +195,7 @@ while (page.hasNextPage()) {
 
 ## Default Headers
 
-We automatically send the `cartesia-version` header set to `2026-03-01`.
+We automatically send the `cartesia-version` header set to `2025-11-04`.
 
 If you need to, you can override it by setting default headers on a per-request basis.
 
