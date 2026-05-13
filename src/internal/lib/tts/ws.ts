@@ -326,7 +326,7 @@ export class TTSWS extends TTSEmitter {
       this.socket = new _ws.WebSocket(this.url, {
         ...options,
         headers: {
-          'cartesia-version': '2026-03-01',
+          'cartesia-version': '2025-11-04',
           ...this.authHeaders(),
           ...options?.headers,
         },
@@ -334,12 +334,37 @@ export class TTSWS extends TTSEmitter {
     } else if (typeof WebSocket !== 'undefined') {
       // Browser: use native WebSocket with auth in URL query params
       const url = new URL(this.url.toString());
-      url.searchParams.set('cartesia_version', '2026-03-01');
-      const authToken = this.client.token || this.client.apiKey;
-      if (authToken) {
-        url.searchParams.set('api_key', authToken);
+
+      if (options?.headers?.['cartesia-version']) {
+        // override cartesia version
+        url.searchParams.set('cartesia_version', options.headers['cartesia-version']);
+      } else if (url.searchParams.get('cartesia_version')) {
+        // use current cartesia version
+      } else {
+        // set cartesia version
+        url.searchParams.set('cartesia_version', '2025-11-04');
       }
-      this.socket = new WebSocket(url.toString());
+
+      if (url.searchParams.get('access_token')) {
+        // use current access token
+      } else if (this.client.token) {
+        // set access token
+        url.searchParams.set('access_token', this.client.token);
+      } else {
+        // api key (insecure fallback)
+        const [, overrideApiKey] = options?.headers?.['Authorization']?.trim().split(' ', 2) ?? [];
+        if (overrideApiKey) {
+          // override api key
+          url.searchParams.set('api_key', overrideApiKey);
+        } else if (url.searchParams.get('api_key')) {
+          // use current api key
+        } else if (this.client.apiKey) {
+          // api key from client
+          url.searchParams.set('api_key', this.client.apiKey);
+        }
+      }
+
+      this.socket = new WebSocket(url);
     } else {
       throw new Error(
         'The "ws" peer dependency is required for WebSocket support in Node.js. Install it with: npm install ws',
