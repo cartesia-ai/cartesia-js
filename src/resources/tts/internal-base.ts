@@ -1,20 +1,9 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import * as TTSAPI from './tts';
+import * as TTSAPI from '../tts';
 import { Cartesia } from '../../client';
 import { EventEmitter } from '../../core/EventEmitter';
 import { CartesiaError } from '../../core/error';
-
-import type { RawWebSocketData, ReconnectingEvent, UnsentMessage } from '../../internal/ws';
-
-export type TTSStreamMessage =
-  | { type: 'connecting' | 'open' | 'closing' }
-  | { type: 'close'; code: number; reason: string; unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[] }
-  | { type: 'reconnecting'; reconnect: ReconnectingEvent }
-  | { type: 'reconnected' }
-  | { type: 'message'; message: TTSAPI.WebsocketResponse }
-  | { type: 'raw'; data: RawWebSocketData }
-  | { type: 'error'; error: WebSocketError };
 
 export class WebSocketError extends CartesiaError {
   /**
@@ -31,14 +20,10 @@ export class WebSocketError extends CartesiaError {
 
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-type WebSocketEvents = Simplify<
+type WebsocketEvents = Simplify<
   {
     event: (event: TTSAPI.WebsocketResponse) => void;
-    raw: (data: RawWebSocketData) => void;
     error: (error: WebSocketError) => void;
-    close: (code: number, reason: string, unsent: UnsentMessage<TTSAPI.WebsocketClientEvent>[]) => void;
-    reconnecting: (event: ReconnectingEvent) => void;
-    reconnected: () => void;
   } & {
     [EventType in Exclude<NonNullable<TTSAPI.WebsocketResponse['type']>, 'error'>]: (
       event: Extract<TTSAPI.WebsocketResponse, { type?: EventType }>,
@@ -46,19 +31,14 @@ type WebSocketEvents = Simplify<
   }
 >;
 
-export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
+export abstract class TTSEmitter extends EventEmitter<WebsocketEvents> {
   /**
    * Send an event to the API.
    */
-  abstract send(event: TTSAPI.WebsocketClientEvent): void;
+  abstract send(event: TTSAPI.WebsocketClientEvent): void | Promise<void>;
 
   /**
-   * Send raw data over the WebSocket without JSON serialization.
-   */
-  abstract sendRaw(data: RawWebSocketData): void;
-
-  /**
-   * Close the WebSocket connection.
+   * Close the websocket connection.
    */
   abstract close(props?: { code: number; reason: string }): void;
 
@@ -91,11 +71,11 @@ export abstract class TTSEmitter extends EventEmitter<WebSocketEvents> {
   }
 }
 
-export function buildURL(client: Cartesia, parameters: Record<string, unknown>): URL {
-  const { ...query } = parameters;
-  const endpoint = '/tts/websocket';
-  const url = new URL(client.buildURL(endpoint, query, undefined));
-  url.protocol = url.protocol === 'http:' || url.protocol === 'ws:' ? 'ws:' : 'wss:';
+export function buildURL(client: Cartesia): URL {
+  const path = '/tts/websocket';
+  const baseURL = client.baseURL;
+  const url = new URL(baseURL + (baseURL.endsWith('/') ? path.slice(1) : path));
+  url.protocol = 'wss';
   return url;
 }
 
@@ -106,3 +86,5 @@ function safeJSONStringify(value: unknown): string | null {
     return null;
   }
 }
+
+export { WebSocketTimeoutError } from '../../internal/lib/tts/websocket-timeout-error';

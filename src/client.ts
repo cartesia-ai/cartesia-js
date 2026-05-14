@@ -48,6 +48,25 @@ import {
   SttTranscribeResponse,
 } from './resources/stt';
 import {
+  GenerationConfig,
+  GenerationRequest,
+  ModelSpeed,
+  OutputFormatContainer,
+  PhonemeTimestamps,
+  RawEncoding,
+  RawOutputFormat,
+  TTS,
+  TTSGenerateParams,
+  TTSGenerateSseParams,
+  TTSGenerateSSEParams,
+  TTSInfillParams,
+  TTSSSEEvent,
+  VoiceSpecifier,
+  WebsocketClientEvent,
+  WebsocketResponse,
+  WordTimestamps,
+} from './resources/tts';
+import {
   VoiceChanger,
   VoiceChangerChangeVoiceBytesParams,
   VoiceChangerChangeVoiceSseParams,
@@ -84,25 +103,6 @@ import {
   Datasets,
   DatasetsCursorIDPage,
 } from './resources/datasets/datasets';
-import {
-  GenerationConfig,
-  GenerationRequest,
-  ModelSpeed,
-  OutputFormatContainer,
-  PhonemeTimestamps,
-  RawEncoding,
-  RawOutputFormat,
-  TTS,
-  TTSGenerateParams,
-  TTSGenerateSseParams,
-  TTSGenerateSSEParams,
-  TTSInfillParams,
-  TTSSSEEvent,
-  VoiceSpecifier,
-  WebsocketClientEvent,
-  WebsocketResponse,
-  WordTimestamps,
-} from './resources/tts/tts';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
 import { FinalRequestOptions, RequestOptions } from './internal/request-options';
@@ -115,7 +115,6 @@ import {
   parseLogLevel,
 } from './internal/utils/log';
 import { isEmptyObj } from './internal/utils/values';
-import { TTSWSContexts } from './resources/index';
 
 export interface ClientOptions {
   apiKey?: string | null | undefined;
@@ -791,7 +790,7 @@ export class Cartesia {
         'X-Stainless-Retry-Count': String(retryCount),
         ...(options.timeout ? { 'X-Stainless-Timeout': String(Math.trunc(options.timeout / 1000)) } : {}),
         ...getPlatformHeaders(),
-        'cartesia-version': '2026-03-01',
+        'cartesia-version': '2025-11-04',
       },
       await this.authHeaders(options),
       this._options.defaultHeaders,
@@ -977,7 +976,6 @@ export declare namespace Cartesia {
     type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
-    type TTSWSContexts as TTSWSContexts,
   };
 
   export {

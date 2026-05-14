@@ -2,7 +2,7 @@
  * Node.js examples for Cartesia JS SDK v3.x
  *
  * Run an example:
- *   CARTESIA_API_KEY=... npx ts-node examples/node_examples.ts <functionName>
+ *   pnpm i && CARTESIA_API_KEY=... pnpm tsn examples/node_examples.ts <functionName>
  */
 
 import * as fs from 'fs';
@@ -46,17 +46,15 @@ async function ttsGenerateToFile(client: Cartesia): Promise<void> {
 // TTS WebSocket
 // =============================================================================
 
-/** Basic WebSocket usage with generate(). */
+/** Basic WebSocket usage. */
 async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_websocket_basic_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
 
   try {
-    await ws.connect();
-
     const ctx = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
@@ -64,8 +62,8 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
       language: 'en',
     });
 
-    ctx.push({ transcript: 'Hello, world!' });
-    ctx.end();
+    await ctx.push({ transcript: 'Hello, world!' });
+    await ctx.no_more_inputs();
 
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk') {
@@ -85,15 +83,13 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
 
 /** Streaming a transcript split into multiple parts, using continuations. */
 async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_websocket_continuations_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
 
   try {
-    await ws.connect();
-
     const ctx = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
@@ -102,9 +98,9 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
     });
 
     for (const part of ['The road ', 'goes ever ', 'on and ', 'on.']) {
-      ctx.push({ transcript: part });
+      await ctx.push({ transcript: part });
     }
-    ctx.end();
+    await ctx.no_more_inputs();
 
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk') {
@@ -124,7 +120,7 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
 
 /** Demonstrates manual flushing to separate audio from different transcripts. */
 async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const files: Map<number, fs.WriteStream> = new Map();
@@ -139,17 +135,17 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
 
     // 1. Send first transcript
     console.log('Sending first transcript...');
-    ctx.push({ transcript: 'Stay hungry, ' });
+    await ctx.push({ transcript: 'Stay hungry, ' });
 
     // 2. Flush — forces all buffered audio for the first transcript to be generated.
     console.log('Flushing...');
-    ctx.flush();
+    await ctx.flush();
 
     // 3. Send second transcript
     console.log('Sending second transcript...');
-    ctx.push({ transcript: 'stay foolish.' });
+    await ctx.push({ transcript: 'stay foolish.' });
 
-    ctx.end();
+    await ctx.no_more_inputs();
 
     const ts = timestamp();
 
@@ -184,15 +180,13 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
 
 /** Demonstrates changing emotion mid-stream using generation_config. */
 async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_emotion_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
 
   try {
-    await ws.connect();
-
     const ctx = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
@@ -201,15 +195,15 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
     });
 
     console.log('Sending neutral text...');
-    ctx.push({ transcript: 'Well maybe if you just ' });
+    await ctx.push({ transcript: 'Well maybe if you just ' });
 
     console.log('Sending angry text...');
-    ctx.push({
+    await ctx.push({
       transcript: 'loosen up a little!',
       generation_config: { emotion: 'angry' },
     });
 
-    ctx.end();
+    await ctx.no_more_inputs();
 
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk') {
@@ -229,15 +223,13 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
 
 /** Demonstrates changing speed mid-stream using generation_config. */
 async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_speed_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
 
   try {
-    await ws.connect();
-
     const ctx = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
@@ -246,15 +238,15 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
     });
 
     console.log('Sending normal speed text...');
-    ctx.push({ transcript: 'I am speaking at a normal pace. ' });
+    await ctx.push({ transcript: 'I am speaking at a normal pace. ' });
 
     console.log('Sending fast speed text...');
-    ctx.push({
+    await ctx.push({
       transcript: 'But now I am speaking much faster!',
       generation_config: { speed: 1.5 },
     });
 
-    ctx.end();
+    await ctx.no_more_inputs();
 
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk') {
@@ -274,12 +266,10 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
 
 /** Two contexts on one connection, received concurrently via Promise.all(). */
 async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   try {
-    await ws.connect();
-
     const ctx1 = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
@@ -295,21 +285,21 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
     });
 
     // Send to both contexts before receiving.
-    ctx1.push({
+    await ctx1.push({
       transcript:
         'Context one is speaking now. This is a longer transcript to ensure that ' +
         'audio chunks from both contexts are interleaved on the wire. ' +
         'The quick brown fox jumps over the lazy dog.',
     });
-    ctx1.end();
+    await ctx1.no_more_inputs();
 
-    ctx2.push({
+    await ctx2.push({
       transcript:
         'Context two has a different message. We want to verify that the routing ' +
         'logic correctly separates the audio streams. ' +
         'Pack my box with five dozen liquor jugs.',
     });
-    ctx2.end();
+    await ctx2.no_more_inputs();
 
     const ts = timestamp();
 
@@ -340,103 +330,15 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
   }
 }
 
-/**
- * Demonstrates using a single WebSocket connection (via generateWS) to manage
- * multiple contexts concurrently.
- *
- * We spawn separate tasks to push audio to 3 different contexts.
- * We use a single receiver loop to de-multiplex the responses to the correct files.
- */
-async function ttsGenerateWSConcurrentContexts(client: Cartesia): Promise<void> {
-  const conn = client.tts.generateWS();
-  conn.on('error', (err) => console.error('WS error:', err.message));
-
-  const allQuotes = [
-    ['Ask not what your country can do for you, ', 'ask what you can do ', 'for your country.'],
-    ['I have a dream ', 'that one day this nation ', 'will rise up.'],
-    ["In the end, it's not the years in your life that count. ", "It's the life ", 'in your years.'],
-  ];
-
-  const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-  // Sender task: pushes the parts of one quote, in order, to a single context_id.
-  async function sendTranscript(ctxIndex: number): Promise<void> {
-    const transcripts = allQuotes[ctxIndex]!;
-    for (let partIdx = 0; partIdx < transcripts.length; partIdx++) {
-      const part = transcripts[partIdx]!;
-      console.log(`Sending '${part.trim()}' to context ${ctxIndex}`);
-      conn.send({
-        model_id: 'sonic-3',
-        voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-        output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
-        context_id: String(ctxIndex),
-        transcript: part,
-        language: 'en',
-        continue: partIdx + 1 < transcripts.length,
-      });
-      // Small delay to simulate real-time input and interleave requests.
-      await sleep(100);
-    }
-    console.log(`Finished sending to context ${ctxIndex}`);
-  }
-
-  const sendTasks = allQuotes.map((_, i) => sendTranscript(i));
-
-  const files = new Map<number, fs.WriteStream>();
-  const ts = timestamp();
-
-  console.log('Starting receiver loop...');
-  let doneCount = 0;
-
-  try {
-    for await (const event of conn) {
-      if (event.type !== 'message') continue;
-      const msg = event.message;
-
-      if (msg.type === 'chunk') {
-        const ctxIndex = Number(msg.context_id);
-        if (!files.has(ctxIndex)) {
-          const filename = `tts_concurrent_${ctxIndex}_${ts}.pcm`;
-          files.set(ctxIndex, fs.createWriteStream(filename));
-          console.log(`Created file for context ${ctxIndex}: ${filename}`);
-        }
-        files.get(ctxIndex)?.write(Buffer.from(msg.data, 'base64'));
-      } else if (msg.type === 'done') {
-        console.log(`Context ${msg.context_id} finished.`);
-        doneCount++;
-        if (doneCount === allQuotes.length) {
-          console.log('All contexts finished.');
-          break;
-        }
-      } else if (msg.type === 'error') {
-        throw new Error(`${msg.title ?? 'error'}: ${msg.message ?? ''}`);
-      }
-    }
-
-    await Promise.all(sendTasks);
-  } finally {
-    for (const f of files.values()) f.end();
-    conn.close();
-  }
-
-  console.log('\nFinished.');
-  console.log('You can play the generated audio files with these commands:');
-  for (const [ctxIndex, f] of files) {
-    console.log(`  Context ${ctxIndex}: ffplay -f f32le -ar 44100 ${(f as any).path}`);
-  }
-}
-
 /** WebSocket response type handling with timestamps. */
 async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
-  const ws = client.tts.contextsWS();
+  const ws = await client.tts.websocket();
   ws.on('error', (err) => console.error('WS error:', err.message));
 
   const filename = `tts_websocket_response_handling_${timestamp()}.pcm`;
   const file = fs.createWriteStream(filename);
 
   try {
-    await ws.connect();
-
     const ctx = ws.context({
       model_id: 'sonic-3',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
@@ -445,10 +347,10 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
       add_timestamps: true,
     });
 
-    ctx.push({
+    await ctx.push({
       transcript: 'Hello, world!',
     });
-    ctx.end();
+    await ctx.no_more_inputs();
 
     for await (const event of ctx.receive()) {
       if (event.type === 'chunk') {
@@ -653,7 +555,6 @@ const examples: Record<string, (client: Cartesia) => Promise<void>> = {
   ttsWebsocketEmotion,
   ttsWebsocketSpeed,
   ttsWebsocketConcurrentContexts,
-  ttsGenerateWSConcurrentContexts,
   ttsWebsocketResponseHandling,
   ttsSSEBasic,
   ttsSSEWithTimestamps,

@@ -29,7 +29,7 @@ const client = new Cartesia({
 const response = await client.tts.generate({
   model_id: 'sonic-3',
   output_format: {
-    container: 'wav',
+    container: 'raw',
     encoding: 'pcm_f32le',
     sample_rate: 44100,
   },
@@ -195,7 +195,7 @@ while (page.hasNextPage()) {
 
 ## Default Headers
 
-We automatically send the `cartesia-version` header set to `2026-03-01`.
+We automatically send the `cartesia-version` header set to `2025-11-04`.
 
 If you need to, you can override it by setting default headers on a per-request basis.
 

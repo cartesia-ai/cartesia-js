@@ -1,42 +1,27 @@
 import WebSocket from 'ws';
-import { Cartesia } from '../../client';
+import { Cartesia } from '../client';
 import { BackCompatRequestOptions } from './types';
-import { backCompatWrap } from './utils';
+import { wrap } from './utils';
 import { Readable } from 'stream';
+import type { RequestOptions } from '../internal/request-options';
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
+// Define compatible interfaces to match the old SDK types for WebSocket
 export interface BackCompatWebSocketOptions {
   container?: 'raw' | 'wav' | 'mp3';
   encoding?: 'pcm_f32le' | 'pcm_s16le' | 'pcm_alaw' | 'pcm_mulaw';
   sampleRate: number;
 }
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
 export type BackCompatTtsRequestVoiceSpecifier =
   | { mode: 'id'; id: string }
-  | {
-      /** @deprecated Voice embeddings stop working effective 2026-06-01. Use mode: 'id' instead */
-      mode: 'embedding';
-      /** @deprecated Voice embeddings stop working effective 2026-06-01. Use mode: 'id' instead */
-      embedding: number[];
-    };
+  | { mode: 'embedding'; embedding: number[] };
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
 export interface BackCompatGenerationConfig {
   volume?: number;
   speed?: number;
   emotion?: string[]; // Simplified from strict union for backcompat flexibility
 }
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
 export interface BackCompatWebSocketTtsRequest {
   modelId: string;
   transcript: string;
@@ -56,9 +41,6 @@ export interface BackCompatWebSocketTtsRequest {
   addPhonemeTimestamps?: boolean;
 }
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
 export interface BackCompatTtsRequest {
   modelId: string;
   transcript: string;
@@ -160,10 +142,7 @@ class AudioSource {
   }
 }
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
-export class BackCompatWebSocketWrapper {
+export class WebSocketWrapper {
   private client: Cartesia;
   private config: BackCompatWebSocketOptions;
   private socket: WebSocket | null = null;
@@ -193,33 +172,34 @@ export class BackCompatWebSocketWrapper {
 
     const url = new URL(urlStr);
 
-    const headers: any = {
-      'cartesia-version': '2026-03-01',
+    const headers: Record<string, string> = {
+      'cartesia-version': '2025-11-04',
     };
     if (this.client.apiKey) {
       headers['Authorization'] = `Bearer ${this.client.apiKey}`;
     }
 
-    this.socket = new WebSocket(url.toString(), {
-      headers: headers,
+    const socket = new WebSocket(url.toString(), {
+      headers,
     });
+    this.socket = socket;
 
     return new Promise<void>((resolve, reject) => {
-      this.socket!.on('open', () => {
+      socket.on('open', () => {
         console.log('WebSocket connected.');
         resolve();
       });
 
-      this.socket!.on('error', (err) => {
+      socket.on('error', (err) => {
         console.error('WebSocket error:', err);
         reject(err);
       });
 
-      this.socket!.on('message', (data) => {
+      socket.on('message', (data) => {
         this.handleMessage(data);
       });
 
-      this.socket!.on('close', () => {
+      socket.on('close', () => {
         console.log('WebSocket closed.');
         this.sources.forEach((s) => {
           s.markDone();
@@ -321,9 +301,6 @@ export class BackCompatWebSocketWrapper {
   }
 }
 
-/**
- * @deprecated Used {@link Cartesia } instead.
- */
 export interface BackCompatTtsGenerateOptions {
   modelId?: string;
   outputFormat?: {
@@ -339,7 +316,7 @@ export interface BackCompatTtsGenerateOptions {
 }
 
 /** @deprecated Use the new SDK's tts methods on the {@link Cartesia} instance instead. */
-export class BackCompatTTSWrapper {
+export class TTSWrapper {
   private client: Cartesia;
 
   constructor(client: Cartesia) {
@@ -348,7 +325,7 @@ export class BackCompatTTSWrapper {
 
   /** @deprecated Use {@link Cartesia.tts.websocket} instead. */
   websocket(config: BackCompatWebSocketOptions) {
-    return new BackCompatWebSocketWrapper(this.client, config);
+    return new WebSocketWrapper(this.client, config);
   }
 
   /**
@@ -402,17 +379,18 @@ export class BackCompatTTSWrapper {
       params.pronunciation_dict_id = options.pronunciationDictId;
     }
 
-    const requestOptions: any = {};
+    const requestOptions: RequestOptions = {};
     if (signal) {
       requestOptions.signal = signal;
     }
 
-    const response = await backCompatWrap(this.client.tts.generate(params, requestOptions));
+    const response = await wrap(this.client.tts.generate(params, requestOptions));
     if (!response.body) {
       throw new Error('Response body is null');
     }
 
-    return Readable.fromWeb(response.body as any);
+    // @ts-ignore
+    return Readable.fromWeb(response.body);
   }
 
   /** @deprecated Use {@link Cartesia.tts.generate} instead. */
@@ -449,11 +427,12 @@ export class BackCompatTTSWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    const response = await backCompatWrap(this.client.tts.generate(params, options));
+    const response = await wrap(this.client.tts.generate(params, options));
     if (!response.body) {
       throw new Error('Response body is null');
     }
 
-    return Readable.fromWeb(response.body as any);
+    // @ts-ignore
+    return Readable.fromWeb(response.body);
   }
 }

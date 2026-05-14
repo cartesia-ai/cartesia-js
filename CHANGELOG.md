@@ -1,5 +1,42 @@
 # Changelog
 
+## 3.1.0-b4 (2026-05-14)
+
+Full Changelog: [v3.1.0-b3...v3.1.0-b4](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b3...v3.1.0-b4)
+
+### Bug Fixes
+
+* address newly introduced bugs ([dbe4fb8](https://github.com/cartesia-ai/cartesia-js/commit/dbe4fb8fa838484d830991667bd67aa61a56421c))
+* **examples:** change examples to use tts.websocket ([5d2bf96](https://github.com/cartesia-ai/cartesia-js/commit/5d2bf9646afc10df5c3f71ce62da2a2fac50609b))
+* **tts:** add container to RawOutputFormat type ([0aa1c06](https://github.com/cartesia-ai/cartesia-js/commit/0aa1c06dabe8e54ff2f33721286887fdf7d930fa))
+* **tts:** change generation request to accept the common raw output format type ([40c3e41](https://github.com/cartesia-ai/cartesia-js/commit/40c3e41456932140167b6e383d0cb72c248f6b9c))
+* **tts:** make tts ws backward compatible ([16bdcd4](https://github.com/cartesia-ai/cartesia-js/commit/16bdcd470f0ba05ffbc8ce93ae2f93764a3e7980))
+* **tts:** make ws 3.0 return decoded audio in chunk messages ([532ab62](https://github.com/cartesia-ai/cartesia-js/commit/532ab628fbeaf5ffeda7698986040965699cf367))
+* **tts:** remove generate_ws method ([fedb0eb](https://github.com/cartesia-ai/cartesia-js/commit/fedb0ebb5ef8004ef22e838ec258b1e36b8dc55b))
+* **tts:** rollback default cartesia version to support voice embedding ([3811a0b](https://github.com/cartesia-ai/cartesia-js/commit/3811a0b396772324b649ef24e72a707525b1a8f8))
+* **tts:** rollback to cartesia version 2025-11-04 to support voice embedding ([34b2b84](https://github.com/cartesia-ai/cartesia-js/commit/34b2b84eb888976d6216494007fcfa439fea9c0e))
+
+
+### Chores
+
+* redact api-key headers in debug logs ([8984a27](https://github.com/cartesia-ai/cartesia-js/commit/8984a274823d8265b5b57011ca3ad28d8ff1b031))
+
+
+### Documentation
+
+* change example comment to use pnpm to run ([45f9de7](https://github.com/cartesia-ai/cartesia-js/commit/45f9de789adcb5b7059bcc17454fa5d24fddc4bb))
+* change migrating back to using tts.websocket() ([eb9f384](https://github.com/cartesia-ai/cartesia-js/commit/eb9f38432a71c05e56f95599877269890fe2d674))
+
+
+### Styles
+
+* **tts:** remove extra newline ([b96ffec](https://github.com/cartesia-ai/cartesia-js/commit/b96ffecd5ca0160c50e794fb99120b6d46ce5ed9))
+
+
+### Refactors
+
+* **tts:** remove uplicate base64 decode function ([37ce313](https://github.com/cartesia-ai/cartesia-js/commit/37ce31341daf818bd426f7e112f27911701c8c7d))
+
 ## 3.1.0-b3 (2026-05-05)
 
 Full Changelog: [v3.1.0-b2...v3.1.0-b3](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b2...v3.1.0-b3)

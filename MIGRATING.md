@@ -95,8 +95,7 @@ while (true) {
 ws.disconnect();
 
 // v3.x (new API)
-const ws = client.tts.contextsWS();
-await ws.connect();
+const ws = await client.tts.websocket();
 
 const ctx = ws.context({
   model_id: 'sonic-2',
@@ -104,8 +103,8 @@ const ctx = ws.context({
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
 
-ctx.push({ transcript: 'Hello, world!' });
-ctx.end();
+await ctx.push({ transcript: 'Hello, world!' });
+await ctx.no_more_inputs();
 
 for await (const event of ws.receive()) {
   if (event.type === 'chunk' && event.audio) {
@@ -141,8 +140,7 @@ await ws.continue({
 ws.disconnect();
 
 // v3.x (new API)
-const ws = client.tts.contextsWS();
-await ws.connect();
+const ws = await client.tts.websocket();
 
 const ctx = ws.context({
   model_id: 'sonic-2',
@@ -150,9 +148,9 @@ const ctx = ws.context({
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
 
-ctx.push({ transcript: 'First part. ' });
-ctx.push({ transcript: 'Second part.' });
-ctx.end();
+await ctx.push({ transcript: 'First part. ' });
+await ctx.push({ transcript: 'Second part.' });
+await ctx.no_more_inputs();
 
 for await (const event of ctx.receive()) {
   if (event.type === 'chunk' && event.audio) {
@@ -176,7 +174,7 @@ const ctx = ws.context({
 await ctx.push({ transcript: 'First sentence. ' });
 await ctx.flush(); // Force generation of buffered text
 await ctx.push({ transcript: 'Second sentence.' });
-await ctx.end();
+await ctx.no_more_inputs();
 
 for await (const event of ctx.receive()) {
   if (event.type === 'chunk') {
@@ -311,11 +309,11 @@ try {
 
 ## Changes for migrating from deprecated `CartesiaClient` to `Cartesia`
 
-| Feature               | CartesiaClient                                             | Cartesia                                                                |
-| --------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
-| TTS batch method      | `client.tts.bytes(...)`                                    | `client.tts.generate(...)`                                              |
-| Parameter naming      | camelCase (`modelId`)                                      | snake_case (`model_id`)                                                 |
-| Response naming       | camelCase (`createdAt`)                                    | snake_case (`created_at`)                                               |
-| WebSocket connect     | `ws = client.tts.websocket({...})`                         | `ws = client.tts.contextsWS()`                                          |
-| WebSocket generations | `ws.send({..., continue: true})` then `ws.continue({...})` | `ctx = ws.context({...})` then `ctx.push({transcript})` and `ctx.end()` |
-| WebSocket disconnect  | `ws.disconnect()`                                          | `ws.close()`                                                            |
+| Feature               | CartesiaClient                                                         | Cartesia                                                                                       |
+| --------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| TTS batch method      | `await client.tts.bytes(...)`                                          | `await client.tts.generate(...)`                                                               |
+| Parameter naming      | camelCase (`modelId`)                                                  | snake_case (`model_id`)                                                                        |
+| Response naming       | camelCase (`createdAt`)                                                | snake_case (`created_at`)                                                                      |
+| WebSocket connect     | `ws = client.tts.websocket({...})`                                     | `ws = await client.tts.websocket()`                                                            |
+| WebSocket generations | `await ws.send({..., continue: true})` then `await ws.continue({...})` | `ctx = ws.context({...})` then `await ctx.push({transcript})` and `await ctx.no_more_inputs()` |
+| WebSocket disconnect  | `ws.disconnect()`                                                      | `ws.close()`                                                                                   |
