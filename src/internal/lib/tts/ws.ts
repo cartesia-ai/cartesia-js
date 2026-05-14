@@ -2,11 +2,10 @@
 
 import type * as WS from 'ws';
 import type { Cartesia } from '../../../client';
-import { uuid4 } from '../../utils/uuid';
 import type * as TTSAPI from '../../../resources/tts';
-import type * as VoicesAPI from '../../../resources/voices';
 import { buildURL, TTSEmitter } from '../../../resources/tts/internal-base';
-import { decodeBase64String } from '../../../lib';
+import type * as VoicesAPI from '../../../resources/voices';
+import { fromBase64, uuid4 } from '../../utils';
 import { WebSocketTimeoutError } from './websocket-timeout-error';
 
 let _ws: typeof import('ws') | undefined;
@@ -400,7 +399,7 @@ export class TTSWS extends TTSEmitter {
       if (event) {
         // Decode audio for chunk events (mirrors Python SDK's .audio property).
         if (event.type === 'chunk') {
-          event.audio = decodeBase64String(event.data);
+          event.audio = fromBase64(event.data);
         }
 
         // Always emit on EventEmitter for backwards compatibility and global listeners.
