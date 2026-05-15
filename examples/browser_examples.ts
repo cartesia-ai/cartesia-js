@@ -33,7 +33,7 @@ function createClient(token: string): Cartesia {
 /** Generate a wav and play it using an <audio> element. */
 async function ttsPlayAudio(client: Cartesia): Promise<void> {
   const response = await client.tts.generate({
-    model_id: 'sonic-3',
+    model_id: 'sonic-latest',
     transcript: 'Hello from the browser!',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
     output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 44100 },
@@ -55,7 +55,7 @@ async function ttsPlayAudio(client: Cartesia): Promise<void> {
 /** Generate audio and trigger a file download in the browser. */
 async function ttsDownloadFile(client: Cartesia): Promise<void> {
   const response = await client.tts.generate({
-    model_id: 'sonic-3',
+    model_id: 'sonic-latest',
     transcript: 'This audio will be downloaded as a file.',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
     output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 44100 },
@@ -88,7 +88,7 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
       language: 'en',
@@ -148,7 +148,7 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
       language: 'en',
@@ -188,31 +188,7 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
 }
 
 // =============================================================================
-// Voices — Display in a list
-// =============================================================================
-
-/** Fetch voices and display them in a <ul> element. */
-async function voicesListToDOM(client: Cartesia): Promise<void> {
-  const ul = document.createElement('ul');
-
-  for await (const voice of client.voices.list({ limit: 20 })) {
-    const li = document.createElement('li');
-    li.textContent = `${voice.name} (${voice.language})`;
-    ul.appendChild(li);
-  }
-
-  document.body.appendChild(ul);
-}
-
-// =============================================================================
 // Exports
 // =============================================================================
 
-export {
-  createClient,
-  ttsPlayAudio,
-  ttsDownloadFile,
-  ttsWebsocketStreamAudio,
-  ttsWebsocketLowLatency,
-  voicesListToDOM,
-};
+export { createClient, ttsPlayAudio, ttsDownloadFile, ttsWebsocketStreamAudio, ttsWebsocketLowLatency };

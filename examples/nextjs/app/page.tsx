@@ -25,7 +25,7 @@ function BatchCartesiaTTSExample() {
     try {
       const client = new Cartesia({ token: await getToken() });
       const response = await client.tts.generate({
-        model_id: 'sonic-3',
+        model_id: 'sonic-latest',
         transcript: 'Hello! This audio was generated in one batch and then played.',
         voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
         output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: SAMPLE_RATE },
@@ -66,7 +66,7 @@ function StreamingCartesiaTTSExample() {
     try {
       const client = new Cartesia({ token: await getToken() });
       const response = await client.tts.generate({
-        model_id: 'sonic-3',
+        model_id: 'sonic-latest',
         transcript: 'Hello! This audio is being streamed and played as chunks arrive.',
         voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
         output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: SAMPLE_RATE },
