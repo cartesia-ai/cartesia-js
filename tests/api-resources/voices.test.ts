@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import Cartesia from '@cartesia/cartesia-js';
+import Cartesia, { toFile } from '@cartesia/cartesia-js';
 
 const client = new Cartesia({
   token: 'My Token',
@@ -9,8 +9,8 @@ const client = new Cartesia({
 
 describe('resource voices', () => {
   // Mock server tests are disabled
-  test.skip('update: only required params', async () => {
-    const responsePromise = client.voices.update('id', { description: 'description', name: 'name' });
+  test.skip('update', async () => {
+    const responsePromise = client.voices.update('id', {});
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -18,15 +18,6 @@ describe('resource voices', () => {
     const dataAndResponse = await responsePromise.withResponse();
     expect(dataAndResponse.data).toBe(response);
     expect(dataAndResponse.response).toBe(rawResponse);
-  });
-
-  // Mock server tests are disabled
-  test.skip('update: required and optional params', async () => {
-    const response = await client.voices.update('id', {
-      description: 'description',
-      name: 'name',
-      gender: 'masculine',
-    });
   });
 
   // Mock server tests are disabled
@@ -73,8 +64,12 @@ describe('resource voices', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('clone', async () => {
-    const responsePromise = client.voices.clone({});
+  test.skip('clone: only required params', async () => {
+    const responsePromise = client.voices.clone({
+      clip: await toFile(Buffer.from('Example data'), 'README.md'),
+      language: 'en',
+      name: 'name',
+    });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -82,6 +77,17 @@ describe('resource voices', () => {
     const dataAndResponse = await responsePromise.withResponse();
     expect(dataAndResponse.data).toBe(response);
     expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('clone: required and optional params', async () => {
+    const response = await client.voices.clone({
+      clip: await toFile(Buffer.from('Example data'), 'README.md'),
+      language: 'en',
+      name: 'name',
+      base_voice_id: 'base_voice_id',
+      description: 'description',
+    });
   });
 
   // Mock server tests are disabled
