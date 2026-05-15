@@ -17,10 +17,7 @@ export class Voices extends APIResource {
    *
    * @example
    * ```ts
-   * const voice = await client.voices.update('id', {
-   *   description: 'description',
-   *   name: 'name',
-   * });
+   * const voice = await client.voices.update('id');
    * ```
    */
   update(id: string, body: VoiceUpdateParams, options?: RequestOptions): APIPromise<Voice> {
@@ -67,7 +64,11 @@ export class Voices extends APIResource {
    *
    * @example
    * ```ts
-   * const voiceMetadata = await client.voices.clone();
+   * const voiceMetadata = await client.voices.clone({
+   *   clip: fs.createReadStream('path/to/file'),
+   *   language: 'en',
+   *   name: 'name',
+   * });
    * ```
    */
   clone(body: VoiceCloneParams, options?: RequestOptions): APIPromise<VoiceMetadata> {
@@ -259,14 +260,14 @@ export interface VoiceUpdateParams {
   /**
    * The description of the voice.
    */
-  description: string;
+  description?: string;
+
+  gender?: GenderPresentation | null;
 
   /**
    * The name of the voice.
    */
-  name: string;
-
-  gender?: GenderPresentation | null;
+  name?: string;
 }
 
 export interface VoiceListParams extends CursorIDPageParams {
@@ -297,27 +298,27 @@ export interface VoiceListParams extends CursorIDPageParams {
 }
 
 export interface VoiceCloneParams {
+  clip: Uploadable;
+
+  /**
+   * The language of the voice.
+   */
+  language: SupportedLanguage;
+
+  /**
+   * The name of the voice.
+   */
+  name: string;
+
   /**
    * Optional base voice ID that the cloned voice is derived from.
    */
   base_voice_id?: string | null;
 
-  clip?: Uploadable;
-
   /**
    * A description for the voice.
    */
   description?: string | null;
-
-  /**
-   * The language of the voice.
-   */
-  language?: SupportedLanguage;
-
-  /**
-   * The name of the voice.
-   */
-  name?: string;
 }
 
 export interface VoiceGetParams {
