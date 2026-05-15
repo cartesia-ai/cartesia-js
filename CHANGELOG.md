@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.1.0-b5 (2026-05-15)
+
+Full Changelog: [v3.1.0-b4...v3.1.0-b5](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b4...v3.1.0-b5)
+
+### Bug Fixes
+
+* make ws optional and fix examples ([4c378a6](https://github.com/cartesia-ai/cartesia-js/commit/4c378a60f5b286f512691f6b15749a274b5fc676))
+* **voices:** correct required properties ([04ed6c3](https://github.com/cartesia-ai/cartesia-js/commit/04ed6c35a6c8d01f4c04c0ec35808b1030632516))
+
 ## 3.1.0-b4 (2026-05-14)
 
 Full Changelog: [v3.1.0-b3...v3.1.0-b4](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b3...v3.1.0-b4)
