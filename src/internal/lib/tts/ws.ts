@@ -7,6 +7,7 @@ import { buildURL, TTSEmitter } from '../../../resources/tts/internal-base';
 import type * as VoicesAPI from '../../../resources/voices';
 import { fromBase64, uuid4 } from '../../utils';
 import { WebSocketTimeoutError } from './websocket-timeout-error';
+import { CartesiaError } from '../../../error';
 
 let _ws: typeof import('ws') | undefined;
 try {
@@ -234,7 +235,7 @@ export class TTSWSContext {
             return;
           }
           if (event.type === 'error') {
-            throw new Error(JSON.stringify(event));
+            throw new CartesiaError(event.message || event.title || 'Unknown server error');
           }
         } else {
           // Wait for the next event to be pushed into the queue.
@@ -365,7 +366,7 @@ export class TTSWS extends TTSEmitter {
 
       this.socket = new WebSocket(url);
     } else {
-      throw new Error(
+      throw new CartesiaError(
         'The "ws" peer dependency is required for WebSocket support in Node.js. Install it with: npm install ws',
       );
     }
@@ -528,7 +529,7 @@ export class TTSWS extends TTSEmitter {
   /** Register a per-context queue. Called by context(). */
   _registerContext(contextId: string): void {
     if (this._contextQueues.has(contextId)) {
-      throw new Error(`Context ${contextId} is already registered`);
+      throw new CartesiaError(`Context ${contextId} is already registered`);
     }
     this._contextQueues.set(contextId, { queue: [], resolve: null });
   }

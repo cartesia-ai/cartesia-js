@@ -1,9 +1,19 @@
-import WebSocket from 'ws';
+import type * as WS from 'ws';
 import { Cartesia } from '../client';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
 import { Readable } from 'stream';
 import type { RequestOptions } from '../internal/request-options';
+import { CartesiaError } from '../error';
+import { uuid4 } from '../internal/utils/uuid';
+
+let _ws: typeof import('ws') | undefined;
+try {
+  _ws = require('ws');
+} catch {
+  // Optional — in browsers, we use the native WebSocket API instead.
+  _ws = undefined;
+}
 
 // Define compatible interfaces to match the old SDK types for WebSocket
 export interface BackCompatWebSocketOptions {
@@ -56,15 +66,6 @@ export interface BackCompatTtsRequest {
   duration?: number;
   speed?: 'slow' | 'normal' | 'fast';
   pronunciationDictId?: string;
-}
-
-// Helper for generating UUIDs. Not cryptographically secure.
-function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    var r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
 }
 
 class AudioSource {
@@ -145,7 +146,7 @@ class AudioSource {
 export class WebSocketWrapper {
   private client: Cartesia;
   private config: BackCompatWebSocketOptions;
-  private socket: WebSocket | null = null;
+  private socket: WS.WebSocket | null = null;
   private sources: Map<string, AudioSource> = new Map();
   // Fallback source for messages without context_id or if we just want to capture everything (legacy behavior?)
   // The original test didn't use context_id explicitly in send() but expected a response source.
@@ -158,6 +159,12 @@ export class WebSocketWrapper {
   }
 
   async connect() {
+    if (_ws === undefined) {
+      throw new CartesiaError(
+        'The "ws" peer dependency is required for WebSocket support in Node.js. If you are using CartesiaClient from a browser, switch to `import Cartesia from "@carteisa/cartesia-js"` for the browser-compatible client.',
+      );
+    }
+
     const baseURL = this.client.baseURL;
     // Construct WebSocket URL
     // baseURL is like https://api.cartesia.ai
@@ -179,7 +186,7 @@ export class WebSocketWrapper {
       headers['Authorization'] = `Bearer ${this.client.apiKey}`;
     }
 
-    const socket = new WebSocket(url.toString(), {
+    const socket = new _ws.WebSocket(url.toString(), {
       headers,
     });
     this.socket = socket;
@@ -209,7 +216,7 @@ export class WebSocketWrapper {
     });
   }
 
-  private handleMessage(data: WebSocket.Data) {
+  private handleMessage(data: WS.Data) {
     try {
       const str = data.toString();
       const msg = JSON.parse(str);
@@ -238,11 +245,11 @@ export class WebSocketWrapper {
 
   async send(request: BackCompatWebSocketTtsRequest) {
     if (!this.socket) {
-      throw new Error('WebSocket not connected');
+      throw new CartesiaError('WebSocket not connected');
     }
 
     // Ensure request has a context_id so we can route the response
-    const contextId = request.contextId || uuidv4();
+    const contextId = request.contextId || uuid4();
 
     const source = new AudioSource();
     this.sources.set(contextId, source);
@@ -386,7 +393,7 @@ export class TTSWrapper {
 
     const response = await wrap(this.client.tts.generate(params, requestOptions));
     if (!response.body) {
-      throw new Error('Response body is null');
+      throw new CartesiaError('Response body is null');
     }
 
     // @ts-ignore
@@ -429,7 +436,7 @@ export class TTSWrapper {
 
     const response = await wrap(this.client.tts.generate(params, options));
     if (!response.body) {
-      throw new Error('Response body is null');
+      throw new CartesiaError('Response body is null');
     }
 
     // @ts-ignore

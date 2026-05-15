@@ -144,9 +144,6 @@ export default function Home() {
         <BatchCartesiaTTSExample />
         <StreamingCartesiaTTSExample />
       </div>
-      <p style={{ marginTop: '2rem' }}>
-        <a href="/websocket">WebSocket streaming example →</a>
-      </p>
     </main>
   );
 }

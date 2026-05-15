@@ -151,18 +151,20 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
 
     for await (const event of ctx.receive()) {
       // Log every response, but redact audio data to avoid swamping the console.
-      const loggable = { ...(event as any) };
-      if (loggable.data) loggable.data = '[...]';
-      if (loggable.audio) loggable.audio = '[...]';
+      const loggable: Record<string, unknown> = { ...event };
+      if (loggable['data']) loggable['data'] = '[...]';
+      if (loggable['audio']) loggable['audio'] = '[...]';
       console.log('Event:', JSON.stringify(loggable));
 
       if (event.type === 'chunk' && event.audio) {
-        const flushId = (event as any).flush_id ?? 0;
-        if (!files.has(flushId)) {
+        const flushId = event.flush_id ?? 0;
+        let file = files.get(flushId);
+        if (file === undefined) {
           const name = `tts_flush_${flushId}_${ts}.pcm`;
-          files.set(flushId, fs.createWriteStream(name));
+          file = fs.createWriteStream(name);
+          files.set(flushId, file);
         }
-        files.get(flushId)!.write(event.audio);
+        file.write(event.audio);
       } else if (event.type === 'error') {
         throw new Error(`${event.title}: ${event.message}`);
       }
@@ -170,7 +172,7 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
 
     console.log('\nFinished. Play the generated audio files with:');
     for (const [flushId, f] of files) {
-      console.log(`  Flush ID ${flushId}: ffplay -f f32le -ar 44100 ${(f as any).path}`);
+      console.log(`  Flush ID ${flushId}: ffplay -f f32le -ar 44100 ${f.path}`);
     }
   } finally {
     for (const f of files.values()) f.end();
@@ -356,7 +358,7 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
       if (event.type === 'chunk') {
         if (event.audio) file.write(event.audio);
       } else if (event.type === 'timestamps') {
-        const wt = (event as any).word_timestamps;
+        const wt = event.word_timestamps;
         if (wt) {
           console.log(`Words: ${wt.words}, Starts: ${wt.start}, Ends: ${wt.end}`);
         }
@@ -449,42 +451,90 @@ async function ttsSSEWithTimestamps(client: Cartesia): Promise<void> {
 // Voices API
 // =============================================================================
 
-/** List voices with pagination. */
+/** List voices with pagination via a `loadMore()` function (e.g. for infinite scroll). */
 async function voicesList(client: Cartesia): Promise<void> {
-  for await (const voice of client.voices.list({ limit: 10 })) {
-    console.log(voice.name);
+  console.log('fetching first page...');
+  let page = await client.voices.list();
+  const voices = [...page.data];
+
+  async function loadMore(): Promise<void> {
+    if (page.hasNextPage()) {
+      page = await page.getNextPage();
+      voices.push(...page.data);
+    }
   }
+
+  // loaded 1 page
+  console.log('loaded', voices.length);
+
+  console.log('fetching second page...');
+  await loadMore();
+  // loaded 2 pages
+  console.log('loaded', voices.length);
+
+  console.log('fetching third page...');
+  await loadMore();
+  // loaded 3 pages
+  console.log('loaded', voices.length);
+
+  console.log([voices[0], '...']);
 }
 
 /** Get a specific voice. */
-async function voicesGet(client: Cartesia): Promise<void> {
-  const voice = await client.voices.get('6ccbfb76-1fc6-48f7-b71d-91ac6298247b');
-  console.log(voice.name);
+async function voicesGet(client: Cartesia, args: string[]): Promise<void> {
+  const voiceId = args[0] ?? '6ccbfb76-1fc6-48f7-b71d-91ac6298247b';
+  const voice = await client.voices.get(voiceId);
+
+  if ('embedding' in voice) {
+    console.log({ ...voice, embedding: '[...]' });
+  } else {
+    console.log(voice);
+  }
 }
 
 /** Clone a voice from an audio clip. */
-async function voicesClone(client: Cartesia): Promise<void> {
-  const clip = fs.createReadStream('sample.wav');
+async function voicesClone(client: Cartesia, args: string[]): Promise<void> {
+  const [clipPath, language, ...nameParts] = args;
+  if (!clipPath || !language) {
+    console.error('Usage: voicesClone <path to audio file> <language> <name>');
+    console.error(
+      'See https://docs.cartesia.ai/build-with-cartesia/tts-models/latest for supported languages: en, fr, de, es, ...',
+    );
+    process.exit(1);
+  }
+  const clip = fs.createReadStream(clipPath);
   const voice = await client.voices.clone({
     clip,
-    name: 'My Voice',
-    description: 'A custom voice',
-    language: 'en',
+    language,
+    name: nameParts.length > 0 ? nameParts.join(' ') : 'My Voice',
   });
   console.log('Cloned voice:', voice.id);
 }
 
 /** Update a voice. */
-async function voicesUpdate(client: Cartesia): Promise<void> {
-  await client.voices.update('voice-id', {
-    name: 'Updated Name',
-    description: 'Updated description',
-  });
+async function voicesUpdate(client: Cartesia, args: string[]): Promise<void> {
+  const [voiceId, ...nameParts] = args;
+  if (!voiceId || nameParts.length === 0) {
+    console.error('Usage: voicesUpdate <voiceId> <name>');
+    process.exit(1);
+  }
+  const voice = await client.voices.update(voiceId, { name: nameParts.join(' ') });
+
+  if ('embedding' in voice) {
+    console.log({ ...voice, embedding: '[...]' });
+  } else {
+    console.log(voice);
+  }
 }
 
 /** Delete a voice. */
-async function voicesDelete(client: Cartesia): Promise<void> {
-  await client.voices.delete('voice-id');
+async function voicesDelete(client: Cartesia, args: string[]): Promise<void> {
+  const [voiceId] = args;
+  if (!voiceId) {
+    console.error('Usage: voicesDelete <voiceId>');
+    process.exit(1);
+  }
+  await client.voices.delete(voiceId);
 }
 
 // =============================================================================
@@ -492,8 +542,13 @@ async function voicesDelete(client: Cartesia): Promise<void> {
 // =============================================================================
 
 /** Transcribe audio with word timestamps. */
-async function sttTranscribe(client: Cartesia): Promise<void> {
-  const file = fs.createReadStream('audio.wav');
+async function sttTranscribe(client: Cartesia, args: string[]): Promise<void> {
+  const [filePath] = args;
+  if (!filePath) {
+    console.error('Usage: sttTranscribe <filePath>');
+    process.exit(1);
+  }
+  const file = fs.createReadStream(filePath);
   const response = await client.stt.transcribe({
     file,
     model: 'ink-whisper',
@@ -519,7 +574,7 @@ async function errorHandling(client: Cartesia): Promise<void> {
       model_id: 'sonic-3',
       transcript: 'Hello, world!',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-      output_format: { container: 'wav', encoding: 'pcm_f32le', sample_rate: 44100 },
+      output_format: null as any, // bad request
       language: 'en',
     });
   } catch (e) {
@@ -547,7 +602,7 @@ function timestamp(): string {
   return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 }
 
-const examples: Record<string, (client: Cartesia) => Promise<void>> = {
+const examples: Record<string, (client: Cartesia, args: string[]) => Promise<void>> = {
   ttsGenerateToFile,
   ttsWebsocketBasic,
   ttsWebsocketContinuations,
@@ -568,22 +623,29 @@ const examples: Record<string, (client: Cartesia) => Promise<void>> = {
 };
 
 async function main() {
-  const name = process.argv[2];
-
-  if (!name || !(name in examples)) {
-    console.log('Usage: npx ts-node examples/node_examples.ts <functionName>');
-    console.log(`Available: ${Object.keys(examples).join(', ')}`);
-    process.exit(1);
-  }
-
   if (!process.env['CARTESIA_API_KEY']) {
     console.error('Error: CARTESIA_API_KEY environment variable not set.');
     process.exit(1);
   }
 
+  const name = process.argv[2];
+  if (!name) {
+    console.log('Usage: npx ts-node examples/node_examples.ts <functionName>');
+    console.log(`Available: ${Object.keys(examples).join(', ')}`);
+    process.exit(1);
+  }
+
+  const exampleFunc = examples[name];
+
+  if (exampleFunc === undefined) {
+    console.log(`Unknown function: ${name}`);
+    console.log(`Available: ${Object.keys(examples).join(', ')}`);
+    process.exit(1);
+  }
+
   const client = createClient();
   try {
-    await examples[name]!(client);
+    await exampleFunc(client, process.argv.slice(3));
   } catch (e) {
     console.error(`Error: ${e}`);
     process.exit(1);

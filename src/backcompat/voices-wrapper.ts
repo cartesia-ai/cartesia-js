@@ -4,7 +4,6 @@ import {
   type VoiceCloneParams,
   type SupportedLanguage,
   type GenderPresentation,
-  type VoiceUpdateParams,
   type VoiceLocalizeParams,
   type VoiceListParams,
 } from '../resources/voices';
@@ -45,15 +44,15 @@ export interface BackCompatVoiceListOptions {
 export interface BackCompatCloneVoiceRequest {
   name: string;
   description?: string;
-  language: string;
-  mode: 'similarity' | 'stability';
+  language: Cartesia.Voices.SupportedLanguage;
+  mode?: 'similarity' | 'stability';
   enhance?: boolean;
   baseVoiceId?: string;
 }
 
 export interface BackCompatUpdateVoiceRequest {
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
 }
 
 export interface BackCompatLocalizeVoiceRequest {
@@ -128,11 +127,6 @@ export class VoicesWrapper {
     request: BackCompatUpdateVoiceRequest,
     requestOptions?: BackCompatRequestOptions,
   ): Promise<BackCompatVoice> {
-    const params: VoiceUpdateParams = {
-      name: request.name,
-      description: request.description,
-    };
-
     const options: InternalRequestOptions = {};
     if (requestOptions) {
       if (requestOptions.timeoutInSeconds) {
@@ -145,7 +139,7 @@ export class VoicesWrapper {
       options.signal = requestOptions.abortSignal;
     }
 
-    return await wrap(this.client.voices.update(id, params, options));
+    return await wrap(this.client.voices.update(id, request, options));
   }
 
   /** @deprecated Use {@link Cartesia.voices.localize} instead. */
