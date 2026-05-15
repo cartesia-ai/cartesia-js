@@ -29,7 +29,7 @@ function createClient(): Cartesia {
 /** Use generate() to get a wav Response and write it to a file. */
 async function ttsGenerateToFile(client: Cartesia): Promise<void> {
   const response = await client.tts.generate({
-    model_id: 'sonic-3',
+    model_id: 'sonic-latest',
     transcript: 'Hello, world!',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
     output_format: { container: 'wav', encoding: 'pcm_f32le', sample_rate: 44100 },
@@ -56,7 +56,7 @@ async function ttsWebsocketBasic(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
@@ -91,7 +91,7 @@ async function ttsWebsocketContinuations(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
@@ -127,7 +127,7 @@ async function ttsWebsocketFlushing(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
@@ -190,7 +190,7 @@ async function ttsWebsocketEmotion(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
@@ -233,7 +233,7 @@ async function ttsWebsocketSpeed(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
@@ -273,14 +273,14 @@ async function ttsWebsocketConcurrentContexts(client: Cartesia): Promise<void> {
 
   try {
     const ctx1 = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
     });
 
     const ctx2 = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
@@ -342,7 +342,7 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
 
   try {
     const ctx = ws.context({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
       language: 'en',
@@ -382,7 +382,7 @@ async function ttsWebsocketResponseHandling(client: Cartesia): Promise<void> {
 /** SSE streaming. */
 async function ttsSSEBasic(client: Cartesia): Promise<void> {
   const stream = await client.tts.generateSSE({
-    model_id: 'sonic-3',
+    model_id: 'sonic-latest',
     transcript: 'Hello, world!',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
     output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
@@ -413,7 +413,7 @@ async function ttsSSEBasic(client: Cartesia): Promise<void> {
 /** SSE streaming with timestamps. */
 async function ttsSSEWithTimestamps(client: Cartesia): Promise<void> {
   const stream = await client.tts.generateSSE({
-    model_id: 'sonic-3',
+    model_id: 'sonic-latest',
     transcript: 'Hello, world!',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
     output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
@@ -451,31 +451,25 @@ async function ttsSSEWithTimestamps(client: Cartesia): Promise<void> {
 // Voices API
 // =============================================================================
 
-/** List voices with pagination via a `loadMore()` function (e.g. for infinite scroll). */
+/** List voices with pagination via a `loadMore()` function. */
 async function voicesList(client: Cartesia): Promise<void> {
-  console.log('fetching first page...');
+  console.log('loading page 1...');
+
   let page = await client.voices.list();
   const voices = [...page.data];
 
-  async function loadMore(): Promise<void> {
-    if (page.hasNextPage()) {
-      page = await page.getNextPage();
-      voices.push(...page.data);
-    }
+  console.log('loaded', voices.length);
+
+  for (let i = 2; i < 4; i++) {
+    if (!page.hasNextPage()) break;
+
+    console.log(`loading page ${i}...`);
+
+    page = await page.getNextPage();
+    voices.push(...page.data);
+
+    console.log('loaded', voices.length);
   }
-
-  // loaded 1 page
-  console.log('loaded', voices.length);
-
-  console.log('fetching second page...');
-  await loadMore();
-  // loaded 2 pages
-  console.log('loaded', voices.length);
-
-  console.log('fetching third page...');
-  await loadMore();
-  // loaded 3 pages
-  console.log('loaded', voices.length);
 
   console.log([voices[0], '...']);
 }
@@ -486,7 +480,7 @@ async function voicesGet(client: Cartesia, args: string[]): Promise<void> {
   const voice = await client.voices.get(voiceId);
 
   if ('embedding' in voice) {
-    console.log({ ...voice, embedding: '[...]' });
+    console.log({ ...voice, embedding: ['...'] });
   } else {
     console.log(voice);
   }
@@ -571,7 +565,7 @@ async function sttTranscribe(client: Cartesia, args: string[]): Promise<void> {
 async function errorHandling(client: Cartesia): Promise<void> {
   try {
     await client.tts.generate({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       transcript: 'Hello, world!',
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: null as any, // bad request

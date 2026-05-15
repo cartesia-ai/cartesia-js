@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0-b6 (2026-05-15)
+
+Full Changelog: [v3.1.0-b5...v3.1.0-b6](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b5...v3.1.0-b6)
+
+### Documentation
+
+* **tts:** change default model to sonic-latest ([1e1d3cc](https://github.com/cartesia-ai/cartesia-js/commit/1e1d3ccf59dcf60b3e98691e8f60557a52ba2528))
+
 ## 3.1.0-b5 (2026-05-15)
 
 Full Changelog: [v3.1.0-b4...v3.1.0-b5](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b4...v3.1.0-b5)

@@ -20,7 +20,7 @@ import { WebSocket } from 'ws';
 // ---------------------------------------------------------------------------
 
 const CONTEXT_OPTIONS = {
-  model_id: 'sonic-3',
+  model_id: 'sonic-latest',
   voice: { id: 'test-voice', mode: 'id' as const },
   output_format: { container: 'raw' as const, encoding: 'pcm_f32le' as const, sample_rate: 44100 as const },
 };
@@ -267,7 +267,7 @@ describe('WebSocket multi-context routing', () => {
     // We just need to start the generator to trigger the unregister — we don't
     // need to actually consume it (that would require a live connection).
     const gen = ctx.generate({
-      model_id: 'sonic-3',
+      model_id: 'sonic-latest',
       voice: { mode: 'id', id: 'test-voice' },
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 as const },
       transcript: 'test',
