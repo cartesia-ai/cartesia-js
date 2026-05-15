@@ -4,6 +4,7 @@ import { type RequestOptions as InternalRequestOptions } from '../internal/reque
 import { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
+import { CartesiaError } from '../error';
 
 export interface BackCompatVoiceChangerBytesRequest {
   voiceId: string;
@@ -67,7 +68,7 @@ export class VoiceChangerWrapper {
     );
 
     if (!response.body) {
-      throw new Error('Response body is null');
+      throw new CartesiaError('Response body is null');
     }
 
     // @ts-ignore

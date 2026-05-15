@@ -1,18 +1,20 @@
 {
   "name": "cartesia-nextjs-example",
-  "private": true,
+  "license": "Apache-2.0",
   "scripts": {
+    "predev": "npm --prefix ../.. run build",
+    "prebuild": "npm --prefix ../.. run build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
     "@cartesia/cartesia-js": "file:../..",
-    "next": "^15",
-    "react": "^19",
-    "react-dom": "^19"
+    "next": "16.x",
+    "react": "19.x",
+    "react-dom": "19.x"
   },
   "devDependencies": {
-    "@types/react": "19.2.14"
+    "@types/react": "19.x"
   }
 }
