@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.1.0-b8 (2026-05-18)
+
+Full Changelog: [v3.1.0-b7...v3.1.0-b8](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b7...v3.1.0-b8)
+
+### Features
+
+* **api:** add next_page to all paginated endpoints ([9eef45c](https://github.com/cartesia-ai/cartesia-js/commit/9eef45c2dc53f32c91853639b616b6250ad31d80))
+
+
+### Bug Fixes
+
+* **api:** undo next_page deprecation ([7a04967](https://github.com/cartesia-ai/cartesia-js/commit/7a04967236f85babf90065ee01fbe1c00825fa1e))
+
+
+### Documentation
+
+* **metrics:** remove comment about next page function ([2248c1f](https://github.com/cartesia-ai/cartesia-js/commit/2248c1fd4b7449e5f45c5997f6eaf15f2d987912))
+
 ## 3.1.0-b7 (2026-05-18)
 
 Full Changelog: [v3.1.0-b6...v3.1.0-b7](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b6...v3.1.0-b7)
