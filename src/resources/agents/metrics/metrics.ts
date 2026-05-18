@@ -115,8 +115,8 @@ export interface MetricListResponse {
   has_more: boolean;
 
   /**
-   * The ID of the last Metric in the current response as a cursor for the next page
-   * of results.
+   * @deprecated Use the last ID from `data` instead. An ID that can be passed as
+   * `starting_after` to get the next page of metrics.
    */
   next_page?: string | null;
 }
