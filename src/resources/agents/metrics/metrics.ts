@@ -109,14 +109,13 @@ export interface MetricListResponse {
   data: Array<Metric>;
 
   /**
-   * Whether there are more metrics to fetch (using `starting_after=id`, where id is
-   * the ID of the last Metric in the current response).
+   * Whether there are more pages of metrics.
    */
   has_more: boolean;
 
   /**
-   * An ID that can be passed as `starting_after` to get the next page of metrics.
-   * Used by the next page function.
+   * An ID that can be passed as `starting_after` or `ending_before` to get the next
+   * page of metrics. Used by the next page function.
    */
   next_page?: string | null;
 }
