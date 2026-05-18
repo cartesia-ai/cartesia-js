@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.1.0-b7 (2026-05-18)
+
+Full Changelog: [v3.1.0-b6...v3.1.0-b7](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b6...v3.1.0-b7)
+
+### Features
+
+* **api:** deprecate next_page ([367ce0a](https://github.com/cartesia-ai/cartesia-js/commit/367ce0a4ee765bc8e7c08b662785062bfe4629d5))
+* **voices:** add voice country ([cdb80f8](https://github.com/cartesia-ai/cartesia-js/commit/cdb80f84dea357fcb3756872f961cc910353c4db))
+
+
+### Bug Fixes
+
+* **tts:** wav output format type ([083d9ec](https://github.com/cartesia-ai/cartesia-js/commit/083d9ec6fcd47cead669bcf4c2d4bae1694b5a91))
+
 ## 3.1.0-b6 (2026-05-15)
 
 Full Changelog: [v3.1.0-b5...v3.1.0-b6](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b5...v3.1.0-b6)
