@@ -115,7 +115,7 @@ export interface MetricListResponse {
 
   /**
    * An ID that can be passed as `starting_after` or `ending_before` to get the next
-   * page of metrics. Used by the next page function.
+   * page of metrics.
    */
   next_page?: string | null;
 }
