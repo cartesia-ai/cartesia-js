@@ -1,7 +1,6 @@
 import fs from 'fs';
 import type { ResponseLike } from '@cartesia/cartesia-js/internal/to-file';
 import { toFile } from '@cartesia/cartesia-js/core/uploads';
-import { File } from 'node:buffer';
 
 class MyClass {
   name: string = 'foo';
