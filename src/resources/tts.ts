@@ -806,8 +806,12 @@ export namespace TTSGenerateParams {
     container?: 'raw';
   }
 
-  export interface WavOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
-    container?: 'wav';
+  export interface WavOutputFormat {
+    container: 'wav';
+
+    encoding: TTSAPI.RawEncoding;
+
+    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
   }
 
   export interface MP3OutputFormat {
@@ -931,8 +935,12 @@ export namespace TTSInfillParams {
     container?: 'raw';
   }
 
-  export interface WavOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
-    container?: 'wav';
+  export interface WavOutputFormat {
+    container: 'wav';
+
+    encoding: TTSAPI.RawEncoding;
+
+    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
   }
 
   export interface MP3OutputFormat {

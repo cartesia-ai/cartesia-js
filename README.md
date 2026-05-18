@@ -29,7 +29,7 @@ const client = new Cartesia({
 const response = await client.tts.generate({
   model_id: 'sonic-3',
   output_format: {
-    container: 'raw',
+    container: 'wav',
     encoding: 'pcm_f32le',
     sample_rate: 44100,
   },
