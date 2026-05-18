@@ -204,6 +204,12 @@ export interface Voice {
   name: string;
 
   /**
+   * The country associated with the voice, as an ISO 3166-1 alpha-2 code when
+   * available (e.g. `US`, `GB`, `FR`).
+   */
+  country?: string | null;
+
+  /**
    * The gender of the voice, if specified.
    */
   gender?: GenderPresentation | null;
