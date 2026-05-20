@@ -120,7 +120,7 @@ export type GenderPresentation = 'masculine' | 'feminine' | 'gender_neutral';
 
 /**
  * The language that the given voice should speak the transcript in. For valid
- * options, see [Models](/build-with-cartesia/tts-models).
+ * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
  */
 export type SupportedLanguage =
   | 'en'
@@ -195,7 +195,7 @@ export interface Voice {
 
   /**
    * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](/build-with-cartesia/tts-models).
+   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
    */
   language: SupportedLanguage;
 
@@ -248,7 +248,7 @@ export interface VoiceMetadata {
 
   /**
    * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](/build-with-cartesia/tts-models).
+   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
    */
   language: SupportedLanguage;
 

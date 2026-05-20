@@ -23,7 +23,7 @@ export class STT extends APIResource {
    * audio processed.
    *
    * <Note>
-   * For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](/api-reference/stt/migrate-from-open-ai).
+   * For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](https://docs.cartesia.ai/api-reference/stt/migrate-from-open-ai).
    * </Note>
    */
   transcribe(params: STTTranscribeParams, options?: RequestOptions): APIPromise<STTTranscribeResponse> {
