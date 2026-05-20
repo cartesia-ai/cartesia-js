@@ -95,7 +95,7 @@ export class TTS extends APIResource {
  * `sonic-3` and have no effect on earlier models.
  *
  * See
- * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+ * [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
  * for a guide on this option.
  */
 export interface GenerationConfig {
@@ -184,7 +184,8 @@ export interface GenerationRequest {
 
   /**
    * The ID of the model to use for the generation. See
-   * [Models](/build-with-cartesia/tts-models) for available models.
+   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
+   * models.
    */
   model_id: string;
 
@@ -227,14 +228,14 @@ export interface GenerationRequest {
    * `sonic-3` and have no effect on earlier models.
    *
    * See
-   * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+   * [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
    * for a guide on this option.
    */
   generation_config?: GenerationConfig;
 
   /**
    * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](/build-with-cartesia/tts-models).
+   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
    */
   language?: VoicesAPI.SupportedLanguage;
 
@@ -754,7 +755,8 @@ export interface WordTimestamps {
 export interface TTSGenerateParams {
   /**
    * The ID of the model to use for the generation. See
-   * [Models](/build-with-cartesia/tts-models) for available models.
+   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
+   * models.
    */
   model_id: string;
 
@@ -772,14 +774,14 @@ export interface TTSGenerateParams {
    * `sonic-3` and have no effect on earlier models.
    *
    * See
-   * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+   * [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
    * for a guide on this option.
    */
   generation_config?: GenerationConfig;
 
   /**
    * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](/build-with-cartesia/tts-models).
+   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
    */
   language?: VoicesAPI.SupportedLanguage | null;
 
@@ -826,7 +828,8 @@ export namespace TTSGenerateParams {
 export interface TTSGenerateSSEParams {
   /**
    * The ID of the model to use for the generation. See
-   * [Models](/build-with-cartesia/tts-models) for available models.
+   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
+   * models.
    */
   model_id: string;
 
@@ -860,14 +863,14 @@ export interface TTSGenerateSSEParams {
    * `sonic-3` and have no effect on earlier models.
    *
    * See
-   * [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+   * [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
    * for a guide on this option.
    */
   generation_config?: GenerationConfig;
 
   /**
    * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](/build-with-cartesia/tts-models).
+   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
    */
   language?: VoicesAPI.SupportedLanguage;
 
