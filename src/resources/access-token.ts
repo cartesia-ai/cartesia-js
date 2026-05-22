@@ -43,7 +43,8 @@ export namespace AccessTokenCreateParams {
   export interface Grants {
     /**
      * The `agent` grant allows the token to be used to access the Agent websocket
-     * calling [endpoint](/line/integrations/web-calls#connection).
+     * calling
+     * [endpoint](https://docs.cartesia.ai/line/integrations/web-calls#connection).
      */
     agent?: boolean | null;
 
