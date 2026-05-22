@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.1.0 (2026-05-22)
+
+Full Changelog: [v3.1.0-b8...v3.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b8...v3.1.0)
+
+### Bug Fixes
+
+* **typescript:** upgrade tsc-multi so that it works with Node 26 ([39808c9](https://github.com/cartesia-ai/cartesia-js/commit/39808c93ffee6df7f064d157fa44879816ab4d2c))
+
+
+### Chores
+
+* **tests:** remove redundant File import ([ec6d436](https://github.com/cartesia-ai/cartesia-js/commit/ec6d4362dd0bf77a8d23d61949960f7faa1f32e2))
+
+
+### Documentation
+
+* **api:** fix doc links ([b103fdd](https://github.com/cartesia-ai/cartesia-js/commit/b103fdde6a3968615d97c4c35b7d2f41b09a8f15))
+
 ## 3.1.0-b8 (2026-05-18)
 
 Full Changelog: [v3.1.0-b7...v3.1.0-b8](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b7...v3.1.0-b8)
