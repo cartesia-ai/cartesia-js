@@ -1,12 +1,10 @@
-# This workflow is triggered when a GitHub release is created.
-# It can also be run manually to re-publish to NPM in case it failed for some reason.
-# You can run this workflow by navigating to https://www.github.com/cartesia-ai/cartesia-js/actions/workflows/publish-npm.yml
-name: Publish NPM
+# DISABLED: superseded by publish-npm-trusted.yml, which uses npm Trusted
+# Publishers (OIDC) instead of a long-lived NPM_TOKEN. Kept on disk as a
+# fallback in case we need to revert. To re-enable, restore the `release`
+# trigger below
+name: Publish NPM (disabled)
 on:
   workflow_dispatch:
-
-  release:
-    types: [published]
 
 jobs:
   publish:
