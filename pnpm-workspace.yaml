@@ -1,5 +1,6 @@
-onlyBuiltDependencies:
-  - '@swc/core'
-minimumReleaseAge: 1440
+allowBuilds:
+  '@swc/core': true
 minimumReleaseAgeExclude:
   - '@cartesia/cartesia-js'
+overrides:
+  minimatch: ^9.0.5

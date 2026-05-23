@@ -8,7 +8,7 @@
   "type": "commonjs",
   "repository": "github:cartesia-ai/cartesia-js",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@10.30.1",
+  "packageManager": "pnpm@11.2.2",
   "files": [
     "**/*"
   ],
@@ -61,11 +61,6 @@
   },
   "overrides": {
     "minimatch": "^9.0.5"
-  },
-  "pnpm": {
-    "overrides": {
-      "minimatch": "^9.0.5"
-    }
   },
   "resolutions": {
     "minimatch": "^9.0.5"
