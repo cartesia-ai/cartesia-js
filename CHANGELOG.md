@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.0 (2026-05-23)
+
+Full Changelog: [v3.1.0...v3.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0...v3.1.0)
+
 ## 3.1.0 (2026-05-22)
 
 Full Changelog: [v3.1.0-b8...v3.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0-b8...v3.1.0)
