@@ -80,4 +80,4 @@ jobs:
             TAG="latest"
           fi
 
-          npm publish --tag "$TAG" --access public
+          npm stage publish --tag "$TAG" --access public
