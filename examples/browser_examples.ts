@@ -26,6 +26,45 @@ function createClient(token: string): Cartesia {
   return new Cartesia({ token });
 }
 
+const AUDIO_CHUNK_MS = 100;
+const AUDIO_CONTEXT_ENCODING = 'pcm_f32le';
+
+function createFloat32AudioChunker(
+  sampleRate: number,
+  sendRaw: (chunk: ArrayBufferLike) => void,
+): { append(samples: Float32Array): void; flush(): void } {
+  const chunkSamples = Math.round((sampleRate * AUDIO_CHUNK_MS) / 1000);
+  let pending = new Float32Array(0);
+
+  const send = (samples: Float32Array) => {
+    const chunk = new Float32Array(samples.length);
+    chunk.set(samples);
+    sendRaw(chunk.buffer);
+  };
+
+  return {
+    append(samples: Float32Array) {
+      const combined = new Float32Array(pending.length + samples.length);
+      combined.set(pending);
+      combined.set(samples, pending.length);
+
+      let offset = 0;
+      while (combined.length - offset >= chunkSamples) {
+        send(combined.subarray(offset, offset + chunkSamples));
+        offset += chunkSamples;
+      }
+
+      pending = combined.slice(offset);
+    },
+
+    flush() {
+      if (pending.length === 0) return;
+      send(pending);
+      pending = new Float32Array(0);
+    },
+  };
+}
+
 // =============================================================================
 // TTS Generate — Play with <audio> element
 // =============================================================================
@@ -188,7 +227,194 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
 }
 
 // =============================================================================
+// STT WebSocket — Turn Detecting
+// =============================================================================
+
+/**
+ * Realtime STT with turn detection — recommended for voice agents.
+ *
+ * Captures microphone audio and prints turn events as the user speaks.
+ * Wire `stop` up to a button (or any UI control) to end the session
+ * cleanly; this example stops itself after 30 seconds.
+ */
+async function sttTurnDetectingWebsocket(client: Cartesia): Promise<void> {
+  const audioCtx = new AudioContext();
+
+  // AudioWorklet that forwards mono Float32 frames to the main thread.
+  const workletSource = `
+    class PCMCapture extends AudioWorkletProcessor {
+      process(inputs) {
+        const ch = inputs[0]?.[0];
+        if (ch) this.port.postMessage(ch);
+        return true;
+      }
+    }
+    registerProcessor('pcm-capture', PCMCapture);
+  `;
+  const workletURL = URL.createObjectURL(new Blob([workletSource], { type: 'application/javascript' }));
+  await audioCtx.audioWorklet.addModule(workletURL);
+  URL.revokeObjectURL(workletURL);
+
+  const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const source = audioCtx.createMediaStreamSource(mediaStream);
+  const capture = new AudioWorkletNode(audioCtx, 'pcm-capture');
+
+  const ws = client.stt.turnDetecting.websocket({
+    model: 'ink-2',
+    encoding: AUDIO_CONTEXT_ENCODING,
+    sample_rate: audioCtx.sampleRate,
+  });
+  ws.on('error', (err) => console.error(err.message));
+
+  const audioChunks = createFloat32AudioChunker(audioCtx.sampleRate, (chunk) => ws.sendRaw(chunk));
+  let stopped = false;
+
+  capture.port.onmessage = (e) => {
+    if (stopped) return;
+    const floats: Float32Array = e.data;
+    audioChunks.append(floats);
+  };
+  source.connect(capture);
+
+  // Sends a graceful close so the server finalizes buffered audio first.
+  const stop = () => {
+    if (stopped) return;
+    stopped = true;
+    audioChunks.flush();
+    ws.send({ type: 'close' });
+  };
+  const stopTimer = setTimeout(stop, 30_000);
+
+  try {
+    for await (const event of ws.stream()) {
+      if (event.type === 'message') {
+        const m = event.message;
+        if (m.type === 'turn.start') console.log('Turn started');
+        else if (m.type === 'turn.update') console.log(`Turn (partial): ${m.transcript}`);
+        else if (m.type === 'turn.end') console.log(`Turn (final):   ${m.transcript}`);
+      } else if (event.type === 'error') {
+        console.error('Error:', event.error.message);
+      } else if (event.type === 'close') {
+        break;
+      }
+    }
+  } finally {
+    stopped = true;
+    clearTimeout(stopTimer);
+    source.disconnect();
+    capture.disconnect();
+    mediaStream.getTracks().forEach((t) => t.stop());
+    await audioCtx.close();
+  }
+}
+
+// =============================================================================
+// STT WebSocket — External VAD
+// =============================================================================
+
+/**
+ * Realtime STT with external VAD — recommended for push-to-talk apps.
+ *
+ * Captures microphone audio, then calls `finalize()` to ask the model for a
+ * transcript of everything sent so far. In a real push-to-talk UI you would
+ * call `finalize()` on button-up; this example fires it after 5 seconds.
+ */
+async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
+  const audioCtx = new AudioContext();
+
+  const workletSource = `
+    class PCMCapture extends AudioWorkletProcessor {
+      process(inputs) {
+        const ch = inputs[0]?.[0];
+        if (ch) this.port.postMessage(ch);
+        return true;
+      }
+    }
+    registerProcessor('pcm-capture', PCMCapture);
+  `;
+  const workletURL = URL.createObjectURL(new Blob([workletSource], { type: 'application/javascript' }));
+  await audioCtx.audioWorklet.addModule(workletURL);
+  URL.revokeObjectURL(workletURL);
+
+  const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const source = audioCtx.createMediaStreamSource(mediaStream);
+  const capture = new AudioWorkletNode(audioCtx, 'pcm-capture');
+
+  const ws = client.stt.externalVAD.websocket({
+    model: 'ink-whisper',
+    encoding: AUDIO_CONTEXT_ENCODING,
+    sample_rate: audioCtx.sampleRate,
+  });
+  ws.on('error', (err) => console.error(err.message));
+
+  const audioChunks = createFloat32AudioChunker(audioCtx.sampleRate, (chunk) => ws.sendRaw(chunk));
+  let closed = false;
+
+  capture.port.onmessage = (e) => {
+    if (closed) return;
+    const floats: Float32Array = e.data;
+    audioChunks.append(floats);
+  };
+  source.connect(capture);
+
+  // Push-to-talk: simulate "release button" after 5s, then close after 10s.
+  const finalizeTimer = setTimeout(() => {
+    audioChunks.flush();
+    ws.send('finalize');
+  }, 5_000);
+  const closeTimer = setTimeout(() => {
+    if (closed) return;
+    closed = true;
+    audioChunks.flush();
+    ws.send('close');
+  }, 10_000);
+
+  // Transcript chunks are deltas — concatenate is_final chunks to build the
+  // full transcript. Do not add or strip whitespace between them.
+  let transcript = '';
+
+  try {
+    for await (const event of ws.stream()) {
+      if (event.type === 'message') {
+        const m = event.message;
+        if (m.type === 'transcript') {
+          const tag = m.is_final ? 'final  ' : 'partial';
+          console.log(`[${tag}] ${JSON.stringify(m.text)}`);
+          if (m.is_final) transcript += m.text;
+        } else if (m.type === 'flush_done') {
+          console.log('flush_done');
+        } else if (m.type === 'done') {
+          console.log('done');
+        }
+      } else if (event.type === 'error') {
+        console.error('Error:', event.error.message);
+      } else if (event.type === 'close') {
+        break;
+      }
+    }
+  } finally {
+    closed = true;
+    clearTimeout(finalizeTimer);
+    clearTimeout(closeTimer);
+    source.disconnect();
+    capture.disconnect();
+    mediaStream.getTracks().forEach((t) => t.stop());
+    await audioCtx.close();
+  }
+
+  console.log(`Full transcript: ${JSON.stringify(transcript)}`);
+}
+
+// =============================================================================
 // Exports
 // =============================================================================
 
-export { createClient, ttsPlayAudio, ttsDownloadFile, ttsWebsocketStreamAudio, ttsWebsocketLowLatency };
+export {
+  createClient,
+  ttsPlayAudio,
+  ttsDownloadFile,
+  ttsWebsocketStreamAudio,
+  ttsWebsocketLowLatency,
+  sttTurnDetectingWebsocket,
+  sttExternalVADWebsocket,
+};
