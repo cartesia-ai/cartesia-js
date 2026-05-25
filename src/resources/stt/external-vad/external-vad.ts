@@ -177,7 +177,7 @@ export type STTExternalVADWebsocketResponse =
  * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
  * all options.
  */
-export type STTRealtimeExternalVADModel = 'ink-2' | 'ink-whisper' | 'ink-whisper-2025-06-04';
+export type STTRealtimeExternalVADModel = 'ink-2' | 'ink-whisper' | 'ink-whisper-2025-06-04' | (string & {});
 
 export interface ExternalVADWebsocketParams {
   /**
