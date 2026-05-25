@@ -157,7 +157,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
     }
 
     if (this._isReconnecting || this.socket.readyState === ReadyState.CONNECTING) {
-      if (!this._sendQueue.enqueue(event)) {
+      if (!this._sendQueue.enqueueRaw(event)) {
         this._onError(null, 'send queue is full, message discarded', undefined);
       }
       return;
@@ -167,7 +167,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
       return;
     }
     try {
-      this.socket.send(JSON.stringify(event));
+      this.socket.send(event);
     } catch (err) {
       this._onError(null, 'could not send data', err);
     }
