@@ -2,6 +2,7 @@
 
 import { APIResource } from '../core/resource';
 import * as TTSAPI from './tts';
+import * as Shared from './shared';
 import * as VoicesAPI from './voices';
 import { APIPromise } from '../core/api-promise';
 import { Stream } from '../core/streaming';
@@ -183,11 +184,11 @@ export interface GenerationRequest {
   context_id: string;
 
   /**
-   * The ID of the model to use for the generation. See
-   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-   * models.
+   * Text-to-speech models. See
+   * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+   * all options.
    */
-  model_id: string;
+  model_id: TTSModel;
 
   output_format: RawOutputFormat;
 
@@ -271,31 +272,18 @@ export interface GenerationRequest {
 }
 
 /**
+ * Infill models. See
+ * [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+ * for all options.
+ */
+export type InfillModel = 'sonic-3' | 'sonic-3-2026-01-12' | 'sonic-3-2025-10-27';
+
+/**
  * @deprecated Use `generation_config.speed` for sonic-3.
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
 export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
-
-/**
- * Phoneme-level timing information.
- */
-export interface PhonemeTimestamps {
-  /**
-   * End times in seconds for each phoneme.
-   */
-  end: Array<number>;
-
-  /**
-   * List of phonemes in order.
-   */
-  phonemes: Array<string>;
-
-  /**
-   * Start times in seconds for each phoneme.
-   */
-  start: Array<number>;
-}
 
 export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
 
@@ -306,6 +294,18 @@ export interface RawOutputFormat {
 
   sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
+
+/**
+ * Text-to-speech models. See
+ * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+ * all options.
+ */
+export type TTSModel =
+  | 'sonic-3.5'
+  | 'sonic-3'
+  | 'sonic-3.5-2026-05-04'
+  | 'sonic-3-2026-01-12'
+  | 'sonic-3-2025-10-27';
 
 /**
  * An event emitted by the TTS SSE stream.
@@ -377,7 +377,7 @@ export namespace TTSSSEEvent {
     /**
      * Word-level timing information.
      */
-    word_timestamps: TTSAPI.WordTimestamps;
+    word_timestamps: Shared.WordTimestamps;
 
     /**
      * The context ID echoed back from the request, if one was provided.
@@ -398,7 +398,7 @@ export namespace TTSSSEEvent {
     /**
      * Phoneme-level timing information.
      */
-    phoneme_timestamps: TTSAPI.PhonemeTimestamps;
+    phoneme_timestamps: Shared.PhonemeTimestamps;
 
     /**
      * HTTP-style status code.
@@ -650,7 +650,7 @@ export namespace WebsocketResponse {
     /**
      * Word-level timing information.
      */
-    word_timestamps?: TTSAPI.WordTimestamps | null;
+    word_timestamps?: Shared.WordTimestamps | null;
   }
 
   export interface Error {
@@ -728,37 +728,17 @@ export namespace WebsocketResponse {
     /**
      * Phoneme-level timing information.
      */
-    phoneme_timestamps?: TTSAPI.PhonemeTimestamps | null;
+    phoneme_timestamps?: Shared.PhonemeTimestamps | null;
   }
-}
-
-/**
- * Word-level timing information.
- */
-export interface WordTimestamps {
-  /**
-   * End times in seconds for each word.
-   */
-  end: Array<number>;
-
-  /**
-   * Start times in seconds for each word.
-   */
-  start: Array<number>;
-
-  /**
-   * List of words in order.
-   */
-  words: Array<string>;
 }
 
 export interface TTSGenerateParams {
   /**
-   * The ID of the model to use for the generation. See
-   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-   * models.
+   * Text-to-speech models. See
+   * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+   * all options.
    */
-  model_id: string;
+  model_id: TTSModel;
 
   output_format:
     | TTSGenerateParams.RawOutputFormat
@@ -827,11 +807,11 @@ export namespace TTSGenerateParams {
 
 export interface TTSGenerateSSEParams {
   /**
-   * The ID of the model to use for the generation. See
-   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-   * models.
+   * Text-to-speech models. See
+   * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+   * all options.
    */
-  model_id: string;
+  model_id: TTSModel;
 
   output_format: TTSGenerateSSEParams.OutputFormat;
 
@@ -910,10 +890,11 @@ export interface TTSInfillParams {
   left_audio?: Uploadable;
 
   /**
-   * The ID of the model to use for generating audio. Any model other than the first
-   * `"sonic"` model is supported.
+   * Infill models. See
+   * [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+   * for all options.
    */
-  model_id?: string;
+  model_id?: InfillModel;
 
   output_format?:
     | TTSInfillParams.RawOutputFormat
@@ -959,16 +940,16 @@ export declare namespace TTS {
   export {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
+    type InfillModel as InfillModel,
     type ModelSpeed as ModelSpeed,
     type OutputFormatContainer as OutputFormatContainer,
-    type PhonemeTimestamps as PhonemeTimestamps,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
+    type TTSModel as TTSModel,
     type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
-    type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,

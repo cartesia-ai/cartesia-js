@@ -24,6 +24,7 @@ import { APIPromise } from './core/api-promise';
 import { AccessToken, AccessTokenCreateParams, AccessTokenCreateResponse } from './resources/access-token';
 import {
   FineTune,
+  FineTuneBaseModel,
   FineTuneCreateParams,
   FineTuneListParams,
   FineTuneListVoicesParams,
@@ -39,24 +40,23 @@ import {
   PronunciationDicts,
   PronunciationDictsCursorIDPage,
 } from './resources/pronunciation-dicts';
-import { STT, STTTranscribeParams, STTTranscribeResponse } from './resources/stt';
 import {
   GenerationConfig,
   GenerationRequest,
+  InfillModel,
   ModelSpeed,
   OutputFormatContainer,
-  PhonemeTimestamps,
   RawEncoding,
   RawOutputFormat,
   TTS,
   TTSGenerateParams,
   TTSGenerateSSEParams,
   TTSInfillParams,
+  TTSModel,
   TTSSSEEvent,
   VoiceSpecifier,
   WebsocketClientEvent,
   WebsocketResponse,
-  WordTimestamps,
 } from './resources/tts';
 import {
   VoiceChanger,
@@ -93,6 +93,14 @@ import {
   Datasets,
   DatasetsCursorIDPage,
 } from './resources/datasets/datasets';
+import {
+  STT,
+  STTBatchModel,
+  STTEncoding,
+  STTErrorResponse,
+  STTTranscribeParams,
+  STTTranscribeResponse,
+} from './resources/stt/stt';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
 import { FinalRequestOptions, RequestOptions } from './internal/request-options';
@@ -919,6 +927,7 @@ export declare namespace Cartesia {
   export {
     FineTunes as FineTunes,
     type FineTune as FineTune,
+    type FineTuneBaseModel as FineTuneBaseModel,
     type FineTunesCursorIDPage as FineTunesCursorIDPage,
     type FineTuneCreateParams as FineTuneCreateParams,
     type FineTuneListParams as FineTuneListParams,
@@ -937,6 +946,9 @@ export declare namespace Cartesia {
 
   export {
     STT as STT,
+    type STTBatchModel as STTBatchModel,
+    type STTEncoding as STTEncoding,
+    type STTErrorResponse as STTErrorResponse,
     type STTTranscribeResponse as STTTranscribeResponse,
     type STTTranscribeParams as STTTranscribeParams,
   };
@@ -945,16 +957,16 @@ export declare namespace Cartesia {
     TTS as TTS,
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
+    type InfillModel as InfillModel,
     type ModelSpeed as ModelSpeed,
     type OutputFormatContainer as OutputFormatContainer,
-    type PhonemeTimestamps as PhonemeTimestamps,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
+    type TTSModel as TTSModel,
     type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
-    type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
@@ -980,4 +992,7 @@ export declare namespace Cartesia {
     type VoiceGetParams as VoiceGetParams,
     type VoiceLocalizeParams as VoiceLocalizeParams,
   };
+
+  export type PhonemeTimestamps = API.PhonemeTimestamps;
+  export type WordTimestamps = API.WordTimestamps;
 }
