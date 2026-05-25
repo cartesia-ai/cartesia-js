@@ -8,6 +8,7 @@ import type * as VoicesAPI from '../../../resources/voices';
 import { fromBase64, uuid4 } from '../../utils';
 import { WebSocketTimeoutError } from './websocket-timeout-error';
 import { CartesiaError } from '../../../error';
+import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
 
 let _ws: typeof import('ws') | undefined;
 try {
@@ -352,10 +353,10 @@ export class TTSWS extends TTSEmitter {
         url.searchParams.set('access_token', this.client.token);
       } else {
         // api key (insecure fallback)
-        const [, overrideApiKey] = options?.headers?.['Authorization']?.trim().split(' ', 2) ?? [];
-        if (overrideApiKey) {
+        const overrideAPIKey = getAuthorizationTokenFromHeaders(options?.headers);
+        if (overrideAPIKey) {
           // override api key
-          url.searchParams.set('api_key', overrideApiKey);
+          url.searchParams.set('api_key', overrideAPIKey);
         } else if (url.searchParams.get('api_key')) {
           // use current api key
         } else if (this.client.apiKey) {
