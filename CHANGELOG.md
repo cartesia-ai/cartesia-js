@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.2.0-b2 (2026-05-25)
+
+Full Changelog: [v3.2.0-b1...v3.2.0-b2](https://github.com/cartesia-ai/cartesia-js/compare/v3.2.0-b1...v3.2.0-b2)
+
+### Bug Fixes
+
+* **browsers:** check if ws.WebSocket is undefined for browser compatibility ([b04cbbc](https://github.com/cartesia-ai/cartesia-js/commit/b04cbbc9e5af4f9568f674a9b15c2d68130021d1))
+
 ## 3.2.0-b1 (2026-05-25)
 
 Full Changelog: [v3.1.0...v3.2.0-b1](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0...v3.2.0-b1)

@@ -11,7 +11,7 @@ import { CartesiaError } from '../../../error';
 import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
 import { buildHeaders } from '../../headers';
 
-let _ws: typeof import('ws') | undefined;
+let _ws: Partial<typeof import('ws')> | undefined;
 try {
   _ws = require('ws');
 } catch {
@@ -323,7 +323,7 @@ export class TTSWS extends TTSEmitter {
   }
 
   private _initSocket(options?: WS.ClientOptions | undefined): void {
-    if (_ws !== undefined) {
+    if (_ws?.WebSocket !== undefined) {
       // Node: use ws package with custom headers for auth
       this.socket = new _ws.WebSocket(this.url, {
         ...options,

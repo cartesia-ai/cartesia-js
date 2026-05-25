@@ -1,12 +1,15 @@
 {
   "name": "@cartesia/cartesia-js",
-  "version": "3.2.0-b1",
+  "version": "3.2.0-b2",
   "description": "The official TypeScript library for the Cartesia API",
   "author": "Cartesia <support@cartesia.ai>",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "type": "commonjs",
-  "repository": "github:cartesia-ai/cartesia-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cartesia-ai/cartesia-js.git"
+  },
   "license": "Apache-2.0",
   "packageManager": "pnpm@11.2.2",
   "files": [
