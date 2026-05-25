@@ -106,7 +106,7 @@ export interface FineTune {
  * [the docs](https://docs.cartesia.ai/api-reference/fine-tunes/create#body-model-id)
  * for all options.
  */
-export type FineTuneBaseModel = 'sonic-3-2026-01-12';
+export type FineTuneBaseModel = 'sonic-3-2026-01-12' | (string & {});
 
 export interface FineTuneCreateParams {
   /**

@@ -315,7 +315,7 @@ export namespace GenerationRequest {
  * [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
  * for all options.
  */
-export type InfillModel = 'sonic-3' | 'sonic-3-2026-01-12' | 'sonic-3-2025-10-27';
+export type InfillModel = 'sonic-3' | 'sonic-3-2026-01-12' | 'sonic-3-2025-10-27' | (string & {});
 
 /**
  * @deprecated Use `generation_config.speed` for sonic-3.
@@ -344,7 +344,8 @@ export type TTSModel =
   | 'sonic-3'
   | 'sonic-3.5-2026-05-04'
   | 'sonic-3-2026-01-12'
-  | 'sonic-3-2025-10-27';
+  | 'sonic-3-2025-10-27'
+  | (string & {});
 
 /**
  * An event emitted by the TTS SSE stream.
@@ -780,12 +781,12 @@ export namespace WebsocketResponse {
 
   export namespace Timestamps {
     /** Alias for backward compatibility */
-    export type WordTimestamps = Shared.WordTimestamps;
+    export type WordTimestamps = TTSAPI.WordTimestamps;
   }
 
   export namespace PhonemeTimestamps {
     /** Alias for backward compatibility */
-    export type PhonemeTimestamps = Shared.PhonemeTimestamps;
+    export type PhonemeTimestamps = TTSAPI.PhonemeTimestamps;
   }
 }
 
@@ -995,6 +996,10 @@ export namespace TTSInfillParams {
 
 /** Type alias for backward compatibility */
 export type TTSGenerateSseParams = TTSGenerateSSEParams;
+/** Type alias for backward compatibility */
+export type PhonemeTimestamps = Shared.PhonemeTimestamps;
+/** Type alias for backward compatibility */
+export type WordTimestamps = Shared.WordTimestamps;
 
 export declare namespace TTS {
   export {
@@ -1014,5 +1019,7 @@ export declare namespace TTS {
     type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
+    type PhonemeTimestamps as PhonemeTimestamps,
+    type WordTimestamps as WordTimestamps,
   };
 }

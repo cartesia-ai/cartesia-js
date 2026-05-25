@@ -71,7 +71,7 @@ export class STT extends APIResource {
  * [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
  * all options.
  */
-export type STTBatchModel = 'ink-whisper' | 'ink-whisper-2025-06-04';
+export type STTBatchModel = 'ink-whisper' | 'ink-whisper-2025-06-04' | (string & {});
 
 /**
  * The encoding format for audio data sent to the STT WebSocket.

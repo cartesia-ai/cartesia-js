@@ -11,7 +11,7 @@ export class TurnDetecting extends APIResource {}
  * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
  * all options.
  */
-export type STTRealtimeTurnDetectingModel = 'ink-2';
+export type STTRealtimeTurnDetectingModel = 'ink-2' | (string & {});
 
 /**
  * Sent as a JSON-encoded WebSocket text frame to close the session cleanly. All
