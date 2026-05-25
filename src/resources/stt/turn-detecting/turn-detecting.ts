@@ -2,8 +2,36 @@
 
 import { APIResource } from '../../../core/resource';
 import * as STTAPI from '../stt';
+import { TurnDetectingWS, type TurnDetectingWSClientOptions, type TurnDetectingWSParameters } from './ws';
 
-export class TurnDetecting extends APIResource {}
+export class TurnDetecting extends APIResource {
+  /**
+   * Realtime Speech-to-Text with user turn detection.
+   *
+   * This is the recommended STT method for building voice agents.
+   *
+   * The API is organized around **user turns** (human user starts talking, stops talking), not transcript segments. The model itself signals when a user turn begins and ends, so your agent reacts to events rather than running its own voice activity detection.
+   *
+   * Supports:
+   *   - Streaming transcription
+   *   - Native turn detection (`turn.start`, `turn.update`, `turn.end`)
+   *   - Eager end-of-turn prediction (`turn.eager_end`, `turn.resume`)
+   *   - Long-lived connections that reuse a live network connection for low latency
+   *
+   *
+   * **All emitted text is final** — the model does not revise previous output. The `transcript` field is cumulative within a turn.
+   *
+   * See [the API docs](https://docs.cartesia.ai/api-reference/stt/turns/websocket) for all details.
+   *
+   * See [Turns](https://docs.cartesia.ai/use-the-api/stt/turns/turns) for details on handling turn events.
+   */
+  websocket(
+    parameters: TurnDetectingWSParameters,
+    options?: TurnDetectingWSClientOptions | null | undefined,
+  ): TurnDetectingWS {
+    return new TurnDetectingWS(this._client, parameters, options);
+  }
+}
 
 /**
  * Models that support realtime speech-to-text with turn-detection. This mode

@@ -3,8 +3,33 @@
 import { APIResource } from '../../../core/resource';
 import * as Shared from '../../shared';
 import * as STTAPI from '../stt';
+import { ExternalVADWS, type ExternalVADWSParameters, type ExternalVADWSClientOptions } from './ws';
 
-export class ExternalVAD extends APIResource {}
+export class ExternalVAD extends APIResource {
+  /**
+   * Realtime speech-to-text without turn detection.
+   *
+   * A bidirectional WebSocket connection for real-time speech transcription that works with external voice activity detection (VAD). It is the recommended endpoint for "push-to-talk" apps.
+   *
+   * This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using the turn detecting method instead.
+   *
+   * Basic usage:
+   * 1. Connect to the WebSocket with appropriate query parameters
+   * 2. Send audio in small chunks (e.g. 100ms) as WebSocket binary messages
+   * 3. Send `finalize` as a WebSocket text message when the user is done speaking
+   * 4. Receive transcripts as JSON encoded WebSocket text messages (each message is a delta and is not cumulative)
+   * 5. Repeat 2-4
+   * 6. Send `close` as a WebSocket text message to finalize any buffered audio and close the session cleanly
+   *
+   * See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
+   */
+  websocket(
+    parameters: ExternalVADWSParameters,
+    options?: ExternalVADWSClientOptions | null | undefined,
+  ): ExternalVADWS {
+    return new ExternalVADWS(this._client, parameters, options);
+  }
+}
 
 /**
  * Acknowledgment for the `close` command, sent after all buffered audio has been
