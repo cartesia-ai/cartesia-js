@@ -48,14 +48,8 @@ export class STT extends APIResource {
    * **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
    * webm
    *
-   * **Response format:** Returns JSON with transcribed text, duration, and language.
-   * Include `timestamp_granularities: ["word"]` to get word-level timestamps.
-   * **Pricing:** Batch transcription is priced at **1 credit per 2 seconds** of
-   * audio processed.
-   *
-   * <Note>
-   * For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](https://docs.cartesia.ai/api-reference/stt/migrate-from-open-ai).
-   * </Note>
+   * See [the API docs](https://docs.cartesia.ai/api-reference/stt/transcribe) for
+   * details.
    */
   transcribe(params: STTTranscribeParams, options?: RequestOptions): APIPromise<STTTranscribeResponse> {
     const { encoding, sample_rate, ...body } = params;

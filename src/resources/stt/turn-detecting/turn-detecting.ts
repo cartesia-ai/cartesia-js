@@ -6,7 +6,7 @@ import * as STTAPI from '../stt';
 export class TurnDetecting extends APIResource {}
 
 /**
- * Models that support realtime speech-to-text in turn-detection mode. This mode
+ * Models that support realtime speech-to-text with turn-detection. This mode
  * detects when the user is speaking and emits turn events. See
  * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
  * all options.
@@ -141,7 +141,7 @@ export interface STTTurnsWebsocketQueryParams {
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text in turn-detection mode. This mode
+   * Models that support realtime speech-to-text with turn-detection. This mode
    * detects when the user is speaking and emits turn events. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.
@@ -188,7 +188,7 @@ export interface TurnDetectingWebsocketParams {
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text in turn-detection mode. This mode
+   * Models that support realtime speech-to-text with turn-detection. This mode
    * detects when the user is speaking and emits turn events. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.

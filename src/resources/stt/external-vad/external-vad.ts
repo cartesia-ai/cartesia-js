@@ -45,9 +45,9 @@ export interface STTExternalVADQueryParams {
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text using in external
-   * voice-activity-detection mode. This mode expects you to send the `finalize`
-   * command to trigger transcription. See
+   * Models that support realtime speech-to-text with external VAD (voice activity
+   * detection). This mode expects you to send the `finalize` command to trigger
+   * transcription. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.
    */
@@ -124,12 +124,14 @@ export interface STTExternalVADTranscriptResponse {
 }
 
 /**
- * Text commands sent to the server.
+ * Text commands sent to the server:
  *
  * - Send `finalize` as a text message when the user is done speaking to receive
- *   the transcript for any buffered audio - Send `close` as a text message to
- *   flush remaining audio, close session, and receive a done acknowledgment Audio
- *   data is sent as raw binary messages.
+ *   the transcript for any buffered audio
+ * - Send `close` as a text message to flush remaining audio, close session, and
+ *   receive a done acknowledgment
+ *
+ * Audio data is sent as raw binary messages.
  */
 export type STTExternalVADWebsocketRequest = 'finalize' | 'close';
 
@@ -144,9 +146,9 @@ export type STTExternalVADWebsocketResponse =
   | STTAPI.STTErrorResponse;
 
 /**
- * Models that support realtime speech-to-text using in external
- * voice-activity-detection mode. This mode expects you to send the `finalize`
- * command to trigger transcription. See
+ * Models that support realtime speech-to-text with external VAD (voice activity
+ * detection). This mode expects you to send the `finalize` command to trigger
+ * transcription. See
  * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
  * all options.
  */
@@ -159,9 +161,9 @@ export interface ExternalVADWebsocketParams {
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text using in external
-   * voice-activity-detection mode. This mode expects you to send the `finalize`
-   * command to trigger transcription. See
+   * Models that support realtime speech-to-text with external VAD (voice activity
+   * detection). This mode expects you to send the `finalize` command to trigger
+   * transcription. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.
    */

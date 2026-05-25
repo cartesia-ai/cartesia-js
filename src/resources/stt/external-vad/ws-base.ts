@@ -25,9 +25,9 @@ export interface ExternalVADWSParameters extends Record<string, unknown> {
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text using in external
-   * voice-activity-detection mode. This mode expects you to send the `finalize`
-   * command to trigger transcription. See
+   * Models that support realtime speech-to-text with external VAD (voice activity
+   * detection). This mode expects you to send the `finalize` command to trigger
+   * transcription. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.
    */
