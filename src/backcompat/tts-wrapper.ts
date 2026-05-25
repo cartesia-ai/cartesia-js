@@ -7,12 +7,11 @@ import type { RequestOptions } from '../internal/request-options';
 import { CartesiaError } from '../error';
 import { uuid4 } from '../internal/utils/uuid';
 
-let _ws: typeof import('ws') | undefined;
+let _ws: Partial<typeof import('ws')> | undefined;
 try {
   _ws = require('ws');
 } catch {
   // Optional — in browsers, we use the native WebSocket API instead.
-  _ws = undefined;
 }
 
 // Define compatible interfaces to match the old SDK types for WebSocket
@@ -159,7 +158,7 @@ export class WebSocketWrapper {
   }
 
   async connect() {
-    if (_ws === undefined) {
+    if (_ws?.WebSocket === undefined) {
       throw new CartesiaError(
         'The "ws" peer dependency is required for WebSocket support in Node.js. If you are using CartesiaClient from a browser, switch to `import Cartesia from "@carteisa/cartesia-js"` for the browser-compatible client.',
       );
