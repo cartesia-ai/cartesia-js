@@ -6,6 +6,7 @@ import { NodeWebSocket } from '../../../internal/ws-adapter-node';
 import { ExternalVADWSBase, type ExternalVADWSBaseOptions, type ExternalVADWSParameters } from './ws-base';
 import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
+import { buildHeaders } from '../../../internal/headers';
 
 let _ws: typeof import('ws') | undefined;
 try {
@@ -42,44 +43,47 @@ export class ExternalVADWS extends ExternalVADWSBase<NodeWebSocket | BrowserWebS
     if (_ws !== undefined) {
       const ws = new _ws.WebSocket(url, {
         ...this._wsOptions,
-        headers: {
-          'cartesia-version': '2025-11-04',
-          ...authHeaders,
-          ...this._wsOptions?.headers,
-        },
+        headers: Object.fromEntries(
+          buildHeaders([
+            {
+              'cartesia-version': '2025-11-04',
+            },
+            authHeaders,
+            this._wsOptions?.headers,
+          ]).values.entries(),
+        ),
       });
       return new NodeWebSocket(ws);
     }
     // BrowserWebSocket
     url = new URL(url);
+    const wsOptionsHeaders = buildHeaders([this._wsOptions?.headers]).values;
 
-    if (this._wsOptions?.headers?.['cartesia-version']) {
-      // override cartesia version
-      url.searchParams.set('cartesia_version', this._wsOptions.headers['cartesia-version']);
-    } else if (url.searchParams.get('cartesia_version')) {
+    const cartesiaVersionFromWSOptions = wsOptionsHeaders.get('cartesia-version');
+    if (url.searchParams.get('cartesia_version')) {
       // use current cartesia version
+    } else if (cartesiaVersionFromWSOptions) {
+      // cartesia version from ws options
+      url.searchParams.set('cartesia_version', cartesiaVersionFromWSOptions);
     } else {
       // set cartesia version
       url.searchParams.set('cartesia_version', '2025-11-04');
     }
 
+    const apiKeyFromWSOptions = getAuthorizationTokenFromHeaders(wsOptionsHeaders);
     if (url.searchParams.get('access_token')) {
       // use current access token
     } else if (this._client.token) {
       // set access token
       url.searchParams.set('access_token', this._client.token);
-    } else {
-      // api key (insecure fallback)
-      const overrideAPIKey = getAuthorizationTokenFromHeaders(this._wsOptions?.headers);
-      if (overrideAPIKey) {
-        // override api key
-        url.searchParams.set('api_key', overrideAPIKey);
-      } else if (url.searchParams.get('api_key')) {
-        // use current api key
-      } else if (this._client.apiKey) {
-        // api key from client
-        url.searchParams.set('api_key', this._client.apiKey);
-      }
+    } else if (url.searchParams.get('api_key')) {
+      // use current api key
+    } else if (apiKeyFromWSOptions) {
+      // override api key
+      url.searchParams.set('api_key', apiKeyFromWSOptions);
+    } else if (this._client.apiKey) {
+      // api key from client
+      url.searchParams.set('api_key', this._client.apiKey);
     }
 
     return new BrowserWebSocket(new WebSocket(url));
