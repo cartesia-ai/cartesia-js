@@ -8,7 +8,7 @@ import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
 import { buildHeaders } from '../../../internal/headers';
 
-let _ws: typeof import('ws') | undefined;
+let _ws: Partial<typeof import('ws')> | undefined;
 try {
   _ws = require('ws');
 } catch {
@@ -27,7 +27,7 @@ export class ExternalVADWS extends ExternalVADWSBase<NodeWebSocket | BrowserWebS
     parameters: ExternalVADWSParameters,
     options?: ExternalVADWSClientOptions | null | undefined,
   ) {
-    if (_ws === undefined && typeof WebSocket === 'undefined') {
+    if (_ws?.WebSocket === undefined && typeof WebSocket === 'undefined') {
       throw new Error(
         'ExternalVADWS from "@cartesia/cartesia-js/resources/stt/external-vad/ws" requires the "ws" package but it could not be loaded.',
       );
@@ -40,7 +40,7 @@ export class ExternalVADWS extends ExternalVADWSBase<NodeWebSocket | BrowserWebS
   }
 
   protected _createSocket(url: URL, authHeaders: Record<string, string>): NodeWebSocket | BrowserWebSocket {
-    if (_ws !== undefined) {
+    if (_ws?.WebSocket !== undefined) {
       const ws = new _ws.WebSocket(url, {
         ...this._wsOptions,
         headers: Object.fromEntries(
