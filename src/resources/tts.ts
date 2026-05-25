@@ -283,6 +283,14 @@ export type InfillModel = 'sonic-3' | 'sonic-3-2026-01-12' | 'sonic-3-2025-10-27
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
+export interface MP3OutputFormat {
+  bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
+
+  container: 'mp3';
+
+  sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
+}
+
 export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
 
 export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
@@ -494,6 +502,14 @@ export interface VoiceSpecifier {
   id: string;
 
   mode: 'id';
+}
+
+export interface WAVOutputFormat {
+  container: 'wav';
+
+  encoding: RawEncoding;
+
+  sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
 
 /**
@@ -740,10 +756,7 @@ export interface TTSGenerateParams {
    */
   model_id: TTSModel;
 
-  output_format:
-    | TTSGenerateParams.RawOutputFormat
-    | TTSGenerateParams.WavOutputFormat
-    | TTSGenerateParams.MP3OutputFormat;
+  output_format: RawOutputFormat | WAVOutputFormat | MP3OutputFormat;
 
   transcript: string;
 
@@ -781,28 +794,6 @@ export interface TTSGenerateParams {
    * @deprecated Use `generation_config.speed` for sonic-3.
    */
   speed?: ModelSpeed;
-}
-
-export namespace TTSGenerateParams {
-  export interface RawOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
-    container?: 'raw';
-  }
-
-  export interface WavOutputFormat {
-    container: 'wav';
-
-    encoding: TTSAPI.RawEncoding;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-  }
-
-  export interface MP3OutputFormat {
-    bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-
-    container?: 'mp3';
-  }
 }
 
 export interface TTSGenerateSSEParams {
@@ -896,10 +887,7 @@ export interface TTSInfillParams {
    */
   model_id?: InfillModel;
 
-  output_format?:
-    | TTSInfillParams.RawOutputFormat
-    | TTSInfillParams.WavOutputFormat
-    | TTSInfillParams.MP3OutputFormat;
+  output_format?: RawOutputFormat | WAVOutputFormat | MP3OutputFormat;
 
   right_audio?: Uploadable;
 
@@ -914,40 +902,20 @@ export interface TTSInfillParams {
   voice_id?: string;
 }
 
-export namespace TTSInfillParams {
-  export interface RawOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
-    container?: 'raw';
-  }
-
-  export interface WavOutputFormat {
-    container: 'wav';
-
-    encoding: TTSAPI.RawEncoding;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-  }
-
-  export interface MP3OutputFormat {
-    bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-
-    container?: 'mp3';
-  }
-}
-
 export declare namespace TTS {
   export {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type InfillModel as InfillModel,
     type ModelSpeed as ModelSpeed,
+    type MP3OutputFormat as MP3OutputFormat,
     type OutputFormatContainer as OutputFormatContainer,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
     type TTSModel as TTSModel,
     type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
+    type WAVOutputFormat as WAVOutputFormat,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
     type TTSGenerateParams as TTSGenerateParams,
