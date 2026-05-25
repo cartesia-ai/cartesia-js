@@ -322,7 +322,7 @@ export class TTSWS extends TTSEmitter {
   }
 
   private _initSocket(options?: WS.ClientOptions | undefined): void {
-    if (_ws) {
+    if (_ws !== undefined) {
       // Node: use ws package with custom headers for auth
       this.socket = new _ws.WebSocket(this.url, {
         ...options,

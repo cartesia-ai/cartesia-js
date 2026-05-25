@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import * as WS from 'ws';
+import type * as WS from 'ws';
 import { BrowserWebSocket } from '../../../internal/ws-adapter-browser';
 import { NodeWebSocket } from '../../../internal/ws-adapter-node';
 import {
@@ -10,6 +10,13 @@ import {
 } from './ws-base';
 import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
+
+let _ws: typeof import('ws') | undefined;
+try {
+  _ws = require('ws');
+} catch {
+  // Optional — in browsers, we use the native WebSocket API instead.
+}
 
 export type { TurnDetectingWSParameters, TurnDetectingWSReconnectOptions } from './ws-base';
 
@@ -23,7 +30,7 @@ export class TurnDetectingWS extends TurnDetectingWSBase<NodeWebSocket | Browser
     parameters: TurnDetectingWSParameters,
     options?: TurnDetectingWSClientOptions | null | undefined,
   ) {
-    if (!WS?.WebSocket && typeof WebSocket === 'undefined') {
+    if (_ws === undefined && typeof WebSocket === 'undefined') {
       throw new Error(
         'TurnDetectingWS from "@cartesia/cartesia-js/resources/stt/turn-detecting/ws" requires the "ws" package but it could not be loaded.',
       );
@@ -36,8 +43,8 @@ export class TurnDetectingWS extends TurnDetectingWSBase<NodeWebSocket | Browser
   }
 
   protected _createSocket(url: URL, authHeaders: Record<string, string>): NodeWebSocket | BrowserWebSocket {
-    if (WS?.WebSocket) {
-      const ws = new WS.WebSocket(url, {
+    if (_ws !== undefined) {
+      const ws = new _ws.WebSocket(url, {
         ...this._wsOptions,
         headers: {
           'cartesia-version': '2025-11-04',
