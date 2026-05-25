@@ -3,6 +3,7 @@
 import type { ClientOptions as WSClientOptions } from 'ws';
 import { APIResource } from '../core/resource';
 import * as TTSAPI from './tts';
+import * as Shared from './shared';
 import * as VoicesAPI from './voices';
 import { APIPromise } from '../core/api-promise';
 import { Stream } from '../core/streaming';
@@ -217,11 +218,11 @@ export interface GenerationRequest {
   context_id: string;
 
   /**
-   * The ID of the model to use for the generation. See
-   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-   * models.
+   * Text-to-speech models. See
+   * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+   * all options.
    */
-  model_id: string;
+  model_id: TTSModel;
 
   output_format: RawOutputFormat;
 
@@ -310,31 +311,26 @@ export namespace GenerationRequest {
 }
 
 /**
+ * Infill models. See
+ * [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+ * for all options.
+ */
+export type InfillModel = 'sonic-3' | 'sonic-3-2026-01-12' | 'sonic-3-2025-10-27' | (string & {});
+
+/**
  * @deprecated Use `generation_config.speed` for sonic-3.
  */
 export type ModelSpeed = 'slow' | 'normal' | 'fast';
 
-export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
+export interface MP3OutputFormat {
+  bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
 
-/**
- * Phoneme-level timing information.
- */
-export interface PhonemeTimestamps {
-  /**
-   * End times in seconds for each phoneme.
-   */
-  end: Array<number>;
+  container: 'mp3';
 
-  /**
-   * List of phonemes in order.
-   */
-  phonemes: Array<string>;
-
-  /**
-   * Start times in seconds for each phoneme.
-   */
-  start: Array<number>;
+  sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
+
+export type OutputFormatContainer = 'raw' | 'wav' | 'mp3';
 
 export type RawEncoding = 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
 
@@ -345,6 +341,19 @@ export interface RawOutputFormat {
 
   sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
+
+/**
+ * Text-to-speech models. See
+ * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+ * all options.
+ */
+export type TTSModel =
+  | 'sonic-3.5'
+  | 'sonic-3'
+  | 'sonic-3.5-2026-05-04'
+  | 'sonic-3-2026-01-12'
+  | 'sonic-3-2025-10-27'
+  | (string & {});
 
 /**
  * An event emitted by the TTS SSE stream.
@@ -416,7 +425,7 @@ export namespace TTSSSEEvent {
     /**
      * Word-level timing information.
      */
-    word_timestamps: TTSAPI.WordTimestamps;
+    word_timestamps: Shared.WordTimestamps;
 
     /**
      * The context ID echoed back from the request, if one was provided.
@@ -437,7 +446,7 @@ export namespace TTSSSEEvent {
     /**
      * Phoneme-level timing information.
      */
-    phoneme_timestamps: TTSAPI.PhonemeTimestamps;
+    phoneme_timestamps: Shared.PhonemeTimestamps;
 
     /**
      * HTTP-style status code.
@@ -533,6 +542,14 @@ export interface VoiceSpecifier {
   id: string;
 
   mode: 'id';
+}
+
+export interface WAVOutputFormat {
+  container: 'wav';
+
+  encoding: RawEncoding;
+
+  sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
 }
 
 /**
@@ -697,7 +714,7 @@ export namespace WebsocketResponse {
     /**
      * Word-level timing information.
      */
-    word_timestamps?: TTSAPI.WordTimestamps | null;
+    word_timestamps?: Shared.WordTimestamps | null;
   }
 
   export interface Error {
@@ -775,7 +792,7 @@ export namespace WebsocketResponse {
     /**
      * Phoneme-level timing information.
      */
-    phoneme_timestamps?: TTSAPI.PhonemeTimestamps | null;
+    phoneme_timestamps?: Shared.PhonemeTimestamps | null;
   }
 
   export namespace Timestamps {
@@ -789,38 +806,15 @@ export namespace WebsocketResponse {
   }
 }
 
-/**
- * Word-level timing information.
- */
-export interface WordTimestamps {
-  /**
-   * End times in seconds for each word.
-   */
-  end: Array<number>;
-
-  /**
-   * Start times in seconds for each word.
-   */
-  start: Array<number>;
-
-  /**
-   * List of words in order.
-   */
-  words: Array<string>;
-}
-
 export interface TTSGenerateParams {
   /**
-   * The ID of the model to use for the generation. See
-   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-   * models.
+   * Text-to-speech models. See
+   * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+   * all options.
    */
-  model_id: string;
+  model_id: TTSModel;
 
-  output_format:
-    | TTSGenerateParams.RawOutputFormat
-    | TTSGenerateParams.WavOutputFormat
-    | TTSGenerateParams.MP3OutputFormat;
+  output_format: RawOutputFormat | WAVOutputFormat | MP3OutputFormat;
 
   transcript: string;
 
@@ -860,35 +854,13 @@ export interface TTSGenerateParams {
   speed?: ModelSpeed;
 }
 
-export namespace TTSGenerateParams {
-  export interface RawOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
-    container?: 'raw';
-  }
-
-  export interface WavOutputFormat {
-    container: 'wav';
-
-    encoding: TTSAPI.RawEncoding;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-  }
-
-  export interface MP3OutputFormat {
-    bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-
-    container?: 'mp3';
-  }
-}
-
 export interface TTSGenerateSSEParams {
   /**
-   * The ID of the model to use for the generation. See
-   * [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-   * models.
+   * Text-to-speech models. See
+   * [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+   * all options.
    */
-  model_id: string;
+  model_id: TTSModel;
 
   output_format: TTSGenerateSSEParams.OutputFormat;
 
@@ -967,15 +939,13 @@ export interface TTSInfillParams {
   left_audio?: Uploadable;
 
   /**
-   * The ID of the model to use for generating audio. Any model other than the first
-   * `"sonic"` model is supported.
+   * Infill models. See
+   * [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+   * for all options.
    */
-  model_id?: string;
+  model_id?: InfillModel;
 
-  output_format?:
-    | TTSInfillParams.RawOutputFormat
-    | TTSInfillParams.WavOutputFormat
-    | TTSInfillParams.MP3OutputFormat;
+  output_format?: RawOutputFormat | WAVOutputFormat | MP3OutputFormat;
 
   right_audio?: Uploadable;
 
@@ -990,48 +960,52 @@ export interface TTSInfillParams {
   voice_id?: string;
 }
 
+export namespace TTSGenerateParams {
+  /** Type alias for backward compatibility */
+  export type RawOutputFormat = TTSAPI.RawOutputFormat;
+  /** Type alias for backward compatibility */
+  export type WavOutputFormat = TTSAPI.WAVOutputFormat;
+  /** Type alias for backward compatibility */
+  export type MP3OutputFormat = TTSAPI.MP3OutputFormat;
+}
+
 export namespace TTSInfillParams {
-  export interface RawOutputFormat extends Omit<TTSAPI.RawOutputFormat, 'container'> {
-    container?: 'raw';
-  }
-
-  export interface WavOutputFormat {
-    container: 'wav';
-
-    encoding: TTSAPI.RawEncoding;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-  }
-
-  export interface MP3OutputFormat {
-    bit_rate: 32000 | 64000 | 96000 | 128000 | 192000;
-
-    sample_rate: 8000 | 16000 | 22050 | 24000 | 44100 | 48000;
-
-    container?: 'mp3';
-  }
+  /** Type alias for backward compatibility */
+  export type RawOutputFormat = TTSAPI.RawOutputFormat;
+  /** Type alias for backward compatibility */
+  export type WavOutputFormat = TTSAPI.WAVOutputFormat;
+  /** Type alias for backward compatibility */
+  export type MP3OutputFormat = TTSAPI.MP3OutputFormat;
 }
 
 /** Type alias for backward compatibility */
 export type TTSGenerateSseParams = TTSGenerateSSEParams;
+/** Type alias for backward compatibility */
+export type PhonemeTimestamps = Shared.PhonemeTimestamps;
+/** Type alias for backward compatibility */
+export type WordTimestamps = Shared.WordTimestamps;
 
 export declare namespace TTS {
   export {
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
+    type InfillModel as InfillModel,
     type ModelSpeed as ModelSpeed,
+    type MP3OutputFormat as MP3OutputFormat,
     type OutputFormatContainer as OutputFormatContainer,
-    type PhonemeTimestamps as PhonemeTimestamps,
     type RawEncoding as RawEncoding,
     type RawOutputFormat as RawOutputFormat,
+    type TTSModel as TTSModel,
     type TTSSSEEvent as TTSSSEEvent,
     type VoiceSpecifier as VoiceSpecifier,
+    type WAVOutputFormat as WAVOutputFormat,
     type WebsocketClientEvent as WebsocketClientEvent,
     type WebsocketResponse as WebsocketResponse,
-    type WordTimestamps as WordTimestamps,
     type TTSGenerateParams as TTSGenerateParams,
     type TTSGenerateSseParams as TTSGenerateSseParams,
     type TTSGenerateSSEParams as TTSGenerateSSEParams,
     type TTSInfillParams as TTSInfillParams,
+    type PhonemeTimestamps as PhonemeTimestamps,
+    type WordTimestamps as WordTimestamps,
   };
 }

@@ -1,5 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+export * from './shared';
 export { AccessToken, type AccessTokenCreateResponse, type AccessTokenCreateParams } from './access-token';
 export {
   Agents,
@@ -20,6 +21,7 @@ export {
 export {
   FineTunes,
   type FineTune,
+  type FineTuneBaseModel,
   type FineTuneCreateParams,
   type FineTuneListParams,
   type FineTuneListVoicesParams,
@@ -34,28 +36,31 @@ export {
   type PronunciationDictListParams,
   type PronunciationDictsCursorIDPage,
 } from './pronunciation-dicts';
+export type { Stt, SttTranscribeResponse, SttTranscribeParams } from './stt';
 export {
   STT,
-  type Stt,
+  type STTBatchModel,
+  type STTEncoding,
+  type STTErrorResponse,
   type STTTranscribeResponse,
   type STTTranscribeParams,
-  type SttTranscribeResponse,
-  type SttTranscribeParams,
-} from './stt';
+} from './stt/stt';
 export {
   TTS,
   type GenerationConfig,
   type GenerationRequest,
+  type InfillModel,
   type ModelSpeed,
+  type MP3OutputFormat,
   type OutputFormatContainer,
-  type PhonemeTimestamps,
   type RawEncoding,
   type RawOutputFormat,
+  type TTSModel,
   type TTSSSEEvent,
   type VoiceSpecifier,
+  type WAVOutputFormat,
   type WebsocketClientEvent,
   type WebsocketResponse,
-  type WordTimestamps,
   type TTSGenerateParams,
   type TTSGenerateSSEParams,
   type TTSGenerateSseParams,

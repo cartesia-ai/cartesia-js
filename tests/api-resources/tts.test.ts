@@ -11,7 +11,7 @@ describe('resource tts', () => {
   // Mock server tests are disabled
   test.skip('generate: required and optional params', async () => {
     const response = await client.tts.generate({
-      model_id: 'model_id',
+      model_id: 'sonic-3.5',
       output_format: {
         container: 'raw',
         encoding: 'pcm_f32le',
@@ -34,7 +34,7 @@ describe('resource tts', () => {
   // Mock server tests are disabled
   test.skip('generateSSE: only required params', async () => {
     const responsePromise = client.tts.generateSSE({
-      model_id: 'model_id',
+      model_id: 'sonic-3.5',
       output_format: {
         container: 'raw',
         encoding: 'pcm_f32le',
@@ -55,7 +55,7 @@ describe('resource tts', () => {
   // Mock server tests are disabled
   test.skip('generateSSE: required and optional params', async () => {
     const response = await client.tts.generateSSE({
-      model_id: 'model_id',
+      model_id: 'sonic-3.5',
       output_format: {
         container: 'raw',
         encoding: 'pcm_f32le',

@@ -86,7 +86,7 @@ export interface FineTune {
   language: string;
 
   /**
-   * Base model identifier to fine-tune from
+   * Base model identifier for the fine-tune
    */
   model_id: string;
 
@@ -100,6 +100,13 @@ export interface FineTune {
    */
   status: 'created' | 'training' | 'completed' | 'failed';
 }
+
+/**
+ * Base model for a fine-tune. See
+ * [the docs](https://docs.cartesia.ai/api-reference/fine-tunes/create#body-model-id)
+ * for all options.
+ */
+export type FineTuneBaseModel = 'sonic-3-2026-01-12' | (string & {});
 
 export interface FineTuneCreateParams {
   /**
@@ -118,9 +125,11 @@ export interface FineTuneCreateParams {
   language: string;
 
   /**
-   * Base model ID to fine-tune from
+   * Base model for a fine-tune. See
+   * [the docs](https://docs.cartesia.ai/api-reference/fine-tunes/create#body-model-id)
+   * for all options.
    */
-  model_id: string;
+  model_id: FineTuneBaseModel;
 
   /**
    * Name for the new fine-tune
@@ -145,6 +154,7 @@ export interface FineTuneListVoicesParams extends CursorIDPageParams {
 export declare namespace FineTunes {
   export {
     type FineTune as FineTune,
+    type FineTuneBaseModel as FineTuneBaseModel,
     type FineTunesCursorIDPage as FineTunesCursorIDPage,
     type FineTuneCreateParams as FineTuneCreateParams,
     type FineTuneListParams as FineTuneListParams,

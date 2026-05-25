@@ -8,6 +8,8 @@ import type * as VoicesAPI from '../../../resources/voices';
 import { fromBase64, uuid4 } from '../../utils';
 import { WebSocketTimeoutError } from './websocket-timeout-error';
 import { CartesiaError } from '../../../error';
+import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
+import { buildHeaders } from '../../headers';
 
 let _ws: typeof import('ws') | undefined;
 try {
@@ -49,7 +51,7 @@ export interface ContextOptions {
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
-  model_id: string;
+  model_id: TTSAPI.TTSModel;
 
   output_format: TTSAPI.RawOutputFormat;
 
@@ -321,47 +323,44 @@ export class TTSWS extends TTSEmitter {
   }
 
   private _initSocket(options?: WS.ClientOptions | undefined): void {
-    if (_ws) {
+    if (_ws !== undefined) {
       // Node: use ws package with custom headers for auth
       this.socket = new _ws.WebSocket(this.url, {
         ...options,
-        headers: {
-          'cartesia-version': '2025-11-04',
-          ...this.authHeaders(),
-          ...options?.headers,
-        },
+        headers: Object.fromEntries(
+          buildHeaders([
+            {
+              'cartesia-version': '2025-11-04',
+            },
+            this.authHeaders(),
+            options?.headers,
+          ]).values.entries(),
+        ),
       });
     } else if (typeof WebSocket !== 'undefined') {
       // Browser: use native WebSocket with auth in URL query params
-      const url = new URL(this.url.toString());
+      const url = new URL(this.url);
+      const optionsHeaders = buildHeaders([this._wsOptions?.headers]).values;
 
-      if (options?.headers?.['cartesia-version']) {
-        // override cartesia version
-        url.searchParams.set('cartesia_version', options.headers['cartesia-version']);
-      } else if (url.searchParams.get('cartesia_version')) {
-        // use current cartesia version
+      const cartesiaVersionFromOptions = optionsHeaders.get('cartesia-version');
+      if (cartesiaVersionFromOptions) {
+        // cartesia version from ws options
+        url.searchParams.set('cartesia_version', cartesiaVersionFromOptions);
       } else {
         // set cartesia version
         url.searchParams.set('cartesia_version', '2025-11-04');
       }
 
-      if (url.searchParams.get('access_token')) {
-        // use current access token
-      } else if (this.client.token) {
+      const apiKeyFromOptions = getAuthorizationTokenFromHeaders(optionsHeaders);
+      if (this.client.token) {
         // set access token
         url.searchParams.set('access_token', this.client.token);
-      } else {
-        // api key (insecure fallback)
-        const [, overrideApiKey] = options?.headers?.['Authorization']?.trim().split(' ', 2) ?? [];
-        if (overrideApiKey) {
-          // override api key
-          url.searchParams.set('api_key', overrideApiKey);
-        } else if (url.searchParams.get('api_key')) {
-          // use current api key
-        } else if (this.client.apiKey) {
-          // api key from client
-          url.searchParams.set('api_key', this.client.apiKey);
-        }
+      } else if (apiKeyFromOptions) {
+        // override api key
+        url.searchParams.set('api_key', apiKeyFromOptions);
+      } else if (this.client.apiKey) {
+        // api key from client
+        url.searchParams.set('api_key', this.client.apiKey);
       }
 
       this.socket = new WebSocket(url);

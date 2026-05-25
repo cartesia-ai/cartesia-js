@@ -14,7 +14,7 @@ describe('resource fineTunes', () => {
       dataset: 'dataset',
       description: 'description',
       language: 'language',
-      model_id: 'model_id',
+      model_id: 'sonic-3-2026-01-12',
       name: 'name',
     });
     const rawResponse = await responsePromise.asResponse();
@@ -32,7 +32,7 @@ describe('resource fineTunes', () => {
       dataset: 'dataset',
       description: 'description',
       language: 'language',
-      model_id: 'model_id',
+      model_id: 'sonic-3-2026-01-12',
       name: 'name',
     });
   });

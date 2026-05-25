@@ -8,6 +8,13 @@ Methods:
 
 - <code title="get /">client.<a href="./src/index.ts">getStatus</a>() -> GetStatusResponse</code>
 
+# Shared
+
+Types:
+
+- <code><a href="./src/resources/shared.ts">PhonemeTimestamps</a></code>
+- <code><a href="./src/resources/shared.ts">WordTimestamps</a></code>
+
 # Agents
 
 Types:
@@ -119,6 +126,7 @@ Methods:
 Types:
 
 - <code><a href="./src/resources/fine-tunes.ts">FineTune</a></code>
+- <code><a href="./src/resources/fine-tunes.ts">FineTuneBaseModel</a></code>
 
 Methods:
 
@@ -147,11 +155,42 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/stt.ts">STTTranscribeResponse</a></code>
+- <code><a href="./src/resources/stt/stt.ts">STTBatchModel</a></code>
+- <code><a href="./src/resources/stt/stt.ts">STTEncoding</a></code>
+- <code><a href="./src/resources/stt/stt.ts">STTErrorResponse</a></code>
+- <code><a href="./src/resources/stt/stt.ts">STTTranscribeResponse</a></code>
 
 Methods:
 
-- <code title="post /stt">client.stt.<a href="./src/resources/stt.ts">transcribe</a>({ ...params }) -> STTTranscribeResponse</code>
+- <code title="post /stt">client.stt.<a href="./src/resources/stt/stt.ts">transcribe</a>({ ...params }) -> STTTranscribeResponse</code>
+
+## TurnDetecting
+
+Types:
+
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTRealtimeTurnDetectingModel</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsCloseCommand</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsConnected</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnEagerEnd</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnEnd</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnResume</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnStart</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnUpdate</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsWebsocketQueryParams</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsWebsocketRequest</a></code>
+- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsWebsocketResponse</a></code>
+
+## ExternalVAD
+
+Types:
+
+- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADDoneResponse</a></code>
+- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADFlushDoneResponse</a></code>
+- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADQueryParams</a></code>
+- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADTranscriptResponse</a></code>
+- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADWebsocketRequest</a></code>
+- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADWebsocketResponse</a></code>
+- <code><a href="./src/resources/stt/external-vad.ts">STTRealtimeExternalVADModel</a></code>
 
 # TTS
 
@@ -159,16 +198,18 @@ Types:
 
 - <code><a href="./src/resources/tts.ts">GenerationConfig</a></code>
 - <code><a href="./src/resources/tts.ts">GenerationRequest</a></code>
+- <code><a href="./src/resources/tts.ts">InfillModel</a></code>
 - <code><a href="./src/resources/tts.ts">ModelSpeed</a></code>
+- <code><a href="./src/resources/tts.ts">MP3OutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">OutputFormatContainer</a></code>
-- <code><a href="./src/resources/tts.ts">PhonemeTimestamps</a></code>
 - <code><a href="./src/resources/tts.ts">RawEncoding</a></code>
 - <code><a href="./src/resources/tts.ts">RawOutputFormat</a></code>
+- <code><a href="./src/resources/tts.ts">TTSModel</a></code>
 - <code><a href="./src/resources/tts.ts">TTSSSEEvent</a></code>
 - <code><a href="./src/resources/tts.ts">VoiceSpecifier</a></code>
+- <code><a href="./src/resources/tts.ts">WAVOutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketClientEvent</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketResponse</a></code>
-- <code><a href="./src/resources/tts.ts">WordTimestamps</a></code>
 
 Methods:
 

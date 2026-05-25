@@ -1,5 +1,37 @@
 # Changelog
 
+## 3.2.0-b1 (2026-05-25)
+
+Full Changelog: [v3.1.0...v3.2.0-b1](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0...v3.2.0-b1)
+
+### Features
+
+* **api:** add realtime stt and model enums ([f07d77f](https://github.com/cartesia-ai/cartesia-js/commit/f07d77fdc8eb116f2665b79ea51c359d5821bf91))
+* **stt:** add websocket methods ([25b0bd5](https://github.com/cartesia-ai/cartesia-js/commit/25b0bd5437ffba62790228327528f028f5c00dc8))
+* **stt:** support browser websockets ([b01f743](https://github.com/cartesia-ai/cartesia-js/commit/b01f74303c35eadebabe6c208fc796bd940d00a2))
+* **tts:** export each output format type ([351d890](https://github.com/cartesia-ai/cartesia-js/commit/351d890d63d7c051859fd1773170742c33898ae0))
+
+
+### Bug Fixes
+
+* **api:** keep accepting any string in model types ([90d1acc](https://github.com/cartesia-ai/cartesia-js/commit/90d1acc216476aa10c2b3ec791d50eb449c110bf))
+* **browsers:** make ws optional ([ff2978e](https://github.com/cartesia-ai/cartesia-js/commit/ff2978e4770837084d2df6803d09659737a4e4ea))
+* **stt:** accept any string value for external vad model ([04a4a64](https://github.com/cartesia-ai/cartesia-js/commit/04a4a64a1c8a7137ca94adde99645bc4274f9677))
+* **stt:** do not json stringify external vad commands ([ff8ac41](https://github.com/cartesia-ai/cartesia-js/commit/ff8ac418bd87c51f9d0221f65d2f2fc75f202911))
+* **ws:** lowercase headers from options to override properly ([8f9880e](https://github.com/cartesia-ai/cartesia-js/commit/8f9880eea35f6b612fc18d165482a429c8c74f95))
+
+
+### Documentation
+
+* **api:** improve formatting and grammar ([4923359](https://github.com/cartesia-ai/cartesia-js/commit/4923359255e63783bb4bc9e6c05099f0332e42a8))
+* **readme:** change examples to use sonic-latest ([a2302c8](https://github.com/cartesia-ai/cartesia-js/commit/a2302c89a976112ee5b4fa34ff0abfd45cad1d8f))
+* **stt:** add stt websocket examples ([6363dea](https://github.com/cartesia-ai/cartesia-js/commit/6363dea891da7804e43c424b49dac8e0497b9312))
+
+
+### Refactors
+
+* **ws:** change comments and remove extra comma ([61359e8](https://github.com/cartesia-ai/cartesia-js/commit/61359e8c1b4cdae8926493720b4b609f36ba37eb))
+
 ## 3.1.0 (2026-05-23)
 
 Full Changelog: [v3.1.0...v3.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.1.0...v3.1.0)
