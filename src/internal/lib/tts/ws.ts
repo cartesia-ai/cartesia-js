@@ -334,7 +334,6 @@ export class TTSWS extends TTSEmitter {
             },
             this.authHeaders(),
             options?.headers,
-            ,
           ]).values.entries(),
         ),
       });

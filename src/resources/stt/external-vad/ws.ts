@@ -61,9 +61,9 @@ export class ExternalVADWS extends ExternalVADWSBase<NodeWebSocket | BrowserWebS
 
     const cartesiaVersionFromWSOptions = wsOptionsHeaders.get('cartesia-version');
     if (url.searchParams.get('cartesia_version')) {
-      // use current cartesia version
+      // cartesia version from parameters
     } else if (cartesiaVersionFromWSOptions) {
-      // cartesia version from ws options
+      // cartesia version from options
       url.searchParams.set('cartesia_version', cartesiaVersionFromWSOptions);
     } else {
       // set cartesia version
@@ -72,14 +72,14 @@ export class ExternalVADWS extends ExternalVADWSBase<NodeWebSocket | BrowserWebS
 
     const apiKeyFromWSOptions = getAuthorizationTokenFromHeaders(wsOptionsHeaders);
     if (url.searchParams.get('access_token')) {
-      // use current access token
+      // access token from parameters
     } else if (this._client.token) {
       // set access token
       url.searchParams.set('access_token', this._client.token);
     } else if (url.searchParams.get('api_key')) {
-      // use current api key
+      // api key from parameters
     } else if (apiKeyFromWSOptions) {
-      // override api key
+      // api key from options
       url.searchParams.set('api_key', apiKeyFromWSOptions);
     } else if (this._client.apiKey) {
       // api key from client

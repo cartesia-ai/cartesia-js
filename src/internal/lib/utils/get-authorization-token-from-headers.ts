@@ -1,6 +1,6 @@
 /**
  * Returns `<token>` from `authorization: Bearer <token>`.
- * @param headers Header names should be lowercased.
+ * @param headers may or may not contain the Authorization header.
  * @returns `<token>` or undefined if headers did not contain the expected header and value.
  */
 export function getAuthorizationTokenFromHeaders(headers: Headers): string | undefined {
