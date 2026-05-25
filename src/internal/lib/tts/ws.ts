@@ -49,7 +49,7 @@ export interface ContextOptions {
    * The ID of the model to use for the generation. See
    * [Models](/build-with-cartesia/tts-models) for available models.
    */
-  model_id: string;
+  model_id: TTSAPI.TTSModel;
 
   output_format: TTSAPI.RawOutputFormat;
 
