@@ -200,12 +200,14 @@ Types:
 - <code><a href="./src/resources/tts.ts">GenerationRequest</a></code>
 - <code><a href="./src/resources/tts.ts">InfillModel</a></code>
 - <code><a href="./src/resources/tts.ts">ModelSpeed</a></code>
+- <code><a href="./src/resources/tts.ts">MP3OutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">OutputFormatContainer</a></code>
 - <code><a href="./src/resources/tts.ts">RawEncoding</a></code>
 - <code><a href="./src/resources/tts.ts">RawOutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">TTSModel</a></code>
 - <code><a href="./src/resources/tts.ts">TTSSSEEvent</a></code>
 - <code><a href="./src/resources/tts.ts">VoiceSpecifier</a></code>
+- <code><a href="./src/resources/tts.ts">WAVOutputFormat</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketClientEvent</a></code>
 - <code><a href="./src/resources/tts.ts">WebsocketResponse</a></code>
 
