@@ -1,10 +1,17 @@
 import * as fs from 'fs';
 import { Cartesia } from '../client';
 import { type RequestOptions as InternalRequestOptions } from '../internal/request-options';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
 import { CartesiaError } from '../error';
+
+let _stream: Partial<typeof import('stream')> | undefined;
+try {
+  _stream = require('stream');
+} catch {
+  // Not available in browsers
+}
 
 export interface BackCompatVoiceChangerBytesRequest {
   voiceId: string;
@@ -28,6 +35,12 @@ export class VoiceChangerWrapper {
     request: BackCompatVoiceChangerBytesRequest,
     requestOptions?: BackCompatRequestOptions,
   ): Promise<Readable> {
+    if (_stream?.Readable?.fromWeb === undefined) {
+      throw new CartesiaError(
+        'CartesiaClient is deprecated and does not work in browsers. Use `import Cartesia from "@carteisa/cartesia-js"` for the browser-compatible client.',
+      );
+    }
+
     const params: Cartesia.VoiceChanger.VoiceChangerGenerateParams = {
       clip: clip,
       'voice[id]': request.voiceId,
@@ -71,7 +84,6 @@ export class VoiceChangerWrapper {
       throw new CartesiaError('Response body is null');
     }
 
-    // @ts-ignore
-    return Readable.fromWeb(response.body);
+    return _stream.Readable.fromWeb(response.body as any);
   }
 }
