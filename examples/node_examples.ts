@@ -645,11 +645,11 @@ async function sttTranscribe(client: Cartesia, args: string[]): Promise<void> {
  * real-time 100 ms chunks, then prints turn events.
  */
 async function sttTurnDetectingWebsocket(client: Cartesia, args: string[]): Promise<void> {
-  const transcript = args.length > 0 ? args.join(' ') : 'The quick brown fox jumps over the lazy dog.';
+  const input = args.length > 0 ? args.join(' ') : 'The quick brown fox jumps over the lazy dog.';
   const encoding = 'pcm_s16le';
   const sampleRate = 16000;
 
-  console.log(`Generating audio for: ${JSON.stringify(transcript)}`);
+  console.log(`Generating audio for: ${JSON.stringify(input)}`);
 
   const ws = client.stt.turnDetecting.websocket({
     model: 'ink-2',
@@ -661,7 +661,7 @@ async function sttTurnDetectingWebsocket(client: Cartesia, args: string[]): Prom
   const sender = (async () => {
     const ttsResponse = await client.tts.generate({
       model_id: 'sonic-latest',
-      transcript,
+      transcript: input,
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding, sample_rate: sampleRate },
       language: 'en',
@@ -677,31 +677,41 @@ async function sttTurnDetectingWebsocket(client: Cartesia, args: string[]): Prom
     ws.send({ type: 'close' });
   })();
 
+  // Concatenate transcripts from all turn.end events to get the full transcript
+  // Do not strip or add whitespace!
+  let fullTranscript = '';
+
   for await (const event of ws.stream()) {
     if (event.type === 'message') {
       const m = event.message;
       switch (m.type) {
         case 'connected':
-          console.log(`Connected (request_id=${m.request_id})`);
+          console.log(`connected      | request_id=${m.request_id}`);
           break;
         case 'turn.start':
-          console.log('Turn started');
+          console.log('turn.start     |');
           break;
         case 'turn.update':
-          console.log(`Turn (partial): ${m.transcript}`);
+          console.log(`turn.update    | ${m.transcript}`);
+          break;
+        case 'turn.eager_end':
+          console.log(`turn.eager_end | ${m.transcript}`);
+          break;
+        case 'turn.resume':
+          console.log('turn.resume    |');
           break;
         case 'turn.end':
-          console.log(`Turn (final):   ${m.transcript}`);
+          console.log(`turn.end       | ${m.transcript}`);
+          fullTranscript += m.transcript;
           break;
       }
     } else if (event.type === 'error') {
-      console.error('Error:', event.error.message);
-    } else if (event.type === 'close') {
-      break;
+      console.error(`error        | ${event.error.message}`);
     }
   }
 
   await sender;
+  console.log(`Full transcript: ${JSON.stringify(fullTranscript)}`);
 }
 
 /**
@@ -712,24 +722,26 @@ async function sttTurnDetectingWebsocket(client: Cartesia, args: string[]): Prom
  * buffered audio.
  */
 async function sttExternalVADWebsocket(client: Cartesia, args: string[]): Promise<void> {
-  const transcript = args.length > 0 ? args.join(' ') : 'The quick brown fox jumps over the lazy dog.';
+  const input =
+    args.length > 0 ?
+      args.join(' ')
+    : 'The quick brown fox jumps over the lazy dog. Sandy sells seashells on the sea shore.';
   const encoding = 'pcm_s16le';
   const sampleRate = 16000;
 
-  console.log(`Generating audio for: ${JSON.stringify(transcript)}`);
+  console.log(`Generating audio for: ${JSON.stringify(input)}`);
 
   const ws = client.stt.externalVAD.websocket({
-    model: 'ink-whisper',
+    model: 'ink-2',
     encoding,
     sample_rate: sampleRate,
-    language: 'en',
   });
   ws.on('error', (err) => console.error('WS error:', err.message));
 
-  const sender = (async () => {
+  const generateAudioAndPushToSTT = async (utterance: string): Promise<void> => {
     const ttsResponse = await client.tts.generate({
       model_id: 'sonic-latest',
-      transcript,
+      transcript: utterance,
       voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
       output_format: { container: 'raw', encoding, sample_rate: sampleRate },
       language: 'en',
@@ -743,35 +755,51 @@ async function sttExternalVADWebsocket(client: Cartesia, args: string[]): Promis
     );
     // Triggers transcription of buffered audio.
     ws.send('finalize');
+  };
+
+  const sender = (async () => {
+    // Split transcript on fullstops to simulate multiple user utterances
+    // In reality, you would run voice activity detection (VAD) on the user audio stream
+    // to decide when to send the "finalize" command
+    for (const utterance of input.split(/[.]/g).filter((u) => /\w/g.exec(u))) {
+      await generateAudioAndPushToSTT(utterance);
+    }
+
     // Flushes remaining audio, sends a `done` ack, then closes the socket.
     ws.send('close');
   })();
 
   // Transcript chunks are deltas — concatenate is_final chunks to build the
   // full transcript. Do not add or strip whitespace between them.
-  let result = '';
+  let fullTranscript = '';
 
   for await (const event of ws.stream()) {
     if (event.type === 'message') {
       const m = event.message;
-      if (m.type === 'transcript') {
-        const tag = m.is_final ? 'final  ' : 'partial';
-        console.log(`[${tag}] ${JSON.stringify(m.text)}`);
-        if (m.is_final) result += m.text;
-      } else if (m.type === 'flush_done') {
-        console.log('flush_done: server finished processing buffered audio');
-      } else if (m.type === 'done') {
-        console.log('done: server processed all audio before close');
+      switch (m.type) {
+        case 'transcript': {
+          if (m.is_final) {
+            console.log(`transcript | ${m.text}`);
+            fullTranscript += m.text;
+          }
+          break;
+        }
+        case 'flush_done': {
+          console.log('flush_done |');
+          break;
+        }
+        case 'done': {
+          console.log('done       |');
+          break;
+        }
       }
     } else if (event.type === 'error') {
-      console.error('Error:', event.error.message);
-    } else if (event.type === 'close') {
-      break;
+      console.error(`error    | ${event.error.message}`);
     }
   }
 
   await sender;
-  console.log(`Full transcript: ${JSON.stringify(result)}`);
+  console.log(`Full transcript: ${JSON.stringify(fullTranscript)}`);
 }
 
 // =============================================================================

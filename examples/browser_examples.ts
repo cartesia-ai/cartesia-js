@@ -286,18 +286,40 @@ async function sttTurnDetectingWebsocket(client: Cartesia): Promise<void> {
   const stopTimer = setTimeout(stop, 30_000);
 
   try {
+    // Concatenate transcripts from all turn.end events to get the full transcript
+    // Do not strip or add whitespace!
+    let fullTranscript = '';
+
     for await (const event of ws.stream()) {
       if (event.type === 'message') {
         const m = event.message;
-        if (m.type === 'turn.start') console.log('Turn started');
-        else if (m.type === 'turn.update') console.log(`Turn (partial): ${m.transcript}`);
-        else if (m.type === 'turn.end') console.log(`Turn (final):   ${m.transcript}`);
+        switch (m.type) {
+          case 'connected':
+            console.log(`connected      | request_id=${m.request_id}`);
+            break;
+          case 'turn.start':
+            console.log('turn.start     |');
+            break;
+          case 'turn.update':
+            console.log(`turn.update    | ${m.transcript}`);
+            break;
+          case 'turn.eager_end':
+            console.log(`turn.eager_end | ${m.transcript}`);
+            break;
+          case 'turn.resume':
+            console.log('turn.resume    |');
+            break;
+          case 'turn.end':
+            console.log(`turn.end       | ${m.transcript}`);
+            fullTranscript += m.transcript;
+            break;
+        }
       } else if (event.type === 'error') {
-        console.error('Error:', event.error.message);
-      } else if (event.type === 'close') {
-        break;
+        console.error(`error        | ${event.error.message}`);
       }
     }
+
+    console.log(`Full transcript: ${JSON.stringify(fullTranscript)}`);
   } finally {
     stopped = true;
     clearTimeout(stopTimer);
@@ -341,7 +363,7 @@ async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
   const capture = new AudioWorkletNode(audioCtx, 'pcm-capture');
 
   const ws = client.stt.externalVAD.websocket({
-    model: 'ink-whisper',
+    model: 'ink-2',
     encoding: AUDIO_CONTEXT_ENCODING,
     sample_rate: audioCtx.sampleRate,
   });
@@ -371,25 +393,31 @@ async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
 
   // Transcript chunks are deltas — concatenate is_final chunks to build the
   // full transcript. Do not add or strip whitespace between them.
-  let transcript = '';
+  let fullTranscript = '';
 
   try {
     for await (const event of ws.stream()) {
       if (event.type === 'message') {
         const m = event.message;
-        if (m.type === 'transcript') {
-          const tag = m.is_final ? 'final  ' : 'partial';
-          console.log(`[${tag}] ${JSON.stringify(m.text)}`);
-          if (m.is_final) transcript += m.text;
-        } else if (m.type === 'flush_done') {
-          console.log('flush_done');
-        } else if (m.type === 'done') {
-          console.log('done');
+        switch (m.type) {
+          case 'transcript': {
+            if (m.is_final) {
+              console.log(`transcript | ${m.text}`);
+              fullTranscript += m.text;
+            }
+            break;
+          }
+          case 'flush_done': {
+            console.log('flush_done |');
+            break;
+          }
+          case 'done': {
+            console.log('done       |');
+            break;
+          }
         }
       } else if (event.type === 'error') {
-        console.error('Error:', event.error.message);
-      } else if (event.type === 'close') {
-        break;
+        console.error(`error    | ${event.error.message}`);
       }
     }
   } finally {
@@ -402,7 +430,7 @@ async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
     await audioCtx.close();
   }
 
-  console.log(`Full transcript: ${JSON.stringify(transcript)}`);
+  console.log(`Full transcript: ${JSON.stringify(fullTranscript)}`);
 }
 
 // =============================================================================
