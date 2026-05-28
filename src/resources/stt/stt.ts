@@ -119,20 +119,35 @@ export interface STTTranscribeResponse {
   text: string;
 
   /**
+   * The message type. Always `transcript` for a batch transcription response.
+   */
+  type: 'transcript';
+
+  /**
    * The duration of the input audio in seconds.
    */
-  duration?: number | null;
+  duration?: number;
+
+  /**
+   * @deprecated Not used for batch transcription.
+   */
+  is_final?: boolean;
 
   /**
    * The specified language of the input audio.
    */
-  language?: string | null;
+  language?: string;
+
+  /**
+   * Unique identifier for this transcription request.
+   */
+  request_id?: string;
 
   /**
    * Word-level timestamps showing the start and end time of each word. Only included
    * when `[word]` is passed into `timestamp_granularities[]`.
    */
-  words?: Array<STTTranscribeResponse.Word> | null;
+  words?: Array<STTTranscribeResponse.Word>;
 }
 
 export namespace STTTranscribeResponse {
@@ -156,18 +171,19 @@ export namespace STTTranscribeResponse {
 
 export interface STTTranscribeParams {
   /**
-   * Query param: The encoding format to process the audio as. If not specified, the
-   * audio file will be decoded automatically.
-   *
-   * **Supported formats:**
-   *
-   * - `pcm_s16le` - 16-bit signed integer PCM, little-endian (recommended for best
-   *   performance)
-   * - `pcm_s32le` - 32-bit signed integer PCM, little-endian
-   * - `pcm_f16le` - 16-bit floating point PCM, little-endian
-   * - `pcm_f32le` - 32-bit floating point PCM, little-endian
-   * - `pcm_mulaw` - 8-bit μ-law encoded PCM
-   * - `pcm_alaw` - 8-bit A-law encoded PCM
+   * Body param
+   */
+  file: Uploadable;
+
+  /**
+   * Body param: Models that support batch speech-to-text transcription. See
+   * [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
+   * all options.
+   */
+  model: STTBatchModel;
+
+  /**
+   * Query param: The encoding format for audio data sent to the STT WebSocket.
    */
   encoding?: STTEncoding | null;
 
@@ -175,11 +191,6 @@ export interface STTTranscribeParams {
    * Query param: The sample rate of the audio in Hz.
    */
   sample_rate?: number | null;
-
-  /**
-   * Body param
-   */
-  file?: Uploadable;
 
   /**
    * Body param: The language of the input audio in ISO-639-1 format. Defaults to
@@ -285,21 +296,13 @@ export interface STTTranscribeParams {
     | 'ba'
     | 'jw'
     | 'su'
-    | 'yue'
-    | null;
-
-  /**
-   * Body param: Models that support batch speech-to-text transcription. See
-   * [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
-   * all options.
-   */
-  model?: STTBatchModel;
+    | 'yue';
 
   /**
    * Body param: The timestamp granularities to populate for this transcription.
    * Currently only `word` level timestamps are supported.
    */
-  timestamp_granularities?: Array<'word'> | null;
+  timestamp_granularities?: Array<'word'>;
 }
 
 STT.TurnDetecting = TurnDetecting;
