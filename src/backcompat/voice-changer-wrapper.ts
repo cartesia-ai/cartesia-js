@@ -37,7 +37,7 @@ export class VoiceChangerWrapper {
   ): Promise<Readable> {
     if (_stream?.Readable?.fromWeb === undefined) {
       throw new CartesiaError(
-        'Failed to load the "ws" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
+        'Failed to load the "stream" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
       );
     }
 
