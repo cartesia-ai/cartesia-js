@@ -162,7 +162,7 @@ export class WebSocketWrapper {
   async connect() {
     if (_ws?.WebSocket === undefined) {
       throw new CartesiaError(
-        'The "ws" peer dependency is required for WebSocket support in Node.js. If you are using CartesiaClient from a browser, switch to `import Cartesia from "@cartesia/cartesia-js"` for the browser-compatible client.',
+        'Failed to load the "ws" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
       );
     }
 
@@ -354,7 +354,7 @@ export class TTSWrapper {
   ): Promise<Readable> {
     if (_stream?.Readable?.fromWeb === undefined) {
       throw new CartesiaError(
-        'CartesiaClient is deprecated and does not work in browsers. Use `import Cartesia from "@carteisa/cartesia-js"` for the browser-compatible client.',
+        'Failed to load the "stream" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
       );
     }
 
@@ -410,7 +410,7 @@ export class TTSWrapper {
   async bytes(request: BackCompatTtsRequest, requestOptions?: BackCompatRequestOptions): Promise<Readable> {
     if (_stream?.Readable?.fromWeb === undefined) {
       throw new CartesiaError(
-        'CartesiaClient is deprecated and does not work in browsers. Use `import Cartesia from "@carteisa/cartesia-js"` for the browser-compatible client.',
+        'Failed to load the "stream" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
       );
     }
 

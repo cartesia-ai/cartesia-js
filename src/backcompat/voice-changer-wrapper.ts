@@ -37,7 +37,7 @@ export class VoiceChangerWrapper {
   ): Promise<Readable> {
     if (_stream?.Readable?.fromWeb === undefined) {
       throw new CartesiaError(
-        'CartesiaClient is deprecated and does not work in browsers. Use `import Cartesia from "@carteisa/cartesia-js"` for the browser-compatible client.',
+        'Failed to load the "ws" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
       );
     }
 
