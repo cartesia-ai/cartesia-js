@@ -7,20 +7,20 @@ import { AutoFinalizeWS, type AutoFinalizeWSClientOptions, type AutoFinalizeWSPa
 export class AutoFinalize extends APIResource {
   /**
    * Realtime Speech-to-Text with user turn detection.
-   * 
+   *
    * This is the recommended STT method for building voice agents.
    *
    * Usage:
    *   - Send audio in chunks (e.g. 100 ms) using `ws.sendRaw()`
    *   - Send JSON commands using `ws.send()`
    *   - See [examples](https://github.com/cartesia-ai/cartesia-js/tree/main/examples) for reference
-   * 
+   *
    * Supports:
    *   - Streaming transcription
    *   - Native turn detection (`turn.start`, `turn.update`, `turn.end`)
    *   - Eager end-of-turn prediction (`turn.eager_end`, `turn.resume`)
    *   - Long-lived connections that reuse a live network connection for low latency
-   * 
+   *
    * See also:
    *   - [API Reference](https://docs.cartesia.ai/api-reference/stt/turns/websocket)
    *   - [Turn Events](https://docs.cartesia.ai/use-the-api/stt/turns/turns)

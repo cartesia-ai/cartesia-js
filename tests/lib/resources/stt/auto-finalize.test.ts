@@ -1,5 +1,5 @@
 /**
- * Tests for the TurnDetecting WebSocket resource.
+ * Tests for the AutoFinalize WebSocket resource.
  *
  * Use a fake client (no API key required) so that the underlying ws.WebSocket
  * fails to connect against a non-routable URL — we then inject events directly
@@ -7,8 +7,8 @@
  */
 
 import Cartesia from '@cartesia/cartesia-js';
-import { TurnDetectingWS } from '@cartesia/cartesia-js/resources/stt/turn-detecting/ws';
-import type { STTTurnsWebsocketResponse } from '@cartesia/cartesia-js/resources/stt/turn-detecting';
+import { AutoFinalizeWS } from '@cartesia/cartesia-js/resources/stt/auto-finalize/ws';
+import type { STTAutoFinalizeWebsocketResponse } from '@cartesia/cartesia-js/resources/stt/auto-finalize';
 import { NodeWebSocket } from '@cartesia/cartesia-js/internal/ws-adapter-node';
 
 // ---------------------------------------------------------------------------
@@ -29,16 +29,16 @@ function createClient(): Cartesia {
 }
 
 function createTestWS(
-  parameters: Parameters<Cartesia['stt']['turnDetecting']['websocket']>[0] = DEFAULT_PARAMS,
-): TurnDetectingWS {
+  parameters: Parameters<Cartesia['stt']['autoFinalize']['websocket']>[0] = DEFAULT_PARAMS,
+): AutoFinalizeWS {
   const client = createClient();
-  const ws = client.stt.turnDetecting.websocket(parameters);
+  const ws = client.stt.autoFinalize.websocket(parameters);
   // Suppress connection-error noise from the unreachable URL.
   ws.on('error', () => {});
   return ws;
 }
 
-function platformSocket(ws: TurnDetectingWS): InstanceType<typeof import('ws').WebSocket> {
+function platformSocket(ws: AutoFinalizeWS): InstanceType<typeof import('ws').WebSocket> {
   const socket = ws.socket;
   if (!(socket instanceof NodeWebSocket)) {
     throw new Error('expected NodeWebSocket in tests');
@@ -46,11 +46,11 @@ function platformSocket(ws: TurnDetectingWS): InstanceType<typeof import('ws').W
   return socket.platformSocket;
 }
 
-function injectMessage(ws: TurnDetectingWS, event: Record<string, unknown>) {
+function injectMessage(ws: AutoFinalizeWS, event: Record<string, unknown>) {
   platformSocket(ws).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
-function injectBinary(ws: TurnDetectingWS, data: Buffer) {
+function injectBinary(ws: AutoFinalizeWS, data: Buffer) {
   platformSocket(ws).emit('message', data, true);
 }
 
@@ -60,7 +60,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('TurnDetectingWS URL construction', () => {
+describe('AutoFinalizeWS URL construction', () => {
   test('uses the /stt/turns/websocket endpoint with ws:// protocol on http baseURL', () => {
     const ws = createTestWS();
     expect(ws.url.pathname).toBe('/stt/turns/websocket');
@@ -70,7 +70,7 @@ describe('TurnDetectingWS URL construction', () => {
 
   test('uses wss:// protocol on https baseURL', () => {
     const client = new Cartesia({ apiKey: 'test', baseURL: 'https://example.invalid' });
-    const ws = client.stt.turnDetecting.websocket(DEFAULT_PARAMS);
+    const ws = client.stt.autoFinalize.websocket(DEFAULT_PARAMS);
     ws.on('error', () => {});
     expect(ws.url.protocol).toBe('wss:');
     ws.close();
@@ -89,7 +89,7 @@ describe('TurnDetectingWS URL construction', () => {
   });
 });
 
-describe('TurnDetectingWS send', () => {
+describe('AutoFinalizeWS send', () => {
   test('send({ type: "close" }) JSON-encodes the command', async () => {
     const ws = createTestWS();
     const socket = platformSocket(ws);
@@ -138,10 +138,10 @@ describe('TurnDetectingWS send', () => {
   });
 });
 
-describe('TurnDetectingWS receive', () => {
+describe('AutoFinalizeWS receive', () => {
   test('emits a connected event when the server announces the session', () => {
     const ws = createTestWS();
-    const received: STTTurnsWebsocketResponse[] = [];
+    const received: STTAutoFinalizeWebsocketResponse[] = [];
     ws.on('connected', (e) => received.push(e));
 
     injectMessage(ws, { type: 'connected', request_id: 'req-1' });
@@ -234,7 +234,7 @@ describe('TurnDetectingWS receive', () => {
 
   test('emits a generic event for every server message regardless of type', () => {
     const ws = createTestWS();
-    const events: STTTurnsWebsocketResponse[] = [];
+    const events: STTAutoFinalizeWebsocketResponse[] = [];
     ws.on('event', (e) => events.push(e));
 
     injectMessage(ws, { type: 'connected', request_id: 'r' });
@@ -246,7 +246,7 @@ describe('TurnDetectingWS receive', () => {
   });
 });
 
-describe('TurnDetectingWS stream() iterator', () => {
+describe('AutoFinalizeWS stream() iterator', () => {
   test('yields injected messages and exits on close', async () => {
     const ws = createTestWS();
     const stream = ws.stream();
@@ -314,7 +314,7 @@ describe('TurnDetectingWS stream() iterator', () => {
   });
 });
 
-describe('TurnDetectingWS close', () => {
+describe('AutoFinalizeWS close', () => {
   test('emits close with the supplied code/reason and drains the send queue', async () => {
     const ws = createTestWS();
     const socket = platformSocket(ws);

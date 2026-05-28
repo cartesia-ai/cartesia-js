@@ -616,18 +616,43 @@ async function voicesDelete(client: Cartesia, args: string[]): Promise<void> {
 // STT (Speech-to-Text)
 // =============================================================================
 
-/** Transcribe audio with word timestamps. */
+/**
+ * Transcribe an audio file with word timestamps.
+ *
+ * Pass a path to an audio file, or omit it to generate a sample WAV via TTS.
+ */
 async function sttTranscribe(client: Cartesia, args: string[]): Promise<void> {
-  const [filePath] = args;
-  if (!filePath) {
-    console.error('Usage: sttTranscribe <filePath>');
-    process.exit(1);
+  async function generateSampleWav(): Promise<[string, string]> {
+    const transcript = 'The quick brown fox jumps over the lazy dog.';
+    const language = 'en';
+    console.log(`No audio file provided. Generating a sample for: ${JSON.stringify(transcript)}`);
+    const response = await client.tts.generate({
+      model_id: 'sonic-latest',
+      transcript,
+      voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+      output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 16000 },
+      language: language,
+    });
+    const path = `stt_sample_${timestamp()}.wav`;
+    fs.writeFileSync(path, Buffer.from(await response.arrayBuffer()));
+    console.log(`Saved sample audio to ${path}`);
+    return [path, language];
   }
+
+  let [filePath, language] = args;
+  if (!filePath) {
+    [filePath, language] = await generateSampleWav();
+  } else if (!language) {
+    console.error('Usage: sttTranscribe <audio_file> <language_code>');
+    console.error('Example: sttTranscribe my_audio.wav en');
+    return process.exit(1);
+  }
+
   const file = fs.createReadStream(filePath);
   const response = await client.stt.transcribe({
     file,
     model: 'ink-whisper',
-    language: 'en',
+    language,
     timestamp_granularities: ['word'],
   });
   console.log(response.text);
@@ -639,19 +664,19 @@ async function sttTranscribe(client: Cartesia, args: string[]): Promise<void> {
 }
 
 /**
- * Realtime STT with turn detection — recommended for voice agents.
+ * Realtime STT with turn detection: recommended for voice agents.
  *
  * Generates test audio via TTS and pipes it into the STT WebSocket in
  * real-time 100 ms chunks, then prints turn events.
  */
-async function sttTurnDetectingWebsocket(client: Cartesia, args: string[]): Promise<void> {
+async function sttAutoFinalizeWebsocket(client: Cartesia, args: string[]): Promise<void> {
   const input = args.length > 0 ? args.join(' ') : 'The quick brown fox jumps over the lazy dog.';
   const encoding = 'pcm_s16le';
   const sampleRate = 16000;
 
   console.log(`Generating audio for: ${JSON.stringify(input)}`);
 
-  const ws = client.stt.turnDetecting.websocket({
+  const ws = client.stt.autoFinalize.websocket({
     model: 'ink-2',
     encoding,
     sample_rate: sampleRate,
@@ -715,13 +740,13 @@ async function sttTurnDetectingWebsocket(client: Cartesia, args: string[]): Prom
 }
 
 /**
- * Realtime STT with external VAD — recommended for push-to-talk apps.
+ * Realtime STT (Manual Finalize): recommended for push-to-talk apps.
  *
  * Generates test audio via TTS, pipes it into the STT WebSocket in real-time
  * 100 ms chunks, then sends `finalize` to trigger transcription of the
  * buffered audio.
  */
-async function sttExternalVADWebsocket(client: Cartesia, args: string[]): Promise<void> {
+async function sttManualFinalizeWebsocket(client: Cartesia, args: string[]): Promise<void> {
   const input =
     args.length > 0 ?
       args.join(' ')
@@ -731,7 +756,7 @@ async function sttExternalVADWebsocket(client: Cartesia, args: string[]): Promis
 
   console.log(`Generating audio for: ${JSON.stringify(input)}`);
 
-  const ws = client.stt.externalVAD.websocket({
+  const ws = client.stt.manualFinalize.websocket({
     model: 'ink-2',
     encoding,
     sample_rate: sampleRate,
@@ -761,7 +786,7 @@ async function sttExternalVADWebsocket(client: Cartesia, args: string[]): Promis
     // Split transcript on fullstops to simulate multiple user utterances
     // In reality, you would run voice activity detection (VAD) on the user audio stream
     // to decide when to send the "finalize" command
-    for (const utterance of input.split(/[.]/g).filter((u) => /\w/g.exec(u))) {
+    for (const utterance of input.split('.').filter((u) => /\w/g.exec(u))) {
       await generateAudioAndPushToSTT(utterance);
     }
 
@@ -858,8 +883,8 @@ const examples: Record<string, (client: Cartesia, args: string[]) => Promise<voi
   voicesUpdate,
   voicesDelete,
   sttTranscribe,
-  sttTurnDetectingWebsocket,
-  sttExternalVADWebsocket,
+  sttAutoFinalizeWebsocket,
+  sttManualFinalizeWebsocket,
   errorHandling,
 };
 

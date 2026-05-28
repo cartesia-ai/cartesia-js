@@ -1,5 +1,5 @@
 /**
- * Tests for the ExternalVAD WebSocket resource.
+ * Tests for the ManualFinalize WebSocket resource.
  *
  * Use a fake client (no API key required) so that the underlying ws.WebSocket
  * fails to connect against a non-routable URL — we then inject events directly
@@ -7,8 +7,8 @@
  */
 
 import Cartesia from '@cartesia/cartesia-js';
-import { ExternalVADWS } from '@cartesia/cartesia-js/resources/stt/external-vad/ws';
-import type { STTExternalVADWebsocketResponse } from '@cartesia/cartesia-js/resources/stt/external-vad';
+import { ManualFinalizeWS } from '@cartesia/cartesia-js/resources/stt/manual-finalize/ws';
+import type { STTManualFinalizeWebsocketResponse } from '@cartesia/cartesia-js/resources/stt/manual-finalize';
 import { NodeWebSocket } from '@cartesia/cartesia-js/internal/ws-adapter-node';
 
 // ---------------------------------------------------------------------------
@@ -29,16 +29,16 @@ function createClient(): Cartesia {
 }
 
 function createTestWS(
-  parameters: Parameters<Cartesia['stt']['externalVAD']['websocket']>[0] = DEFAULT_PARAMS,
-): ExternalVADWS {
+  parameters: Parameters<Cartesia['stt']['manualFinalize']['websocket']>[0] = DEFAULT_PARAMS,
+): ManualFinalizeWS {
   const client = createClient();
-  const ws = client.stt.externalVAD.websocket(parameters);
+  const ws = client.stt.manualFinalize.websocket(parameters);
   // Suppress connection-error noise from the unreachable URL.
   ws.on('error', () => {});
   return ws;
 }
 
-function platformSocket(ws: ExternalVADWS): InstanceType<typeof import('ws').WebSocket> {
+function platformSocket(ws: ManualFinalizeWS): InstanceType<typeof import('ws').WebSocket> {
   const socket = ws.socket;
   if (!(socket instanceof NodeWebSocket)) {
     throw new Error('expected NodeWebSocket in tests');
@@ -46,11 +46,11 @@ function platformSocket(ws: ExternalVADWS): InstanceType<typeof import('ws').Web
   return socket.platformSocket;
 }
 
-function injectMessage(ws: ExternalVADWS, event: Record<string, unknown>) {
+function injectMessage(ws: ManualFinalizeWS, event: Record<string, unknown>) {
   platformSocket(ws).emit('message', Buffer.from(JSON.stringify(event)), false);
 }
 
-function injectBinary(ws: ExternalVADWS, data: Buffer) {
+function injectBinary(ws: ManualFinalizeWS, data: Buffer) {
   platformSocket(ws).emit('message', data, true);
 }
 
@@ -60,7 +60,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('ExternalVADWS URL construction', () => {
+describe('ManualFinalizeWS URL construction', () => {
   test('uses the /stt/websocket endpoint with ws:// protocol on http baseURL', () => {
     const ws = createTestWS();
     expect(ws.url.pathname).toBe('/stt/websocket');
@@ -70,7 +70,7 @@ describe('ExternalVADWS URL construction', () => {
 
   test('uses wss:// protocol on https baseURL', () => {
     const client = new Cartesia({ apiKey: 'test', baseURL: 'https://example.invalid' });
-    const ws = client.stt.externalVAD.websocket(DEFAULT_PARAMS);
+    const ws = client.stt.manualFinalize.websocket(DEFAULT_PARAMS);
     ws.on('error', () => {});
     expect(ws.url.protocol).toBe('wss:');
     ws.close();
@@ -102,7 +102,7 @@ describe('ExternalVADWS URL construction', () => {
   });
 });
 
-describe('ExternalVADWS send', () => {
+describe('ManualFinalizeWS send', () => {
   test('send("finalize") writes the literal command string (no JSON-encoding)', async () => {
     const ws = createTestWS();
     const socket = platformSocket(ws);
@@ -154,10 +154,10 @@ describe('ExternalVADWS send', () => {
   });
 });
 
-describe('ExternalVADWS receive', () => {
+describe('ManualFinalizeWS receive', () => {
   test('emits a parsed transcript event', () => {
     const ws = createTestWS();
-    const received: STTExternalVADWebsocketResponse[] = [];
+    const received: STTManualFinalizeWebsocketResponse[] = [];
     ws.on('transcript', (e) => received.push(e));
 
     injectMessage(ws, {
@@ -236,7 +236,7 @@ describe('ExternalVADWS receive', () => {
 
   test('emits a generic event for every server message regardless of type', () => {
     const ws = createTestWS();
-    const events: STTExternalVADWebsocketResponse[] = [];
+    const events: STTManualFinalizeWebsocketResponse[] = [];
     ws.on('event', (e) => events.push(e));
 
     injectMessage(ws, { type: 'transcript', request_id: 'r', text: 'hi', is_final: false });
@@ -248,7 +248,7 @@ describe('ExternalVADWS receive', () => {
   });
 });
 
-describe('ExternalVADWS stream() iterator', () => {
+describe('ManualFinalizeWS stream() iterator', () => {
   test('yields injected messages and exits on close', async () => {
     const ws = createTestWS();
     const stream = ws.stream();
@@ -318,7 +318,7 @@ describe('ExternalVADWS stream() iterator', () => {
   });
 });
 
-describe('ExternalVADWS close', () => {
+describe('ManualFinalizeWS close', () => {
   test('emits close with the supplied code/reason and drains the send queue', async () => {
     const ws = createTestWS();
     const socket = platformSocket(ws);

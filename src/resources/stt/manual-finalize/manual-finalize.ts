@@ -8,11 +8,11 @@ import { ManualFinalizeWS, type ManualFinalizeWSParameters, type ManualFinalizeW
 export class ManualFinalize extends APIResource {
   /**
    * Realtime speech-to-text without turn detection.
-   * 
+   *
    * This is the recommended endpoint for "push-to-talk" apps.
-   * 
+   *
    * This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using `auto finalize` instead.
-   * 
+   *
    * Basic usage:
    *   1. Connect to the WebSocket: `const ws = cartesia.stt.manualFinalize.websocket({ model, encoding, sample_rate })`
    *   2. Send audio in small chunks (e.g. 100ms) using `ws.sendRaw()`
@@ -21,9 +21,9 @@ export class ManualFinalize extends APIResource {
    *   5. Repeat 2-4
    *   6. Finalize any buffered audio and close the session cleanly: `ws.send("close")`
    *   7. Receive the remaining transcript chunks
-   * 
+   *
    * See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
-   * 
+   *
    * See [examples](https://github.com/cartesia-ai/cartesia-js/tree/main/examples) for an implementation references.
    */
   websocket(

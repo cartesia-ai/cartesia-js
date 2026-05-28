@@ -289,7 +289,8 @@ export interface STTTranscribeParams {
     | 'ba'
     | 'jw'
     | 'su'
-    | 'yue';
+    | 'yue'
+    | (string & {});
 
   /**
    * Body param: The timestamp granularities to populate for this transcription.

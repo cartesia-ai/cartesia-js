@@ -27,7 +27,7 @@ describe('getAuthorizationTokenFromHeaders', () => {
     expect(getAuthorizationTokenFromHeaders(headers)).toBe('first');
   });
 
-  describe('when paired with buildHeaders (as used in ExternalVADWS)', () => {
+  describe('when paired with buildHeaders (as used in ManualFinalizeWS)', () => {
     test('extracts the token from headers built by buildHeaders', () => {
       const { values } = buildHeaders([{ Authorization: 'Bearer ws-options-token' }]);
       expect(getAuthorizationTokenFromHeaders(values)).toBe('ws-options-token');
