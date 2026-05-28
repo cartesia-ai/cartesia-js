@@ -4,9 +4,9 @@ import type * as WS from 'ws';
 import { BrowserWebSocket } from '../../../internal/ws-adapter-browser';
 import { NodeWebSocket } from '../../../internal/ws-adapter-node';
 import {
-  TurnDetectingWSBase,
-  type TurnDetectingWSBaseOptions,
-  type TurnDetectingWSParameters,
+  ManualFinalizeWSBase,
+  type ManualFinalizeWSBaseOptions,
+  type ManualFinalizeWSParameters,
 } from './ws-base';
 import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
@@ -19,21 +19,21 @@ try {
   // Optional — in browsers, we use the native WebSocket API instead.
 }
 
-export type { TurnDetectingWSParameters, TurnDetectingWSReconnectOptions } from './ws-base';
+export type { ManualFinalizeWSParameters, ManualFinalizeWSReconnectOptions } from './ws-base';
 
-export interface TurnDetectingWSClientOptions extends WS.ClientOptions, TurnDetectingWSBaseOptions {}
+export interface ManualFinalizeWSClientOptions extends WS.ClientOptions, ManualFinalizeWSBaseOptions {}
 
-export class TurnDetectingWS extends TurnDetectingWSBase<NodeWebSocket | BrowserWebSocket> {
+export class ManualFinalizeWS extends ManualFinalizeWSBase<NodeWebSocket | BrowserWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
 
   constructor(
     client: Cartesia,
-    parameters: TurnDetectingWSParameters,
-    options?: TurnDetectingWSClientOptions | null | undefined,
+    parameters: ManualFinalizeWSParameters,
+    options?: ManualFinalizeWSClientOptions | null | undefined,
   ) {
     if (_ws?.WebSocket === undefined && typeof WebSocket === 'undefined') {
       throw new Error(
-        'TurnDetectingWS from "@cartesia/cartesia-js/resources/stt/turn-detecting/ws" requires the "ws" package but it could not be loaded.',
+        'ManualFinalizeWS from "@cartesia/cartesia-js/resources/stt/manual-finalize/ws" requires the "ws" package but it could not be loaded.',
       );
     }
 

@@ -2,17 +2,18 @@ import type * as WS from 'ws';
 import { Cartesia } from '../client';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { RequestOptions } from '../internal/request-options';
 import { CartesiaError } from '../error';
 import { uuid4 } from '../internal/utils/uuid';
 
-let _ws: typeof import('ws') | undefined;
+let _ws: Partial<typeof import('ws')> | undefined;
+let _stream: Partial<typeof import('stream')> | undefined;
 try {
   _ws = require('ws');
+  _stream = require('stream');
 } catch {
-  // Optional — in browsers, we use the native WebSocket API instead.
-  _ws = undefined;
+  // Optional peer dependencies
 }
 
 // Define compatible interfaces to match the old SDK types for WebSocket
@@ -159,9 +160,9 @@ export class WebSocketWrapper {
   }
 
   async connect() {
-    if (_ws === undefined) {
+    if (_ws?.WebSocket === undefined) {
       throw new CartesiaError(
-        'The "ws" peer dependency is required for WebSocket support in Node.js. If you are using CartesiaClient from a browser, switch to `import Cartesia from "@carteisa/cartesia-js"` for the browser-compatible client.',
+        'Failed to load the "ws" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
       );
     }
 
@@ -351,6 +352,12 @@ export class TTSWrapper {
     signal?: AbortSignal,
     _source?: string,
   ): Promise<Readable> {
+    if (_stream?.Readable?.fromWeb === undefined) {
+      throw new CartesiaError(
+        'Failed to load the "stream" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
+      );
+    }
+
     const params: any = {
       model_id: options?.modelId ?? 'sonic-2',
       transcript,
@@ -396,12 +403,17 @@ export class TTSWrapper {
       throw new CartesiaError('Response body is null');
     }
 
-    // @ts-ignore
-    return Readable.fromWeb(response.body);
+    return _stream.Readable.fromWeb(response.body as any);
   }
 
   /** @deprecated Use {@link Cartesia.tts.generate} instead. */
   async bytes(request: BackCompatTtsRequest, requestOptions?: BackCompatRequestOptions): Promise<Readable> {
+    if (_stream?.Readable?.fromWeb === undefined) {
+      throw new CartesiaError(
+        'Failed to load the "stream" package: use `import Cartesia from "@cartesia/cartesia-js"` instead.',
+      );
+    }
+
     const params: any = {
       model_id: request.modelId,
       transcript: request.transcript,
@@ -439,7 +451,6 @@ export class TTSWrapper {
       throw new CartesiaError('Response body is null');
     }
 
-    // @ts-ignore
-    return Readable.fromWeb(response.body);
+    return _stream.Readable.fromWeb(response.body as any);
   }
 }

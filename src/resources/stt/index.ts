@@ -1,16 +1,28 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 export {
-  ExternalVAD,
-  type STTExternalVADDoneResponse,
-  type STTExternalVADFlushDoneResponse,
-  type STTExternalVADQueryParams,
-  type STTExternalVADTranscriptResponse,
-  type STTExternalVADWebsocketRequest,
-  type STTExternalVADWebsocketResponse,
-  type STTRealtimeExternalVADModel,
-  type ExternalVADWebsocketParams,
-} from './external-vad';
+  AutoFinalize,
+  type STTAutoFinalizeConnected,
+  type STTAutoFinalizeModel,
+  type STTAutoFinalizeTurnEagerEnd,
+  type STTAutoFinalizeTurnEnd,
+  type STTAutoFinalizeTurnResume,
+  type STTAutoFinalizeTurnStart,
+  type STTAutoFinalizeTurnUpdate,
+  type STTAutoFinalizeWebsocketRequest,
+  type STTAutoFinalizeWebsocketResponse,
+  type AutoFinalizeWebsocketParams,
+} from './auto-finalize';
+export {
+  ManualFinalize,
+  type STTManualFinalizeDoneResponse,
+  type STTManualFinalizeFlushDoneResponse,
+  type STTManualFinalizeModel,
+  type STTManualFinalizeTranscriptResponse,
+  type STTManualFinalizeWebsocketRequest,
+  type STTManualFinalizeWebsocketResponse,
+  type ManualFinalizeWebsocketParams,
+} from './manual-finalize';
 export {
   STT,
   type STTBatchModel,
@@ -19,18 +31,3 @@ export {
   type STTTranscribeResponse,
   type STTTranscribeParams,
 } from './stt';
-export {
-  TurnDetecting,
-  type STTRealtimeTurnDetectingModel,
-  type STTTurnsCloseCommand,
-  type STTTurnsConnected,
-  type STTTurnsTurnEagerEnd,
-  type STTTurnsTurnEnd,
-  type STTTurnsTurnResume,
-  type STTTurnsTurnStart,
-  type STTTurnsTurnUpdate,
-  type STTTurnsWebsocketQueryParams,
-  type STTTurnsWebsocketRequest,
-  type STTTurnsWebsocketResponse,
-  type TurnDetectingWebsocketParams,
-} from './turn-detecting';

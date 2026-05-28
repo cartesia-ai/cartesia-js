@@ -133,16 +133,68 @@ function StreamingCartesiaTTSExample() {
 }
 
 // =============================================================================
+// Transcribe: uploads an audio file and prints the transcript with timestamps
+// =============================================================================
+
+function TranscribeCartesiaSTTExample() {
+  const [loading, setLoading] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [words, setWords] = useState<Cartesia.STTTranscribeResponse.Word[]>([]);
+
+  async function transcribe(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    setTranscript('');
+    setWords([]);
+    try {
+      const client = new Cartesia({ token: await getToken() });
+      const response = await client.stt.transcribe({
+        file,
+        model: 'ink-whisper',
+        language: 'en',
+        timestamp_granularities: ['word'],
+      });
+      setTranscript(response.text);
+      setWords(response.words ?? []);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section>
+      <h2>Transcribe</h2>
+      <p>Uploads an audio file and transcribes it with word-level timestamps.</p>
+      <input type="file" accept="audio/*" onChange={transcribe} disabled={loading} />
+      {loading && <p>Transcribing...</p>}
+      {transcript && <p style={{ marginTop: '0.5rem' }}>{transcript}</p>}
+      {words.length > 0 && (
+        <ul>
+          {words.map((w, i) => (
+            <li key={i}>
+              {w.word}: {w.start}s – {w.end}s
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// =============================================================================
 // Page
 // =============================================================================
 
 export default function Home() {
   return (
     <main style={{ padding: '2rem', fontFamily: 'system-ui' }}>
-      <h1>Cartesia TTS — Next.js Example</h1>
+      <h1>Cartesia TTS + STT — Next.js Example</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '1rem' }}>
         <BatchCartesiaTTSExample />
         <StreamingCartesiaTTSExample />
+        <TranscribeCartesiaSTTExample />
       </div>
     </main>
   );

@@ -227,17 +227,59 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
 }
 
 // =============================================================================
-// STT WebSocket — Turn Detecting
+// STT Transcribe — Batch transcription with word timestamps
 // =============================================================================
 
 /**
- * Realtime STT with turn detection — recommended for voice agents.
+ * Transcribe an audio file with word timestamps.
+ *
+ * Pass a `File` (e.g. the user's selection from an <input type="file">), or omit
+ * it to generate a sample WAV via TTS.
+ */
+async function sttTranscribeFile(client: Cartesia, file?: File, language = 'en'): Promise<void> {
+  async function generateSampleFile(): Promise<File> {
+    const transcript = 'The quick brown fox jumps over the lazy dog.';
+    console.log(`No audio file provided. Generating a sample for: ${JSON.stringify(transcript)}`);
+    const response = await client.tts.generate({
+      model_id: 'sonic-latest',
+      transcript,
+      voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+      output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 16000 },
+      language: 'en',
+    });
+    const blob = await response.blob();
+    return new File([blob], 'stt_sample.wav', { type: 'audio/wav' });
+  }
+
+  const audioFile = file ?? (await generateSampleFile());
+
+  const response = await client.stt.transcribe({
+    file: audioFile,
+    model: 'ink-whisper',
+    language,
+    timestamp_granularities: ['word'],
+  });
+
+  console.log(response.text);
+  if (response.words) {
+    for (const word of response.words) {
+      console.log(`${word.word}: ${word.start}s - ${word.end}s`);
+    }
+  }
+}
+
+// =============================================================================
+// STT WebSocket: (Auto Finalize)
+// =============================================================================
+
+/**
+ * Realtime STT with turn detection: recommended for voice agents.
  *
  * Captures microphone audio and prints turn events as the user speaks.
  * Wire `stop` up to a button (or any UI control) to end the session
  * cleanly; this example stops itself after 30 seconds.
  */
-async function sttTurnDetectingWebsocket(client: Cartesia): Promise<void> {
+async function sttAutoFinalizeWebsocket(client: Cartesia): Promise<void> {
   const audioCtx = new AudioContext();
 
   // AudioWorklet that forwards mono Float32 frames to the main thread.
@@ -259,7 +301,7 @@ async function sttTurnDetectingWebsocket(client: Cartesia): Promise<void> {
   const source = audioCtx.createMediaStreamSource(mediaStream);
   const capture = new AudioWorkletNode(audioCtx, 'pcm-capture');
 
-  const ws = client.stt.turnDetecting.websocket({
+  const ws = client.stt.autoFinalize.websocket({
     model: 'ink-2',
     encoding: AUDIO_CONTEXT_ENCODING,
     sample_rate: audioCtx.sampleRate,
@@ -286,18 +328,40 @@ async function sttTurnDetectingWebsocket(client: Cartesia): Promise<void> {
   const stopTimer = setTimeout(stop, 30_000);
 
   try {
+    // Concatenate transcripts from all turn.end events to get the full transcript
+    // Do not strip or add whitespace!
+    let fullTranscript = '';
+
     for await (const event of ws.stream()) {
       if (event.type === 'message') {
         const m = event.message;
-        if (m.type === 'turn.start') console.log('Turn started');
-        else if (m.type === 'turn.update') console.log(`Turn (partial): ${m.transcript}`);
-        else if (m.type === 'turn.end') console.log(`Turn (final):   ${m.transcript}`);
+        switch (m.type) {
+          case 'connected':
+            console.log(`connected      | request_id=${m.request_id}`);
+            break;
+          case 'turn.start':
+            console.log('turn.start     |');
+            break;
+          case 'turn.update':
+            console.log(`turn.update    | ${m.transcript}`);
+            break;
+          case 'turn.eager_end':
+            console.log(`turn.eager_end | ${m.transcript}`);
+            break;
+          case 'turn.resume':
+            console.log('turn.resume    |');
+            break;
+          case 'turn.end':
+            console.log(`turn.end       | ${m.transcript}`);
+            fullTranscript += m.transcript;
+            break;
+        }
       } else if (event.type === 'error') {
-        console.error('Error:', event.error.message);
-      } else if (event.type === 'close') {
-        break;
+        console.error(`error        | ${event.error.message}`);
       }
     }
+
+    console.log(`Full transcript: ${JSON.stringify(fullTranscript)}`);
   } finally {
     stopped = true;
     clearTimeout(stopTimer);
@@ -309,17 +373,17 @@ async function sttTurnDetectingWebsocket(client: Cartesia): Promise<void> {
 }
 
 // =============================================================================
-// STT WebSocket — External VAD
+// STT WebSocket (Manual Finalize)
 // =============================================================================
 
 /**
- * Realtime STT with external VAD — recommended for push-to-talk apps.
+ * Realtime STT (Manual Finalize): recommended for push-to-talk apps.
  *
  * Captures microphone audio, then calls `finalize()` to ask the model for a
  * transcript of everything sent so far. In a real push-to-talk UI you would
  * call `finalize()` on button-up; this example fires it after 5 seconds.
  */
-async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
+async function sttManualFinalizeWebsocket(client: Cartesia): Promise<void> {
   const audioCtx = new AudioContext();
 
   const workletSource = `
@@ -340,8 +404,8 @@ async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
   const source = audioCtx.createMediaStreamSource(mediaStream);
   const capture = new AudioWorkletNode(audioCtx, 'pcm-capture');
 
-  const ws = client.stt.externalVAD.websocket({
-    model: 'ink-whisper',
+  const ws = client.stt.manualFinalize.websocket({
+    model: 'ink-2',
     encoding: AUDIO_CONTEXT_ENCODING,
     sample_rate: audioCtx.sampleRate,
   });
@@ -371,25 +435,31 @@ async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
 
   // Transcript chunks are deltas — concatenate is_final chunks to build the
   // full transcript. Do not add or strip whitespace between them.
-  let transcript = '';
+  let fullTranscript = '';
 
   try {
     for await (const event of ws.stream()) {
       if (event.type === 'message') {
         const m = event.message;
-        if (m.type === 'transcript') {
-          const tag = m.is_final ? 'final  ' : 'partial';
-          console.log(`[${tag}] ${JSON.stringify(m.text)}`);
-          if (m.is_final) transcript += m.text;
-        } else if (m.type === 'flush_done') {
-          console.log('flush_done');
-        } else if (m.type === 'done') {
-          console.log('done');
+        switch (m.type) {
+          case 'transcript': {
+            if (m.is_final) {
+              console.log(`transcript | ${m.text}`);
+              fullTranscript += m.text;
+            }
+            break;
+          }
+          case 'flush_done': {
+            console.log('flush_done |');
+            break;
+          }
+          case 'done': {
+            console.log('done       |');
+            break;
+          }
         }
       } else if (event.type === 'error') {
-        console.error('Error:', event.error.message);
-      } else if (event.type === 'close') {
-        break;
+        console.error(`error    | ${event.error.message}`);
       }
     }
   } finally {
@@ -402,7 +472,7 @@ async function sttExternalVADWebsocket(client: Cartesia): Promise<void> {
     await audioCtx.close();
   }
 
-  console.log(`Full transcript: ${JSON.stringify(transcript)}`);
+  console.log(`Full transcript: ${JSON.stringify(fullTranscript)}`);
 }
 
 // =============================================================================
@@ -415,6 +485,7 @@ export {
   ttsDownloadFile,
   ttsWebsocketStreamAudio,
   ttsWebsocketLowLatency,
-  sttTurnDetectingWebsocket,
-  sttExternalVADWebsocket,
+  sttTranscribeFile,
+  sttAutoFinalizeWebsocket,
+  sttManualFinalizeWebsocket,
 };

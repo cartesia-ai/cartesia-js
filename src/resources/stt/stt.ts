@@ -1,49 +1,42 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../../core/resource';
-import * as ExternalVADAPI from './external-vad/external-vad';
+import * as AutoFinalizeAPI from './auto-finalize/auto-finalize';
 import {
-  ExternalVAD,
-  ExternalVADWebsocketParams,
-  STTExternalVADDoneResponse,
-  STTExternalVADFlushDoneResponse,
-  STTExternalVADQueryParams,
-  STTExternalVADTranscriptResponse,
-  STTExternalVADWebsocketRequest,
-  STTExternalVADWebsocketResponse,
-  STTRealtimeExternalVADModel,
-} from './external-vad/external-vad';
-import * as TurnDetectingAPI from './turn-detecting/turn-detecting';
+  AutoFinalize,
+  AutoFinalizeWebsocketParams,
+  STTAutoFinalizeConnected,
+  STTAutoFinalizeModel,
+  STTAutoFinalizeTurnEagerEnd,
+  STTAutoFinalizeTurnEnd,
+  STTAutoFinalizeTurnResume,
+  STTAutoFinalizeTurnStart,
+  STTAutoFinalizeTurnUpdate,
+  STTAutoFinalizeWebsocketRequest,
+  STTAutoFinalizeWebsocketResponse,
+} from './auto-finalize/auto-finalize';
+import * as ManualFinalizeAPI from './manual-finalize/manual-finalize';
 import {
-  STTRealtimeTurnDetectingModel,
-  STTTurnsCloseCommand,
-  STTTurnsConnected,
-  STTTurnsTurnEagerEnd,
-  STTTurnsTurnEnd,
-  STTTurnsTurnResume,
-  STTTurnsTurnStart,
-  STTTurnsTurnUpdate,
-  STTTurnsWebsocketQueryParams,
-  STTTurnsWebsocketRequest,
-  STTTurnsWebsocketResponse,
-  TurnDetecting,
-  TurnDetectingWebsocketParams,
-} from './turn-detecting/turn-detecting';
+  ManualFinalize,
+  ManualFinalizeWebsocketParams,
+  STTManualFinalizeDoneResponse,
+  STTManualFinalizeFlushDoneResponse,
+  STTManualFinalizeModel,
+  STTManualFinalizeTranscriptResponse,
+  STTManualFinalizeWebsocketRequest,
+  STTManualFinalizeWebsocketResponse,
+} from './manual-finalize/manual-finalize';
 import { APIPromise } from '../../core/api-promise';
 import { type Uploadable } from '../../core/uploads';
 import { RequestOptions } from '../../internal/request-options';
 import { multipartFormRequestOptions } from '../../internal/uploads';
 
 export class STT extends APIResource {
-  turnDetecting: TurnDetectingAPI.TurnDetecting = new TurnDetectingAPI.TurnDetecting(this._client);
-  externalVAD: ExternalVADAPI.ExternalVAD = new ExternalVADAPI.ExternalVAD(this._client);
+  autoFinalize: AutoFinalizeAPI.AutoFinalize = new AutoFinalizeAPI.AutoFinalize(this._client);
+  manualFinalize: ManualFinalizeAPI.ManualFinalize = new ManualFinalizeAPI.ManualFinalize(this._client);
 
   /**
-   * Transcribes audio files into text using Cartesia's Speech-to-Text API.
-   *
-   * Upload an audio file and receive a complete transcription response. Supports
-   * arbitrarily long audio files with automatic intelligent chunking for longer
-   * audio.
+   * Transcribes audio files into text.
    *
    * **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
    * webm
@@ -119,20 +112,35 @@ export interface STTTranscribeResponse {
   text: string;
 
   /**
+   * The message type. Always `transcript` for a batch transcription response.
+   */
+  type: 'transcript';
+
+  /**
    * The duration of the input audio in seconds.
    */
-  duration?: number | null;
+  duration?: number;
+
+  /**
+   * @deprecated Not used for batch transcription.
+   */
+  is_final?: boolean;
 
   /**
    * The specified language of the input audio.
    */
-  language?: string | null;
+  language?: string;
+
+  /**
+   * Unique identifier for this transcription request.
+   */
+  request_id?: string;
 
   /**
    * Word-level timestamps showing the start and end time of each word. Only included
    * when `[word]` is passed into `timestamp_granularities[]`.
    */
-  words?: Array<STTTranscribeResponse.Word> | null;
+  words?: Array<STTTranscribeResponse.Word>;
 }
 
 export namespace STTTranscribeResponse {
@@ -156,18 +164,19 @@ export namespace STTTranscribeResponse {
 
 export interface STTTranscribeParams {
   /**
-   * Query param: The encoding format to process the audio as. If not specified, the
-   * audio file will be decoded automatically.
-   *
-   * **Supported formats:**
-   *
-   * - `pcm_s16le` - 16-bit signed integer PCM, little-endian (recommended for best
-   *   performance)
-   * - `pcm_s32le` - 32-bit signed integer PCM, little-endian
-   * - `pcm_f16le` - 16-bit floating point PCM, little-endian
-   * - `pcm_f32le` - 32-bit floating point PCM, little-endian
-   * - `pcm_mulaw` - 8-bit μ-law encoded PCM
-   * - `pcm_alaw` - 8-bit A-law encoded PCM
+   * Body param
+   */
+  file: Uploadable;
+
+  /**
+   * Body param: Models that support batch speech-to-text transcription. See
+   * [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
+   * all options.
+   */
+  model: STTBatchModel;
+
+  /**
+   * Query param: The encoding format for audio data sent to the STT WebSocket.
    */
   encoding?: STTEncoding | null;
 
@@ -175,11 +184,6 @@ export interface STTTranscribeParams {
    * Query param: The sample rate of the audio in Hz.
    */
   sample_rate?: number | null;
-
-  /**
-   * Body param
-   */
-  file?: Uploadable;
 
   /**
    * Body param: The language of the input audio in ISO-639-1 format. Defaults to
@@ -286,24 +290,17 @@ export interface STTTranscribeParams {
     | 'jw'
     | 'su'
     | 'yue'
-    | null;
-
-  /**
-   * Body param: Models that support batch speech-to-text transcription. See
-   * [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
-   * all options.
-   */
-  model?: STTBatchModel;
+    | (string & {});
 
   /**
    * Body param: The timestamp granularities to populate for this transcription.
    * Currently only `word` level timestamps are supported.
    */
-  timestamp_granularities?: Array<'word'> | null;
+  timestamp_granularities?: Array<'word'>;
 }
 
-STT.TurnDetecting = TurnDetecting;
-STT.ExternalVAD = ExternalVAD;
+STT.AutoFinalize = AutoFinalize;
+STT.ManualFinalize = ManualFinalize;
 
 export declare namespace STT {
   export {
@@ -315,30 +312,27 @@ export declare namespace STT {
   };
 
   export {
-    TurnDetecting as TurnDetecting,
-    type STTRealtimeTurnDetectingModel as STTRealtimeTurnDetectingModel,
-    type STTTurnsCloseCommand as STTTurnsCloseCommand,
-    type STTTurnsConnected as STTTurnsConnected,
-    type STTTurnsTurnEagerEnd as STTTurnsTurnEagerEnd,
-    type STTTurnsTurnEnd as STTTurnsTurnEnd,
-    type STTTurnsTurnResume as STTTurnsTurnResume,
-    type STTTurnsTurnStart as STTTurnsTurnStart,
-    type STTTurnsTurnUpdate as STTTurnsTurnUpdate,
-    type STTTurnsWebsocketQueryParams as STTTurnsWebsocketQueryParams,
-    type STTTurnsWebsocketRequest as STTTurnsWebsocketRequest,
-    type STTTurnsWebsocketResponse as STTTurnsWebsocketResponse,
-    type TurnDetectingWebsocketParams as TurnDetectingWebsocketParams,
+    AutoFinalize as AutoFinalize,
+    type STTAutoFinalizeConnected as STTAutoFinalizeConnected,
+    type STTAutoFinalizeModel as STTAutoFinalizeModel,
+    type STTAutoFinalizeTurnEagerEnd as STTAutoFinalizeTurnEagerEnd,
+    type STTAutoFinalizeTurnEnd as STTAutoFinalizeTurnEnd,
+    type STTAutoFinalizeTurnResume as STTAutoFinalizeTurnResume,
+    type STTAutoFinalizeTurnStart as STTAutoFinalizeTurnStart,
+    type STTAutoFinalizeTurnUpdate as STTAutoFinalizeTurnUpdate,
+    type STTAutoFinalizeWebsocketRequest as STTAutoFinalizeWebsocketRequest,
+    type STTAutoFinalizeWebsocketResponse as STTAutoFinalizeWebsocketResponse,
+    type AutoFinalizeWebsocketParams as AutoFinalizeWebsocketParams,
   };
 
   export {
-    ExternalVAD as ExternalVAD,
-    type STTExternalVADDoneResponse as STTExternalVADDoneResponse,
-    type STTExternalVADFlushDoneResponse as STTExternalVADFlushDoneResponse,
-    type STTExternalVADQueryParams as STTExternalVADQueryParams,
-    type STTExternalVADTranscriptResponse as STTExternalVADTranscriptResponse,
-    type STTExternalVADWebsocketRequest as STTExternalVADWebsocketRequest,
-    type STTExternalVADWebsocketResponse as STTExternalVADWebsocketResponse,
-    type STTRealtimeExternalVADModel as STTRealtimeExternalVADModel,
-    type ExternalVADWebsocketParams as ExternalVADWebsocketParams,
+    ManualFinalize as ManualFinalize,
+    type STTManualFinalizeDoneResponse as STTManualFinalizeDoneResponse,
+    type STTManualFinalizeFlushDoneResponse as STTManualFinalizeFlushDoneResponse,
+    type STTManualFinalizeModel as STTManualFinalizeModel,
+    type STTManualFinalizeTranscriptResponse as STTManualFinalizeTranscriptResponse,
+    type STTManualFinalizeWebsocketRequest as STTManualFinalizeWebsocketRequest,
+    type STTManualFinalizeWebsocketResponse as STTManualFinalizeWebsocketResponse,
+    type ManualFinalizeWebsocketParams as ManualFinalizeWebsocketParams,
   };
 }
