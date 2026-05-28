@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { TurnDetectingEmitter, TurnDetectingStreamMessage, WebSocketError, buildURL } from './internal-base';
+import { AutoFinalizeEmitter, AutoFinalizeStreamMessage, WebSocketError, buildURL } from './internal-base';
 import { InternalEventEmitter } from '../../../core/EventEmitter';
 import { sleep } from '../../../internal/utils/sleep';
 import { type WebSocketLike, ReadyState } from '../../../internal/ws-adapter';
@@ -14,23 +14,23 @@ import {
   type UnsentMessage,
 } from '../../../internal/ws';
 import * as STTAPI from '../stt';
-import * as TurnDetectingAPI from './turn-detecting';
+import * as AutoFinalizeAPI from './auto-finalize';
 import { Cartesia } from '../../../client';
 import { CartesiaError } from '../../../core/error';
 
-export interface TurnDetectingWSParameters extends Record<string, unknown> {
+export interface AutoFinalizeWSParameters extends Record<string, unknown> {
   /**
    * The encoding format for audio data sent to the STT WebSocket.
    */
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text with turn-detection. This mode
-   * detects when the user is speaking and emits turn events. See
+   * Models that support realtime speech-to-text (auto finalize). This mode detects
+   * when the user is speaking and emits turn events. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.
    */
-  model: TurnDetectingAPI.STTRealtimeTurnDetectingModel;
+  model: AutoFinalizeAPI.STTAutoFinalizeModel;
 
   /**
    * Sample rate in Hz.
@@ -38,14 +38,14 @@ export interface TurnDetectingWSParameters extends Record<string, unknown> {
   sample_rate: number;
 }
 
-export interface TurnDetectingWSReconnectOptions {
+export interface AutoFinalizeWSReconnectOptions {
   /**
    * Called before each reconnect attempt. Return an object with
    * `parameters` to override query parameters for the next connection.
    */
   onReconnecting(
-    event: ReconnectingEvent<TurnDetectingWSParameters>,
-  ): ReconnectingOverrides<TurnDetectingWSParameters> | void;
+    event: ReconnectingEvent<AutoFinalizeWSParameters>,
+  ): ReconnectingOverrides<AutoFinalizeWSParameters> | void;
 
   /**
    * Maximum number of reconnection attempts. Default: 5.
@@ -64,12 +64,12 @@ export interface TurnDetectingWSReconnectOptions {
   maxDelay?: number;
 }
 
-export interface TurnDetectingWSBaseOptions {
+export interface AutoFinalizeWSBaseOptions {
   /**
    * Options for automatic reconnection on recoverable close codes.
    * Automatic reconnection is only enabled when this has a non-null value.
    */
-  reconnect?: TurnDetectingWSReconnectOptions | null | undefined;
+  reconnect?: AutoFinalizeWSReconnectOptions | null | undefined;
 
   /**
    * Maximum size of the outgoing message queue in bytes.
@@ -81,14 +81,14 @@ export interface TurnDetectingWSBaseOptions {
   maxQueueSize?: number | undefined;
 }
 
-export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends TurnDetectingEmitter {
+export abstract class AutoFinalizeWSBase<TSocket extends WebSocketLike> extends AutoFinalizeEmitter {
   url!: URL;
   socket!: TSocket;
 
   protected _client: Cartesia;
-  protected _parameters: TurnDetectingWSParameters | null | undefined;
-  private _reconnectOptions: TurnDetectingWSReconnectOptions | null;
-  private _sendQueue: SendQueue<TurnDetectingAPI.STTTurnsWebsocketRequest>;
+  protected _parameters: AutoFinalizeWSParameters | null | undefined;
+  private _reconnectOptions: AutoFinalizeWSReconnectOptions | null;
+  private _sendQueue: SendQueue<AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest>;
   private _isReconnecting: boolean = false;
   private _intentionallyClosed = false;
   private _closeCode: number = 1000;
@@ -99,25 +99,25 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
   // Necessary to keep the public event interface clean while we manage reconnecting
   private _internalEvents = new InternalEventEmitter<{
     socketSwap: (oldSocket: TSocket, newSocket: TSocket) => void;
-    reconnecting: (event: ReconnectingEvent<TurnDetectingWSParameters>) => void;
+    reconnecting: (event: ReconnectingEvent<AutoFinalizeWSParameters>) => void;
     reconnected: () => void;
     close: (
       code: number,
       reason: string,
-      unsent: UnsentMessage<TurnDetectingAPI.STTTurnsWebsocketRequest>[],
+      unsent: UnsentMessage<AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest>[],
     ) => void;
   }>();
 
   constructor(
     client: Cartesia,
-    parameters: TurnDetectingWSParameters,
-    options?: TurnDetectingWSBaseOptions | undefined,
+    parameters: AutoFinalizeWSParameters,
+    options?: AutoFinalizeWSBaseOptions | undefined,
   ) {
     super();
     this._client = client;
     this._parameters = parameters ?? undefined;
     this._reconnectOptions = options?.reconnect ?? null;
-    this._sendQueue = new SendQueue<TurnDetectingAPI.STTTurnsWebsocketRequest>(options?.maxQueueSize);
+    this._sendQueue = new SendQueue<AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest>(options?.maxQueueSize);
   }
 
   /** Establishes the initial WebSocket connection. */
@@ -129,7 +129,7 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
   /** Creates a platform-specific WebSocket for the given URL and auth headers. */
   protected abstract _createSocket(url: URL, authHeaders: Record<string, string>): TSocket;
 
-  send(event: TurnDetectingAPI.STTTurnsWebsocketRequest) {
+  send(event: AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest) {
     if (!this.socket) {
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
@@ -211,11 +211,11 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
    * }
    * ```
    */
-  stream(): AsyncIterableIterator<TurnDetectingStreamMessage> {
+  stream(): AsyncIterableIterator<AutoFinalizeStreamMessage> {
     return this[Symbol.asyncIterator]();
   }
 
-  [Symbol.asyncIterator](): AsyncIterableIterator<TurnDetectingStreamMessage> {
+  [Symbol.asyncIterator](): AsyncIterableIterator<AutoFinalizeStreamMessage> {
     if (!this.socket) {
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
@@ -223,17 +223,17 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
     // Two-queue async iterator: `queue` buffers incoming messages,
     // `resolvers` buffers waiting next() calls. A push wakes the
     // oldest next(); a next() drains the oldest message.
-    const queue: TurnDetectingStreamMessage[] = [];
+    const queue: AutoFinalizeStreamMessage[] = [];
     const resolvers: (() => void)[] = [];
     let done = false;
     let currentSocket = this.socket;
 
-    const push = (msg: TurnDetectingStreamMessage) => {
+    const push = (msg: AutoFinalizeStreamMessage) => {
       queue.push(msg);
       resolvers.shift()?.();
     };
 
-    const onEvent = (event: TurnDetectingAPI.STTTurnsWebsocketResponse) => {
+    const onEvent = (event: AutoFinalizeAPI.STTAutoFinalizeWebsocketResponse) => {
       if (event.type === 'error') return; // handled by onEmitterError
       push({ type: 'message', message: event });
     };
@@ -251,7 +251,7 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
       push({ type: 'open' });
     };
 
-    const onReconnecting = (evt: ReconnectingEvent<TurnDetectingWSParameters>) => {
+    const onReconnecting = (evt: ReconnectingEvent<AutoFinalizeWSParameters>) => {
       push({ type: 'reconnecting', reconnect: evt });
     };
 
@@ -268,7 +268,7 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
     const onClose = (
       code: number,
       reason: string,
-      unsent: UnsentMessage<TurnDetectingAPI.STTTurnsWebsocketRequest>[],
+      unsent: UnsentMessage<AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest>[],
     ) => {
       push({ type: 'close', code, reason, unsent });
       done = true;
@@ -334,7 +334,7 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
       }
     }
 
-    const resolve = (res: (value: IteratorResult<TurnDetectingStreamMessage>) => void) => {
+    const resolve = (res: (value: IteratorResult<AutoFinalizeStreamMessage>) => void) => {
       if (queue.length > 0) {
         res({ value: queue.shift()!, done: false });
       } else if (done) {
@@ -345,7 +345,7 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
       return true;
     };
 
-    const next = (): Promise<IteratorResult<TurnDetectingStreamMessage>> =>
+    const next = (): Promise<IteratorResult<AutoFinalizeStreamMessage>> =>
       new Promise((res) => {
         if (resolve(res)) return;
         resolvers.push(() => {
@@ -381,9 +381,9 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
       // Coerce to string in case the adapter delivers a typed-array for text frames.
       const text = typeof data === 'string' ? data : String(data);
 
-      let event: TurnDetectingAPI.STTTurnsWebsocketResponse;
+      let event: AutoFinalizeAPI.STTAutoFinalizeWebsocketResponse;
       try {
-        event = JSON.parse(text) as TurnDetectingAPI.STTTurnsWebsocketResponse;
+        event = JSON.parse(text) as AutoFinalizeAPI.STTAutoFinalizeWebsocketResponse;
       } catch {
         this._emit('raw', data);
         return;
@@ -468,7 +468,7 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
       const jitter = 0.75 + Math.random() * 0.25;
       const actualDelay = Math.round(baseDelay * jitter);
 
-      let reconnectingEvent: ReconnectingEvent<TurnDetectingWSParameters> = {
+      let reconnectingEvent: ReconnectingEvent<AutoFinalizeWSParameters> = {
         attempt,
         maxAttempts: maxRetries,
         delay: actualDelay,
@@ -476,7 +476,7 @@ export abstract class TurnDetectingWSBase<TSocket extends WebSocketLike> extends
         parameters: this._parameters ? { ...this._parameters } : undefined,
       };
 
-      let overrides: ReconnectingOverrides<TurnDetectingWSParameters> | void;
+      let overrides: ReconnectingOverrides<AutoFinalizeWSParameters> | void;
       try {
         overrides = this._reconnectOptions.onReconnecting(reconnectingEvent);
       } catch (err) {

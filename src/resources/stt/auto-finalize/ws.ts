@@ -3,7 +3,7 @@
 import type * as WS from 'ws';
 import { BrowserWebSocket } from '../../../internal/ws-adapter-browser';
 import { NodeWebSocket } from '../../../internal/ws-adapter-node';
-import { ExternalVADWSBase, type ExternalVADWSBaseOptions, type ExternalVADWSParameters } from './ws-base';
+import { AutoFinalizeWSBase, type AutoFinalizeWSBaseOptions, type AutoFinalizeWSParameters } from './ws-base';
 import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
 import { buildHeaders } from '../../../internal/headers';
@@ -15,21 +15,21 @@ try {
   // Optional — in browsers, we use the native WebSocket API instead.
 }
 
-export type { ExternalVADWSParameters, ExternalVADWSReconnectOptions } from './ws-base';
+export type { AutoFinalizeWSParameters, AutoFinalizeWSReconnectOptions } from './ws-base';
 
-export interface ExternalVADWSClientOptions extends WS.ClientOptions, ExternalVADWSBaseOptions {}
+export interface AutoFinalizeWSClientOptions extends WS.ClientOptions, AutoFinalizeWSBaseOptions {}
 
-export class ExternalVADWS extends ExternalVADWSBase<NodeWebSocket | BrowserWebSocket> {
+export class AutoFinalizeWS extends AutoFinalizeWSBase<NodeWebSocket | BrowserWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
 
   constructor(
     client: Cartesia,
-    parameters: ExternalVADWSParameters,
-    options?: ExternalVADWSClientOptions | null | undefined,
+    parameters: AutoFinalizeWSParameters,
+    options?: AutoFinalizeWSClientOptions | null | undefined,
   ) {
     if (_ws?.WebSocket === undefined && typeof WebSocket === 'undefined') {
       throw new Error(
-        'ExternalVADWS from "@cartesia/cartesia-js/resources/stt/external-vad/ws" requires the "ws" package but it could not be loaded.',
+        'AutoFinalizeWS from "@cartesia/cartesia-js/resources/stt/auto-finalize/ws" requires the "ws" package but it could not be loaded.',
       );
     }
 

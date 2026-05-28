@@ -1,25 +1,25 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import * as STTAPI from '../stt';
-import * as ExternalVADAPI from './external-vad';
+import * as ManualFinalizeAPI from './manual-finalize';
 import { Cartesia } from '../../../client';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { CartesiaError } from '../../../core/error';
 
 import type { RawWebSocketData, ReconnectingEvent, UnsentMessage } from '../../../internal/ws';
-import { ExternalVADWSParameters } from './ws-base';
+import { ManualFinalizeWSParameters } from './ws-base';
 
-export type ExternalVADStreamMessage =
+export type ManualFinalizeStreamMessage =
   | { type: 'connecting' | 'open' | 'closing' }
   | {
       type: 'close';
       code: number;
       reason: string;
-      unsent: UnsentMessage<ExternalVADAPI.STTExternalVADWebsocketRequest>[];
+      unsent: UnsentMessage<ManualFinalizeAPI.STTManualFinalizeWebsocketRequest>[];
     }
-  | { type: 'reconnecting'; reconnect: ReconnectingEvent<ExternalVADWSParameters> }
+  | { type: 'reconnecting'; reconnect: ReconnectingEvent<ManualFinalizeWSParameters> }
   | { type: 'reconnected' }
-  | { type: 'message'; message: ExternalVADAPI.STTExternalVADWebsocketResponse }
+  | { type: 'message'; message: ManualFinalizeAPI.STTManualFinalizeWebsocketResponse }
   | { type: 'raw'; data: RawWebSocketData }
   | { type: 'error'; error: WebSocketError };
 
@@ -40,28 +40,31 @@ type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 type WebSocketEvents = Simplify<
   {
-    event: (event: ExternalVADAPI.STTExternalVADWebsocketResponse) => void;
+    event: (event: ManualFinalizeAPI.STTManualFinalizeWebsocketResponse) => void;
     raw: (data: RawWebSocketData) => void;
     error: (error: WebSocketError) => void;
     close: (
       code: number,
       reason: string,
-      unsent: UnsentMessage<ExternalVADAPI.STTExternalVADWebsocketRequest>[],
+      unsent: UnsentMessage<ManualFinalizeAPI.STTManualFinalizeWebsocketRequest>[],
     ) => void;
-    reconnecting: (event: ReconnectingEvent<ExternalVADWSParameters>) => void;
+    reconnecting: (event: ReconnectingEvent<ManualFinalizeWSParameters>) => void;
     reconnected: () => void;
   } & {
-    [EventType in Exclude<NonNullable<ExternalVADAPI.STTExternalVADWebsocketResponse['type']>, 'error'>]: (
-      event: Extract<ExternalVADAPI.STTExternalVADWebsocketResponse, { type?: EventType }>,
+    [EventType in Exclude<
+      NonNullable<ManualFinalizeAPI.STTManualFinalizeWebsocketResponse['type']>,
+      'error'
+    >]: (
+      event: Extract<ManualFinalizeAPI.STTManualFinalizeWebsocketResponse, { type?: EventType }>,
     ) => unknown;
   }
 >;
 
-export abstract class ExternalVADEmitter extends EventEmitter<WebSocketEvents> {
+export abstract class ManualFinalizeEmitter extends EventEmitter<WebSocketEvents> {
   /**
    * Send an event to the API.
    */
-  abstract send(event: ExternalVADAPI.STTExternalVADWebsocketRequest): void;
+  abstract send(event: ManualFinalizeAPI.STTManualFinalizeWebsocketRequest): void;
 
   /**
    * Send raw data over the WebSocket without JSON serialization.
