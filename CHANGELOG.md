@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.2.0 (2026-05-28)
+
+Full Changelog: [v3.2.0-b2...v3.2.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.2.0-b2...v3.2.0)
+
+### Bug Fixes
+
+* **backcompat:** correct error message when stream is unavailable ([4ef1f1f](https://github.com/cartesia-ai/cartesia-js/commit/4ef1f1fe664f49db13dccc53979114b2485b4281))
+* **backcompat:** throw a useful error when CartesiaClient.tts.websocket is used in the browser ([8276cd2](https://github.com/cartesia-ai/cartesia-js/commit/8276cd215913bf713a2cf32eef6a65dd44045447))
+* **browsers:** make stream optional ([7c4d86f](https://github.com/cartesia-ai/cartesia-js/commit/7c4d86f4162cae6b20e94ea5b775ad834b72789b))
+* **stt:** correct transcribe params ([ae6293f](https://github.com/cartesia-ai/cartesia-js/commit/ae6293ff4bbb975419dab12a767636cfb86f9a33))
+
+
+### Documentation
+
+* **backcompat:** do not assume require error is due to being in a browser ([dec4c7b](https://github.com/cartesia-ai/cartesia-js/commit/dec4c7b2d7b210061037499fd88041a559671b28))
+* **stt:** improve examples ([6944c10](https://github.com/cartesia-ai/cartesia-js/commit/6944c10c2bada6f887dc4a9267db008b14115edc))
+* update contributing.md with publish-npm-trusted.yml ([0bea5d0](https://github.com/cartesia-ai/cartesia-js/commit/0bea5d0ef6bd3babb6cf02ad2369f7e031ec4263))
+
+
+### Refactors
+
+* **stt:** fix errors from refactor ([3eb0b03](https://github.com/cartesia-ai/cartesia-js/commit/3eb0b0358f17263b0fdec4282b420a27de2dae0b))
+* **stt:** rename external vad to manual finalize ([5a9b35c](https://github.com/cartesia-ai/cartesia-js/commit/5a9b35c10502ac25ddc91d3ce8cf8d242d9e55e1))
+
 ## 3.2.0-b2 (2026-05-25)
 
 Full Changelog: [v3.2.0-b1...v3.2.0-b2](https://github.com/cartesia-ai/cartesia-js/compare/v3.2.0-b1...v3.2.0-b2)
