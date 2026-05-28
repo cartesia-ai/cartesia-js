@@ -164,33 +164,30 @@ Methods:
 
 - <code title="post /stt">client.stt.<a href="./src/resources/stt/stt.ts">transcribe</a>({ ...params }) -> STTTranscribeResponse</code>
 
-## TurnDetecting
+## AutoFinalize
 
 Types:
 
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTRealtimeTurnDetectingModel</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsCloseCommand</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsConnected</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnEagerEnd</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnEnd</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnResume</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnStart</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsTurnUpdate</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsWebsocketQueryParams</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsWebsocketRequest</a></code>
-- <code><a href="./src/resources/stt/turn-detecting.ts">STTTurnsWebsocketResponse</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeConnected</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeModel</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeTurnEagerEnd</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeTurnEnd</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeTurnResume</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeTurnStart</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeTurnUpdate</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeWebsocketRequest</a></code>
+- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeWebsocketResponse</a></code>
 
-## ExternalVAD
+## ManualFinalize
 
 Types:
 
-- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADDoneResponse</a></code>
-- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADFlushDoneResponse</a></code>
-- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADQueryParams</a></code>
-- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADTranscriptResponse</a></code>
-- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADWebsocketRequest</a></code>
-- <code><a href="./src/resources/stt/external-vad.ts">STTExternalVADWebsocketResponse</a></code>
-- <code><a href="./src/resources/stt/external-vad.ts">STTRealtimeExternalVADModel</a></code>
+- <code><a href="./src/resources/stt/manual-finalize.ts">STTManualFinalizeDoneResponse</a></code>
+- <code><a href="./src/resources/stt/manual-finalize.ts">STTManualFinalizeFlushDoneResponse</a></code>
+- <code><a href="./src/resources/stt/manual-finalize.ts">STTManualFinalizeModel</a></code>
+- <code><a href="./src/resources/stt/manual-finalize.ts">STTManualFinalizeTranscriptResponse</a></code>
+- <code><a href="./src/resources/stt/manual-finalize.ts">STTManualFinalizeWebsocketRequest</a></code>
+- <code><a href="./src/resources/stt/manual-finalize.ts">STTManualFinalizeWebsocketResponse</a></code>
 
 # TTS
 

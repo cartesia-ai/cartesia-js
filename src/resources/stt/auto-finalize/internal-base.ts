@@ -1,25 +1,25 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import * as STTAPI from '../stt';
-import * as TurnDetectingAPI from './turn-detecting';
+import * as AutoFinalizeAPI from './auto-finalize';
 import { Cartesia } from '../../../client';
 import { EventEmitter } from '../../../core/EventEmitter';
 import { CartesiaError } from '../../../core/error';
 
 import type { RawWebSocketData, ReconnectingEvent, UnsentMessage } from '../../../internal/ws';
-import { TurnDetectingWSParameters } from './ws-base';
+import { AutoFinalizeWSParameters } from './ws-base';
 
-export type TurnDetectingStreamMessage =
+export type AutoFinalizeStreamMessage =
   | { type: 'connecting' | 'open' | 'closing' }
   | {
       type: 'close';
       code: number;
       reason: string;
-      unsent: UnsentMessage<TurnDetectingAPI.STTTurnsWebsocketRequest>[];
+      unsent: UnsentMessage<AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest>[];
     }
-  | { type: 'reconnecting'; reconnect: ReconnectingEvent<TurnDetectingWSParameters> }
+  | { type: 'reconnecting'; reconnect: ReconnectingEvent<AutoFinalizeWSParameters> }
   | { type: 'reconnected' }
-  | { type: 'message'; message: TurnDetectingAPI.STTTurnsWebsocketResponse }
+  | { type: 'message'; message: AutoFinalizeAPI.STTAutoFinalizeWebsocketResponse }
   | { type: 'raw'; data: RawWebSocketData }
   | { type: 'error'; error: WebSocketError };
 
@@ -40,28 +40,28 @@ type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 type WebSocketEvents = Simplify<
   {
-    event: (event: TurnDetectingAPI.STTTurnsWebsocketResponse) => void;
+    event: (event: AutoFinalizeAPI.STTAutoFinalizeWebsocketResponse) => void;
     raw: (data: RawWebSocketData) => void;
     error: (error: WebSocketError) => void;
     close: (
       code: number,
       reason: string,
-      unsent: UnsentMessage<TurnDetectingAPI.STTTurnsWebsocketRequest>[],
+      unsent: UnsentMessage<AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest>[],
     ) => void;
-    reconnecting: (event: ReconnectingEvent<TurnDetectingWSParameters>) => void;
+    reconnecting: (event: ReconnectingEvent<AutoFinalizeWSParameters>) => void;
     reconnected: () => void;
   } & {
-    [EventType in Exclude<NonNullable<TurnDetectingAPI.STTTurnsWebsocketResponse['type']>, 'error'>]: (
-      event: Extract<TurnDetectingAPI.STTTurnsWebsocketResponse, { type?: EventType }>,
+    [EventType in Exclude<NonNullable<AutoFinalizeAPI.STTAutoFinalizeWebsocketResponse['type']>, 'error'>]: (
+      event: Extract<AutoFinalizeAPI.STTAutoFinalizeWebsocketResponse, { type?: EventType }>,
     ) => unknown;
   }
 >;
 
-export abstract class TurnDetectingEmitter extends EventEmitter<WebSocketEvents> {
+export abstract class AutoFinalizeEmitter extends EventEmitter<WebSocketEvents> {
   /**
    * Send an event to the API.
    */
-  abstract send(event: TurnDetectingAPI.STTTurnsWebsocketRequest): void;
+  abstract send(event: AutoFinalizeAPI.STTAutoFinalizeWebsocketRequest): void;
 
   /**
    * Send raw data over the WebSocket without JSON serialization.

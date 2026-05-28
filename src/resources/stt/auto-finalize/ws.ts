@@ -2,28 +2,24 @@
 
 import * as WS from 'ws';
 import { NodeWebSocket } from '../../../internal/ws-adapter-node';
-import {
-  TurnDetectingWSBase,
-  type TurnDetectingWSBaseOptions,
-  type TurnDetectingWSParameters,
-} from './ws-base';
+import { AutoFinalizeWSBase, type AutoFinalizeWSBaseOptions, type AutoFinalizeWSParameters } from './ws-base';
 import { Cartesia } from '../../../client';
 
-export type { TurnDetectingWSParameters, TurnDetectingWSReconnectOptions } from './ws-base';
+export type { AutoFinalizeWSParameters, AutoFinalizeWSReconnectOptions } from './ws-base';
 
-export interface TurnDetectingWSClientOptions extends WS.ClientOptions, TurnDetectingWSBaseOptions {}
+export interface AutoFinalizeWSClientOptions extends WS.ClientOptions, AutoFinalizeWSBaseOptions {}
 
-export class TurnDetectingWS extends TurnDetectingWSBase<NodeWebSocket> {
+export class AutoFinalizeWS extends AutoFinalizeWSBase<NodeWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
 
   constructor(
     client: Cartesia,
-    parameters: TurnDetectingWSParameters,
-    options?: TurnDetectingWSClientOptions | null | undefined,
+    parameters: AutoFinalizeWSParameters,
+    options?: AutoFinalizeWSClientOptions | null | undefined,
   ) {
     if (!WS?.WebSocket) {
       throw new Error(
-        'TurnDetectingWS from "@cartesia/cartesia-js/resources/stt/turn-detecting/ws" requires the "ws" package but it could not be loaded.',
+        'AutoFinalizeWS from "@cartesia/cartesia-js/resources/stt/auto-finalize/ws" requires the "ws" package but it could not be loaded.',
       );
     }
 

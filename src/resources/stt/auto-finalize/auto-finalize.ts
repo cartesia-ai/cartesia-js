@@ -3,34 +3,13 @@
 import { APIResource } from '../../../core/resource';
 import * as STTAPI from '../stt';
 
-export class TurnDetecting extends APIResource {}
-
-/**
- * Models that support realtime speech-to-text with turn-detection. This mode
- * detects when the user is speaking and emits turn events. See
- * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
- * all options.
- */
-export type STTRealtimeTurnDetectingModel = 'ink-2';
-
-/**
- * Sent as a JSON-encoded WebSocket text frame to close the session cleanly. All
- * buffered audio will be processed by the model into events before the connection
- * closes.
- */
-export interface STTTurnsCloseCommand {
-  /**
-   * Command type. Send this as a JSON-encoded WebSocket text frame to close the
-   * session.
-   */
-  type: 'close';
-}
+export class AutoFinalize extends APIResource {}
 
 /**
  * Fires once when the WebSocket connection is established. You do not need to wait
  * for this event before sending audio.
  */
-export interface STTTurnsConnected {
+export interface STTAutoFinalizeConnected {
   /**
    * Unique identifier for this connection.
    */
@@ -43,9 +22,17 @@ export interface STTTurnsConnected {
 }
 
 /**
+ * Models that support realtime speech-to-text (auto finalize). This mode detects
+ * when the user is speaking and emits turn events. See
+ * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
+ * all options.
+ */
+export type STTAutoFinalizeModel = 'ink-2';
+
+/**
  * [PREVIEW] Fires when the model predicts that the user might be done speaking.
  */
-export interface STTTurnsTurnEagerEnd {
+export interface STTAutoFinalizeTurnEagerEnd {
   /**
    * Unique identifier for this connection. Does not change between turns.
    */
@@ -65,7 +52,7 @@ export interface STTTurnsTurnEagerEnd {
 /**
  * Marks the end of a user turn.
  */
-export interface STTTurnsTurnEnd {
+export interface STTAutoFinalizeTurnEnd {
   /**
    * Unique identifier for this connection. Does not change between turns.
    */
@@ -85,7 +72,7 @@ export interface STTTurnsTurnEnd {
 /**
  * [PREVIEW] Fires after `turn.eager_end` if the user turn has not actually ended.
  */
-export interface STTTurnsTurnResume {
+export interface STTAutoFinalizeTurnResume {
   /**
    * Unique identifier for this connection. Does not change between turns.
    */
@@ -101,7 +88,7 @@ export interface STTTurnsTurnResume {
  * Marks the start of a user turn. Fires quickly after the user begins speaking.
  * This event can be used to interrupt your agent to avoid talking over the user.
  */
-export interface STTTurnsTurnStart {
+export interface STTAutoFinalizeTurnStart {
   /**
    * Unique identifier for this connection. Does not change between turns.
    */
@@ -116,7 +103,7 @@ export interface STTTurnsTurnStart {
 /**
  * Fires repeatedly as the model transcribes the current user turn.
  */
-export interface STTTurnsTurnUpdate {
+export interface STTAutoFinalizeTurnUpdate {
   /**
    * Unique identifier for this connection. Does not change between turns.
    */
@@ -134,32 +121,12 @@ export interface STTTurnsTurnUpdate {
   type: 'turn.update';
 }
 
-export interface STTTurnsWebsocketQueryParams {
-  /**
-   * The encoding format for audio data sent to the STT WebSocket.
-   */
-  encoding: STTAPI.STTEncoding;
-
-  /**
-   * Models that support realtime speech-to-text with turn-detection. This mode
-   * detects when the user is speaking and emits turn events. See
-   * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
-   * all options.
-   */
-  model: STTRealtimeTurnDetectingModel;
-
-  /**
-   * Sample rate in Hz.
-   */
-  sample_rate: number;
-}
-
 /**
  * Sent as a JSON-encoded WebSocket text frame to close the session cleanly. All
  * buffered audio will be processed by the model into events before the connection
  * closes.
  */
-export interface STTTurnsWebsocketRequest {
+export interface STTAutoFinalizeWebsocketRequest {
   /**
    * Command type. Send this as a JSON-encoded WebSocket text frame to close the
    * session.
@@ -172,28 +139,28 @@ export interface STTTurnsWebsocketRequest {
  * between message variants. All emitted text is final — the model does not revise
  * previous output. The `transcript` field is cumulative within a turn.
  */
-export type STTTurnsWebsocketResponse =
-  | STTTurnsConnected
-  | STTTurnsTurnStart
-  | STTTurnsTurnUpdate
-  | STTTurnsTurnEagerEnd
-  | STTTurnsTurnResume
-  | STTTurnsTurnEnd
+export type STTAutoFinalizeWebsocketResponse =
+  | STTAutoFinalizeConnected
+  | STTAutoFinalizeTurnStart
+  | STTAutoFinalizeTurnUpdate
+  | STTAutoFinalizeTurnEagerEnd
+  | STTAutoFinalizeTurnResume
+  | STTAutoFinalizeTurnEnd
   | STTAPI.STTErrorResponse;
 
-export interface TurnDetectingWebsocketParams {
+export interface AutoFinalizeWebsocketParams {
   /**
    * The encoding format for audio data sent to the STT WebSocket.
    */
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text with turn-detection. This mode
-   * detects when the user is speaking and emits turn events. See
+   * Models that support realtime speech-to-text (auto finalize). This mode detects
+   * when the user is speaking and emits turn events. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.
    */
-  model: STTRealtimeTurnDetectingModel;
+  model: STTAutoFinalizeModel;
 
   /**
    * Sample rate in Hz.
@@ -201,19 +168,17 @@ export interface TurnDetectingWebsocketParams {
   sample_rate: number;
 }
 
-export declare namespace TurnDetecting {
+export declare namespace AutoFinalize {
   export {
-    type STTRealtimeTurnDetectingModel as STTRealtimeTurnDetectingModel,
-    type STTTurnsCloseCommand as STTTurnsCloseCommand,
-    type STTTurnsConnected as STTTurnsConnected,
-    type STTTurnsTurnEagerEnd as STTTurnsTurnEagerEnd,
-    type STTTurnsTurnEnd as STTTurnsTurnEnd,
-    type STTTurnsTurnResume as STTTurnsTurnResume,
-    type STTTurnsTurnStart as STTTurnsTurnStart,
-    type STTTurnsTurnUpdate as STTTurnsTurnUpdate,
-    type STTTurnsWebsocketQueryParams as STTTurnsWebsocketQueryParams,
-    type STTTurnsWebsocketRequest as STTTurnsWebsocketRequest,
-    type STTTurnsWebsocketResponse as STTTurnsWebsocketResponse,
-    type TurnDetectingWebsocketParams as TurnDetectingWebsocketParams,
+    type STTAutoFinalizeConnected as STTAutoFinalizeConnected,
+    type STTAutoFinalizeModel as STTAutoFinalizeModel,
+    type STTAutoFinalizeTurnEagerEnd as STTAutoFinalizeTurnEagerEnd,
+    type STTAutoFinalizeTurnEnd as STTAutoFinalizeTurnEnd,
+    type STTAutoFinalizeTurnResume as STTAutoFinalizeTurnResume,
+    type STTAutoFinalizeTurnStart as STTAutoFinalizeTurnStart,
+    type STTAutoFinalizeTurnUpdate as STTAutoFinalizeTurnUpdate,
+    type STTAutoFinalizeWebsocketRequest as STTAutoFinalizeWebsocketRequest,
+    type STTAutoFinalizeWebsocketResponse as STTAutoFinalizeWebsocketResponse,
+    type AutoFinalizeWebsocketParams as AutoFinalizeWebsocketParams,
   };
 }

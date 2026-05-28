@@ -1,6 +1,11 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { ExternalVADEmitter, ExternalVADStreamMessage, WebSocketError, buildURL } from './internal-base';
+import {
+  ManualFinalizeEmitter,
+  ManualFinalizeStreamMessage,
+  WebSocketError,
+  buildURL,
+} from './internal-base';
 import { InternalEventEmitter } from '../../../core/EventEmitter';
 import { sleep } from '../../../internal/utils/sleep';
 import { type WebSocketLike, ReadyState } from '../../../internal/ws-adapter';
@@ -14,24 +19,23 @@ import {
   type UnsentMessage,
 } from '../../../internal/ws';
 import * as STTAPI from '../stt';
-import * as ExternalVADAPI from './external-vad';
+import * as ManualFinalizeAPI from './manual-finalize';
 import { Cartesia } from '../../../client';
 import { CartesiaError } from '../../../core/error';
 
-export interface ExternalVADWSParameters extends Record<string, unknown> {
+export interface ManualFinalizeWSParameters extends Record<string, unknown> {
   /**
    * The encoding format for audio data sent to the STT WebSocket.
    */
   encoding: STTAPI.STTEncoding;
 
   /**
-   * Models that support realtime speech-to-text with external VAD (voice activity
-   * detection). This mode expects you to send the `finalize` command to trigger
-   * transcription. See
+   * Models that support realtime speech-to-text (manual finalize). This mode expects
+   * you to send the `finalize` command to trigger transcription. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * all options.
    */
-  model: ExternalVADAPI.STTRealtimeExternalVADModel;
+  model: ManualFinalizeAPI.STTManualFinalizeModel;
 
   /**
    * Sample rate in Hz.
@@ -60,14 +64,14 @@ export interface ExternalVADWSParameters extends Record<string, unknown> {
   min_volume?: number;
 }
 
-export interface ExternalVADWSReconnectOptions {
+export interface ManualFinalizeWSReconnectOptions {
   /**
    * Called before each reconnect attempt. Return an object with
    * `parameters` to override query parameters for the next connection.
    */
   onReconnecting(
-    event: ReconnectingEvent<ExternalVADWSParameters>,
-  ): ReconnectingOverrides<ExternalVADWSParameters> | void;
+    event: ReconnectingEvent<ManualFinalizeWSParameters>,
+  ): ReconnectingOverrides<ManualFinalizeWSParameters> | void;
 
   /**
    * Maximum number of reconnection attempts. Default: 5.
@@ -86,12 +90,12 @@ export interface ExternalVADWSReconnectOptions {
   maxDelay?: number;
 }
 
-export interface ExternalVADWSBaseOptions {
+export interface ManualFinalizeWSBaseOptions {
   /**
    * Options for automatic reconnection on recoverable close codes.
    * Automatic reconnection is only enabled when this has a non-null value.
    */
-  reconnect?: ExternalVADWSReconnectOptions | null | undefined;
+  reconnect?: ManualFinalizeWSReconnectOptions | null | undefined;
 
   /**
    * Maximum size of the outgoing message queue in bytes.
@@ -103,14 +107,14 @@ export interface ExternalVADWSBaseOptions {
   maxQueueSize?: number | undefined;
 }
 
-export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends ExternalVADEmitter {
+export abstract class ManualFinalizeWSBase<TSocket extends WebSocketLike> extends ManualFinalizeEmitter {
   url!: URL;
   socket!: TSocket;
 
   protected _client: Cartesia;
-  protected _parameters: ExternalVADWSParameters | null | undefined;
-  private _reconnectOptions: ExternalVADWSReconnectOptions | null;
-  private _sendQueue: SendQueue<ExternalVADAPI.STTExternalVADWebsocketRequest>;
+  protected _parameters: ManualFinalizeWSParameters | null | undefined;
+  private _reconnectOptions: ManualFinalizeWSReconnectOptions | null;
+  private _sendQueue: SendQueue<ManualFinalizeAPI.STTManualFinalizeWebsocketRequest>;
   private _isReconnecting: boolean = false;
   private _intentionallyClosed = false;
   private _closeCode: number = 1000;
@@ -121,25 +125,27 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
   // Necessary to keep the public event interface clean while we manage reconnecting
   private _internalEvents = new InternalEventEmitter<{
     socketSwap: (oldSocket: TSocket, newSocket: TSocket) => void;
-    reconnecting: (event: ReconnectingEvent<ExternalVADWSParameters>) => void;
+    reconnecting: (event: ReconnectingEvent<ManualFinalizeWSParameters>) => void;
     reconnected: () => void;
     close: (
       code: number,
       reason: string,
-      unsent: UnsentMessage<ExternalVADAPI.STTExternalVADWebsocketRequest>[],
+      unsent: UnsentMessage<ManualFinalizeAPI.STTManualFinalizeWebsocketRequest>[],
     ) => void;
   }>();
 
   constructor(
     client: Cartesia,
-    parameters: ExternalVADWSParameters,
-    options?: ExternalVADWSBaseOptions | undefined,
+    parameters: ManualFinalizeWSParameters,
+    options?: ManualFinalizeWSBaseOptions | undefined,
   ) {
     super();
     this._client = client;
     this._parameters = parameters ?? undefined;
     this._reconnectOptions = options?.reconnect ?? null;
-    this._sendQueue = new SendQueue<ExternalVADAPI.STTExternalVADWebsocketRequest>(options?.maxQueueSize);
+    this._sendQueue = new SendQueue<ManualFinalizeAPI.STTManualFinalizeWebsocketRequest>(
+      options?.maxQueueSize,
+    );
   }
 
   /** Establishes the initial WebSocket connection. */
@@ -151,7 +157,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
   /** Creates a platform-specific WebSocket for the given URL and auth headers. */
   protected abstract _createSocket(url: URL, authHeaders: Record<string, string>): TSocket;
 
-  send(event: ExternalVADAPI.STTExternalVADWebsocketRequest) {
+  send(event: ManualFinalizeAPI.STTManualFinalizeWebsocketRequest) {
     if (!this.socket) {
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
@@ -233,11 +239,11 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
    * }
    * ```
    */
-  stream(): AsyncIterableIterator<ExternalVADStreamMessage> {
+  stream(): AsyncIterableIterator<ManualFinalizeStreamMessage> {
     return this[Symbol.asyncIterator]();
   }
 
-  [Symbol.asyncIterator](): AsyncIterableIterator<ExternalVADStreamMessage> {
+  [Symbol.asyncIterator](): AsyncIterableIterator<ManualFinalizeStreamMessage> {
     if (!this.socket) {
       throw new CartesiaError('Internal error: failed to initialize socket. Please report this issue.');
     }
@@ -245,17 +251,17 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
     // Two-queue async iterator: `queue` buffers incoming messages,
     // `resolvers` buffers waiting next() calls. A push wakes the
     // oldest next(); a next() drains the oldest message.
-    const queue: ExternalVADStreamMessage[] = [];
+    const queue: ManualFinalizeStreamMessage[] = [];
     const resolvers: (() => void)[] = [];
     let done = false;
     let currentSocket = this.socket;
 
-    const push = (msg: ExternalVADStreamMessage) => {
+    const push = (msg: ManualFinalizeStreamMessage) => {
       queue.push(msg);
       resolvers.shift()?.();
     };
 
-    const onEvent = (event: ExternalVADAPI.STTExternalVADWebsocketResponse) => {
+    const onEvent = (event: ManualFinalizeAPI.STTManualFinalizeWebsocketResponse) => {
       if (event.type === 'error') return; // handled by onEmitterError
       push({ type: 'message', message: event });
     };
@@ -273,7 +279,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
       push({ type: 'open' });
     };
 
-    const onReconnecting = (evt: ReconnectingEvent<ExternalVADWSParameters>) => {
+    const onReconnecting = (evt: ReconnectingEvent<ManualFinalizeWSParameters>) => {
       push({ type: 'reconnecting', reconnect: evt });
     };
 
@@ -290,7 +296,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
     const onClose = (
       code: number,
       reason: string,
-      unsent: UnsentMessage<ExternalVADAPI.STTExternalVADWebsocketRequest>[],
+      unsent: UnsentMessage<ManualFinalizeAPI.STTManualFinalizeWebsocketRequest>[],
     ) => {
       push({ type: 'close', code, reason, unsent });
       done = true;
@@ -356,7 +362,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
       }
     }
 
-    const resolve = (res: (value: IteratorResult<ExternalVADStreamMessage>) => void) => {
+    const resolve = (res: (value: IteratorResult<ManualFinalizeStreamMessage>) => void) => {
       if (queue.length > 0) {
         res({ value: queue.shift()!, done: false });
       } else if (done) {
@@ -367,7 +373,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
       return true;
     };
 
-    const next = (): Promise<IteratorResult<ExternalVADStreamMessage>> =>
+    const next = (): Promise<IteratorResult<ManualFinalizeStreamMessage>> =>
       new Promise((res) => {
         if (resolve(res)) return;
         resolvers.push(() => {
@@ -403,9 +409,9 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
       // Coerce to string in case the adapter delivers a typed-array for text frames.
       const text = typeof data === 'string' ? data : String(data);
 
-      let event: ExternalVADAPI.STTExternalVADWebsocketResponse;
+      let event: ManualFinalizeAPI.STTManualFinalizeWebsocketResponse;
       try {
-        event = JSON.parse(text) as ExternalVADAPI.STTExternalVADWebsocketResponse;
+        event = JSON.parse(text) as ManualFinalizeAPI.STTManualFinalizeWebsocketResponse;
       } catch {
         this._emit('raw', data);
         return;
@@ -490,7 +496,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
       const jitter = 0.75 + Math.random() * 0.25;
       const actualDelay = Math.round(baseDelay * jitter);
 
-      let reconnectingEvent: ReconnectingEvent<ExternalVADWSParameters> = {
+      let reconnectingEvent: ReconnectingEvent<ManualFinalizeWSParameters> = {
         attempt,
         maxAttempts: maxRetries,
         delay: actualDelay,
@@ -498,7 +504,7 @@ export abstract class ExternalVADWSBase<TSocket extends WebSocketLike> extends E
         parameters: this._parameters ? { ...this._parameters } : undefined,
       };
 
-      let overrides: ReconnectingOverrides<ExternalVADWSParameters> | void;
+      let overrides: ReconnectingOverrides<ManualFinalizeWSParameters> | void;
       try {
         overrides = this._reconnectOptions.onReconnecting(reconnectingEvent);
       } catch (err) {

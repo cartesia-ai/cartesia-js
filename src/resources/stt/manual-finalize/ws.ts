@@ -2,24 +2,28 @@
 
 import * as WS from 'ws';
 import { NodeWebSocket } from '../../../internal/ws-adapter-node';
-import { ExternalVADWSBase, type ExternalVADWSBaseOptions, type ExternalVADWSParameters } from './ws-base';
+import {
+  ManualFinalizeWSBase,
+  type ManualFinalizeWSBaseOptions,
+  type ManualFinalizeWSParameters,
+} from './ws-base';
 import { Cartesia } from '../../../client';
 
-export type { ExternalVADWSParameters, ExternalVADWSReconnectOptions } from './ws-base';
+export type { ManualFinalizeWSParameters, ManualFinalizeWSReconnectOptions } from './ws-base';
 
-export interface ExternalVADWSClientOptions extends WS.ClientOptions, ExternalVADWSBaseOptions {}
+export interface ManualFinalizeWSClientOptions extends WS.ClientOptions, ManualFinalizeWSBaseOptions {}
 
-export class ExternalVADWS extends ExternalVADWSBase<NodeWebSocket> {
+export class ManualFinalizeWS extends ManualFinalizeWSBase<NodeWebSocket> {
   private _wsOptions: WS.ClientOptions | null | undefined;
 
   constructor(
     client: Cartesia,
-    parameters: ExternalVADWSParameters,
-    options?: ExternalVADWSClientOptions | null | undefined,
+    parameters: ManualFinalizeWSParameters,
+    options?: ManualFinalizeWSClientOptions | null | undefined,
   ) {
     if (!WS?.WebSocket) {
       throw new Error(
-        'ExternalVADWS from "@cartesia/cartesia-js/resources/stt/external-vad/ws" requires the "ws" package but it could not be loaded.',
+        'ManualFinalizeWS from "@cartesia/cartesia-js/resources/stt/manual-finalize/ws" requires the "ws" package but it could not be loaded.',
       );
     }
 
