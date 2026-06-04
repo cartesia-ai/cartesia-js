@@ -1,14 +1,8 @@
-# Publishes to npm using a Trusted Publisher (OIDC) instead of a long-lived
-# NPM_TOKEN. See https://docs.npmjs.com/trusted-publishers.
-#
-# This workflow is triggered when a GitHub release is created. It can also be
-# run manually to re-publish if it failed for some reason.
+# This workflow publishes the package to NPM.
+# You can run this workflow manually by navigating to https://www.github.com/cartesia-ai/cartesia-js/actions/workflows/publish-npm.yml
 name: Publish NPM (Trusted)
 on:
   workflow_dispatch:
-
-  release:
-    types: [published]
 
 permissions:
   id-token: write
