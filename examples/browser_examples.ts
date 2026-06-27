@@ -75,7 +75,7 @@ async function ttsPlayAudio(client: Cartesia): Promise<void> {
     model_id: 'sonic-latest',
     transcript: 'Hello from the browser!',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-    output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 44100 },
+    output_format: { container: ''mp3', encoding: 'pcm_s16le', sample_rate: 44100 },
     language: 'en',
   });
 
@@ -97,7 +97,7 @@ async function ttsDownloadFile(client: Cartesia): Promise<void> {
     model_id: 'sonic-latest',
     transcript: 'This audio will be downloaded as a file.',
     voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
-    output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 44100 },
+    output_format: { container: ''mp3', encoding: 'pcm_s16le', sample_rate: 44100 },
     language: 'en',
   });
 
