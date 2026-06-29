@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.3.0 (2026-06-29)
+
+Full Changelog: [v3.2.0...v3.3.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.2.0...v3.3.0)
+
+### Features
+
+* stamp client identity on REST and WebSocket handshakes ([#106](https://github.com/cartesia-ai/cartesia-js/issues/106)) ([37a5751](https://github.com/cartesia-ai/cartesia-js/commit/37a575189ec01ab5e6d2f7e98567274e89cdbd95))
+
+
+### Bug Fixes
+
+* **client:** send content-type header for requests with an omitted optional body ([a999a05](https://github.com/cartesia-ai/cartesia-js/commit/a999a054858033f1359f70d0e8035ed422ee07dd))
+
+
+### Chores
+
+* **deps:** bump actions/checkout from 6.0.2 to 7.0.0 ([#104](https://github.com/cartesia-ai/cartesia-js/issues/104)) ([0f5ce6e](https://github.com/cartesia-ai/cartesia-js/commit/0f5ce6ed436c66213d4d81d9e392b2fe5d0c11ea))
+* **deps:** bump pnpm/action-setup from 6.0.8 to 6.0.9 ([#102](https://github.com/cartesia-ai/cartesia-js/issues/102)) ([bd389c0](https://github.com/cartesia-ai/cartesia-js/commit/bd389c0b595c783333914df10d49d09b93ef5f86))
+
 ## 3.2.0 (2026-05-28)
 
 Full Changelog: [v3.2.0-b2...v3.2.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.2.0-b2...v3.2.0)
