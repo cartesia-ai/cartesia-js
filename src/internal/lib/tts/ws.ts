@@ -9,10 +9,7 @@ import { fromBase64, uuid4 } from '../../utils';
 import { WebSocketTimeoutError } from './websocket-timeout-error';
 import { CartesiaError } from '../../../error';
 import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
-import {
-  appendBrowserWebSocketClientParam,
-  getWebSocketConnectHeaders,
-} from '../../client-identity';
+import { appendBrowserWebSocketClientParam, getWebSocketConnectHeaders } from '../../client-identity';
 import { buildHeaders } from '../../headers';
 
 let _ws: Partial<typeof import('ws')> | undefined;
