@@ -10,6 +10,10 @@ import {
 } from './ws-base';
 import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
+import {
+  appendBrowserWebSocketClientParam,
+  getWebSocketConnectHeaders,
+} from '../../../internal/client-identity';
 import { buildHeaders } from '../../../internal/headers';
 
 let _ws: Partial<typeof import('ws')> | undefined;
@@ -47,15 +51,7 @@ export class ManualFinalizeWS extends ManualFinalizeWSBase<NodeWebSocket | Brows
     if (_ws?.WebSocket !== undefined) {
       const ws = new _ws.WebSocket(url, {
         ...this._wsOptions,
-        headers: Object.fromEntries(
-          buildHeaders([
-            {
-              'cartesia-version': '2025-11-04',
-            },
-            authHeaders,
-            this._wsOptions?.headers,
-          ]).values.entries(),
-        ),
+        headers: getWebSocketConnectHeaders(authHeaders, this._wsOptions?.headers),
       });
       return new NodeWebSocket(ws);
     }
@@ -89,6 +85,8 @@ export class ManualFinalizeWS extends ManualFinalizeWSBase<NodeWebSocket | Brows
       // api key from client
       url.searchParams.set('api_key', this._client.apiKey);
     }
+
+    appendBrowserWebSocketClientParam(url);
 
     return new BrowserWebSocket(new WebSocket(url));
   }

@@ -9,6 +9,7 @@ import { fromBase64, uuid4 } from '../../utils';
 import { WebSocketTimeoutError } from './websocket-timeout-error';
 import { CartesiaError } from '../../../error';
 import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
+import { appendBrowserWebSocketClientParam, getWebSocketConnectHeaders } from '../../client-identity';
 import { buildHeaders } from '../../headers';
 
 let _ws: Partial<typeof import('ws')> | undefined;
@@ -327,15 +328,7 @@ export class TTSWS extends TTSEmitter {
       // Node: use ws package with custom headers for auth
       this.socket = new _ws.WebSocket(this.url, {
         ...options,
-        headers: Object.fromEntries(
-          buildHeaders([
-            {
-              'cartesia-version': '2025-11-04',
-            },
-            this.authHeaders(),
-            options?.headers,
-          ]).values.entries(),
-        ),
+        headers: getWebSocketConnectHeaders(this.authHeaders(), options?.headers),
       });
     } else if (typeof WebSocket !== 'undefined') {
       // Browser: use native WebSocket with auth in URL query params
@@ -362,6 +355,8 @@ export class TTSWS extends TTSEmitter {
         // api key from client
         url.searchParams.set('api_key', this.client.apiKey);
       }
+
+      appendBrowserWebSocketClientParam(url);
 
       this.socket = new WebSocket(url);
     } else {

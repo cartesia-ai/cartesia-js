@@ -1,5 +1,6 @@
 import type * as WS from 'ws';
 import { Cartesia } from '../client';
+import { getWebSocketConnectHeaders } from '../internal/client-identity';
 import { BackCompatRequestOptions } from './types';
 import { wrap } from './utils';
 import type { Readable } from 'stream';
@@ -180,15 +181,13 @@ export class WebSocketWrapper {
 
     const url = new URL(urlStr);
 
-    const headers: Record<string, string> = {
-      'cartesia-version': '2025-11-04',
-    };
+    const authHeaders: Record<string, string> = {};
     if (this.client.apiKey) {
-      headers['Authorization'] = `Bearer ${this.client.apiKey}`;
+      authHeaders['Authorization'] = `Bearer ${this.client.apiKey}`;
     }
 
     const socket = new _ws.WebSocket(url.toString(), {
-      headers,
+      headers: getWebSocketConnectHeaders(authHeaders),
     });
     this.socket = socket;
 
