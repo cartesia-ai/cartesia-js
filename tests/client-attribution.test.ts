@@ -10,7 +10,7 @@ import { VERSION } from '@cartesia/cartesia-js/version';
 
 /** Canonical cartesia-js identity — every outbound surface must use these values. */
 const CARTESIA_JS_CLIENT = {
-  userAgent: `Cartesia/JS ${VERSION}`,
+  userAgent: `cartesia-js/${VERSION}`,
   clientHeader: `cartesia-js/${VERSION}`,
 } as const;
 

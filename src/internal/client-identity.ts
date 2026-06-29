@@ -5,7 +5,7 @@ const CLIENT_ID = 'cartesia-js';
 
 /** Stable User-Agent for REST and Node WebSocket handshakes. */
 export function getClientUserAgent(): string {
-  return `Cartesia/JS ${VERSION}`;
+  return getClientHeader();
 }
 
 /** Minification-proof client identifier for attribution in Datadog APM. */

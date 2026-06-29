@@ -7,17 +7,17 @@ import {
 import { VERSION } from '@cartesia/cartesia-js/version';
 
 describe('client identity', () => {
-  test('getClientUserAgent uses stable Cartesia prefix', () => {
-    expect(getClientUserAgent()).toBe(`Cartesia/JS ${VERSION}`);
+  test('getClientUserAgent matches package slug client id', () => {
+    expect(getClientUserAgent()).toBe(`cartesia-js/${VERSION}`);
   });
 
   test('getClientHeader uses stable client id', () => {
     expect(getClientHeader()).toBe(`cartesia-js/${VERSION}`);
   });
 
-  test('getClientRequestHeaders includes User-Agent and X-Cartesia-Client', () => {
+  test('getClientRequestHeaders uses the same value for User-Agent and X-Cartesia-Client', () => {
     expect(getClientRequestHeaders()).toEqual({
-      'User-Agent': `Cartesia/JS ${VERSION}`,
+      'User-Agent': `cartesia-js/${VERSION}`,
       'X-Cartesia-Client': `cartesia-js/${VERSION}`,
     });
   });
