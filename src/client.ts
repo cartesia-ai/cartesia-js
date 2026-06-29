@@ -13,7 +13,6 @@ import { getPlatformHeaders } from './internal/detect-platform';
 import * as Shims from './internal/shims';
 import * as Opts from './internal/request-options';
 import { stringifyQuery } from './internal/utils/query';
-import { VERSION } from './version';
 import * as Errors from './core/error';
 import * as Pagination from './core/pagination';
 import { AbstractPage, type CursorIDPageParams, CursorIDPageResponse } from './core/pagination';
