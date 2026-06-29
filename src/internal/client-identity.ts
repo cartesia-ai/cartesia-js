@@ -1,4 +1,5 @@
 import { VERSION } from '../version';
+import { buildHeaders, type HeadersLike } from './headers';
 
 const CLIENT_ID = 'cartesia-js';
 
@@ -18,6 +19,23 @@ export function getClientRequestHeaders(): Record<string, string> {
     'User-Agent': getClientUserAgent(),
     'X-Cartesia-Client': getClientHeader(),
   };
+}
+
+/** Headers for Node WebSocket upgrade requests (TTS + STT). */
+export function getWebSocketConnectHeaders(
+  authHeaders: Record<string, string> = {},
+  extraHeaders?: HeadersLike,
+): Record<string, string> {
+  return Object.fromEntries(
+    buildHeaders([
+      getClientRequestHeaders(),
+      {
+        'cartesia-version': '2025-11-04',
+      },
+      authHeaders,
+      extraHeaders,
+    ]).values.entries(),
+  );
 }
 
 /** Browser WebSocket cannot set custom headers; stamp identity via query param. */

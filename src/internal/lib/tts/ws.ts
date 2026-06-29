@@ -11,7 +11,7 @@ import { CartesiaError } from '../../../error';
 import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
 import {
   appendBrowserWebSocketClientParam,
-  getClientRequestHeaders,
+  getWebSocketConnectHeaders,
 } from '../../client-identity';
 import { buildHeaders } from '../../headers';
 
@@ -331,16 +331,7 @@ export class TTSWS extends TTSEmitter {
       // Node: use ws package with custom headers for auth
       this.socket = new _ws.WebSocket(this.url, {
         ...options,
-        headers: Object.fromEntries(
-          buildHeaders([
-            getClientRequestHeaders(),
-            {
-              'cartesia-version': '2025-11-04',
-            },
-            this.authHeaders(),
-            options?.headers,
-          ]).values.entries(),
-        ),
+        headers: getWebSocketConnectHeaders(this.authHeaders(), options?.headers),
       });
     } else if (typeof WebSocket !== 'undefined') {
       // Browser: use native WebSocket with auth in URL query params

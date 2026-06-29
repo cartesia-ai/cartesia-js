@@ -12,7 +12,7 @@ import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
 import {
   appendBrowserWebSocketClientParam,
-  getClientRequestHeaders,
+  getWebSocketConnectHeaders,
 } from '../../../internal/client-identity';
 import { buildHeaders } from '../../../internal/headers';
 
@@ -51,16 +51,7 @@ export class ManualFinalizeWS extends ManualFinalizeWSBase<NodeWebSocket | Brows
     if (_ws?.WebSocket !== undefined) {
       const ws = new _ws.WebSocket(url, {
         ...this._wsOptions,
-        headers: Object.fromEntries(
-          buildHeaders([
-            getClientRequestHeaders(),
-            {
-              'cartesia-version': '2025-11-04',
-            },
-            authHeaders,
-            this._wsOptions?.headers,
-          ]).values.entries(),
-        ),
+        headers: getWebSocketConnectHeaders(authHeaders, this._wsOptions?.headers),
       });
       return new NodeWebSocket(ws);
     }
