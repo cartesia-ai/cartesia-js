@@ -47,7 +47,7 @@ describe('cartesia-js client attribution by service', () => {
       const headers = getWebSocketConnectHeaders({ Authorization: 'Bearer test-api-key' });
       expectCartesiaJsHeaders(headers);
       expect(headers['cartesia-version']).toBe('2025-11-04');
-      expect(headers.authorization).toBe('Bearer test-api-key');
+      expect(headers['authorization']).toBe('Bearer test-api-key');
       expect(path).toMatch(/^\/(tts|stt)/);
     });
 
