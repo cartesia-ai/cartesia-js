@@ -6,6 +6,10 @@ import { NodeWebSocket } from '../../../internal/ws-adapter-node';
 import { AutoFinalizeWSBase, type AutoFinalizeWSBaseOptions, type AutoFinalizeWSParameters } from './ws-base';
 import { Cartesia } from '../../../client';
 import { getAuthorizationTokenFromHeaders } from '../../../internal/lib/utils/get-authorization-token-from-headers';
+import {
+  appendBrowserWebSocketClientParam,
+  getClientRequestHeaders,
+} from '../../../internal/client-identity';
 import { buildHeaders } from '../../../internal/headers';
 
 let _ws: Partial<typeof import('ws')> | undefined;
@@ -45,6 +49,7 @@ export class AutoFinalizeWS extends AutoFinalizeWSBase<NodeWebSocket | BrowserWe
         ...this._wsOptions,
         headers: Object.fromEntries(
           buildHeaders([
+            getClientRequestHeaders(),
             {
               'cartesia-version': '2025-11-04',
             },
@@ -85,6 +90,8 @@ export class AutoFinalizeWS extends AutoFinalizeWSBase<NodeWebSocket | BrowserWe
       // api key from client
       url.searchParams.set('api_key', this._client.apiKey);
     }
+
+    appendBrowserWebSocketClientParam(url);
 
     return new BrowserWebSocket(new WebSocket(url));
   }

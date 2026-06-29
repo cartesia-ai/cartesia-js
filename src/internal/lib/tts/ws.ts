@@ -9,6 +9,10 @@ import { fromBase64, uuid4 } from '../../utils';
 import { WebSocketTimeoutError } from './websocket-timeout-error';
 import { CartesiaError } from '../../../error';
 import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
+import {
+  appendBrowserWebSocketClientParam,
+  getClientRequestHeaders,
+} from '../../client-identity';
 import { buildHeaders } from '../../headers';
 
 let _ws: Partial<typeof import('ws')> | undefined;
@@ -329,6 +333,7 @@ export class TTSWS extends TTSEmitter {
         ...options,
         headers: Object.fromEntries(
           buildHeaders([
+            getClientRequestHeaders(),
             {
               'cartesia-version': '2025-11-04',
             },
@@ -362,6 +367,8 @@ export class TTSWS extends TTSEmitter {
         // api key from client
         url.searchParams.set('api_key', this.client.apiKey);
       }
+
+      appendBrowserWebSocketClientParam(url);
 
       this.socket = new WebSocket(url);
     } else {
