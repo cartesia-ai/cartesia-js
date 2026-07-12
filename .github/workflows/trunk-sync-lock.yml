@@ -2,15 +2,15 @@ name: Trunk sync lock
 
 # Posts a `trunk-synced` commit status to open PRs targeting staging `main`:
 # red while production is ahead of staging (a release hasn't been synced back
-# yet), green once they are in sync. 
+# yet), green once they are in sync.
 #
-# You should make `trunk-synced` a required status check on staging `main` 
+# You should make `trunk-synced` a required status check on staging `main`
 # to block merges onto a stale trunk during the release
 # window.
 #
 # This only gates PRs, not direct pushes. The back-sync bypasses this check
 # by pushing to staging `main` directly. If staging `main` also requires a pull
-# request, give the back-sync's identity ruleset-bypass so it can push. Never 
+# request, give the back-sync's identity ruleset-bypass so it can push. Never
 # route the back-sync through a PR gated by this check, or it deadlocks.
 #
 # First-run note: GitHub treats a status check as "required" only once it has
@@ -23,7 +23,7 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened]
   workflow_run:
-    workflows: ["Sync from production"]
+    workflows: ['Sync from production']
     types: [completed]
   repository_dispatch:
     types: [prod-released]
