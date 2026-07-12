@@ -8,11 +8,11 @@ import { sleep } from './internal/utils/sleep';
 export type { Logger, LogLevel } from './internal/utils/log';
 import { castToError, isAbortError } from './internal/errors';
 import type { APIResponseProps } from './internal/parse';
+import { getClientRequestHeaders } from './internal/client-identity';
 import { getPlatformHeaders } from './internal/detect-platform';
 import * as Shims from './internal/shims';
 import * as Opts from './internal/request-options';
 import { stringifyQuery } from './internal/utils/query';
-import { VERSION } from './version';
 import * as Errors from './core/error';
 import * as Pagination from './core/pagination';
 import { AbstractPage, type CursorIDPageParams, CursorIDPageResponse } from './core/pagination';
@@ -350,10 +350,6 @@ export class Cartesia {
 
   protected stringifyQuery(query: object | Record<string, unknown>): string {
     return stringifyQuery(query);
-  }
-
-  private getUserAgent(): string {
-    return `${this.constructor.name}/JS ${VERSION}`;
   }
 
   protected defaultIdempotencyKey(): string {
@@ -788,9 +784,9 @@ export class Cartesia {
 
     const headers = buildHeaders([
       idempotencyHeaders,
+      getClientRequestHeaders(),
       {
         Accept: 'application/json',
-        'User-Agent': this.getUserAgent(),
         'X-Stainless-Retry-Count': String(retryCount),
         ...(options.timeout ? { 'X-Stainless-Timeout': String(Math.trunc(options.timeout / 1000)) } : {}),
         ...getPlatformHeaders(),
