@@ -1,13 +1,13 @@
 name: Sync from production
 
 # Bring production's commits back onto staging `main` by fast-forwarding.
-# This keeps staging and production identical and linear so the next `stlc build` 
+# This keeps staging and production identical and linear so the next `stlc build`
 # reseals against the released state.
 #
 # Triggered by the production-side release dispatch and by a periodic poll.
 on:
   schedule:
-    # Polls for non-release production changes. If you take frequent 
+    # Polls for non-release production changes. If you take frequent
     # community PRs, tighten this or add an eager `on: push: [main]`
     # dispatch on production alongside the release one.
     - cron: '17 */6 * * *'

@@ -21,7 +21,7 @@ jobs:
   promote:
     runs-on: ubuntu-latest
     if: github.repository == 'cartesia-ai/cartesia-js-staging'
-    # Optional: add required reviewers on each promote run before the fast-forward push. 
+    # Optional: add required reviewers on each promote run before the fast-forward push.
     # With no reviewers it only scopes secrets/variables and adds no gate, so the manual dispatch
     # above is the only checkpoint. Remove this line if you don't use it.
     environment: production
