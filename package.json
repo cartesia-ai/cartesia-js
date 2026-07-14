@@ -11,7 +11,7 @@
     "url": "git+https://github.com/cartesia-ai/cartesia-js.git"
   },
   "license": "Apache-2.0",
-  "packageManager": "pnpm@11.2.2",
+  "packageManager": "pnpm@11.13.0",
   "files": [
     "**/*"
   ],
@@ -22,7 +22,7 @@
   "scripts": {
     "test": "./scripts/test",
     "build": "./scripts/build",
-    "prepublishOnly": "echo 'to publish, run pnpm build && (cd dist; pnpm publish)' && exit 1",
+    "prepublishOnly": "echo 'to stage a release, run pnpm build && (cd dist; pnpm stage publish)' && exit 1",
     "format": "./scripts/format",
     "prepare": "if ./scripts/utils/check-is-in-git-install.sh; then ./scripts/build && ./scripts/utils/git-swap.sh; fi",
     "tsn": "ts-node -r tsconfig-paths/register",
