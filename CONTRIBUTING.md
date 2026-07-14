@@ -88,14 +88,14 @@ $ pnpm fix
 
 ## Publishing and releases
 
-Changes made to this repository via the automated release PR pipeline should publish to npm automatically. If
-the changes aren't made through the automated pipeline, you may want to make releases manually.
+Changes made to this repository via the automated release PR pipeline should be staged on npm automatically. If
+the changes aren't made through the automated pipeline, you may want to stage releases manually.
 
-### Publish with a GitHub workflow
+### Stage with a GitHub workflow
 
-You can release to package managers by using [the `Publish NPM` GitHub action](https://www.github.com/cartesia-ai/cartesia-js/actions/workflows/publish-npm-trusted.yml).
+You can stage an npm release for approval by using [the `Stage NPM` GitHub action](https://www.github.com/cartesia-ai/cartesia-js/actions/workflows/publish-npm.yml). After reviewing the staged package, a maintainer must approve it on npm before it becomes available from the registry.
 
-### Publish manually
+### Stage manually
 
-If you need to manually release a package, you can run the `bin/publish-npm` script with an `NPM_TOKEN` set on
-the environment.
+If you need to manually stage a package, you can run the `bin/publish-npm` script with an `NPM_TOKEN` set in
+the environment. The command prints the stage ID needed to inspect, approve, or reject the staged package.

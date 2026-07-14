@@ -62,8 +62,6 @@ else
   TAG="latest"
 fi
 
-# Install OIDC compatible npm version
-npm install --prefix ../oidc/ npm@11.6.2
-
-# Publish with the appropriate tag
-pnpm publish --npm-path "$(cd ../ && pwd)/oidc/node_modules/.bin/npm" --no-git-checks --tag "$TAG"
+# Stage with the appropriate tag. A maintainer must approve the stage in npm
+# before the package becomes available from the registry.
+pnpm stage publish --no-git-checks --tag "$TAG"

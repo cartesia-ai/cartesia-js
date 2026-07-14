@@ -1864,7 +1864,7 @@ packages:
         optional: true
 
   tsc-multi@https://github.com/stainless-api/tsc-multi/releases/download/v1.1.11/tsc-multi.tgz:
-    resolution: {tarball: https://github.com/stainless-api/tsc-multi/releases/download/v1.1.11/tsc-multi.tgz}
+    resolution: {integrity: sha512-LrjLRdfDnJ6UcZPSsxxY8QDnZmS3ZpPyvzgjUlNMjjRoTAUVqeL+IWrIzEU3Z+CwVrpVI97PePRLenEfCtR/UQ==, tarball: https://github.com/stainless-api/tsc-multi/releases/download/v1.1.11/tsc-multi.tgz}
     version: 1.1.11
     engines: {node: '>=14'}
     hasBin: true
