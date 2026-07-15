@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.3.1 (2026-07-15)
+
+Full Changelog: [v3.3.0...v3.3.1](https://github.com/cartesia-ai/cartesia-js/compare/v3.3.0...v3.3.1)
+
+### Bug Fixes
+
+* **ci:** add environment to workflows ([2b1eb5a](https://github.com/cartesia-ai/cartesia-js/commit/2b1eb5aa093372c7e426c6732baa0982be854095))
+
+
+### Chores
+
+* **ci:** format workflow files ([86fcda7](https://github.com/cartesia-ai/cartesia-js/commit/86fcda7ef52d90da7c7844ec98b88a2ddde2d8ec))
+* **deps:** bump actions/setup-node from 3.9.1 to 6.4.0 ([6e0fea1](https://github.com/cartesia-ai/cartesia-js/commit/6e0fea1d56d7f15fa444f0cece847797f321490c))
+* **deps:** bump actions/setup-node from 6.4.0 to 7.0.0 ([1965bd0](https://github.com/cartesia-ai/cartesia-js/commit/1965bd076c6b33f0c4272991383ebf3cd8543f63))
+
 ## 3.3.0 (2026-06-29)
 
 Full Changelog: [v3.2.0...v3.3.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.2.0...v3.3.0)
