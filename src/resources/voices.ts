@@ -363,7 +363,12 @@ export interface VoiceLocalizeParams {
     | 'pl'
     | 'ru'
     | 'sv'
-    | 'tr';
+    | 'tr'
+    | 'ar'
+    | 'he'
+    | 'ta'
+    | 'te'
+    | 'th';
 
   /**
    * The name of the new localized voice.
