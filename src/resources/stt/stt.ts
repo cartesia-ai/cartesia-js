@@ -5,6 +5,8 @@ import * as AutoFinalizeAPI from './auto-finalize/auto-finalize';
 import {
   AutoFinalize,
   AutoFinalizeWebsocketParams,
+  STTAutoFinalizeCloseCommand,
+  STTAutoFinalizeConfigCommand,
   STTAutoFinalizeConnected,
   STTAutoFinalizeModel,
   STTAutoFinalizeTurnEagerEnd,
@@ -313,6 +315,8 @@ export declare namespace STT {
 
   export {
     AutoFinalize as AutoFinalize,
+    type STTAutoFinalizeCloseCommand as STTAutoFinalizeCloseCommand,
+    type STTAutoFinalizeConfigCommand as STTAutoFinalizeConfigCommand,
     type STTAutoFinalizeConnected as STTAutoFinalizeConnected,
     type STTAutoFinalizeModel as STTAutoFinalizeModel,
     type STTAutoFinalizeTurnEagerEnd as STTAutoFinalizeTurnEagerEnd,
