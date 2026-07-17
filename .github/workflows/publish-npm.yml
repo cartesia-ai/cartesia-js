@@ -1,13 +1,19 @@
 # This workflow stages the package on NPM for maintainer approval.
-# You can run this workflow manually by navigating to https://www.github.com/cartesia-ai/cartesia-js/actions/workflows/publish-npm.yml
+# It runs automatically when release-please publishes a GitHub Release, and
+# can also be run manually by navigating to https://www.github.com/cartesia-ai/cartesia-js/actions/workflows/publish-npm.yml
 name: Stage NPM
 on:
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
   stage:
     name: stage
     runs-on: ubuntu-latest
+    # Guard so this only runs on the production repo — the file also exists in
+    # the staging repo via promotion, and publishing must never happen there.
+    if: github.repository == 'cartesia-ai/cartesia-js'
     permissions:
       contents: read
       id-token: write
