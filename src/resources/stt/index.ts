@@ -2,7 +2,6 @@
 
 export {
   AutoFinalize,
-  type STTAutoFinalizeConfigCommand,
   type STTAutoFinalizeConnected,
   type STTAutoFinalizeModel,
   type STTAutoFinalizeTurnEagerEnd,

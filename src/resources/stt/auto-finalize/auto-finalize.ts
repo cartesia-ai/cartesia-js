@@ -36,134 +36,6 @@ export class AutoFinalize extends APIResource {
 }
 
 /**
- * Sent as a JSON-encoded WebSocket text frame to update model settings
- * mid-session.
- */
-export interface STTAutoFinalizeConfigCommand {
-  /**
-   * Command type. Send this as a JSON-encoded WebSocket text frame to update model
-   * settings.
-   */
-  type: 'config';
-
-  /**
-   * Turn detection settings.
-   */
-  turn?: STTAutoFinalizeConfigCommand.Turn;
-}
-
-export namespace STTAutoFinalizeConfigCommand {
-  /**
-   * Turn detection settings.
-   */
-  export interface Turn {
-    /**
-     * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3–0.6. Must
-     * stay between the end and start thresholds.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    eager_end_threshold?: number;
-
-    /**
-     * Threshold below which to end the turn. Default: 0.2. Range: 0.05–0.5. Must stay
-     * below the eager end threshold.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    end_threshold?: number;
-
-    /**
-     * Maximum amount of time in milliseconds that the model will wait after the user
-     * stops speaking before ending the turn. Default: 5600. Range: 640–11200.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    end_timeout_ms?: number;
-
-    /**
-     * Threshold above which to start the turn. Default: 0.8. Range: 0.5–0.9. Must stay
-     * above the eager end threshold.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    start_threshold?: number;
-  }
-}
-
-/**
- * Sent as a JSON-encoded WebSocket text frame to update model settings
- * mid-session.
- */
-export interface STTAutoFinalizeConfigCommand {
-  /**
-   * Command type. Send this as a JSON-encoded WebSocket text frame to update model
-   * settings.
-   */
-  type: 'config';
-
-  /**
-   * Turn detection settings.
-   */
-  turn?: STTAutoFinalizeConfigCommand.Turn;
-}
-
-export namespace STTAutoFinalizeConfigCommand {
-  /**
-   * Turn detection settings.
-   */
-  export interface Turn {
-    /**
-     * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3–0.6. Must
-     * stay between the end and start thresholds.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    eager_end_threshold?: number;
-
-    /**
-     * Threshold below which to end the turn. Default: 0.2. Range: 0.05–0.5. Must stay
-     * below the eager end threshold.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    end_threshold?: number;
-
-    /**
-     * Maximum amount of time in milliseconds that the model will wait after the user
-     * stops speaking before ending the turn. Default: 5600. Range: 640–11200.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    end_timeout_ms?: number;
-
-    /**
-     * Threshold above which to start the turn. Default: 0.8. Range: 0.5–0.9. Must stay
-     * above the eager end threshold.
-     *
-     * See
-     * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
-     * for details.
-     */
-    start_threshold?: number;
-  }
-}
-
-/**
  * Fires once when the WebSocket connection is established. You do not need to wait
  * for this event before sending audio.
  */
@@ -285,7 +157,7 @@ export interface STTAutoFinalizeTurnUpdate {
  */
 export type STTAutoFinalizeWebsocketRequest =
   | STTAutoFinalizeWebsocketRequest.STTAutoFinalizeCloseCommand
-  | STTAutoFinalizeConfigCommand;
+  | STTAutoFinalizeWebsocketRequest.STTAutoFinalizeConfigCommand;
 
 export namespace STTAutoFinalizeWebsocketRequest {
   /**
@@ -299,6 +171,70 @@ export namespace STTAutoFinalizeWebsocketRequest {
      * session.
      */
     type: 'close';
+  }
+
+  /**
+   * Sent as a JSON-encoded WebSocket text frame to update model settings
+   * mid-session.
+   */
+  export interface STTAutoFinalizeConfigCommand {
+    /**
+     * Command type. Send this as a JSON-encoded WebSocket text frame to update model
+     * settings.
+     */
+    type: 'config';
+
+    /**
+     * Turn detection settings.
+     */
+    turn?: STTAutoFinalizeConfigCommand.Turn;
+  }
+
+  export namespace STTAutoFinalizeConfigCommand {
+    /**
+     * Turn detection settings.
+     */
+    export interface Turn {
+      /**
+       * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3-0.6. Must
+       * stay between the end and start thresholds.
+       *
+       * See
+       * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
+       * for details.
+       */
+      eager_end_threshold?: number;
+
+      /**
+       * Threshold below which to end the turn. Default: 0.2. Range: 0.05-0.5. Must stay
+       * below the eager end threshold.
+       *
+       * See
+       * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
+       * for details.
+       */
+      end_threshold?: number;
+
+      /**
+       * Maximum amount of time in milliseconds that the model will wait after the user
+       * stops speaking before ending the turn. Default: 5600. Range: 640-11200.
+       *
+       * See
+       * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
+       * for details.
+       */
+      end_timeout_ms?: number;
+
+      /**
+       * Threshold above which to start the turn. Default: 0.8. Range: 0.5-0.9. Must stay
+       * above the eager end threshold.
+       *
+       * See
+       * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
+       * for details.
+       */
+      start_threshold?: number;
+    }
   }
 }
 
@@ -347,7 +283,7 @@ export interface AutoFinalizeWebsocketParams {
   keyterm?: Array<string>;
 
   /**
-   * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3–0.6. Must
+   * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3-0.6. Must
    * stay between the end and start thresholds.
    *
    * See
@@ -357,7 +293,7 @@ export interface AutoFinalizeWebsocketParams {
   turn_eager_end_threshold?: number;
 
   /**
-   * Threshold below which to end the turn. Default: 0.2. Range: 0.05–0.5. Must stay
+   * Threshold below which to end the turn. Default: 0.2. Range: 0.05-0.5. Must stay
    * below the eager end threshold.
    *
    * See
@@ -368,7 +304,7 @@ export interface AutoFinalizeWebsocketParams {
 
   /**
    * Maximum amount of time in milliseconds that the model will wait after the user
-   * stops speaking before ending the turn. Default: 5600. Range: 640–11200.
+   * stops speaking before ending the turn. Default: 5600. Range: 640-11200.
    *
    * See
    * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
@@ -377,7 +313,7 @@ export interface AutoFinalizeWebsocketParams {
   turn_end_timeout_ms?: number;
 
   /**
-   * Threshold above which to start the turn. Default: 0.8. Range: 0.5–0.9. Must stay
+   * Threshold above which to start the turn. Default: 0.8. Range: 0.5-0.9. Must stay
    * above the eager end threshold.
    *
    * See
@@ -389,7 +325,6 @@ export interface AutoFinalizeWebsocketParams {
 
 export declare namespace AutoFinalize {
   export {
-    type STTAutoFinalizeConfigCommand as STTAutoFinalizeConfigCommand,
     type STTAutoFinalizeConnected as STTAutoFinalizeConnected,
     type STTAutoFinalizeModel as STTAutoFinalizeModel,
     type STTAutoFinalizeTurnEagerEnd as STTAutoFinalizeTurnEagerEnd,

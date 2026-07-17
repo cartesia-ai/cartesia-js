@@ -49,7 +49,7 @@ export interface AutoFinalizeWSParameters extends Record<string, unknown> {
   keyterm?: Array<string>;
 
   /**
-   * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3–0.6. Must
+   * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3-0.6. Must
    * stay between the end and start thresholds.
    *
    * See
@@ -59,7 +59,7 @@ export interface AutoFinalizeWSParameters extends Record<string, unknown> {
   turn_eager_end_threshold?: number;
 
   /**
-   * Threshold below which to end the turn. Default: 0.2. Range: 0.05–0.5. Must stay
+   * Threshold below which to end the turn. Default: 0.2. Range: 0.05-0.5. Must stay
    * below the eager end threshold.
    *
    * See
@@ -70,7 +70,7 @@ export interface AutoFinalizeWSParameters extends Record<string, unknown> {
 
   /**
    * Maximum amount of time in milliseconds that the model will wait after the user
-   * stops speaking before ending the turn. Default: 5600. Range: 640–11200.
+   * stops speaking before ending the turn. Default: 5600. Range: 640-11200.
    *
    * See
    * [Configuring turn detection](https://docs.cartesia.ai/use-the-api/stt/turns#configuring-turn-detection)
@@ -79,7 +79,7 @@ export interface AutoFinalizeWSParameters extends Record<string, unknown> {
   turn_end_timeout_ms?: number;
 
   /**
-   * Threshold above which to start the turn. Default: 0.8. Range: 0.5–0.9. Must stay
+   * Threshold above which to start the turn. Default: 0.8. Range: 0.5-0.9. Must stay
    * above the eager end threshold.
    *
    * See
