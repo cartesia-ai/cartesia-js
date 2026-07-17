@@ -51,7 +51,7 @@ export interface ManualFinalizeWSParameters extends Record<string, unknown> {
    * See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
    * details.
    */
-  keyterms?: Array<string>;
+  keyterm?: Array<string>;
 
   /**
    * The language of the input audio in ISO-639-1 format. Defaults to `en`. See

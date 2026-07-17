@@ -46,7 +46,7 @@ export interface AutoFinalizeWSParameters extends Record<string, unknown> {
    * See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
    * details.
    */
-  keyterms?: Array<string>;
+  keyterm?: Array<string>;
 
   /**
    * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3-0.6. Must

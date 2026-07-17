@@ -39,7 +39,14 @@ export class Voices extends APIResource {
     query: VoiceListParams | null | undefined = {},
     options?: RequestOptions,
   ): PagePromise<VoicesCursorIDPage, Voice> {
-    return this._client.getAPIList('/voices', CursorIDPage<Voice>, { query, ...options });
+    // `expand` must go over the wire as `expand[]` (the API requires the bracketed
+    // form). Query arrays serialize with `repeat` by default, so send the bracketed
+    // key explicitly to preserve backwards compatibility.
+    const { expand, ...restQuery } = query ?? {};
+    return this._client.getAPIList('/voices', CursorIDPage<Voice>, {
+      query: { ...restQuery, ...(expand != null ? { 'expand[]': expand } : {}) },
+      ...options,
+    });
   }
 
   /**
@@ -91,7 +98,14 @@ export class Voices extends APIResource {
     query: VoiceGetParams | null | undefined = {},
     options?: RequestOptions,
   ): APIPromise<Voice> {
-    return this._client.get(path`/voices/${id}`, { query, ...options });
+    // `expand` must go over the wire as `expand[]` (the API requires the bracketed
+    // form). Query arrays serialize with `repeat` by default, so send the bracketed
+    // key explicitly to preserve backwards compatibility.
+    const { expand, ...restQuery } = query ?? {};
+    return this._client.get(path`/voices/${id}`, {
+      query: { ...restQuery, ...(expand != null ? { 'expand[]': expand } : {}) },
+      ...options,
+    });
   }
 
   /**
