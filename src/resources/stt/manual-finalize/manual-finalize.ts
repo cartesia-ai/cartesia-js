@@ -159,6 +159,17 @@ export interface ManualFinalizeWebsocketParams {
   sample_rate: number;
 
   /**
+   * Key terms to improve the recall of specific words and phrases.
+   *
+   * Pass multiple values to boost multiple terms, up to 100 keyterms totaling 1200
+   * characters. To boost one multi-word phrase, join the words with a space.
+   *
+   * See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
+   * details.
+   */
+  keyterms?: Array<string>;
+
+  /**
    * The language of the input audio in ISO-639-1 format. Defaults to `en`. See
    * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
    * current language support.
