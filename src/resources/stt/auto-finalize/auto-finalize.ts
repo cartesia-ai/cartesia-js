@@ -100,6 +100,32 @@ export namespace STTAutoFinalizeConfigCommand {
 }
 
 /**
+ * Sent as a JSON-encoded WebSocket text frame to close the session cleanly. All
+ * buffered audio will be processed by the model into events before the connection
+ * closes.
+ */
+export interface STTAutoFinalizeCloseCommand {
+  /**
+   * Command type. Send this as a JSON-encoded WebSocket text frame to close the
+   * session.
+   */
+  type: 'close';
+}
+
+/**
+ * Sent as a JSON-encoded WebSocket text frame to close the session cleanly. All
+ * buffered audio will be processed by the model into events before the connection
+ * closes.
+ */
+export interface STTAutoFinalizeCloseCommand {
+  /**
+   * Command type. Send this as a JSON-encoded WebSocket text frame to close the
+   * session.
+   */
+  type: 'close';
+}
+
+/**
  * Sent as a JSON-encoded WebSocket text frame to update model settings
  * mid-session.
  */
@@ -283,24 +309,7 @@ export interface STTAutoFinalizeTurnUpdate {
  * Text messages sent from the client to the server. Audio data is sent as raw
  * binary messages rather than text messages.
  */
-export type STTAutoFinalizeWebsocketRequest =
-  | STTAutoFinalizeWebsocketRequest.STTAutoFinalizeCloseCommand
-  | STTAutoFinalizeConfigCommand;
-
-export namespace STTAutoFinalizeWebsocketRequest {
-  /**
-   * Sent as a JSON-encoded WebSocket text frame to close the session cleanly. All
-   * buffered audio will be processed by the model into events before the connection
-   * closes.
-   */
-  export interface STTAutoFinalizeCloseCommand {
-    /**
-     * Command type. Send this as a JSON-encoded WebSocket text frame to close the
-     * session.
-     */
-    type: 'close';
-  }
-}
+export type STTAutoFinalizeWebsocketRequest = STTAutoFinalizeCloseCommand | STTAutoFinalizeConfigCommand;
 
 /**
  * Events emitted by the server. Each event has a `type` field that discriminates
@@ -389,6 +398,7 @@ export interface AutoFinalizeWebsocketParams {
 
 export declare namespace AutoFinalize {
   export {
+    type STTAutoFinalizeCloseCommand as STTAutoFinalizeCloseCommand,
     type STTAutoFinalizeConfigCommand as STTAutoFinalizeConfigCommand,
     type STTAutoFinalizeConnected as STTAutoFinalizeConnected,
     type STTAutoFinalizeModel as STTAutoFinalizeModel,

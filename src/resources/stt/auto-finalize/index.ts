@@ -2,6 +2,7 @@
 
 export {
   AutoFinalize,
+  type STTAutoFinalizeCloseCommand,
   type STTAutoFinalizeConfigCommand,
   type STTAutoFinalizeConnected,
   type STTAutoFinalizeModel,
