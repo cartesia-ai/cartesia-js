@@ -720,9 +720,19 @@ export namespace WebsocketResponse {
 
   export interface Error {
     /**
-     * Whether generation is complete
+     * Human-readable error message.
      */
-    done: boolean;
+    message: string;
+
+    /**
+     * An HTTP response status code.
+     */
+    status_code: number;
+
+    /**
+     * Human-readable error title.
+     */
+    title: string;
 
     type: 'error';
 
@@ -738,29 +748,19 @@ export namespace WebsocketResponse {
     doc_url?: string;
 
     /**
+     * Whether generation is complete
+     */
+    done?: boolean;
+
+    /**
      * Machine-readable error code.
      */
     error_code?: string;
 
     /**
-     * Human-readable error message.
-     */
-    message?: string;
-
-    /**
      * A unique identifier for the network connection.
      */
     request_id?: string;
-
-    /**
-     * An HTTP response status code.
-     */
-    status_code?: number;
-
-    /**
-     * Human-readable error title.
-     */
-    title?: string;
   }
 
   export interface PhonemeTimestamps {

@@ -70,6 +70,21 @@ export type STTEncoding = 'pcm_s16le' | 'pcm_s32le' | 'pcm_f16le' | 'pcm_f32le' 
  */
 export interface STTErrorResponse {
   /**
+   * Human-readable error message.
+   */
+  message: string;
+
+  /**
+   * An HTTP response status code.
+   */
+  status_code: number;
+
+  /**
+   * Human-readable error title.
+   */
+  title: string;
+
+  /**
    * Event type identifier.
    */
   type: 'error';
@@ -85,24 +100,9 @@ export interface STTErrorResponse {
   error_code?: string;
 
   /**
-   * Human-readable error message.
-   */
-  message?: string;
-
-  /**
    * Unique identifier for this WebSocket connection.
    */
   request_id?: string;
-
-  /**
-   * An HTTP response status code.
-   */
-  status_code?: number;
-
-  /**
-   * Human-readable error title.
-   */
-  title?: string;
 }
 
 export interface STTTranscribeResponse {
