@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.4.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.3.0...v3.4.0) (2026-07-17)
+## [3.4.0-b1](https://github.com/cartesia-ai/cartesia-js/compare/v3.3.0...v3.4.0-b1) (2026-07-17)
 
 
 ### Features
@@ -12,25 +12,12 @@
 
 ### Bug Fixes
 
-* **ci:** add environment to workflows ([a202db5](https://github.com/cartesia-ai/cartesia-js/commit/a202db5ac98cc8c35a1994fe9ce18265f0fbee38))
-* **ci:** add environment to workflows ([2b1eb5a](https://github.com/cartesia-ai/cartesia-js/commit/2b1eb5aa093372c7e426c6732baa0982be854095))
 * correct required properties for tts and stt ws errors ([16bf1df](https://github.com/cartesia-ai/cartesia-js/commit/16bf1dfbe15ef7fdde74d53c5b5bf4f7a87df938))
 
 
-### Chores
+### Documentation
 
-* **ci:** format workflow files ([88757dc](https://github.com/cartesia-ai/cartesia-js/commit/88757dc0ab26bf5946433b4d95d488344a1fbfa9))
-* **ci:** format workflow files ([86fcda7](https://github.com/cartesia-ai/cartesia-js/commit/86fcda7ef52d90da7c7844ec98b88a2ddde2d8ec))
-* **deps:** bump actions/checkout from 6 to 7 ([38dffa7](https://github.com/cartesia-ai/cartesia-js/commit/38dffa744e85bca3545c718b6b23c71451e1414d))
-* **deps:** bump actions/checkout from 6 to 7 ([c8d1965](https://github.com/cartesia-ai/cartesia-js/commit/c8d1965e3e19cb07ded0165d05ea078fe7d328c8))
-* **deps:** bump actions/create-github-app-token from 2 to 3 ([06814e8](https://github.com/cartesia-ai/cartesia-js/commit/06814e8d750399010cfa6e5f1bbf764469a73ccd))
-* **deps:** bump actions/create-github-app-token from 2 to 3 ([4c39737](https://github.com/cartesia-ai/cartesia-js/commit/4c39737abafba9d69b08e8284f74f52c9d6085a4))
-* **deps:** bump actions/setup-node from 3.9.1 to 6.4.0 ([68d1b6a](https://github.com/cartesia-ai/cartesia-js/commit/68d1b6acacbaff6e1a0e24c2e0f67472c34f3e38))
-* **deps:** bump actions/setup-node from 3.9.1 to 6.4.0 ([6e0fea1](https://github.com/cartesia-ai/cartesia-js/commit/6e0fea1d56d7f15fa444f0cece847797f321490c))
-* **deps:** bump actions/setup-node from 6.4.0 to 7.0.0 ([58a51ec](https://github.com/cartesia-ai/cartesia-js/commit/58a51ec3cb3243b70c226b38590e6a839cac6c25))
-* **deps:** bump actions/setup-node from 6.4.0 to 7.0.0 ([1965bd0](https://github.com/cartesia-ai/cartesia-js/commit/1965bd076c6b33f0c4272991383ebf3cd8543f63))
-* **deps:** bump googleapis/release-please-action from 4 to 5 ([d4df7e6](https://github.com/cartesia-ai/cartesia-js/commit/d4df7e62e2b9ab2bef3e37782cb7c11933940635))
-* **deps:** bump googleapis/release-please-action from 4 to 5 ([9719376](https://github.com/cartesia-ai/cartesia-js/commit/9719376a0cf020a08524ffe02d4cabba43cbe0c0))
+* clarify package works in browsers ([#108](https://github.com/cartesia-ai/cartesia-js/pull/108)) ([c3094ac](https://github.com/cartesia-ai/cartesia-js/commit/c3094acf8d0fdbc42cfdc7c78ff86043a292a9a3))
 
 ## 3.3.0 (2026-06-29)
 
