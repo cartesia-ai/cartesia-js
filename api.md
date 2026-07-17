@@ -168,8 +168,6 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeCloseCommand</a></code>
-- <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeConfigCommand</a></code>
 - <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeConnected</a></code>
 - <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeModel</a></code>
 - <code><a href="./src/resources/stt/auto-finalize.ts">STTAutoFinalizeTurnEagerEnd</a></code>
