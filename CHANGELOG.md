@@ -1,11 +1,24 @@
 # Changelog
 
-## [3.4.0-b2](https://github.com/cartesia-ai/cartesia-js/compare/v3.4.0-b1...v3.4.0-b2) (2026-07-21)
+## 3.4.0 (2026-07-21)
 
+Full Changelog: [v3.3.0...v3.4.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.3.0...v3.4.0)
 
-### Chores
+### Features
 
-* **deps:** bump pnpm/action-setup from 4.3.0 to 6.0.9 ([#111](https://github.com/cartesia-ai/cartesia-js/issues/111)) ([5100e2c](https://github.com/cartesia-ai/cartesia-js/commit/5100e2cb7e68f0d9f55b13b4c04ae7dd31e3ac4d))
+* **stt:** add turn configs and key term prompting ([1f0086a](https://github.com/cartesia-ai/cartesia-js/commit/1f0086aceac99406586d0b673aa73542254813be))
+* **stt:** register STTAutoFinalizeCloseCommand as a named model ([c58461c](https://github.com/cartesia-ai/cartesia-js/commit/c58461c5ecd05f8c9d760e78a592a4632af6352b))
+* **tts:** add sonic-latest model ([86dbe06](https://github.com/cartesia-ai/cartesia-js/commit/86dbe06a206a4eeca0571c531c0240e022827fc0))
+* **voices:** add ar, he, ta, te, and th localization languages ([86dbe06](https://github.com/cartesia-ai/cartesia-js/commit/86dbe06a206a4eeca0571c531c0240e022827fc0))
+* **voices:** send expand as expand[] for API compat ([065e5ab](https://github.com/cartesia-ai/cartesia-js/commit/065e5ab8fb359aaadbe54c1f13eacb1628dd06b9))
+
+### Bug Fixes
+
+* correct required properties for tts and stt ws errors ([16bf1df](https://github.com/cartesia-ai/cartesia-js/commit/16bf1dfbe15ef7fdde74d53c5b5bf4f7a87df938))
+
+### Documentation
+
+* clarify package works in browsers ([#108](https://github.com/cartesia-ai/cartesia-js/pull/108)) ([c3094ac](https://github.com/cartesia-ai/cartesia-js/commit/c3094acf8d0fdbc42cfdc7c78ff86043a292a9a3))
 
 ## [3.4.0-b1](https://github.com/cartesia-ai/cartesia-js/compare/v3.3.0...v3.4.0-b1) (2026-07-17)
 
