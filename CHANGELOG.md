@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0-b2](https://github.com/cartesia-ai/cartesia-js/compare/v3.4.0-b1...v3.4.0-b2) (2026-07-21)
+
+
+### Chores
+
+* **deps:** bump pnpm/action-setup from 4.3.0 to 6.0.9 ([#111](https://github.com/cartesia-ai/cartesia-js/issues/111)) ([5100e2c](https://github.com/cartesia-ai/cartesia-js/commit/5100e2cb7e68f0d9f55b13b4c04ae7dd31e3ac4d))
+
 ## [3.4.0-b1](https://github.com/cartesia-ai/cartesia-js/compare/v3.3.0...v3.4.0-b1) (2026-07-17)
 
 
