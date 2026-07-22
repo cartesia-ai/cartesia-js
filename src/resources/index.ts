@@ -47,6 +47,7 @@ export {
 } from './stt/stt';
 export {
   TTS,
+  type Emotion,
   type GenerationConfig,
   type GenerationRequest,
   type InfillModel,
@@ -76,7 +77,10 @@ export {
 } from './voice-changer';
 export {
   Voices,
+  type Gender,
   type GenderPresentation,
+  type LocalizeDialect,
+  type LocalizeTargetLanguage,
   type SupportedLanguage,
   type Voice,
   type VoiceMetadata,

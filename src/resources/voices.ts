@@ -130,7 +130,45 @@ export class Voices extends APIResource {
 
 export type VoicesCursorIDPage = CursorIDPage<Voice>;
 
+export type Gender = 'male' | 'female';
+
 export type GenderPresentation = 'masculine' | 'feminine' | 'gender_neutral';
+
+/**
+ * The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
+ * Portuguese (`pt`), and French (`fr`).
+ */
+export type LocalizeDialect = 'au' | 'in' | 'so' | 'uk' | 'us' | 'mx' | 'pe' | 'br' | 'eu' | 'ca';
+
+/**
+ * Target language to localize the voice to.
+ *
+ * Options: English (en), German (de), Spanish (es), French (fr), Japanese (ja),
+ * Portuguese (pt), Chinese (zh), Hindi (hi), Italian (it), Korean (ko), Dutch
+ * (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr), Arabic (ar), Hebrew
+ * (he), Tamil (ta), Telugu (te), Thai (th).
+ */
+export type LocalizeTargetLanguage =
+  | 'en'
+  | 'de'
+  | 'es'
+  | 'fr'
+  | 'ja'
+  | 'pt'
+  | 'zh'
+  | 'hi'
+  | 'it'
+  | 'ko'
+  | 'nl'
+  | 'pl'
+  | 'ru'
+  | 'sv'
+  | 'tr'
+  | 'ar'
+  | 'he'
+  | 'ta'
+  | 'te'
+  | 'th';
 
 /**
  * The language that the given voice should speak the transcript in. For valid
@@ -360,36 +398,17 @@ export interface VoiceLocalizeParams {
    *
    * Options: English (en), German (de), Spanish (es), French (fr), Japanese (ja),
    * Portuguese (pt), Chinese (zh), Hindi (hi), Italian (it), Korean (ko), Dutch
-   * (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+   * (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr), Arabic (ar), Hebrew
+   * (he), Tamil (ta), Telugu (te), Thai (th).
    */
-  language:
-    | 'en'
-    | 'de'
-    | 'es'
-    | 'fr'
-    | 'ja'
-    | 'pt'
-    | 'zh'
-    | 'hi'
-    | 'it'
-    | 'ko'
-    | 'nl'
-    | 'pl'
-    | 'ru'
-    | 'sv'
-    | 'tr'
-    | 'ar'
-    | 'he'
-    | 'ta'
-    | 'te'
-    | 'th';
+  language: LocalizeTargetLanguage;
 
   /**
    * The name of the new localized voice.
    */
   name: string;
 
-  original_speaker_gender: 'male' | 'female';
+  original_speaker_gender: Gender;
 
   /**
    * The ID of the voice to localize.
@@ -400,12 +419,15 @@ export interface VoiceLocalizeParams {
    * The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
    * Portuguese (`pt`), and French (`fr`).
    */
-  dialect?: 'au' | 'in' | 'so' | 'uk' | 'us' | 'mx' | 'pe' | 'br' | 'eu' | 'ca' | null;
+  dialect?: LocalizeDialect | null;
 }
 
 export declare namespace Voices {
   export {
+    type Gender as Gender,
     type GenderPresentation as GenderPresentation,
+    type LocalizeDialect as LocalizeDialect,
+    type LocalizeTargetLanguage as LocalizeTargetLanguage,
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
     type VoiceMetadata as VoiceMetadata,

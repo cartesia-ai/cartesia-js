@@ -42,6 +42,7 @@ import {
 } from './resources/pronunciation-dicts';
 import { Stt, SttTranscribeParams, SttTranscribeResponse } from './resources/stt';
 import {
+  Emotion,
   GenerationConfig,
   GenerationRequest,
   InfillModel,
@@ -71,7 +72,10 @@ import {
   VoiceChangerSSEEvent,
 } from './resources/voice-changer';
 import {
+  Gender,
   GenderPresentation,
+  LocalizeDialect,
+  LocalizeTargetLanguage,
   SupportedLanguage,
   Voice,
   VoiceCloneParams,
@@ -972,6 +976,7 @@ export declare namespace Cartesia {
 
   export {
     TTS as TTS,
+    type Emotion as Emotion,
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type InfillModel as InfillModel,
@@ -1003,7 +1008,10 @@ export declare namespace Cartesia {
 
   export {
     Voices as Voices,
+    type Gender as Gender,
     type GenderPresentation as GenderPresentation,
+    type LocalizeDialect as LocalizeDialect,
+    type LocalizeTargetLanguage as LocalizeTargetLanguage,
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
     type VoiceMetadata as VoiceMetadata,
