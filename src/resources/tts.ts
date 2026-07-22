@@ -126,6 +126,73 @@ export class TTS extends APIResource {
 }
 
 /**
+ * Guide the emotion of the generated speech.
+ *
+ * The primary emotions are `neutral`, `calm`, `angry`, `content`, `sad`,
+ * `scared`. For more options, see
+ * [Volume, Speed, and Emotion](https://docs.cartesia.ai/build-with-cartesia/capability-guides/volume-speed-emotion#emotion-controls-beta).
+ */
+export type Emotion =
+  | 'neutral'
+  | 'happy'
+  | 'excited'
+  | 'enthusiastic'
+  | 'elated'
+  | 'euphoric'
+  | 'triumphant'
+  | 'amazed'
+  | 'surprised'
+  | 'flirtatious'
+  | 'curious'
+  | 'content'
+  | 'peaceful'
+  | 'serene'
+  | 'calm'
+  | 'grateful'
+  | 'affectionate'
+  | 'trust'
+  | 'sympathetic'
+  | 'anticipation'
+  | 'mysterious'
+  | 'angry'
+  | 'mad'
+  | 'outraged'
+  | 'frustrated'
+  | 'agitated'
+  | 'threatened'
+  | 'disgusted'
+  | 'contempt'
+  | 'envious'
+  | 'sarcastic'
+  | 'ironic'
+  | 'sad'
+  | 'dejected'
+  | 'melancholic'
+  | 'disappointed'
+  | 'hurt'
+  | 'guilty'
+  | 'bored'
+  | 'tired'
+  | 'rejected'
+  | 'nostalgic'
+  | 'wistful'
+  | 'apologetic'
+  | 'hesitant'
+  | 'insecure'
+  | 'confused'
+  | 'resigned'
+  | 'anxious'
+  | 'panicked'
+  | 'alarmed'
+  | 'scared'
+  | 'proud'
+  | 'confident'
+  | 'distant'
+  | 'skeptical'
+  | 'contemplative'
+  | 'determined';
+
+/**
  * Configure the various attributes of the generated speech. These are only for
  * `sonic-3` and have no effect on earlier models.
  *
@@ -137,65 +204,7 @@ export interface GenerationConfig {
   /**
    * Guide the emotion of the generated speech.
    */
-  emotion?:
-    | 'neutral'
-    | 'happy'
-    | 'excited'
-    | 'enthusiastic'
-    | 'elated'
-    | 'euphoric'
-    | 'triumphant'
-    | 'amazed'
-    | 'surprised'
-    | 'flirtatious'
-    | 'curious'
-    | 'content'
-    | 'peaceful'
-    | 'serene'
-    | 'calm'
-    | 'grateful'
-    | 'affectionate'
-    | 'trust'
-    | 'sympathetic'
-    | 'anticipation'
-    | 'mysterious'
-    | 'angry'
-    | 'mad'
-    | 'outraged'
-    | 'frustrated'
-    | 'agitated'
-    | 'threatened'
-    | 'disgusted'
-    | 'contempt'
-    | 'envious'
-    | 'sarcastic'
-    | 'ironic'
-    | 'sad'
-    | 'dejected'
-    | 'melancholic'
-    | 'disappointed'
-    | 'hurt'
-    | 'guilty'
-    | 'bored'
-    | 'tired'
-    | 'rejected'
-    | 'nostalgic'
-    | 'wistful'
-    | 'apologetic'
-    | 'hesitant'
-    | 'insecure'
-    | 'confused'
-    | 'resigned'
-    | 'anxious'
-    | 'panicked'
-    | 'alarmed'
-    | 'scared'
-    | 'proud'
-    | 'confident'
-    | 'distant'
-    | 'skeptical'
-    | 'contemplative'
-    | 'determined';
+  emotion?: Emotion;
 
   /**
    * Adjust the speed of the generated speech between 0.6x and 1.5x the original
@@ -988,6 +997,7 @@ export type WordTimestamps = Shared.WordTimestamps;
 
 export declare namespace TTS {
   export {
+    type Emotion as Emotion,
     type GenerationConfig as GenerationConfig,
     type GenerationRequest as GenerationRequest,
     type InfillModel as InfillModel,

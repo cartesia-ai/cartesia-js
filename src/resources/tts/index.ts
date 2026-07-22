@@ -15,6 +15,7 @@
 
 export {
   TTS,
+  type Emotion,
   type GenerationConfig,
   type GenerationRequest,
   type ModelSpeed,

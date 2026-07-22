@@ -193,6 +193,7 @@ Types:
 
 Types:
 
+- <code><a href="./src/resources/tts.ts">Emotion</a></code>
 - <code><a href="./src/resources/tts.ts">GenerationConfig</a></code>
 - <code><a href="./src/resources/tts.ts">GenerationRequest</a></code>
 - <code><a href="./src/resources/tts.ts">InfillModel</a></code>
@@ -229,7 +230,10 @@ Methods:
 
 Types:
 
+- <code><a href="./src/resources/voices.ts">Gender</a></code>
 - <code><a href="./src/resources/voices.ts">GenderPresentation</a></code>
+- <code><a href="./src/resources/voices.ts">LocalizeDialect</a></code>
+- <code><a href="./src/resources/voices.ts">LocalizeTargetLanguage</a></code>
 - <code><a href="./src/resources/voices.ts">SupportedLanguage</a></code>
 - <code><a href="./src/resources/voices.ts">Voice</a></code>
 - <code><a href="./src/resources/voices.ts">VoiceMetadata</a></code>
