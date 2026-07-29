@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/cartesia-ai/cartesia-js/compare/v3.5.0...v3.5.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **ci:** seal tracking files even when a staging push is missed ([ad29223](https://github.com/cartesia-ai/cartesia-js/commit/ad29223fdbc50c20aabd7b3b71433404bc61be07))
+
 ## [3.5.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.4.0...v3.5.0) (2026-07-23)
 
 
