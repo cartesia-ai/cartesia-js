@@ -85,6 +85,7 @@ describe('resource voices', () => {
       clip: await toFile(Buffer.from('Example data'), 'README.md'),
       language: 'en',
       name: 'name',
+      accent: 'British English',
       base_voice_id: 'base_voice_id',
       description: 'description',
     });
@@ -136,6 +137,7 @@ describe('resource voices', () => {
       name: 'name',
       original_speaker_gender: 'male',
       voice_id: 'voice_id',
+      accent: 'British English',
       dialect: 'au',
     });
   });

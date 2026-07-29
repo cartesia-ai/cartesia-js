@@ -11,9 +11,9 @@ import { path } from '../internal/utils/path';
 
 export class Voices extends APIResource {
   /**
-   * Update the name, description, and gender of a voice. To set the gender back to
-   * the default, set the gender to `null`. If gender is not specified, the gender
-   * will not be updated.
+   * Update the name, description, gender, and accent of a voice. To set the gender
+   * back to the default, set the gender to `null`. If gender is not specified, the
+   * gender will not be updated.
    *
    * @example
    * ```ts
@@ -252,9 +252,22 @@ export interface Voice {
   language: SupportedLanguage;
 
   /**
+   * Locales this voice can speak. The native/source locale is first
+   * (`is_native: true`), followed by attached cross-lingual locales. Locale codes
+   * are BCP-47 language-region tags (for example `en-US`, `es-MX`).
+   */
+  locales: Array<VoiceLocale>;
+
+  /**
    * The name of the voice.
    */
   name: string;
+
+  /**
+   * Canonical accent display name for the voice (for example `British English` or
+   * `General American English`).
+   */
+  accent?: VoiceAccent | null;
 
   /**
    * The country associated with the voice, as an ISO 3166-1 alpha-2 code when
@@ -275,6 +288,102 @@ export interface Voice {
    * no preview available. Only included when `expand[]` includes `preview_file_url`.
    */
   preview_file_url?: string | null;
+}
+
+/**
+ * Canonical accent display name for the voice (for example `British English` or
+ * `General American English`).
+ */
+export type VoiceAccent =
+  | 'Abruzzo Italian'
+  | 'African American English'
+  | 'African French'
+  | 'Arabic'
+  | 'Arabic English'
+  | 'Australian English'
+  | 'Bagheli Hindi'
+  | 'Belgian French'
+  | 'Brazilian Portuguese'
+  | 'British English'
+  | 'Budapest Hungarian'
+  | 'Bulgarian'
+  | 'California English'
+  | 'Camba Spanish'
+  | 'Campania Italian'
+  | 'Canadian English'
+  | 'Canadian French'
+  | 'Castilian Spanish'
+  | 'Central Tamil'
+  | 'Central Thai'
+  | 'Central Vietnamese'
+  | 'Chilean Spanish'
+  | 'Colombian Spanish'
+  | 'Czech'
+  | 'Danish'
+  | 'European Portuguese'
+  | 'Finnish'
+  | 'General American English'
+  | 'High German'
+  | 'Hindi'
+  | 'Indian English'
+  | 'Irish English'
+  | 'Israeli Hebrew'
+  | 'Istanbul Turkish'
+  | 'Italian'
+  | 'Jakarta Indonesian'
+  | 'Japanese'
+  | 'Jessore Bengali'
+  | 'Khaleeji Arabic'
+  | 'Konkani'
+  | 'Korean'
+  | 'Kyiv Ukrainian'
+  | 'Malay'
+  | 'Mandarin Chinese'
+  | 'Manila Filipino'
+  | 'Mexican Spanish'
+  | 'Middle Eastern Arabic'
+  | 'Midwestern American English'
+  | 'Modern Standard Arabic'
+  | 'Moldovan Romanian'
+  | 'New York English'
+  | 'New Zealand English'
+  | 'North Kerala Malayalam'
+  | 'Oslo Norwegian'
+  | 'Parisian French'
+  | 'Parsi Gujarati'
+  | 'Peruvian Spanish'
+  | 'Polish'
+  | 'Powadhi Punjabi'
+  | 'Randstad Dutch'
+  | 'Russian'
+  | 'Singaporean English'
+  | 'Slovak'
+  | 'South African English'
+  | 'Southern American English'
+  | 'Southern Karnataka Kannada'
+  | 'Southern Vietnamese'
+  | 'Standard Japanese'
+  | 'Stockholm Swedish'
+  | 'Swiss Standard German'
+  | 'Tbilisi Georgian'
+  | 'Telangana Telugu'
+  | 'Thessaloniki Greek'
+  | 'Zagreb Croatian';
+
+/**
+ * One locale a voice can speak, as a BCP-47 language-region tag plus whether it is
+ * the voice's native/source locale.
+ */
+export interface VoiceLocale {
+  /**
+   * Whether this is the voice's native/source locale.
+   */
+  is_native: boolean;
+
+  /**
+   * The locale's BCP-47 language-region tag (e.g. `en-US`).
+   */
+  locale: string;
 }
 
 export interface VoiceMetadata {
@@ -316,6 +425,12 @@ export interface VoiceMetadata {
 }
 
 export interface VoiceUpdateParams {
+  /**
+   * Canonical accent display name for the voice (for example `British English` or
+   * `General American English`).
+   */
+  accent?: VoiceAccent | null;
+
   /**
    * The description of the voice.
    */
@@ -370,6 +485,12 @@ export interface VoiceCloneParams {
   name: string;
 
   /**
+   * Canonical accent display name for the voice (for example `British English` or
+   * `General American English`).
+   */
+  accent?: VoiceAccent | null;
+
+  /**
    * Optional base voice ID that the cloned voice is derived from.
    */
   base_voice_id?: string | null;
@@ -416,6 +537,12 @@ export interface VoiceLocalizeParams {
   voice_id: string;
 
   /**
+   * Canonical accent display name for the voice (for example `British English` or
+   * `General American English`).
+   */
+  accent?: VoiceAccent | null;
+
+  /**
    * The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
    * Portuguese (`pt`), and French (`fr`).
    */
@@ -430,6 +557,8 @@ export declare namespace Voices {
     type LocalizeTargetLanguage as LocalizeTargetLanguage,
     type SupportedLanguage as SupportedLanguage,
     type Voice as Voice,
+    type VoiceAccent as VoiceAccent,
+    type VoiceLocale as VoiceLocale,
     type VoiceMetadata as VoiceMetadata,
     type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,

@@ -236,6 +236,8 @@ Types:
 - <code><a href="./src/resources/voices.ts">LocalizeTargetLanguage</a></code>
 - <code><a href="./src/resources/voices.ts">SupportedLanguage</a></code>
 - <code><a href="./src/resources/voices.ts">Voice</a></code>
+- <code><a href="./src/resources/voices.ts">VoiceAccent</a></code>
+- <code><a href="./src/resources/voices.ts">VoiceLocale</a></code>
 - <code><a href="./src/resources/voices.ts">VoiceMetadata</a></code>
 
 Methods:

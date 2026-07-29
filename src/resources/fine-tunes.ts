@@ -99,6 +99,12 @@ export interface FineTune {
    * Current status of the fine-tune
    */
   status: 'created' | 'training' | 'completed' | 'failed';
+
+  /**
+   * Canonical accent display name for the voice (for example `British English` or
+   * `General American English`).
+   */
+  accent?: VoicesAPI.VoiceAccent | null;
 }
 
 /**
@@ -135,6 +141,12 @@ export interface FineTuneCreateParams {
    * Name for the new fine-tune
    */
   name: string;
+
+  /**
+   * Canonical accent display name for the voice (for example `British English` or
+   * `General American English`).
+   */
+  accent?: VoicesAPI.VoiceAccent | null;
 }
 
 export interface FineTuneListParams extends CursorIDPageParams {

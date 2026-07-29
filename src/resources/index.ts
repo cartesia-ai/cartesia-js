@@ -83,6 +83,8 @@ export {
   type LocalizeTargetLanguage,
   type SupportedLanguage,
   type Voice,
+  type VoiceAccent,
+  type VoiceLocale,
   type VoiceMetadata,
   type VoiceUpdateParams,
   type VoiceListParams,
