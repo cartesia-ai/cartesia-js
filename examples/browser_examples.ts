@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 
 /**
- * Browser examples for Cartesia JS SDK v3.x
+ * Browser examples for Cartesia JS SDK v4.x
  *
  * These examples are designed for browser environments. They use browser APIs
  * like Blob, URL.createObjectURL, Audio, and the Web Audio API.
@@ -74,7 +74,7 @@ async function ttsPlayAudio(client: Cartesia): Promise<void> {
   const response = await client.tts.generate({
     model_id: 'sonic-latest',
     transcript: 'Hello from the browser!',
-    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+    voice: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
     output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 44100 },
     language: 'en',
   });
@@ -96,7 +96,7 @@ async function ttsDownloadFile(client: Cartesia): Promise<void> {
   const response = await client.tts.generate({
     model_id: 'sonic-latest',
     transcript: 'This audio will be downloaded as a file.',
-    voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+    voice: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
     output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 44100 },
     language: 'en',
   });
@@ -128,7 +128,7 @@ async function ttsWebsocketStreamAudio(client: Cartesia): Promise<void> {
   try {
     const ctx = ws.context({
       model_id: 'sonic-latest',
-      voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+      voice: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
       language: 'en',
     });
@@ -188,7 +188,7 @@ async function ttsWebsocketLowLatency(client: Cartesia): Promise<void> {
   try {
     const ctx = ws.context({
       model_id: 'sonic-latest',
-      voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+      voice: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
       output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: sampleRate },
       language: 'en',
     });
@@ -243,7 +243,7 @@ async function sttTranscribeFile(client: Cartesia, file?: File, language = 'en')
     const response = await client.tts.generate({
       model_id: 'sonic-latest',
       transcript,
-      voice: { mode: 'id', id: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b' },
+      voice: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
       output_format: { container: 'wav', encoding: 'pcm_s16le', sample_rate: 16000 },
       language: 'en',
     });

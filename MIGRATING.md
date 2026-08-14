@@ -1,3 +1,39 @@
+# Migrating from Cartesia JS SDK v3.x to v4.x
+
+v4.0 defaults `Cartesia-Version` to `2026-08-14`. Method names are unchanged (`tts.generate`, `tts.generateSSE`, `tts.websocket`).
+
+## Installation
+
+```bash
+npm install @cartesia/cartesia-js@4
+```
+
+## Voice specifier
+
+Pass a voice ID string. `{ id }` still works. `{ mode: 'id', id }` is no longer the typed shape.
+
+```typescript
+// v3.x
+voice: { mode: 'id', id: 'voice-id' }
+
+// v4.x
+voice: 'voice-id'
+// or
+voice: { id: 'voice-id' }
+```
+
+## Voices
+
+- `is_public` is replaced by `access` (`'private' | 'public'`) and `visibility` (`'owner' | 'all'`).
+- `accent` is a catalog id (`'british'`, `'parisian'`) from `voices.listAccents()`, not a display name.
+- Localize takes `accent` instead of `language` + `dialect`.
+
+## TTS locale and normalization
+
+Optional `locale` (for example `'en-GB'`) is mutually exclusive with `language`. Optional `normalization` is `'auto'` (default), `'off'`, or a locale code.
+
+---
+
 # Migrating from Cartesia JS SDK v2.x to v3.x
 
 This guide covers the breaking changes and new patterns when upgrading from the Cartesia JS SDK v2.x to v3.x.
