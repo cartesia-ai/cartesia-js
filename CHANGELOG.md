@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/cartesia-ai/cartesia-js/compare/v4.0.0...v4.0.1) (2026-08-14)
+
+
+### Documentation
+
+* use a real voice UUID in README TTS examples ([#22](https://github.com/cartesia-ai/cartesia-js/issues/22)) ([c3f3711](https://github.com/cartesia-ai/cartesia-js/commit/c3f371100b7f11f46676fc9fd12822e8029fcad5))
+
 ## [4.0.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.5.1...v4.0.0) (2026-08-14)
 
 
