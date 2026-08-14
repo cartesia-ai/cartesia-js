@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.0.0](https://github.com/cartesia-ai/cartesia-js/compare/v3.5.1...v4.0.0) (2026-08-14)
+
+
+### Bug Fixes
+
+* default websocket Cartesia-Version to 2026-08-14 ([90e0a50](https://github.com/cartesia-ai/cartesia-js/commit/90e0a501d2f97088cbe9a636f600304fba0d5238))
+* map localize accent and drop voice.mode in examples ([fa0dab5](https://github.com/cartesia-ai/cartesia-js/commit/fa0dab57d686364751554c3d5611a7ac5b2893fa))
+
+
+### Chores
+
+* set next release to 4.0.0 ([1d7257a](https://github.com/cartesia-ai/cartesia-js/commit/1d7257aee9edb85ca94febe894de5307547a9209))
+* set next release to 4.0.0 ([81f72ca](https://github.com/cartesia-ai/cartesia-js/commit/81f72ca0ef71541e0125592b5237a81e83207629))
+
+
+### Documentation
+
+* use string voice ids in 4.0 examples ([#21](https://github.com/cartesia-ai/cartesia-js/issues/21)) ([a8dc2b5](https://github.com/cartesia-ai/cartesia-js/commit/a8dc2b591d74893bd6a20a0835a7dd557d4bb32c))
+
 ## [3.5.1](https://github.com/cartesia-ai/cartesia-js/compare/v3.5.0...v3.5.1) (2026-07-29)
 
 
