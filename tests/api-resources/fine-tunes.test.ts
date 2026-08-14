@@ -34,7 +34,7 @@ describe('resource fineTunes', () => {
       language: 'language',
       model_id: 'sonic-3-2026-01-12',
       name: 'name',
-      accent: 'British English',
+      accent: 'southern-us',
     });
   });
 

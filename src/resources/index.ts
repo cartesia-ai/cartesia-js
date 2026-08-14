@@ -77,8 +77,10 @@ export {
 } from './voice-changer';
 export {
   Voices,
+  type Accent,
   type Gender,
   type GenderPresentation,
+  type ListAccentsResponse,
   type LocalizeDialect,
   type LocalizeTargetLanguage,
   type SupportedLanguage,

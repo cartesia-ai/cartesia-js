@@ -72,8 +72,10 @@ import {
   VoiceChangerSSEEvent,
 } from './resources/voice-changer';
 import {
+  Accent,
   Gender,
   GenderPresentation,
+  ListAccentsResponse,
   LocalizeDialect,
   LocalizeTargetLanguage,
   SupportedLanguage,
@@ -796,7 +798,7 @@ export class Cartesia {
         'X-Stainless-Retry-Count': String(retryCount),
         ...(options.timeout ? { 'X-Stainless-Timeout': String(Math.trunc(options.timeout / 1000)) } : {}),
         ...getPlatformHeaders(),
-        'cartesia-version': '2025-11-04',
+        'cartesia-version': '2026-08-14',
       },
       await this.authHeaders(options),
       this._options.defaultHeaders,
@@ -1010,8 +1012,10 @@ export declare namespace Cartesia {
 
   export {
     Voices as Voices,
+    type Accent as Accent,
     type Gender as Gender,
     type GenderPresentation as GenderPresentation,
+    type ListAccentsResponse as ListAccentsResponse,
     type LocalizeDialect as LocalizeDialect,
     type LocalizeTargetLanguage as LocalizeTargetLanguage,
     type SupportedLanguage as SupportedLanguage,

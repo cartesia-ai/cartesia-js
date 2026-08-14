@@ -238,6 +238,11 @@ export interface GenerationRequest {
    */
   transcript: string;
 
+  /**
+   * The voice to use for generation. Pass either a voice ID string or an object with
+   * a required `id` (additional object fields may be added in future API versions).
+   * Embeddings are not accepted in this API version.
+   */
   voice: VoiceSpecifier;
 
   /**
@@ -543,13 +548,26 @@ export namespace TTSSSEEvent {
   }
 }
 
-export interface VoiceSpecifier {
-  /**
-   * The ID of the voice.
-   */
-  id: string;
+/**
+ * The voice to use for generation. Pass either a voice ID string or an object with
+ * a required `id` (additional object fields may be added in future API versions).
+ * Embeddings are not accepted in this API version.
+ */
+export type VoiceSpecifier = string | VoiceSpecifier.TTSRequestVoiceObject;
 
-  mode: 'id';
+export namespace VoiceSpecifier {
+  /**
+   * Voice object. `id` is required; other fields may be added in future API
+   * versions.
+   */
+  export interface TTSRequestVoiceObject {
+    /**
+     * The ID of the voice.
+     */
+    id: string;
+
+    [k: string]: unknown;
+  }
 }
 
 export interface WAVOutputFormat {
@@ -826,6 +844,11 @@ export interface TTSGenerateParams {
 
   transcript: string;
 
+  /**
+   * The voice to use for generation. Pass either a voice ID string or an object with
+   * a required `id` (additional object fields may be added in future API versions).
+   * Embeddings are not accepted in this API version.
+   */
   voice: VoiceSpecifier;
 
   /**
@@ -839,10 +862,23 @@ export interface TTSGenerateParams {
   generation_config?: GenerationConfig;
 
   /**
-   * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+   * The transcript's language. A request may set `language` or `locale`, never both.
    */
   language?: VoicesAPI.SupportedLanguage | null;
+
+  /**
+   * Language or locale for the generation (for example `en` or `en-GB`). Same
+   * accepted values as `language`. A request may set `language` or `locale`, never
+   * both.
+   */
+  locale?: string | null;
+
+  /**
+   * Text normalization. `auto` (default) runs the locale-aware normalizer, `off`
+   * skips it, or pass a locale code (for example `en-IN`) to pin the normalizer
+   * independently of the generation language.
+   */
+  normalization?: string | null;
 
   /**
    * The ID of a pronunciation dictionary to use for the generation. Pronunciation
@@ -874,6 +910,11 @@ export interface TTSGenerateSSEParams {
 
   transcript: string;
 
+  /**
+   * The voice to use for generation. Pass either a voice ID string or an object with
+   * a required `id` (additional object fields may be added in future API versions).
+   * Embeddings are not accepted in this API version.
+   */
   voice: VoiceSpecifier;
 
   /**

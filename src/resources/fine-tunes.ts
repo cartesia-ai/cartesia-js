@@ -101,8 +101,8 @@ export interface FineTune {
   status: 'created' | 'training' | 'completed' | 'failed';
 
   /**
-   * Canonical accent display name for the voice (for example `British English` or
-   * `General American English`).
+   * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+   * Display names are rejected on this API version.
    */
   accent?: VoicesAPI.VoiceAccent | null;
 }
@@ -143,8 +143,8 @@ export interface FineTuneCreateParams {
   name: string;
 
   /**
-   * Canonical accent display name for the voice (for example `British English` or
-   * `General American English`).
+   * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+   * Display names are rejected on this API version.
    */
   accent?: VoicesAPI.VoiceAccent | null;
 }

@@ -230,8 +230,10 @@ Methods:
 
 Types:
 
+- <code><a href="./src/resources/voices.ts">Accent</a></code>
 - <code><a href="./src/resources/voices.ts">Gender</a></code>
 - <code><a href="./src/resources/voices.ts">GenderPresentation</a></code>
+- <code><a href="./src/resources/voices.ts">ListAccentsResponse</a></code>
 - <code><a href="./src/resources/voices.ts">LocalizeDialect</a></code>
 - <code><a href="./src/resources/voices.ts">LocalizeTargetLanguage</a></code>
 - <code><a href="./src/resources/voices.ts">SupportedLanguage</a></code>
@@ -247,4 +249,5 @@ Methods:
 - <code title="delete /voices/{id}">client.voices.<a href="./src/resources/voices.ts">delete</a>(id) -> void</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/resources/voices.ts">clone</a>({ ...params }) -> VoiceMetadata</code>
 - <code title="get /voices/{id}">client.voices.<a href="./src/resources/voices.ts">get</a>(id, { ...params }) -> Voice</code>
+- <code title="get /accents">client.voices.<a href="./src/resources/voices.ts">listAccents</a>() -> ListAccentsResponse</code>
 - <code title="post /voices/localize">client.voices.<a href="./src/resources/voices.ts">localize</a>({ ...params }) -> VoiceMetadata</code>

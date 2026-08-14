@@ -67,7 +67,7 @@ export class ManualFinalizeWS extends ManualFinalizeWSBase<NodeWebSocket | Brows
       url.searchParams.set('cartesia_version', cartesiaVersionFromWSOptions);
     } else {
       // set cartesia version
-      url.searchParams.set('cartesia_version', '2025-11-04');
+      url.searchParams.set('cartesia_version', '2026-08-14');
     }
 
     const apiKeyFromWSOptions = getAuthorizationTokenFromHeaders(wsOptionsHeaders);

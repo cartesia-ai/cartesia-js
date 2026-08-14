@@ -85,7 +85,7 @@ describe('resource voices', () => {
       clip: await toFile(Buffer.from('Example data'), 'README.md'),
       language: 'en',
       name: 'name',
-      accent: 'British English',
+      accent: 'southern-us',
       base_voice_id: 'base_voice_id',
       description: 'description',
     });
@@ -112,12 +112,22 @@ describe('resource voices', () => {
   });
 
   // Mock server tests are disabled
+  test.skip('listAccents', async () => {
+    const responsePromise = client.voices.listAccents();
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
   test.skip('localize: only required params', async () => {
     const responsePromise = client.voices.localize({
-      description: 'description',
-      language: 'en',
+      accent: 'southern-us',
       name: 'name',
-      original_speaker_gender: 'male',
       voice_id: 'voice_id',
     });
     const rawResponse = await responsePromise.asResponse();
@@ -132,13 +142,14 @@ describe('resource voices', () => {
   // Mock server tests are disabled
   test.skip('localize: required and optional params', async () => {
     const response = await client.voices.localize({
-      description: 'description',
-      language: 'en',
+      accent: 'southern-us',
       name: 'name',
-      original_speaker_gender: 'male',
       voice_id: 'voice_id',
-      accent: 'British English',
+      description: 'description',
       dialect: 'au',
+      language: 'en',
+      original_speaker_gender: 'male',
+      tagline: 'tagline',
     });
   });
 });

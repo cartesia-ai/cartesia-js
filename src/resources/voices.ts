@@ -109,16 +109,29 @@ export class Voices extends APIResource {
   }
 
   /**
+   * Returns the official catalog of supported accents. Use `id` as `Voice.accent`
+   * and as `POST /voices/localize` `accent`. `name` is the human-readable display
+   * name. `is_localizable` is true when localize can target the accent.
+   *
+   * @example
+   * ```ts
+   * const listAccentsResponse =
+   *   await client.voices.listAccents();
+   * ```
+   */
+  listAccents(options?: RequestOptions): APIPromise<ListAccentsResponse> {
+    return this._client.get('/accents', options);
+  }
+
+  /**
    * Create a new voice from an existing voice localized to a new language and
    * dialect.
    *
    * @example
    * ```ts
    * const voiceMetadata = await client.voices.localize({
-   *   description: 'description',
-   *   language: 'en',
+   *   accent: 'southern-us',
    *   name: 'name',
-   *   original_speaker_gender: 'male',
    *   voice_id: 'voice_id',
    * });
    * ```
@@ -130,9 +143,52 @@ export class Voices extends APIResource {
 
 export type VoicesCursorIDPage = CursorIDPage<Voice>;
 
+/**
+ * One accent in the public catalog returned by GET /accents.
+ */
+export interface Accent {
+  /**
+   * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+   * Display names are rejected on this API version.
+   */
+  id: VoiceAccent;
+
+  /**
+   * Whether this accent is the default for its `locale`.
+   */
+  is_locale_default: boolean;
+
+  /**
+   * Whether POST /voices/localize can target this accent.
+   */
+  is_localizable: boolean;
+
+  /**
+   * ISO 639-1 language subtag (for example `en`).
+   */
+  language: string;
+
+  /**
+   * Canonical locale for this accent (BCP-47, for example `en-US`).
+   */
+  locale: string;
+
+  /**
+   * Human-readable display name (for example `General American English`).
+   */
+  name: string;
+}
+
 export type Gender = 'male' | 'female';
 
 export type GenderPresentation = 'masculine' | 'feminine' | 'gender_neutral';
+
+export interface ListAccentsResponse {
+  /**
+   * Official accents, sorted by id.
+   */
+  accents: Array<Accent>;
+}
 
 /**
  * The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
@@ -217,6 +273,8 @@ export type SupportedLanguage =
   | 'ml'
   | 'mr'
   | 'pa'
+  | 'or'
+  | 'ur'
   | (string & {});
 
 export interface Voice {
@@ -224,6 +282,12 @@ export interface Voice {
    * The ID of the voice.
    */
   id: string;
+
+  /**
+   * Who can use the resource. `private` means only the owner can use the resource.
+   * `public` means everyone can use the resource.
+   */
+  access: 'private' | 'public';
 
   /**
    * The date and time the voice was created.
@@ -241,11 +305,6 @@ export interface Voice {
   is_owner: boolean;
 
   /**
-   * Whether the voice is publicly accessible.
-   */
-  is_public: boolean;
-
-  /**
    * The language that the given voice should speak the transcript in. For valid
    * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
    */
@@ -259,19 +318,31 @@ export interface Voice {
   locales: Array<VoiceLocale>;
 
   /**
-   * The name of the voice.
+   * The display name of the voice. Does not include the tagline.
    */
   name: string;
 
   /**
-   * Canonical accent display name for the voice (for example `British English` or
-   * `General American English`).
+   * A short descriptor for the voice (at most 32 characters). Empty string when
+   * unset.
+   */
+  tagline: string;
+
+  /**
+   * When the resource is returned by the list endpoint. `owner` means the resource
+   * appears for the owner only. `all` means the resource appears for all users.
+   */
+  visibility: 'owner' | 'all';
+
+  /**
+   * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+   * Display names are rejected on this API version.
    */
   accent?: VoiceAccent | null;
 
   /**
-   * The country associated with the voice, as an ISO 3166-1 alpha-2 code when
-   * available (e.g. `US`, `GB`, `FR`).
+   * @deprecated Deprecated. Prefer `locales[].locale` (BCP-47). ISO 3166-1 alpha-2
+   * country code when available (e.g. `US`, `GB`, `FR`).
    */
   country?: string | null;
 
@@ -291,84 +362,89 @@ export interface Voice {
 }
 
 /**
- * Canonical accent display name for the voice (for example `British English` or
- * `General American English`).
+ * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+ * Display names are rejected on this API version.
  */
 export type VoiceAccent =
-  | 'Abruzzo Italian'
-  | 'African American English'
-  | 'African French'
-  | 'Arabic'
-  | 'Arabic English'
-  | 'Australian English'
-  | 'Bagheli Hindi'
-  | 'Belgian French'
-  | 'Brazilian Portuguese'
-  | 'British English'
-  | 'Budapest Hungarian'
-  | 'Bulgarian'
-  | 'California English'
-  | 'Camba Spanish'
-  | 'Campania Italian'
-  | 'Canadian English'
-  | 'Canadian French'
-  | 'Castilian Spanish'
-  | 'Central Tamil'
-  | 'Central Thai'
-  | 'Central Vietnamese'
-  | 'Chilean Spanish'
-  | 'Colombian Spanish'
-  | 'Czech'
-  | 'Danish'
-  | 'European Portuguese'
-  | 'Finnish'
-  | 'General American English'
-  | 'High German'
-  | 'Hindi'
-  | 'Indian English'
-  | 'Irish English'
-  | 'Israeli Hebrew'
-  | 'Istanbul Turkish'
-  | 'Italian'
-  | 'Jakarta Indonesian'
-  | 'Japanese'
-  | 'Jessore Bengali'
-  | 'Khaleeji Arabic'
-  | 'Konkani'
-  | 'Korean'
-  | 'Kyiv Ukrainian'
-  | 'Malay'
-  | 'Mandarin Chinese'
-  | 'Manila Filipino'
-  | 'Mexican Spanish'
-  | 'Middle Eastern Arabic'
-  | 'Midwestern American English'
-  | 'Modern Standard Arabic'
-  | 'Moldovan Romanian'
-  | 'New York English'
-  | 'New Zealand English'
-  | 'North Kerala Malayalam'
-  | 'Oslo Norwegian'
-  | 'Parisian French'
-  | 'Parsi Gujarati'
-  | 'Peruvian Spanish'
-  | 'Polish'
-  | 'Powadhi Punjabi'
-  | 'Randstad Dutch'
-  | 'Russian'
-  | 'Singaporean English'
-  | 'Slovak'
-  | 'South African English'
-  | 'Southern American English'
-  | 'Southern Karnataka Kannada'
-  | 'Southern Vietnamese'
-  | 'Standard Japanese'
-  | 'Stockholm Swedish'
-  | 'Swiss Standard German'
-  | 'Tbilisi Georgian'
-  | 'Telangana Telugu'
-  | 'Thessaloniki Greek'
-  | 'Zagreb Croatian';
+  | 'abruzzo-italian'
+  | 'african-american'
+  | 'african-french'
+  | 'arabic'
+  | 'arabic-english'
+  | 'australian'
+  | 'bagheli'
+  | 'belgian-french'
+  | 'brazilian-portuguese'
+  | 'british'
+  | 'budapest'
+  | 'bulgarian'
+  | 'california'
+  | 'camba'
+  | 'campania'
+  | 'canadian-english'
+  | 'canadian-french'
+  | 'castilian'
+  | 'central-tamil'
+  | 'central-thai'
+  | 'central-vietnamese'
+  | 'chilean'
+  | 'colombian'
+  | 'czech'
+  | 'danish'
+  | 'european-portuguese'
+  | 'finnish'
+  | 'general-american'
+  | 'high-german'
+  | 'hindi'
+  | 'indian-english'
+  | 'indian-urdu'
+  | 'irish'
+  | 'israeli'
+  | 'istanbul'
+  | 'italian'
+  | 'jakarta'
+  | 'japanese'
+  | 'jessore'
+  | 'khaleeji'
+  | 'konkani'
+  | 'korean'
+  | 'kyiv'
+  | 'malay'
+  | 'mandarin'
+  | 'manila'
+  | 'mexican'
+  | 'middle-eastern-arabic'
+  | 'midwestern-american'
+  | 'modern-standard-arabic'
+  | 'moldovan'
+  | 'new-york'
+  | 'new-zealand'
+  | 'north-kerala'
+  | 'odia'
+  | 'oslo'
+  | 'parisian'
+  | 'parsi'
+  | 'peruvian'
+  | 'polish'
+  | 'powadhi'
+  | 'randstad'
+  | 'romanian'
+  | 'russian'
+  | 'singaporean'
+  | 'slovak'
+  | 'south-african'
+  | 'southern-us'
+  | 'southern-karnataka'
+  | 'southern-vietnamese'
+  | 'standard-japanese'
+  | 'stockholm'
+  | 'swiss-standard'
+  | 'taiwanese-mandarin'
+  | 'tbilisi'
+  | 'telangana'
+  | 'urdu'
+  | 'thessaloniki'
+  | 'zagreb';
 
 /**
  * One locale a voice can speak, as a BCP-47 language-region tag plus whether it is
@@ -393,19 +469,21 @@ export interface VoiceMetadata {
   id: string;
 
   /**
+   * Who can use the resource. `private` means only the owner can use the resource.
+   * `public` means everyone can use the resource.
+   */
+  access: 'private' | 'public';
+
+  /**
    * The date and time the voice was created.
    */
   created_at: string;
 
   /**
-   * The description of the voice.
+   * A description for the voice, typically longer than the tagline if both are
+   * provided.
    */
   description: string;
-
-  /**
-   * Whether the voice is publicly accessible.
-   */
-  is_public: boolean;
 
   /**
    * The language that the given voice should speak the transcript in. For valid
@@ -419,15 +497,26 @@ export interface VoiceMetadata {
   name: string;
 
   /**
+   * A few words describing the voice.
+   */
+  tagline: string;
+
+  /**
    * The ID of the user who owns the voice.
    */
   user_id: string;
+
+  /**
+   * When the resource is returned by the list endpoint. `owner` means the resource
+   * appears for the owner only. `all` means the resource appears for all users.
+   */
+  visibility: 'owner' | 'all';
 }
 
 export interface VoiceUpdateParams {
   /**
-   * Canonical accent display name for the voice (for example `British English` or
-   * `General American English`).
+   * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+   * Display names are rejected on this API version.
    */
   accent?: VoiceAccent | null;
 
@@ -485,8 +574,8 @@ export interface VoiceCloneParams {
   name: string;
 
   /**
-   * Canonical accent display name for the voice (for example `British English` or
-   * `General American English`).
+   * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+   * Display names are rejected on this API version.
    */
   accent?: VoiceAccent | null;
 
@@ -510,9 +599,31 @@ export interface VoiceGetParams {
 
 export interface VoiceLocalizeParams {
   /**
+   * Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+   * Display names are rejected on this API version.
+   */
+  accent: VoiceAccent;
+
+  /**
+   * The name of the new localized voice.
+   */
+  name: string;
+
+  /**
+   * The ID of the voice to localize.
+   */
+  voice_id: string;
+
+  /**
    * The description of the new localized voice.
    */
-  description: string;
+  description?: string;
+
+  /**
+   * The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
+   * Portuguese (`pt`), and French (`fr`).
+   */
+  dialect?: LocalizeDialect | null;
 
   /**
    * Target language to localize the voice to.
@@ -522,37 +633,22 @@ export interface VoiceLocalizeParams {
    * (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr), Arabic (ar), Hebrew
    * (he), Tamil (ta), Telugu (te), Thai (th).
    */
-  language: LocalizeTargetLanguage;
+  language?: LocalizeTargetLanguage;
+
+  original_speaker_gender?: Gender;
 
   /**
-   * The name of the new localized voice.
+   * Optional short tagline for the localized voice.
    */
-  name: string;
-
-  original_speaker_gender: Gender;
-
-  /**
-   * The ID of the voice to localize.
-   */
-  voice_id: string;
-
-  /**
-   * Canonical accent display name for the voice (for example `British English` or
-   * `General American English`).
-   */
-  accent?: VoiceAccent | null;
-
-  /**
-   * The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
-   * Portuguese (`pt`), and French (`fr`).
-   */
-  dialect?: LocalizeDialect | null;
+  tagline?: string;
 }
 
 export declare namespace Voices {
   export {
+    type Accent as Accent,
     type Gender as Gender,
     type GenderPresentation as GenderPresentation,
+    type ListAccentsResponse as ListAccentsResponse,
     type LocalizeDialect as LocalizeDialect,
     type LocalizeTargetLanguage as LocalizeTargetLanguage,
     type SupportedLanguage as SupportedLanguage,
