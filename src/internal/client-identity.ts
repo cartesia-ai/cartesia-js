@@ -30,7 +30,7 @@ export function getWebSocketConnectHeaders(
     buildHeaders([
       getClientRequestHeaders(),
       {
-        'cartesia-version': '2025-11-04',
+        'cartesia-version': '2026-08-14',
       },
       authHeaders,
       extraHeaders,

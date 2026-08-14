@@ -341,7 +341,7 @@ export class TTSWS extends TTSEmitter {
         url.searchParams.set('cartesia_version', cartesiaVersionFromOptions);
       } else {
         // set cartesia version
-        url.searchParams.set('cartesia_version', '2025-11-04');
+        url.searchParams.set('cartesia_version', '2026-08-14');
       }
 
       const apiKeyFromOptions = getAuthorizationTokenFromHeaders(optionsHeaders);
