@@ -74,6 +74,8 @@ describe('resource tts', () => {
         volume: 0,
       },
       language: 'en',
+      locale: 'locale',
+      normalization: 'normalization',
       pronunciation_dict_id: 'pronunciation_dict_id',
       speed: 'slow',
       use_normalized_timestamps: true,

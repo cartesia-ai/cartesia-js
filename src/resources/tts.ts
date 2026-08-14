@@ -281,10 +281,16 @@ export interface GenerationRequest {
   generation_config?: GenerationConfig;
 
   /**
-   * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+   * The transcript's language. A request may set `language` or `locale`, never both.
    */
-  language?: VoicesAPI.SupportedLanguage;
+  language?: VoicesAPI.SupportedLanguage | null;
+
+  /**
+   * Language or locale for the generation (for example `en` or `en-GB`). Same
+   * accepted values as `language`. A request may set `language` or `locale`, never
+   * both.
+   */
+  locale?: string | null;
 
   /**
    * The maximum time in milliseconds to buffer text before starting generation.
@@ -299,6 +305,13 @@ export interface GenerationRequest {
    * often benefits from having more context.
    */
   max_buffer_delay_ms?: number | null;
+
+  /**
+   * Text normalization. `auto` (default) runs the locale-aware normalizer, `off`
+   * skips it, or pass a locale code (for example `en-IN`) to pin the normalizer
+   * independently of the generation language.
+   */
+  normalization?: string | null;
 
   /**
    * The ID of a pronunciation dictionary to use for the generation. Pronunciation
@@ -947,10 +960,23 @@ export interface TTSGenerateSSEParams {
   generation_config?: GenerationConfig;
 
   /**
-   * The language that the given voice should speak the transcript in. For valid
-   * options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+   * The transcript's language. A request may set `language` or `locale`, never both.
    */
-  language?: VoicesAPI.SupportedLanguage;
+  language?: VoicesAPI.SupportedLanguage | null;
+
+  /**
+   * Language or locale for the generation (for example `en` or `en-GB`). Same
+   * accepted values as `language`. A request may set `language` or `locale`, never
+   * both.
+   */
+  locale?: string | null;
+
+  /**
+   * Text normalization. `auto` (default) runs the locale-aware normalizer, `off`
+   * skips it, or pass a locale code (for example `en-IN`) to pin the normalizer
+   * independently of the generation language.
+   */
+  normalization?: string | null;
 
   /**
    * The ID of a pronunciation dictionary to use for the generation. Pronunciation

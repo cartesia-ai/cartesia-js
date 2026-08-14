@@ -360,7 +360,7 @@ export class TTSWrapper {
     const params: any = {
       model_id: options?.modelId ?? 'sonic-2',
       transcript,
-      voice: { mode: 'id', id: voiceId },
+      voice: { id: voiceId },
     };
 
     if (options?.outputFormat) {

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { Cartesia } from '../client';
 import {
+  type VoiceAccent,
   type VoiceCloneParams,
   type SupportedLanguage,
   type GenderPresentation,
@@ -153,6 +154,7 @@ export class VoicesWrapper {
       description: request.description,
       language: request.language,
       original_speaker_gender: request.originalSpeakerGender,
+      accent: accentFromLegacyLocalize(request.language, request.dialect),
     };
 
     if (request.dialect) {
@@ -241,4 +243,49 @@ export class VoicesWrapper {
 
     await this.client.voices.delete(id, options);
   }
+}
+
+/** Map the deprecated language+dialect localize args to a 2026-08-14 catalog accent id. */
+function accentFromLegacyLocalize(
+  language: BackCompatLocalizeVoiceRequest['language'],
+  dialect?: BackCompatLocalizeVoiceRequest['dialect'],
+): VoiceAccent {
+  if (dialect === 'eu') {
+    return language === 'pt' ? 'european-portuguese' : 'parisian';
+  }
+  const byDialect: Partial<Record<NonNullable<BackCompatLocalizeVoiceRequest['dialect']>, VoiceAccent>> = {
+    au: 'australian',
+    uk: 'british',
+    us: 'general-american',
+    in: 'indian-english',
+    so: 'southern-us',
+    mx: 'mexican',
+    pe: 'castilian',
+    ca: 'canadian-french',
+    br: 'brazilian-portuguese',
+  };
+  if (dialect) {
+    const mapped = byDialect[dialect];
+    if (mapped) {
+      return mapped;
+    }
+  }
+  const byLanguage: Record<BackCompatLocalizeVoiceRequest['language'], VoiceAccent> = {
+    en: 'general-american',
+    es: 'castilian',
+    fr: 'parisian',
+    de: 'high-german',
+    ja: 'japanese',
+    pt: 'european-portuguese',
+    zh: 'mandarin',
+    hi: 'hindi',
+    it: 'italian',
+    ko: 'korean',
+    nl: 'randstad',
+    pl: 'polish',
+    ru: 'russian',
+    sv: 'stockholm',
+    tr: 'istanbul',
+  };
+  return byLanguage[language];
 }
