@@ -245,7 +245,7 @@ export class VoicesWrapper {
   }
 }
 
-/** Map the deprecated language+dialect localize args to a 2026-08-14 catalog accent id. */
+/** Map the deprecated language+dialect localize args to a 2026-08-14 catalog accent id. Kept for the 4.0 client. */
 function accentFromLegacyLocalize(
   language: BackCompatLocalizeVoiceRequest['language'],
   dialect?: BackCompatLocalizeVoiceRequest['dialect'],
