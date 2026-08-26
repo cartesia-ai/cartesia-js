@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v4.0.1...v4.1.0) (2026-08-26)
+
+
+### Features
+
+* add PATCH and DELETE /voices/{id}/accents ([#23](https://github.com/cartesia-ai/cartesia-js/issues/23)) ([2d7d69f](https://github.com/cartesia-ai/cartesia-js/commit/2d7d69fe3ec9a3fd243394716224606ee17d8b9e))
+
 ## [4.0.1](https://github.com/cartesia-ai/cartesia-js/compare/v4.0.0...v4.0.1) (2026-08-14)
 
 
