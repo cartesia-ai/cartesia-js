@@ -73,6 +73,8 @@ import {
 } from './resources/voice-changer';
 import {
   Accent,
+  AddVoiceAccentsRequest,
+  AttachVoiceAccent,
   Gender,
   GenderPresentation,
   ListAccentsResponse,
@@ -81,7 +83,9 @@ import {
   SupportedLanguage,
   Voice,
   VoiceAccent,
+  VoiceAddAccentsParams,
   VoiceCloneParams,
+  VoiceDeleteAccentParams,
   VoiceGetParams,
   VoiceListParams,
   VoiceLocale,
@@ -1013,6 +1017,8 @@ export declare namespace Cartesia {
   export {
     Voices as Voices,
     type Accent as Accent,
+    type AddVoiceAccentsRequest as AddVoiceAccentsRequest,
+    type AttachVoiceAccent as AttachVoiceAccent,
     type Gender as Gender,
     type GenderPresentation as GenderPresentation,
     type ListAccentsResponse as ListAccentsResponse,
@@ -1026,7 +1032,9 @@ export declare namespace Cartesia {
     type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,
     type VoiceListParams as VoiceListParams,
+    type VoiceAddAccentsParams as VoiceAddAccentsParams,
     type VoiceCloneParams as VoiceCloneParams,
+    type VoiceDeleteAccentParams as VoiceDeleteAccentParams,
     type VoiceGetParams as VoiceGetParams,
     type VoiceLocalizeParams as VoiceLocalizeParams,
   };

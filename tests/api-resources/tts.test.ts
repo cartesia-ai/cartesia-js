@@ -18,7 +18,7 @@ describe('resource tts', () => {
         sample_rate: 8000,
       },
       transcript: 'transcript',
-      voice: 'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4',
+      voice: 'e07c00bc-4134-4eae-9ea4-1a55fb45746b',
       generation_config: {
         emotion: 'neutral',
         speed: 0,
@@ -43,7 +43,7 @@ describe('resource tts', () => {
         sample_rate: 8000,
       },
       transcript: 'transcript',
-      voice: 'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4',
+      voice: 'e07c00bc-4134-4eae-9ea4-1a55fb45746b',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -64,7 +64,7 @@ describe('resource tts', () => {
         sample_rate: 8000,
       },
       transcript: 'transcript',
-      voice: 'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4',
+      voice: 'e07c00bc-4134-4eae-9ea4-1a55fb45746b',
       add_phoneme_timestamps: true,
       add_timestamps: true,
       context_id: 'context_id',

@@ -64,6 +64,23 @@ describe('resource voices', () => {
   });
 
   // Mock server tests are disabled
+  test.skip('addAccents: only required params', async () => {
+    const responsePromise = client.voices.addAccents('id', { accents: ['british', 'parisian'] });
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('addAccents: required and optional params', async () => {
+    const response = await client.voices.addAccents('id', { accents: ['british', 'parisian'] });
+  });
+
+  // Mock server tests are disabled
   test.skip('clone: only required params', async () => {
     const responsePromise = client.voices.clone({
       clip: await toFile(Buffer.from('Example data'), 'README.md'),
@@ -89,6 +106,23 @@ describe('resource voices', () => {
       base_voice_id: 'base_voice_id',
       description: 'description',
     });
+  });
+
+  // Mock server tests are disabled
+  test.skip('deleteAccent: only required params', async () => {
+    const responsePromise = client.voices.deleteAccent('british', { id: 'id' });
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('deleteAccent: required and optional params', async () => {
+    const response = await client.voices.deleteAccent('british', { id: 'id' });
   });
 
   // Mock server tests are disabled

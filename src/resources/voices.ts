@@ -65,6 +65,21 @@ export class Voices extends APIResource {
   }
 
   /**
+   * Add accents to an instant voice clone you own so a single `voice_id` can speak
+   * multiple accents natively.
+   *
+   * @example
+   * ```ts
+   * const voice = await client.voices.addAccents('id', {
+   *   accents: ['british', 'parisian'],
+   * });
+   * ```
+   */
+  addAccents(id: string, body: VoiceAddAccentsParams, options?: RequestOptions): APIPromise<Voice> {
+    return this._client.patch(path`/voices/${id}/accents`, { body, ...options });
+  }
+
+  /**
    * Clone a high similarity voice from an audio clip. Clones are more similar to the
    * source clip, but may reproduce background noise. For these, use an audio clip
    * about 5 seconds long.
@@ -83,6 +98,25 @@ export class Voices extends APIResource {
       '/voices/clone',
       multipartFormRequestOptions({ body, ...options }, this._client),
     );
+  }
+
+  /**
+   * Remove an accent your instant voice clone supports.
+   *
+   * @example
+   * ```ts
+   * const voice = await client.voices.deleteAccent('british', {
+   *   id: 'id',
+   * });
+   * ```
+   */
+  deleteAccent(
+    accentID: string,
+    params: VoiceDeleteAccentParams,
+    options?: RequestOptions,
+  ): APIPromise<Voice> {
+    const { id } = params;
+    return this._client.delete(path`/voices/${id}/accents/${accentID}`, options);
   }
 
   /**
@@ -178,6 +212,44 @@ export interface Accent {
    */
   name: string;
 }
+
+export interface AddVoiceAccentsRequest {
+  /**
+   * Accents to add. A voice can support up to 10 accents in total, including native.
+   */
+  accents: Array<AttachVoiceAccent>;
+}
+
+/**
+ * Catalog accent id from GET /accents that PATCH /voices/{id}/accents can attach
+ * (for example `british` or `parisian`). Display names are rejected.
+ */
+export type AttachVoiceAccent =
+  | 'australian'
+  | 'brazilian-portuguese'
+  | 'british'
+  | 'canadian-french'
+  | 'castilian'
+  | 'central-tamil'
+  | 'central-thai'
+  | 'general-american'
+  | 'high-german'
+  | 'hindi'
+  | 'israeli'
+  | 'istanbul'
+  | 'italian'
+  | 'japanese'
+  | 'korean'
+  | 'mandarin'
+  | 'mexican'
+  | 'modern-standard-arabic'
+  | 'parisian'
+  | 'polish'
+  | 'randstad'
+  | 'russian'
+  | 'southern-us'
+  | 'stockholm'
+  | 'telangana';
 
 export type Gender = 'male' | 'female';
 
@@ -560,6 +632,13 @@ export interface VoiceListParams extends CursorIDPageParams {
   q?: string | null;
 }
 
+export interface VoiceAddAccentsParams {
+  /**
+   * Accents to add. A voice can support up to 10 accents in total, including native.
+   */
+  accents: Array<AttachVoiceAccent>;
+}
+
 export interface VoiceCloneParams {
   clip: Uploadable;
 
@@ -588,6 +667,13 @@ export interface VoiceCloneParams {
    * A description for the voice.
    */
   description?: string | null;
+}
+
+export interface VoiceDeleteAccentParams {
+  /**
+   * The ID of the voice.
+   */
+  id: string;
 }
 
 export interface VoiceGetParams {
@@ -646,6 +732,8 @@ export interface VoiceLocalizeParams {
 export declare namespace Voices {
   export {
     type Accent as Accent,
+    type AddVoiceAccentsRequest as AddVoiceAccentsRequest,
+    type AttachVoiceAccent as AttachVoiceAccent,
     type Gender as Gender,
     type GenderPresentation as GenderPresentation,
     type ListAccentsResponse as ListAccentsResponse,
@@ -659,7 +747,9 @@ export declare namespace Voices {
     type VoicesCursorIDPage as VoicesCursorIDPage,
     type VoiceUpdateParams as VoiceUpdateParams,
     type VoiceListParams as VoiceListParams,
+    type VoiceAddAccentsParams as VoiceAddAccentsParams,
     type VoiceCloneParams as VoiceCloneParams,
+    type VoiceDeleteAccentParams as VoiceDeleteAccentParams,
     type VoiceGetParams as VoiceGetParams,
     type VoiceLocalizeParams as VoiceLocalizeParams,
   };

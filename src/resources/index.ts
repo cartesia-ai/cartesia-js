@@ -78,6 +78,8 @@ export {
 export {
   Voices,
   type Accent,
+  type AddVoiceAccentsRequest,
+  type AttachVoiceAccent,
   type Gender,
   type GenderPresentation,
   type ListAccentsResponse,
@@ -90,7 +92,9 @@ export {
   type VoiceMetadata,
   type VoiceUpdateParams,
   type VoiceListParams,
+  type VoiceAddAccentsParams,
   type VoiceCloneParams,
+  type VoiceDeleteAccentParams,
   type VoiceGetParams,
   type VoiceLocalizeParams,
   type VoicesCursorIDPage,
