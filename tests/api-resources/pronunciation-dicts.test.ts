@@ -24,7 +24,13 @@ describe('resource pronunciationDicts', () => {
   test.skip('create: required and optional params', async () => {
     const response = await client.pronunciationDicts.create({
       name: 'name',
-      items: [{ alias: 'alias', text: 'text' }],
+      items: [
+        {
+          alias: 'alias',
+          text: 'text',
+          case_sensitive: true,
+        },
+      ],
     });
   });
 

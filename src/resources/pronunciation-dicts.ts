@@ -107,6 +107,13 @@ export interface PronunciationDictItem {
    * The original text to be replaced
    */
   text: string;
+
+  /**
+   * When false (default), match every capitalization of `text` (Sonic 3.6). When
+   * true, keep existing matching: lowercase keys also match sentence-start
+   * capitalization.
+   */
+  case_sensitive?: boolean;
 }
 
 export interface PronunciationDictCreateParams {
