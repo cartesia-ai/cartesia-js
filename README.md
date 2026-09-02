@@ -1,6 +1,6 @@
 # Cartesia TypeScript API Library
 
-[![NPM version](<https://img.shields.io/npm/v/@cartesia/cartesia-js.svg?label=npm%20(stable)>)](https://npmjs.org/package/@cartesia/cartesia-js) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@cartesia/cartesia-js)
+[![NPM version](<https://img.shields.io/npm/v/@cartesia/cartesia-js.svg?label=npm%20(stable)>)](https://npmjs.org/package/@cartesia/cartesia-js)
 
 This library provides convenient access to the Cartesia REST API from server-side TypeScript or JavaScript.
 
