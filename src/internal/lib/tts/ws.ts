@@ -110,6 +110,8 @@ export interface ContextOptions {
 interface ContextQueueEntry {
   queue: TTSAPI.WebsocketResponse[];
   resolve: (() => void) | null;
+  /** Set when the socket closed while this context was still registered. */
+  closedError?: CartesiaError | undefined;
 }
 
 /**
@@ -232,6 +234,10 @@ export class TTSWSContext {
         }
 
         const event = entry.queue.shift();
+        if (event === undefined && entry.closedError) {
+          // The socket closed and no `done` event is coming.
+          throw entry.closedError;
+        }
         if (event !== undefined) {
           yield event;
           if (event.type === 'done') {
@@ -313,6 +319,7 @@ export class TTSWS extends TTSEmitter {
   private _ready: Promise<void>;
   private _wsOptions: WS.ClientOptions | undefined;
   private _contextQueues: Map<string, ContextQueueEntry> = new Map();
+  private _closeCallbacks: Set<(error: CartesiaError) => void> = new Set();
 
   constructor(client: Cartesia, options?: WS.ClientOptions | undefined) {
     super();
@@ -423,6 +430,34 @@ export class TTSWS extends TTSEmitter {
     this.socket.addEventListener('error', (err: any) => {
       this._onError(null, err.message || 'WebSocket error', err);
     });
+
+    // Without this, `receive()` and `generate()` wait forever when the server
+    // (or the network) drops the connection before sending `done`.
+    const socket = this.socket;
+    let wasOpen = false;
+    socket.addEventListener('open', () => {
+      wasOpen = true;
+    });
+    socket.addEventListener('close', (closeEvent: any) => {
+      // A reconnect replaces the socket; a late close from the old one must not
+      // fail requests made on the new one. A socket that never opened is a
+      // failed connection, which `connect()` and `send()` already report.
+      if (socket !== this.socket || !wasOpen) return;
+      const code = closeEvent?.code;
+      const error = new CartesiaError(
+        `WebSocket closed before the request completed${code === undefined ? '' : ` (code ${code})`}`,
+      );
+      for (const entry of this._contextQueues.values()) {
+        entry.closedError = error;
+        if (entry.resolve) {
+          entry.resolve();
+          entry.resolve = null;
+        }
+      }
+      for (const callback of [...this._closeCallbacks]) {
+        callback(error);
+      }
+    });
   }
 
   async send(event: TTSAPI.WebsocketClientEvent) {
@@ -462,6 +497,13 @@ export class TTSWS extends TTSEmitter {
     };
 
     this.on('event', onEvent);
+    const onClose = (closeError: CartesiaError) => {
+      if (done) return;
+      done = true;
+      error = closeError;
+      resolve?.();
+    };
+    this._closeCallbacks.add(onClose);
 
     try {
       await this.send({ ...request, context_id: contextId });
@@ -482,7 +524,10 @@ export class TTSWS extends TTSEmitter {
           });
         }
       }
+      // The loop only exits without a `done` event when the socket closed.
+      if (error) throw error;
     } finally {
+      this._closeCallbacks.delete(onClose);
       this.off('event', onEvent);
     }
   }
