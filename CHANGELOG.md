@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.2.1](https://github.com/cartesia-ai/cartesia-js/compare/v4.2.0...v4.2.1) (2026-10-23)
+
+
+### Chores
+
+* avoid duplicate trunk sync statuses ([#28](https://github.com/cartesia-ai/cartesia-js/issues/28)) ([8bd5f92](https://github.com/cartesia-ai/cartesia-js/commit/8bd5f929fefcda643a26d661c78e2c2320dd8b28))
+* **deps:** bump actions/setup-node from 7.0.0 to 7.1.0 ([#26](https://github.com/cartesia-ai/cartesia-js/issues/26)) ([ef76508](https://github.com/cartesia-ai/cartesia-js/commit/ef76508dc3824d20dfd7b6e8898aa28b7e476adc))
+
+
+### Documentation
+
+* space separate auto-finalize transcript turns ([#27](https://github.com/cartesia-ai/cartesia-js/issues/27)) ([a1c8f1e](https://github.com/cartesia-ai/cartesia-js/commit/a1c8f1e6722f6bdd266f25640af24a12fb1d837e))
+
 ## [4.2.0](https://github.com/cartesia-ai/cartesia-js/compare/v4.1.0...v4.2.0) (2026-09-02)
 
 
