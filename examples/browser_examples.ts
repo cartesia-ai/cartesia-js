@@ -328,8 +328,7 @@ async function sttAutoFinalizeWebsocket(client: Cartesia): Promise<void> {
   const stopTimer = setTimeout(stop, 30_000);
 
   try {
-    // Concatenate transcripts from all turn.end events to get the full transcript
-    // Do not strip or add whitespace!
+    // Join transcripts from all turn.end events with a space to get the full transcript.
     let fullTranscript = '';
 
     for await (const event of ws.stream()) {
@@ -353,7 +352,7 @@ async function sttAutoFinalizeWebsocket(client: Cartesia): Promise<void> {
             break;
           case 'turn.end':
             console.log(`turn.end       | ${m.transcript}`);
-            fullTranscript += m.transcript;
+            fullTranscript += `${fullTranscript ? ' ' : ''}${m.transcript}`;
             break;
         }
       } else if (event.type === 'error') {
