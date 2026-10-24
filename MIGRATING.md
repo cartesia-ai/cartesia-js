@@ -79,7 +79,7 @@ For backwards compatibility, `client.tts.bytes()` is included on the `CartesiaCl
 ```typescript
 // v2.x
 const stream = await client.tts.bytes({
-  modelId: 'sonic-2',
+  modelId: 'sonic-3.6',
   transcript: 'Hello, world!',
   voice: { mode: 'id', id: 'voice-id' },
   outputFormat: { container: 'wav', encoding: 'pcm_f32le', sampleRate: 44100 },
@@ -93,7 +93,7 @@ const audio = Buffer.concat(chunks);
 
 // v3.x (new API)
 const response = await client.tts.generate({
-  model_id: 'sonic-2',
+  model_id: 'sonic-3.6',
   transcript: 'Hello, world!',
   voice: { mode: 'id', id: 'voice-id' },
   output_format: { container: 'wav', encoding: 'pcm_f32le', sample_rate: 44100 },
@@ -115,7 +115,7 @@ const ws = client.tts.websocket({
 });
 
 const { source } = await ws.send({
-  modelId: 'sonic-2',
+  modelId: 'sonic-3.6',
   transcript: 'Hello, world!',
   voice: { mode: 'id', id: 'voice-id' },
 });
@@ -134,7 +134,7 @@ ws.disconnect();
 const ws = await client.tts.websocket();
 
 const ctx = ws.context({
-  model_id: 'sonic-2',
+  model_id: 'sonic-3.6',
   voice: { mode: 'id', id: 'voice-id' },
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
@@ -159,7 +159,7 @@ const ws = client.tts.websocket({ sampleRate: 44100 });
 await ws.connect();
 
 await ws.send({
-  modelId: 'sonic-2',
+  modelId: 'sonic-3.6',
   transcript: 'First part. ',
   voice: { mode: 'id', id: 'voice-id' },
   continue: true,
@@ -167,7 +167,7 @@ await ws.send({
 });
 
 await ws.continue({
-  modelId: 'sonic-2',
+  modelId: 'sonic-3.6',
   transcript: 'Second part.',
   voice: { mode: 'id', id: 'voice-id' },
   contextId: 'my-context',
@@ -179,7 +179,7 @@ ws.disconnect();
 const ws = await client.tts.websocket();
 
 const ctx = ws.context({
-  model_id: 'sonic-2',
+  model_id: 'sonic-3.6',
   voice: { mode: 'id', id: 'voice-id' },
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
@@ -202,7 +202,7 @@ ws.close();
 ```typescript
 // v3.x (new API)
 const ctx = ws.context({
-  model_id: 'sonic-2',
+  model_id: 'sonic-3.6',
   voice: { mode: 'id', id: 'voice-id' },
   output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 44100 },
 });
