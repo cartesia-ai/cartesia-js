@@ -342,3 +342,71 @@ describe('WebSocket multi-context routing', () => {
     ws.close();
   });
 });
+
+describe('WebSocket closed by the server', () => {
+  /** Simulate an established connection that the server then drops. */
+  function dropConnection(ws: TTSWS, code = 1006) {
+    if (ws.socket instanceof WebSocket) {
+      ws.socket.emit('open');
+      ws.socket.emit('close', code, Buffer.from(''));
+    }
+  }
+
+  test('receive() throws instead of waiting forever', async () => {
+    const ws = createTestWS();
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'close-receive' });
+
+    injectEvent(ws, makeChunk('close-receive', 0));
+    const events: WebsocketResponse[] = [];
+    const consume = (async () => {
+      for await (const event of ctx.receive({ timeout: 2_000 })) {
+        events.push(event);
+      }
+    })();
+
+    await sleep(20);
+    dropConnection(ws);
+
+    await expect(consume).rejects.toThrow(/WebSocket closed.*1006/);
+    // The event received before the drop is still delivered.
+    expect(events.length).toBe(1);
+    expect(ws._getContextQueue('close-receive')).toBeUndefined();
+  });
+
+  test('receive() delivers queued events before throwing', async () => {
+    const ws = createTestWS();
+    const ctx = ws.context({ ...CONTEXT_OPTIONS, contextId: 'close-queued' });
+
+    injectEvent(ws, makeChunk('close-queued', 0));
+    injectEvent(ws, makeChunk('close-queued', 1));
+    dropConnection(ws);
+
+    const events: WebsocketResponse[] = [];
+    await expect(
+      (async () => {
+        for await (const event of ctx.receive({ timeout: 2_000 })) {
+          events.push(event);
+        }
+      })(),
+    ).rejects.toThrow(/WebSocket closed/);
+    expect(events.length).toBe(2);
+  });
+
+  test('generate() throws instead of waiting forever', async () => {
+    const ws = createTestWS();
+    // Keep `send()` from trying to reconnect: pretend the socket is open.
+    (ws as any)._ensureConnected = async () => {};
+    (ws.socket as any).send = () => {};
+
+    const consume = (async () => {
+      for await (const _event of ws.generate({ ...CONTEXT_OPTIONS, transcript: 'hi' })) {
+        // consume
+      }
+    })();
+
+    await sleep(20);
+    dropConnection(ws, 1011);
+
+    await expect(consume).rejects.toThrow(/WebSocket closed.*1011/);
+  });
+});
