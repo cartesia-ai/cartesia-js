@@ -28,6 +28,14 @@ export {
   type FineTunesCursorIDPage,
 } from './fine-tunes';
 export {
+  Models,
+  type ListModelsResponse,
+  type ModelCapability,
+  type ModelCatalogEntry,
+  type STTMode,
+  type ModelListParams,
+} from './models';
+export {
   PronunciationDicts,
   type PronunciationDict,
   type PronunciationDictItem,

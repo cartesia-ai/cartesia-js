@@ -136,6 +136,19 @@ Methods:
 - <code title="delete /fine-tunes/{id}">client.fineTunes.<a href="./src/resources/fine-tunes.ts">delete</a>(id) -> void</code>
 - <code title="get /fine-tunes/{id}/voices">client.fineTunes.<a href="./src/resources/fine-tunes.ts">listVoices</a>(id, { ...params }) -> VoicesCursorIDPage</code>
 
+# Models
+
+Types:
+
+- <code><a href="./src/resources/models.ts">ListModelsResponse</a></code>
+- <code><a href="./src/resources/models.ts">ModelCapability</a></code>
+- <code><a href="./src/resources/models.ts">ModelCatalogEntry</a></code>
+- <code><a href="./src/resources/models.ts">STTMode</a></code>
+
+Methods:
+
+- <code title="get /models">client.models.<a href="./src/resources/models.ts">list</a>({ ...params }) -> ListModelsResponse</code>
+
 # PronunciationDicts
 
 Types:

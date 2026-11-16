@@ -98,6 +98,13 @@ export interface AgentSummary {
   has_text_to_agent_run: boolean;
 
   /**
+   * Whether this is a managed agent, whose configuration is versioned and edited
+   * through the `/v1/agents` endpoints. Managed agents have no deployments, Git
+   * repository, or speech-recognition preset of their own.
+   */
+  is_managed: boolean;
+
+  /**
    * The unique name of the agent, which can be used to identify the agent in the
    * CLI.
    */

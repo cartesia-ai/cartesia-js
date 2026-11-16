@@ -41,6 +41,7 @@ describe('resource voices', () => {
           ending_before: 'ending_before',
           expand: ['preview_file_url'],
           gender: 'masculine',
+          include_archived: true,
           is_owner: true,
           limit: 0,
           q: 'q',

@@ -395,6 +395,13 @@ export interface Voice {
   name: string;
 
   /**
+   * Status of the voice. Only active voices are returned in
+   * [List Voices](/api-reference/voices/list) by default unless
+   * `include_archived=true`.
+   */
+  status: 'active' | 'archived';
+
+  /**
    * A short descriptor for the voice (at most 32 characters). Empty string when
    * unset.
    */
@@ -617,6 +624,11 @@ export interface VoiceListParams extends CursorIDPageParams {
   gender?: GenderPresentation | null;
 
   /**
+   * Defaults to `false`. Set to `true` to include archived voices in the response.
+   */
+  include_archived?: boolean | null;
+
+  /**
    * Whether to only return voices owned your organization.
    */
   is_owner?: boolean | null;
@@ -659,7 +671,7 @@ export interface VoiceCloneParams {
   accent?: VoiceAccent | null;
 
   /**
-   * Optional base voice ID that the cloned voice is derived from.
+   * @deprecated The API ignores this field.
    */
   base_voice_id?: string | null;
 

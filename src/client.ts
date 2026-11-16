@@ -32,6 +32,14 @@ import {
   FineTunesCursorIDPage,
 } from './resources/fine-tunes';
 import {
+  ListModelsResponse,
+  ModelCapability,
+  ModelCatalogEntry,
+  ModelListParams,
+  Models,
+  STTMode,
+} from './resources/models';
+import {
   PronunciationDict,
   PronunciationDictCreateParams,
   PronunciationDictItem,
@@ -897,6 +905,7 @@ export class Cartesia {
   accessToken: API.AccessToken = new API.AccessToken(this);
   datasets: API.Datasets = new API.Datasets(this);
   fineTunes: API.FineTunes = new API.FineTunes(this);
+  models: API.Models = new API.Models(this);
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
   stt: API.STT = new API.STT(this);
   tts: API.TTS = new API.TTS(this);
@@ -908,6 +917,7 @@ Cartesia.Agents = Agents;
 Cartesia.AccessToken = AccessToken;
 Cartesia.Datasets = Datasets;
 Cartesia.FineTunes = FineTunes;
+Cartesia.Models = Models;
 Cartesia.PronunciationDicts = PronunciationDicts;
 Cartesia.STT = STT;
 Cartesia.Stt = Stt;
@@ -958,6 +968,15 @@ export declare namespace Cartesia {
     type FineTuneCreateParams as FineTuneCreateParams,
     type FineTuneListParams as FineTuneListParams,
     type FineTuneListVoicesParams as FineTuneListVoicesParams,
+  };
+
+  export {
+    Models as Models,
+    type ListModelsResponse as ListModelsResponse,
+    type ModelCapability as ModelCapability,
+    type ModelCatalogEntry as ModelCatalogEntry,
+    type STTMode as STTMode,
+    type ModelListParams as ModelListParams,
   };
 
   export {
