@@ -72,14 +72,6 @@ import {
   WebsocketResponse,
 } from './resources/tts';
 import {
-  VoiceChanger,
-  VoiceChangerChangeVoiceBytesParams,
-  VoiceChangerChangeVoiceSseParams,
-  VoiceChangerGenerateParams,
-  VoiceChangerGenerateSSEParams,
-  VoiceChangerSSEEvent,
-} from './resources/voice-changer';
-import {
   Accent,
   AddVoiceAccentsRequest,
   AttachVoiceAccent,
@@ -103,10 +95,12 @@ import {
   Voices,
   VoicesCursorIDPage,
 } from './resources/voices';
+import { Watermark, WatermarkDetectParams, WatermarkDetectResponse } from './resources/watermark';
 import {
-  AgentListPhoneNumbersResponse,
-  AgentListResponse,
-  AgentListTemplatesResponse,
+  Agent,
+  AgentCreateParams,
+  AgentListParams,
+  AgentSummariesCursorIDPage,
   AgentSummary,
   AgentUpdateParams,
   Agents,
@@ -909,7 +903,7 @@ export class Cartesia {
   pronunciationDicts: API.PronunciationDicts = new API.PronunciationDicts(this);
   stt: API.STT = new API.STT(this);
   tts: API.TTS = new API.TTS(this);
-  voiceChanger: API.VoiceChanger = new API.VoiceChanger(this);
+  watermark: API.Watermark = new API.Watermark(this);
   voices: API.Voices = new API.Voices(this);
 }
 
@@ -922,7 +916,7 @@ Cartesia.PronunciationDicts = PronunciationDicts;
 Cartesia.STT = STT;
 Cartesia.Stt = Stt;
 Cartesia.TTS = TTS;
-Cartesia.VoiceChanger = VoiceChanger;
+Cartesia.Watermark = Watermark;
 Cartesia.Voices = Voices;
 
 // backcompat for main client name:
@@ -938,11 +932,12 @@ export declare namespace Cartesia {
 
   export {
     Agents as Agents,
+    type Agent as Agent,
     type AgentSummary as AgentSummary,
-    type AgentListResponse as AgentListResponse,
-    type AgentListPhoneNumbersResponse as AgentListPhoneNumbersResponse,
-    type AgentListTemplatesResponse as AgentListTemplatesResponse,
+    type AgentSummariesCursorIDPage as AgentSummariesCursorIDPage,
+    type AgentCreateParams as AgentCreateParams,
     type AgentUpdateParams as AgentUpdateParams,
+    type AgentListParams as AgentListParams,
   };
 
   export {
@@ -1025,12 +1020,9 @@ export declare namespace Cartesia {
   };
 
   export {
-    VoiceChanger as VoiceChanger,
-    type VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
-    type VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
-    type VoiceChangerSSEEvent as VoiceChangerSSEEvent,
-    type VoiceChangerGenerateParams as VoiceChangerGenerateParams,
-    type VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams,
+    Watermark as Watermark,
+    type WatermarkDetectResponse as WatermarkDetectResponse,
+    type WatermarkDetectParams as WatermarkDetectParams,
   };
 
   export {

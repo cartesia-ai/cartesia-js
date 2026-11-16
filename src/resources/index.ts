@@ -4,11 +4,12 @@ export * from './shared';
 export { AccessToken, type AccessTokenCreateResponse, type AccessTokenCreateParams } from './access-token';
 export {
   Agents,
+  type Agent,
   type AgentSummary,
-  type AgentListResponse,
-  type AgentListPhoneNumbersResponse,
-  type AgentListTemplatesResponse,
+  type AgentCreateParams,
   type AgentUpdateParams,
+  type AgentListParams,
+  type AgentSummariesCursorIDPage,
 } from './agents/agents';
 export {
   Datasets,
@@ -76,14 +77,6 @@ export {
   type TTSInfillParams,
 } from './tts';
 export {
-  VoiceChanger,
-  type VoiceChangerSSEEvent,
-  type VoiceChangerGenerateParams,
-  type VoiceChangerChangeVoiceBytesParams,
-  type VoiceChangerGenerateSSEParams,
-  type VoiceChangerChangeVoiceSseParams,
-} from './voice-changer';
-export {
   Voices,
   type Accent,
   type AddVoiceAccentsRequest,
@@ -107,4 +100,5 @@ export {
   type VoiceLocalizeParams,
   type VoicesCursorIDPage,
 } from './voices';
+export { Watermark, type WatermarkDetectResponse, type WatermarkDetectParams } from './watermark';
 export { type GetStatusResponse } from './top-level';

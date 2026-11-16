@@ -20,6 +20,14 @@ export class Metrics extends APIResource {
 
   /**
    * Create a new metric.
+   *
+   * @example
+   * ```ts
+   * const metric = await client.agents.metrics.create({
+   *   name: 'name',
+   *   prompt: 'prompt',
+   * });
+   * ```
    */
   create(body: MetricCreateParams, options?: RequestOptions): APIPromise<Metric> {
     return this._client.post('/agents/metrics', { body, ...options });
@@ -27,6 +35,13 @@ export class Metrics extends APIResource {
 
   /**
    * Get a metric by its ID.
+   *
+   * @example
+   * ```ts
+   * const metric = await client.agents.metrics.retrieve(
+   *   'metric_id',
+   * );
+   * ```
    */
   retrieve(metricID: string, options?: RequestOptions): APIPromise<Metric> {
     return this._client.get(path`/agents/metrics/${metricID}`, options);
@@ -34,6 +49,11 @@ export class Metrics extends APIResource {
 
   /**
    * List of all LLM-as-a-Judge metrics owned by your account.
+   *
+   * @example
+   * ```ts
+   * const metrics = await client.agents.metrics.list();
+   * ```
    */
   list(
     query: MetricListParams | null | undefined = {},
@@ -43,8 +63,31 @@ export class Metrics extends APIResource {
   }
 
   /**
+   * Delete a metric by its ID. The metric is removed from all agents it is attached
+   * to. Existing metric results are retained.
+   *
+   * @example
+   * ```ts
+   * await client.agents.metrics.delete('metric_id');
+   * ```
+   */
+  delete(metricID: string, options?: RequestOptions): APIPromise<void> {
+    return this._client.delete(path`/agents/metrics/${metricID}`, {
+      ...options,
+      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+    });
+  }
+
+  /**
    * Add a metric to an agent. Once the metric is added, it will be run on all calls
    * made to the agent automatically from that point onwards.
+   *
+   * @example
+   * ```ts
+   * await client.agents.metrics.addToAgent('metric_id', {
+   *   agent_id: 'agent_id',
+   * });
+   * ```
    */
   addToAgent(metricID: string, params: MetricAddToAgentParams, options?: RequestOptions): APIPromise<void> {
     const { agent_id } = params;
@@ -58,6 +101,13 @@ export class Metrics extends APIResource {
    * Remove a metric from an agent. Once the metric is removed, it will no longer be
    * run on all calls made to the agent automatically from that point onwards.
    * Existing metric results will remain.
+   *
+   * @example
+   * ```ts
+   * await client.agents.metrics.removeFromAgent('metric_id', {
+   *   agent_id: 'agent_id',
+   * });
+   * ```
    */
   removeFromAgent(
     metricID: string,

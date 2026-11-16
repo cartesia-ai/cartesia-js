@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../../../core/resource';
-import * as CallsAPI from '../calls';
+import * as CallsAPI from '../calls/calls';
 import { APIPromise } from '../../../core/api-promise';
 import { CursorIDPage, type CursorIDPageParams, PagePromise } from '../../../core/pagination';
 import { type Uploadable } from '../../../core/uploads';
@@ -11,6 +11,14 @@ import { RequestOptions } from '../../../internal/request-options';
 export class Results extends APIResource {
   /**
    * Paginated list of metric results. Filter results using the query parameters,
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const resultListResponse of client.agents.metrics.results.list()) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     query: ResultListParams | null | undefined = {},
@@ -26,6 +34,12 @@ export class Results extends APIResource {
    * Export metric results to a CSV file. This endpoint streams at most 100k results
    * as the CSV file directly to the client. Use the optional filters to narrow down
    * the results to export.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.agents.metrics.results.export();
+   * ```
    */
   export(query: ResultExportParams | null | undefined = {}, options?: RequestOptions): APIPromise<string> {
     return this._client.get('/agents/metrics/results/export', {

@@ -19,32 +19,85 @@ Types:
 
 Types:
 
+- <code><a href="./src/resources/agents/agents.ts">Agent</a></code>
 - <code><a href="./src/resources/agents/agents.ts">AgentSummary</a></code>
-- <code><a href="./src/resources/agents/agents.ts">AgentListResponse</a></code>
-- <code><a href="./src/resources/agents/agents.ts">AgentListPhoneNumbersResponse</a></code>
-- <code><a href="./src/resources/agents/agents.ts">AgentListTemplatesResponse</a></code>
 
 Methods:
 
-- <code title="get /agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">retrieve</a>(agentID) -> AgentSummary</code>
-- <code title="patch /agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">update</a>(agentID, { ...params }) -> AgentSummary</code>
-- <code title="get /agents">client.agents.<a href="./src/resources/agents/agents.ts">list</a>() -> AgentListResponse</code>
-- <code title="delete /agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">delete</a>(agentID) -> void</code>
-- <code title="get /agents/{agent_id}/phone-numbers">client.agents.<a href="./src/resources/agents/agents.ts">listPhoneNumbers</a>(agentID) -> AgentListPhoneNumbersResponse</code>
-- <code title="get /agents/templates">client.agents.<a href="./src/resources/agents/agents.ts">listTemplates</a>() -> AgentListTemplatesResponse</code>
+- <code title="post /v1/agents">client.agents.<a href="./src/resources/agents/agents.ts">create</a>({ ...params }) -> Agent</code>
+- <code title="get /v1/agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">retrieve</a>(agentID) -> Agent</code>
+- <code title="patch /v1/agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">update</a>(agentID, { ...params }) -> Agent</code>
+- <code title="get /v1/agents">client.agents.<a href="./src/resources/agents/agents.ts">list</a>({ ...params }) -> AgentSummariesCursorIDPage</code>
+- <code title="delete /v1/agents/{agent_id}">client.agents.<a href="./src/resources/agents/agents.ts">delete</a>(agentID) -> void</code>
+
+## Models
+
+Types:
+
+- <code><a href="./src/resources/agents/models.ts">Model</a></code>
+
+Methods:
+
+- <code title="get /v1/agents/models/{model_id}">client.agents.models.<a href="./src/resources/agents/models.ts">retrieve</a>(modelID) -> Model</code>
+- <code title="get /v1/agents/models">client.agents.models.<a href="./src/resources/agents/models.ts">list</a>({ ...params }) -> ModelsCursorIDPage</code>
+
+## Tools
+
+Types:
+
+- <code><a href="./src/resources/agents/tools.ts">Tool</a></code>
+- <code><a href="./src/resources/agents/tools.ts">WebhookBodyParam</a></code>
+- <code><a href="./src/resources/agents/tools.ts">ToolListResponse</a></code>
+
+Methods:
+
+- <code title="post /v1/agents/tools">client.agents.tools.<a href="./src/resources/agents/tools.ts">create</a>({ ...params }) -> Tool</code>
+- <code title="get /v1/agents/tools/{tool_id}">client.agents.tools.<a href="./src/resources/agents/tools.ts">retrieve</a>(toolID, { ...params }) -> Tool</code>
+- <code title="patch /v1/agents/tools/{tool_id}">client.agents.tools.<a href="./src/resources/agents/tools.ts">update</a>(toolID, { ...params }) -> Tool</code>
+- <code title="get /v1/agents/tools">client.agents.tools.<a href="./src/resources/agents/tools.ts">list</a>({ ...params }) -> ToolListResponse</code>
+- <code title="delete /v1/agents/tools/{tool_id}">client.agents.tools.<a href="./src/resources/agents/tools.ts">delete</a>(toolID) -> void</code>
+
+## Versions
+
+Types:
+
+- <code><a href="./src/resources/agents/versions.ts">Version</a></code>
+
+Methods:
+
+- <code title="get /v1/agents/{agent_id}/versions/{version_id}">client.agents.versions.<a href="./src/resources/agents/versions.ts">retrieve</a>(versionID, { ...params }) -> Version</code>
+- <code title="get /v1/agents/{agent_id}/versions">client.agents.versions.<a href="./src/resources/agents/versions.ts">list</a>(agentID, { ...params }) -> VersionsCursorIDPage</code>
 
 ## Calls
 
 Types:
 
-- <code><a href="./src/resources/agents/calls.ts">AgentCall</a></code>
-- <code><a href="./src/resources/agents/calls.ts">AgentTranscript</a></code>
+- <code><a href="./src/resources/agents/calls/calls.ts">AgentCall</a></code>
+- <code><a href="./src/resources/agents/calls/calls.ts">AgentTranscript</a></code>
+- <code><a href="./src/resources/agents/calls/calls.ts">CallBatch</a></code>
+- <code><a href="./src/resources/agents/calls/calls.ts">CallCreateResponse</a></code>
+- <code><a href="./src/resources/agents/calls/calls.ts">CallCancelResponse</a></code>
+- <code><a href="./src/resources/agents/calls/calls.ts">CallLogsResponse</a></code>
 
 Methods:
 
-- <code title="get /agents/calls/{call_id}">client.agents.calls.<a href="./src/resources/agents/calls.ts">retrieve</a>(callID) -> AgentCall</code>
-- <code title="get /agents/calls">client.agents.calls.<a href="./src/resources/agents/calls.ts">list</a>({ ...params }) -> AgentCallsCursorIDPage</code>
-- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/resources/agents/calls.ts">downloadAudio</a>(callID) -> void</code>
+- <code title="post /agents/calls">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">create</a>({ ...params }) -> CallCreateResponse</code>
+- <code title="get /agents/calls/{call_id}">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">retrieve</a>(callID) -> AgentCall</code>
+- <code title="get /agents/calls">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">list</a>({ ...params }) -> AgentCallsCursorIDPage</code>
+- <code title="delete /agents/calls/{call_id}">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">delete</a>(callID) -> AgentCall</code>
+- <code title="post /agents/calls/{call_id}/cancel">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">cancel</a>(callID) -> CallCancelResponse</code>
+- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">downloadAudio</a>(callID) -> void</code>
+- <code title="get /agents/calls/{call_id}/logs">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">logs</a>(callID) -> CallLogsResponse</code>
+
+### Batches
+
+Methods:
+
+- <code title="post /agents/calls/batches">client.agents.calls.batches.<a href="./src/resources/agents/calls/batches.ts">create</a>({ ...params }) -> CallBatch</code>
+- <code title="get /agents/calls/batches/{batch_id}">client.agents.calls.batches.<a href="./src/resources/agents/calls/batches.ts">retrieve</a>(batchID) -> CallBatch</code>
+- <code title="get /agents/calls/batches">client.agents.calls.batches.<a href="./src/resources/agents/calls/batches.ts">list</a>({ ...params }) -> CallBatchesCursorIDPage</code>
+- <code title="post /agents/calls/batches/{batch_id}/cancel">client.agents.calls.batches.<a href="./src/resources/agents/calls/batches.ts">cancel</a>(batchID) -> CallBatch</code>
+- <code title="post /agents/calls/batches/{batch_id}/retry">client.agents.calls.batches.<a href="./src/resources/agents/calls/batches.ts">retry</a>(batchID) -> CallBatch</code>
 
 ## Metrics
 
@@ -58,6 +111,7 @@ Methods:
 - <code title="post /agents/metrics">client.agents.metrics.<a href="./src/resources/agents/metrics/metrics.ts">create</a>({ ...params }) -> Metric</code>
 - <code title="get /agents/metrics/{metric_id}">client.agents.metrics.<a href="./src/resources/agents/metrics/metrics.ts">retrieve</a>(metricID) -> Metric</code>
 - <code title="get /agents/metrics">client.agents.metrics.<a href="./src/resources/agents/metrics/metrics.ts">list</a>({ ...params }) -> MetricListResponse</code>
+- <code title="delete /agents/metrics/{metric_id}">client.agents.metrics.<a href="./src/resources/agents/metrics/metrics.ts">delete</a>(metricID) -> void</code>
 - <code title="post /agents/{agent_id}/metrics/{metric_id}">client.agents.metrics.<a href="./src/resources/agents/metrics/metrics.ts">addToAgent</a>(metricID, { ...params }) -> void</code>
 - <code title="delete /agents/{agent_id}/metrics/{metric_id}">client.agents.metrics.<a href="./src/resources/agents/metrics/metrics.ts">removeFromAgent</a>(metricID, { ...params }) -> void</code>
 
@@ -73,17 +127,91 @@ Methods:
 - <code title="get /agents/metrics/results">client.agents.metrics.results.<a href="./src/resources/agents/metrics/results.ts">list</a>({ ...params }) -> ResultListResponsesCursorIDPage</code>
 - <code title="get /agents/metrics/results/export">client.agents.metrics.results.<a href="./src/resources/agents/metrics/results.ts">export</a>({ ...params }) -> string</code>
 
-## Deployments
+## Webhooks
 
 Types:
 
-- <code><a href="./src/resources/agents/deployments.ts">Deployment</a></code>
-- <code><a href="./src/resources/agents/deployments.ts">DeploymentListResponse</a></code>
+- <code><a href="./src/resources/agents/webhooks.ts">Webhook</a></code>
+- <code><a href="./src/resources/agents/webhooks.ts">WebhookRetrieveResponse</a></code>
+- <code><a href="./src/resources/agents/webhooks.ts">WebhookUpdateResponse</a></code>
+- <code><a href="./src/resources/agents/webhooks.ts">WebhookListResponse</a></code>
+- <code><a href="./src/resources/agents/webhooks.ts">WebhookDeleteResponse</a></code>
 
 Methods:
 
-- <code title="get /agents/deployments/{deployment_id}">client.agents.deployments.<a href="./src/resources/agents/deployments.ts">retrieve</a>(deploymentID) -> Deployment</code>
-- <code title="get /agents/{agent_id}/deployments">client.agents.deployments.<a href="./src/resources/agents/deployments.ts">list</a>(agentID) -> DeploymentListResponse</code>
+- <code title="post /agents/webhooks">client.agents.webhooks.<a href="./src/resources/agents/webhooks.ts">create</a>({ ...params }) -> Webhook</code>
+- <code title="get /agents/webhooks/{webhook_id}">client.agents.webhooks.<a href="./src/resources/agents/webhooks.ts">retrieve</a>(webhookID) -> WebhookRetrieveResponse</code>
+- <code title="patch /agents/webhooks/{webhook_id}">client.agents.webhooks.<a href="./src/resources/agents/webhooks.ts">update</a>(webhookID, { ...params }) -> string</code>
+- <code title="get /agents/webhooks">client.agents.webhooks.<a href="./src/resources/agents/webhooks.ts">list</a>({ ...params }) -> WebhookListResponsesCursorIDPage</code>
+- <code title="delete /agents/webhooks/{webhook_id}">client.agents.webhooks.<a href="./src/resources/agents/webhooks.ts">delete</a>(webhookID) -> string</code>
+
+## PhoneNumbers
+
+Types:
+
+- <code><a href="./src/resources/agents/phone-numbers/phone-numbers.ts">PhoneNumber</a></code>
+- <code><a href="./src/resources/agents/phone-numbers/phone-numbers.ts">PhoneNumberListResponse</a></code>
+- <code><a href="./src/resources/agents/phone-numbers/phone-numbers.ts">PhoneNumberProvisionResponse</a></code>
+
+Methods:
+
+- <code title="get /agents/phone-numbers/{id}">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">retrieve</a>(id) -> PhoneNumber</code>
+- <code title="patch /agents/phone-numbers/{id}">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">update</a>(id, { ...params }) -> PhoneNumber</code>
+- <code title="get /agents/phone-numbers">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">list</a>({ ...params }) -> PhoneNumberListResponse</code>
+- <code title="delete /agents/phone-numbers/{id}">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">delete</a>(id) -> void</code>
+- <code title="post /agents/phone-numbers">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">import</a>({ ...params }) -> PhoneNumber</code>
+- <code title="post /agents/phone-numbers/provision">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">provision</a>({ ...params }) -> PhoneNumberProvisionResponse</code>
+
+### Providers
+
+Types:
+
+- <code><a href="./src/resources/agents/phone-numbers/providers.ts">ProviderCreateResponse</a></code>
+- <code><a href="./src/resources/agents/phone-numbers/providers.ts">ProviderRetrieveResponse</a></code>
+- <code><a href="./src/resources/agents/phone-numbers/providers.ts">ProviderUpdateResponse</a></code>
+- <code><a href="./src/resources/agents/phone-numbers/providers.ts">ProviderListResponse</a></code>
+
+Methods:
+
+- <code title="post /agents/phone-numbers/providers">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">create</a>({ ...params }) -> ProviderCreateResponse</code>
+- <code title="get /agents/phone-numbers/providers/{id}">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">retrieve</a>(id) -> ProviderRetrieveResponse</code>
+- <code title="patch /agents/phone-numbers/providers/{id}">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">update</a>(id, { ...params }) -> ProviderUpdateResponse</code>
+- <code title="get /agents/phone-numbers/providers">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">list</a>({ ...params }) -> ProviderListResponse</code>
+- <code title="delete /agents/phone-numbers/providers/{id}">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">delete</a>(id) -> void</code>
+
+## KnowledgeBase
+
+### Folders
+
+Types:
+
+- <code><a href="./src/resources/agents/knowledge-base/folders.ts">Folder</a></code>
+- <code><a href="./src/resources/agents/knowledge-base/folders.ts">FolderListResponse</a></code>
+
+Methods:
+
+- <code title="post /agents/folders">client.agents.knowledgeBase.folders.<a href="./src/resources/agents/knowledge-base/folders.ts">create</a>({ ...params }) -> Folder</code>
+- <code title="get /agents/folders/{id}">client.agents.knowledgeBase.folders.<a href="./src/resources/agents/knowledge-base/folders.ts">retrieve</a>(id) -> Folder</code>
+- <code title="patch /agents/folders/{id}">client.agents.knowledgeBase.folders.<a href="./src/resources/agents/knowledge-base/folders.ts">update</a>(id, { ...params }) -> Folder</code>
+- <code title="get /agents/folders">client.agents.knowledgeBase.folders.<a href="./src/resources/agents/knowledge-base/folders.ts">list</a>({ ...params }) -> FolderListResponse</code>
+- <code title="delete /agents/folders/{id}">client.agents.knowledgeBase.folders.<a href="./src/resources/agents/knowledge-base/folders.ts">delete</a>(id, { ...params }) -> void</code>
+
+### Documents
+
+Types:
+
+- <code><a href="./src/resources/agents/knowledge-base/documents.ts">Document</a></code>
+- <code><a href="./src/resources/agents/knowledge-base/documents.ts">DocumentCreateBulkResponse</a></code>
+
+Methods:
+
+- <code title="post /agents/documents">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">create</a>({ ...params }) -> Document</code>
+- <code title="get /agents/documents/{document_id}">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">retrieve</a>(documentID) -> Document</code>
+- <code title="patch /agents/documents/{document_id}">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">update</a>(documentID, { ...params }) -> Document</code>
+- <code title="get /agents/documents">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">list</a>({ ...params }) -> DocumentsCursorIDPage</code>
+- <code title="delete /agents/documents/{document_id}">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">delete</a>(documentID, { ...params }) -> void</code>
+- <code title="post /agents/documents/bulk">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">createBulk</a>({ ...params }) -> DocumentCreateBulkResponse</code>
+- <code title="post /agents/documents/{document_id}/retry">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">retry</a>(documentID) -> Document</code>
 
 # AccessToken
 
@@ -228,16 +356,15 @@ Methods:
 - <code title="post /tts/sse">client.tts.<a href="./src/resources/tts.ts">generateSSE</a>({ ...params }) -> TTSSSEEvent</code>
 - <code title="post /infill/bytes">client.tts.<a href="./src/resources/tts.ts">infill</a>({ ...params }) -> Response</code>
 
-# VoiceChanger
+# Watermark
 
 Types:
 
-- <code><a href="./src/resources/voice-changer.ts">VoiceChangerSSEEvent</a></code>
+- <code><a href="./src/resources/watermark.ts">WatermarkDetectResponse</a></code>
 
 Methods:
 
-- <code title="post /voice-changer/bytes">client.voiceChanger.<a href="./src/resources/voice-changer.ts">generate</a>({ ...params }) -> Response</code>
-- <code title="post /voice-changer/sse">client.voiceChanger.<a href="./src/resources/voice-changer.ts">generateSSE</a>({ ...params }) -> VoiceChangerSSEEvent</code>
+- <code title="post /v1/watermark/detect">client.watermark.<a href="./src/resources/watermark.ts">detect</a>({ ...params }) -> WatermarkDetectResponse</code>
 
 # Voices
 

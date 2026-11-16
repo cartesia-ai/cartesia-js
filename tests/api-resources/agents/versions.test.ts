@@ -7,10 +7,10 @@ const client = new Cartesia({
   baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
 });
 
-describe('resource calls', () => {
+describe('resource versions', () => {
   // Mock server tests are disabled
-  test.skip('retrieve', async () => {
-    const responsePromise = client.agents.calls.retrieve('call_id');
+  test.skip('retrieve: only required params', async () => {
+    const responsePromise = client.agents.versions.retrieve('x', { agent_id: 'x' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -21,8 +21,13 @@ describe('resource calls', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('list: only required params', async () => {
-    const responsePromise = client.agents.calls.list({ agent_id: 'agent_id' });
+  test.skip('retrieve: required and optional params', async () => {
+    const response = await client.agents.versions.retrieve('x', { agent_id: 'x' });
+  });
+
+  // Mock server tests are disabled
+  test.skip('list', async () => {
+    const responsePromise = client.agents.versions.list('x');
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -33,25 +38,18 @@ describe('resource calls', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('list: required and optional params', async () => {
-    const response = await client.agents.calls.list({
-      agent_id: 'agent_id',
-      ending_before: 'ending_before',
-      expand: 'expand',
-      limit: 0,
-      starting_after: 'starting_after',
-    });
-  });
-
-  // Mock server tests are disabled
-  test.skip('downloadAudio', async () => {
-    const responsePromise = client.agents.calls.downloadAudio('call_id');
-    const rawResponse = await responsePromise.asResponse();
-    expect(rawResponse).toBeInstanceOf(Response);
-    const response = await responsePromise;
-    expect(response).not.toBeInstanceOf(Response);
-    const dataAndResponse = await responsePromise.withResponse();
-    expect(dataAndResponse.data).toBe(response);
-    expect(dataAndResponse.response).toBe(rawResponse);
+  test.skip('list: request options and params are passed correctly', async () => {
+    // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
+    await expect(
+      client.agents.versions.list(
+        'x',
+        {
+          ending_before: 'ending_before',
+          limit: 1,
+          starting_after: 'starting_after',
+        },
+        { path: '/_stainless_unknown_path' },
+      ),
+    ).rejects.toThrow(Cartesia.NotFoundError);
   });
 });

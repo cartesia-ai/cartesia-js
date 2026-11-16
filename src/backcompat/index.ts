@@ -6,7 +6,6 @@
 import { Cartesia, type ClientOptions } from '../client';
 import { TTSWrapper } from './tts-wrapper';
 import { VoicesWrapper } from './voices-wrapper';
-import { VoiceChangerWrapper } from './voice-changer-wrapper';
 import { buildHeaders, type NullableHeaders } from '../internal/headers';
 import type { CartesiaClientOptions, Supplier } from './types';
 import { FinalRequestOptions } from '../internal/request-options';
@@ -59,7 +58,6 @@ export class CartesiaClient {
   private client: Cartesia;
   public tts: TTSWrapper;
   public voices: VoicesWrapper;
-  public voiceChanger: VoiceChangerWrapper;
 
   constructor(options: CartesiaClientOptions = {}) {
     const newOptions: ClientOptions = {};
@@ -82,13 +80,11 @@ export class CartesiaClient {
     this.client = new DynamicCartesia({ ...newOptions, apiKeySupplier });
     this.tts = new TTSWrapper(this.client);
     this.voices = new VoicesWrapper(this.client);
-    this.voiceChanger = new VoiceChangerWrapper(this.client);
   }
 }
 
 export * from './tts-wrapper';
 export * from './voices-wrapper';
-export * from './voice-changer-wrapper';
 export * from './types';
 export * from './errors';
 export * from './utils';
