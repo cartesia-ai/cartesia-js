@@ -1,5 +1,29 @@
 # Changelog
 
+## [5.0.0](https://github.com/cartesia-ai/cartesia-js/compare/v4.2.0...v5.0.0) (2026-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* map client.agents to managed agents for SDK 5.0 ([#31](https://github.com/cartesia-ai/cartesia-js/issues/31))
+
+### Features
+
+* map client.agents to managed agents for SDK 5.0 ([#31](https://github.com/cartesia-ai/cartesia-js/issues/31)) ([9e2c1c3](https://github.com/cartesia-ai/cartesia-js/commit/9e2c1c30ef7eef5485af585af3ca850d7ec0bd1c))
+* sync OpenAPI operations with docs and add AgentSummary.is_managed ([82affc6](https://github.com/cartesia-ai/cartesia-js/commit/82affc64194ad6ebdab5b74cd9c83af6537dc7e4))
+
+
+### Chores
+
+* avoid duplicate trunk sync statuses ([#28](https://github.com/cartesia-ai/cartesia-js/issues/28)) ([8bd5f92](https://github.com/cartesia-ai/cartesia-js/commit/8bd5f929fefcda643a26d661c78e2c2320dd8b28))
+* **deps:** bump actions/setup-node from 7.0.0 to 7.1.0 ([#26](https://github.com/cartesia-ai/cartesia-js/issues/26)) ([ef76508](https://github.com/cartesia-ai/cartesia-js/commit/ef76508dc3824d20dfd7b6e8898aa28b7e476adc))
+
+
+### Documentation
+
+* space separate auto-finalize transcript turns ([#27](https://github.com/cartesia-ai/cartesia-js/issues/27)) ([a1c8f1e](https://github.com/cartesia-ai/cartesia-js/commit/a1c8f1e6722f6bdd266f25640af24a12fb1d837e))
+* use non-deprecated voice in README and tts tests ([#30](https://github.com/cartesia-ai/cartesia-js/issues/30)) ([3dd2348](https://github.com/cartesia-ai/cartesia-js/commit/3dd234804c49941f59e63eca8be5c26236db4deb))
+
 ## [4.2.0](https://github.com/cartesia-ai/cartesia-js/compare/v4.1.0...v4.2.0) (2026-09-02)
 
 
