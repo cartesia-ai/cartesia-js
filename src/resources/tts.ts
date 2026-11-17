@@ -188,7 +188,8 @@ export type Emotion =
   | 'distant'
   | 'skeptical'
   | 'contemplative'
-  | 'determined';
+  | 'determined'
+  | (string & {});
 
 /**
  * Configure the various attributes of the generated speech. These are only for
