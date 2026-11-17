@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v5.0.0...v5.1.0) (2026-11-17)
+
+
+### Features
+
+* add agent sessions and usage, and fix SDK generation gaps ([#32](https://github.com/cartesia-ai/cartesia-js/issues/32)) ([b81e63e](https://github.com/cartesia-ai/cartesia-js/commit/b81e63e66b2a5bbf63fe536474d0ba4fe69dd941))
+
 ## [5.0.0](https://github.com/cartesia-ai/cartesia-js/compare/v4.2.0...v5.0.0) (2026-11-16)
 
 
