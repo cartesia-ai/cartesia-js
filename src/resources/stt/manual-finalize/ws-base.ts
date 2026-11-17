@@ -45,8 +45,9 @@ export interface ManualFinalizeWSParameters extends Record<string, unknown> {
   /**
    * Key terms to improve the recall of specific words and phrases.
    *
-   * Pass multiple values to boost multiple terms, up to 100 keyterms totaling 1200
-   * characters. To boost one multi-word phrase, join the words with a space.
+   * Pass multiple values to boost multiple terms. To boost one multi-word phrase,
+   * join the words with a space. Accepts up to 500 keyterms totaling 5000
+   * characters.
    *
    * See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
    * details.
@@ -59,6 +60,13 @@ export interface ManualFinalizeWSParameters extends Record<string, unknown> {
    * current language support.
    */
   language?: 'en';
+
+  /**
+   * Languages expected in the audio, up to 6 at a time. Transcription accuracy
+   * improves when language hints match the audio. Hinting more languages reduces
+   * efficacy.
+   */
+  language_hint?: Array<STTAPI.STTLanguage>;
 
   /**
    * Used by `ink-whisper` models only. Maximum duration of silence (in seconds)

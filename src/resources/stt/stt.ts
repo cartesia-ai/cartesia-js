@@ -105,6 +105,93 @@ export interface STTErrorResponse {
   request_id?: string;
 }
 
+/**
+ * Speech-to-text languages. See
+ * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
+ * current language support.
+ */
+export type STTLanguage =
+  | 'ar'
+  | 'bg'
+  | 'bn'
+  | 'cs'
+  | 'da'
+  | 'de'
+  | 'el'
+  | 'en'
+  | 'es'
+  | 'fi'
+  | 'fr'
+  | 'gu'
+  | 'he'
+  | 'hi'
+  | 'hu'
+  | 'id'
+  | 'it'
+  | 'ja'
+  | 'ka'
+  | 'kn'
+  | 'ko'
+  | 'ml'
+  | 'mr'
+  | 'ms'
+  | 'nl'
+  | 'no'
+  | 'or'
+  | 'pa'
+  | 'pl'
+  | 'pt'
+  | 'ro'
+  | 'ru'
+  | 'sk'
+  | 'sv'
+  | 'ta'
+  | 'te'
+  | 'th'
+  | 'tl'
+  | 'tr'
+  | 'uk'
+  | 'ur'
+  | 'vi'
+  | 'yue'
+  | 'zh'
+  | (string & {});
+
+/**
+ * A language detected in the audio, with the model's confidence
+ */
+export interface STTLanguageConfidence {
+  /**
+   * Confidence that the audio contains this language, from 0 (not confident) to 1
+   * (very confident)
+   */
+  confidence: number;
+
+  /**
+   * Speech-to-text languages. See
+   * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
+   * current language support.
+   */
+  language: STTLanguage;
+}
+
+export interface STTWord {
+  /**
+   * End time of the word in seconds.
+   */
+  end: number;
+
+  /**
+   * Start time of the word in seconds.
+   */
+  start: number;
+
+  /**
+   * The transcribed word.
+   */
+  word: string;
+}
+
 export interface STTTranscribeResponse {
   /**
    * The transcribed text.
@@ -140,26 +227,14 @@ export interface STTTranscribeResponse {
    * Word-level timestamps showing the start and end time of each word. Only included
    * when `[word]` is passed into `timestamp_granularities[]`.
    */
-  words?: Array<STTTranscribeResponse.Word>;
+  words?: Array<STTWord>;
 }
 
 export namespace STTTranscribeResponse {
-  export interface Word {
-    /**
-     * End time of the word in seconds.
-     */
-    end: number;
-
-    /**
-     * Start time of the word in seconds.
-     */
-    start: number;
-
-    /**
-     * The transcribed word.
-     */
-    word: string;
-  }
+  /**
+   * @deprecated Use `STTWord` instead.
+   */
+  export type Word = STTWord;
 }
 
 export interface STTTranscribeParams {
@@ -307,6 +382,9 @@ export declare namespace STT {
     type STTBatchModel as STTBatchModel,
     type STTEncoding as STTEncoding,
     type STTErrorResponse as STTErrorResponse,
+    type STTLanguage as STTLanguage,
+    type STTLanguageConfidence as STTLanguageConfidence,
+    type STTWord as STTWord,
     type STTTranscribeResponse as STTTranscribeResponse,
     type STTTranscribeParams as STTTranscribeParams,
   };

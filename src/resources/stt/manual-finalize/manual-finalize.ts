@@ -1,7 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../../../core/resource';
-import * as Shared from '../../shared';
 import * as STTAPI from '../stt';
 import { ManualFinalizeWS, type ManualFinalizeWSParameters, type ManualFinalizeWSClientOptions } from './ws';
 
@@ -48,6 +47,11 @@ export interface STTManualFinalizeDoneResponse {
    * Event type identifier.
    */
   type: 'done';
+
+  /**
+   * Languages detected in the audio since the last `finalize`
+   */
+  languages?: Array<STTAPI.STTLanguageConfidence>;
 }
 
 /**
@@ -64,6 +68,11 @@ export interface STTManualFinalizeFlushDoneResponse {
    * Event type identifier.
    */
   type: 'flush_done';
+
+  /**
+   * Languages detected in the audio since the previous `finalize`
+   */
+  languages?: Array<STTAPI.STTLanguageConfidence>;
 }
 
 /**
@@ -72,7 +81,12 @@ export interface STTManualFinalizeFlushDoneResponse {
  * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
  * all options.
  */
-export type STTManualFinalizeModel = 'ink-2' | 'ink-whisper' | 'ink-whisper-2025-06-04' | (string & {});
+export type STTManualFinalizeModel =
+  | 'ink-2'
+  | 'ink-preview'
+  | 'ink-whisper'
+  | 'ink-whisper-2025-06-04'
+  | (string & {});
 
 /**
  * A transcript chunk.
@@ -112,9 +126,10 @@ export interface STTManualFinalizeTranscriptResponse {
   language?: string;
 
   /**
-   * Word-level timing information for the transcript.
+   * Words completed since the previous transcript event, with timings. A word can
+   * arrive in a later event than its text.
    */
-  words?: Array<Shared.WordTimestamps>;
+  words?: Array<STTAPI.STTWord>;
 }
 
 /**
@@ -161,8 +176,9 @@ export interface ManualFinalizeWebsocketParams {
   /**
    * Key terms to improve the recall of specific words and phrases.
    *
-   * Pass multiple values to boost multiple terms, up to 100 keyterms totaling 1200
-   * characters. To boost one multi-word phrase, join the words with a space.
+   * Pass multiple values to boost multiple terms. To boost one multi-word phrase,
+   * join the words with a space. Accepts up to 500 keyterms totaling 5000
+   * characters.
    *
    * See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
    * details.
@@ -175,6 +191,13 @@ export interface ManualFinalizeWebsocketParams {
    * current language support.
    */
   language?: 'en';
+
+  /**
+   * Languages expected in the audio, up to 6 at a time. Transcription accuracy
+   * improves when language hints match the audio. Hinting more languages reduces
+   * efficacy.
+   */
+  language_hint?: Array<STTAPI.STTLanguage>;
 
   /**
    * Used by `ink-whisper` models only. Maximum duration of silence (in seconds)

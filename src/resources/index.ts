@@ -51,6 +51,9 @@ export {
   type STTBatchModel,
   type STTEncoding,
   type STTErrorResponse,
+  type STTLanguage,
+  type STTLanguageConfidence,
+  type STTWord,
   type STTTranscribeResponse,
   type STTTranscribeParams,
 } from './stt/stt';

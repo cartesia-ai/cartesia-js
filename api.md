@@ -299,6 +299,9 @@ Types:
 - <code><a href="./src/resources/stt/stt.ts">STTBatchModel</a></code>
 - <code><a href="./src/resources/stt/stt.ts">STTEncoding</a></code>
 - <code><a href="./src/resources/stt/stt.ts">STTErrorResponse</a></code>
+- <code><a href="./src/resources/stt/stt.ts">STTLanguage</a></code>
+- <code><a href="./src/resources/stt/stt.ts">STTLanguageConfidence</a></code>
+- <code><a href="./src/resources/stt/stt.ts">STTWord</a></code>
 - <code><a href="./src/resources/stt/stt.ts">STTTranscribeResponse</a></code>
 
 Methods:

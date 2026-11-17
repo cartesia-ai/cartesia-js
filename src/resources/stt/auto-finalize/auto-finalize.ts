@@ -57,7 +57,7 @@ export interface STTAutoFinalizeConnected {
  * [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
  * all options.
  */
-export type STTAutoFinalizeModel = 'ink-2' | (string & {});
+export type STTAutoFinalizeModel = 'ink-2' | 'ink-preview' | (string & {});
 
 /**
  * [PREVIEW] Fires when the model predicts that the user might be done speaking.
@@ -77,6 +77,22 @@ export interface STTAutoFinalizeTurnEagerEnd {
    * Event type identifier.
    */
   type: 'turn.eager_end';
+
+  /**
+   * Languages detected in this turn so far
+   */
+  languages?: Array<STTAPI.STTLanguageConfidence>;
+
+  /**
+   * Identifies the turn this event belongs to. Unique within this connection and the
+   * same on every event in the turn.
+   */
+  turn_id?: string;
+
+  /**
+   * Words transcribed so far in this turn, with timings
+   */
+  words?: Array<STTAPI.STTWord>;
 }
 
 /**
@@ -97,6 +113,22 @@ export interface STTAutoFinalizeTurnEnd {
    * Event type identifier.
    */
   type: 'turn.end';
+
+  /**
+   * Languages detected in the completed turn
+   */
+  languages?: Array<STTAPI.STTLanguageConfidence>;
+
+  /**
+   * Identifies the turn this event belongs to. Unique within this connection and the
+   * same on every event in the turn.
+   */
+  turn_id?: string;
+
+  /**
+   * Words in the completed turn, with timings
+   */
+  words?: Array<STTAPI.STTWord>;
 }
 
 /**
@@ -112,6 +144,12 @@ export interface STTAutoFinalizeTurnResume {
    * Event type identifier.
    */
   type: 'turn.resume';
+
+  /**
+   * Identifies the turn this event belongs to. Unique within this connection and the
+   * same on every event in the turn.
+   */
+  turn_id?: string;
 }
 
 /**
@@ -128,6 +166,12 @@ export interface STTAutoFinalizeTurnStart {
    * Event type identifier.
    */
   type: 'turn.start';
+
+  /**
+   * Identifies the turn this event belongs to. Unique within this connection and the
+   * same on every event in the turn.
+   */
+  turn_id?: string;
 }
 
 /**
@@ -149,6 +193,18 @@ export interface STTAutoFinalizeTurnUpdate {
    * Event type identifier.
    */
   type: 'turn.update';
+
+  /**
+   * Identifies the turn this event belongs to. Unique within this connection and the
+   * same on every event in the turn.
+   */
+  turn_id?: string;
+
+  /**
+   * Words transcribed so far in this turn, with timings. Cumulative like
+   * `transcript`.
+   */
+  words?: Array<STTAPI.STTWord>;
 }
 
 /**
@@ -183,6 +239,24 @@ export namespace STTAutoFinalizeWebsocketRequest {
      * settings.
      */
     type: 'config';
+
+    /**
+     * Replaces the session's keyterms. Pass an empty list to clear them; omit the
+     * field to keep them. Accepts up to 500 keyterms totaling 5000 characters.
+     *
+     * See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
+     * details.
+     */
+    keyterms?: Array<string>;
+
+    /**
+     * Replaces the session's language hints. Pass an empty list to clear them; omit
+     * the field to keep them. Accepts up to 6 hints.
+     *
+     * Transcription accuracy improves when language hints match the audio. Hinting
+     * more languages reduces efficacy.
+     */
+    language_hints?: Array<STTAPI.STTLanguage>;
 
     /**
      * Turn detection settings.
@@ -274,13 +348,25 @@ export interface AutoFinalizeWebsocketParams {
   /**
    * Key terms to improve the recall of specific words and phrases.
    *
-   * Pass multiple values to boost multiple terms, up to 100 keyterms totaling 1200
-   * characters. To boost one multi-word phrase, join the words with a space.
+   * Pass multiple values to boost multiple terms. To boost one multi-word phrase,
+   * join the words with a space. Accepts up to 500 keyterms totaling 5000
+   * characters.
+   *
+   * Replace keyterms mid-session with a `config` message.
    *
    * See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
    * details.
    */
   keyterm?: Array<string>;
+
+  /**
+   * Languages expected in the audio, up to 6 at a time. Transcription accuracy
+   * improves when language hints match the audio. Hinting more languages reduces
+   * efficacy.
+   *
+   * Replace language hints mid-session with a `config` message.
+   */
+  language_hint?: Array<STTAPI.STTLanguage>;
 
   /**
    * Threshold below which to eager end the turn. Default: 0.4. Range: 0.3-0.6. Must

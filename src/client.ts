@@ -118,8 +118,11 @@ import {
   STTBatchModel,
   STTEncoding,
   STTErrorResponse,
+  STTLanguage,
+  STTLanguageConfidence,
   STTTranscribeParams,
   STTTranscribeResponse,
+  STTWord,
 } from './resources/stt/stt';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
@@ -989,6 +992,9 @@ export declare namespace Cartesia {
     type STTBatchModel as STTBatchModel,
     type STTEncoding as STTEncoding,
     type STTErrorResponse as STTErrorResponse,
+    type STTLanguage as STTLanguage,
+    type STTLanguageConfidence as STTLanguageConfidence,
+    type STTWord as STTWord,
     type STTTranscribeResponse as STTTranscribeResponse,
     type STTTranscribeParams as STTTranscribeParams,
     Stt as Stt,
