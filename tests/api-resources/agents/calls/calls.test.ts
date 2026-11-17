@@ -100,18 +100,6 @@ describe('resource calls', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('downloadAudio', async () => {
-    const responsePromise = client.agents.calls.downloadAudio('call_id');
-    const rawResponse = await responsePromise.asResponse();
-    expect(rawResponse).toBeInstanceOf(Response);
-    const response = await responsePromise;
-    expect(response).not.toBeInstanceOf(Response);
-    const dataAndResponse = await responsePromise.withResponse();
-    expect(dataAndResponse.data).toBe(response);
-    expect(dataAndResponse.response).toBe(rawResponse);
-  });
-
-  // Mock server tests are disabled
   test.skip('logs', async () => {
     const responsePromise = client.agents.calls.logs('call_id');
     const rawResponse = await responsePromise.asResponse();

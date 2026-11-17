@@ -117,4 +117,16 @@ describe('resource phoneNumbers', () => {
   test.skip('provision: required and optional params', async () => {
     const response = await client.agents.phoneNumbers.provision({ label: 'label', agent_id: 'agent_id' });
   });
+
+  // Mock server tests are disabled
+  test.skip('provisioningUsage', async () => {
+    const responsePromise = client.agents.phoneNumbers.provisioningUsage();
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
 });

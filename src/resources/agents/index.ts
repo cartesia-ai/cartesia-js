@@ -38,11 +38,19 @@ export {
   type PhoneNumber,
   type PhoneNumberListResponse,
   type PhoneNumberProvisionResponse,
+  type PhoneNumberProvisioningUsageResponse,
   type PhoneNumberUpdateParams,
   type PhoneNumberListParams,
   type PhoneNumberImportParams,
   type PhoneNumberProvisionParams,
 } from './phone-numbers/index';
+export {
+  Sessions,
+  type SessionCreateWebrtcResponse,
+  type SessionCreateWebsocketResponse,
+  type SessionCreateWebrtcParams,
+  type SessionCreateWebsocketParams,
+} from './sessions';
 export {
   Tools,
   type Tool,

@@ -3,6 +3,14 @@
 import { APIResource } from '../../core/resource';
 import * as ModelsAPI from './models';
 import { Model as ModelsAPIModel, ModelListParams, Models, ModelsCursorIDPage } from './models';
+import * as SessionsAPI from './sessions';
+import {
+  SessionCreateWebrtcParams,
+  SessionCreateWebrtcResponse,
+  SessionCreateWebsocketParams,
+  SessionCreateWebsocketResponse,
+  Sessions,
+} from './sessions';
 import * as ToolsAPI from './tools';
 import {
   Tool as ToolsAPITool,
@@ -68,6 +76,7 @@ import {
   PhoneNumberListResponse,
   PhoneNumberProvisionParams,
   PhoneNumberProvisionResponse,
+  PhoneNumberProvisioningUsageResponse,
   PhoneNumberUpdateParams,
   PhoneNumbers,
 } from './phone-numbers/phone-numbers';
@@ -85,6 +94,7 @@ export class Agents extends APIResource {
   metrics: MetricsAPI.Metrics = new MetricsAPI.Metrics(this._client);
   webhooks: WebhooksAPI.Webhooks = new WebhooksAPI.Webhooks(this._client);
   phoneNumbers: PhoneNumbersAPI.PhoneNumbers = new PhoneNumbersAPI.PhoneNumbers(this._client);
+  sessions: SessionsAPI.Sessions = new SessionsAPI.Sessions(this._client);
   knowledgeBase: KnowledgeBaseAPI.KnowledgeBase = new KnowledgeBaseAPI.KnowledgeBase(this._client);
 
   /**
@@ -2082,6 +2092,7 @@ Agents.Calls = Calls;
 Agents.Metrics = Metrics;
 Agents.Webhooks = Webhooks;
 Agents.PhoneNumbers = PhoneNumbers;
+Agents.Sessions = Sessions;
 Agents.KnowledgeBase = KnowledgeBase;
 
 export declare namespace Agents {
@@ -2161,10 +2172,19 @@ export declare namespace Agents {
     type PhoneNumber as PhoneNumber,
     type PhoneNumberListResponse as PhoneNumberListResponse,
     type PhoneNumberProvisionResponse as PhoneNumberProvisionResponse,
+    type PhoneNumberProvisioningUsageResponse as PhoneNumberProvisioningUsageResponse,
     type PhoneNumberUpdateParams as PhoneNumberUpdateParams,
     type PhoneNumberListParams as PhoneNumberListParams,
     type PhoneNumberImportParams as PhoneNumberImportParams,
     type PhoneNumberProvisionParams as PhoneNumberProvisionParams,
+  };
+
+  export {
+    Sessions as Sessions,
+    type SessionCreateWebrtcResponse as SessionCreateWebrtcResponse,
+    type SessionCreateWebsocketResponse as SessionCreateWebsocketResponse,
+    type SessionCreateWebrtcParams as SessionCreateWebrtcParams,
+    type SessionCreateWebsocketParams as SessionCreateWebsocketParams,
   };
 
   export { KnowledgeBase as KnowledgeBase };

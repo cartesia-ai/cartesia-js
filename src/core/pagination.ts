@@ -109,6 +109,8 @@ export class PagePromise<
 
 export interface CursorIDPageResponse<Item> {
   data: Array<Item>;
+
+  has_more: boolean;
 }
 
 export interface CursorIDPageParams {
@@ -123,6 +125,8 @@ export class CursorIDPage<Item extends { id: string }>
 {
   data: Array<Item>;
 
+  has_more: boolean;
+
   constructor(
     client: Cartesia,
     response: Response,
@@ -132,10 +136,19 @@ export class CursorIDPage<Item extends { id: string }>
     super(client, response, body, options);
 
     this.data = body.data || [];
+    this.has_more = body.has_more || false;
   }
 
   getPaginatedItems(): Item[] {
     return this.data ?? [];
+  }
+
+  override hasNextPage(): boolean {
+    if (this.has_more === false) {
+      return false;
+    }
+
+    return super.hasNextPage();
   }
 
   nextPageRequestOptions(): PageRequestOptions | null {

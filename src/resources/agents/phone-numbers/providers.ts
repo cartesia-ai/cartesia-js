@@ -24,8 +24,7 @@ export class Providers extends APIResource {
    *   });
    * ```
    */
-  create(params: ProviderCreateParams, options?: RequestOptions): APIPromise<ProviderCreateResponse> {
-    const body = 'body' in params ? params.body : params;
+  create(body: ProviderCreateParams, options?: RequestOptions): APIPromise<ProviderCreateResponse> {
     return this._client.post('/agents/phone-numbers/providers', { body, ...options });
   }
 
@@ -672,7 +671,7 @@ export namespace ProviderListResponse {
 
 export type ProviderCreateParams =
   | ProviderCreateParams.CreateTwilioProviderBody
-  | ProviderCreateParams.Variant1;
+  | ProviderCreateParams.CreateSipProviderBody;
 
 export declare namespace ProviderCreateParams {
   export interface CreateTwilioProviderBody {
@@ -708,8 +707,114 @@ export declare namespace ProviderCreateParams {
     region?: 'us1' | 'ie1' | 'au1';
   }
 
-  export interface Variant1 {
-    body: unknown;
+  export interface CreateSipProviderBody {
+    /**
+     * A human-readable label for the provider.
+     */
+    label: string;
+
+    /**
+     * Must be `"sip_trunk"`.
+     */
+    type: 'sip_trunk';
+
+    /**
+     * Inbound SIP configuration for creating a trunk.
+     */
+    inbound?: CreateSipProviderBody.Inbound;
+
+    /**
+     * Outbound SIP configuration for creating a trunk.
+     */
+    outbound?: CreateSipProviderBody.Outbound;
+  }
+
+  export namespace CreateSipProviderBody {
+    /**
+     * Inbound SIP configuration for creating a trunk.
+     */
+    export interface Inbound {
+      /**
+       * Source IP addresses or CIDR ranges allowed to send SIP traffic.
+       */
+      allowed_addresses?: Array<string>;
+
+      /**
+       * Caller numbers allowed on inbound calls.
+       */
+      allowed_numbers?: Array<string>;
+
+      /**
+       * SIP digest authentication credentials.
+       */
+      credentials?: Inbound.Credentials;
+
+      /**
+       * SRTP policy for call audio. `disabled` does not negotiate encryption, `allowed`
+       * uses encryption when available, and `required` rejects calls that cannot use
+       * encryption.
+       */
+      media_encryption?: 'disabled' | 'allowed' | 'required';
+    }
+
+    export namespace Inbound {
+      /**
+       * SIP digest authentication credentials.
+       */
+      export interface Credentials {
+        password: string;
+
+        username: string;
+      }
+    }
+
+    /**
+     * Outbound SIP configuration for creating a trunk.
+     */
+    export interface Outbound {
+      /**
+       * Carrier host that receives Cartesia's SIP INVITE, as `host` or `host:port`,
+       * without a `sip:` prefix. When the port is omitted, Cartesia uses 5060 for `tcp`
+       * and 5061 for `tls`. Set `host:port` if your carrier listens elsewhere, for
+       * example `sip.example.com:5067`.
+       */
+      address: string;
+
+      /**
+       * Transport for outbound SIP signaling.
+       */
+      transport: 'tcp' | 'tls';
+
+      /**
+       * SIP digest authentication credentials.
+       */
+      credentials?: Outbound.Credentials;
+
+      /**
+       * Two-letter country code for the country the call terminates in (e.g. `US`, `GB`,
+       * `DE`). See
+       * [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
+       */
+      destination_country?: string;
+
+      /**
+       * SRTP policy for call audio. `disabled` does not negotiate encryption, `allowed`
+       * uses encryption when available, and `required` rejects calls that cannot use
+       * encryption.
+       */
+      media_encryption?: 'disabled' | 'allowed' | 'required';
+    }
+
+    export namespace Outbound {
+      /**
+       * SIP digest authentication credentials.
+       */
+      export interface Credentials {
+        password: string;
+
+        username: string;
+      }
+    }
   }
 }
 

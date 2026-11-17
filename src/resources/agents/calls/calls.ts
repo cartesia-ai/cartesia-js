@@ -105,13 +105,19 @@ export class Calls extends APIResource {
    *
    * @example
    * ```ts
-   * await client.agents.calls.downloadAudio('call_id');
+   * const response = await client.agents.calls.downloadAudio(
+   *   'call_id',
+   * );
+   *
+   * const content = await response.blob();
+   * console.log(content);
    * ```
    */
-  downloadAudio(callID: string, options?: RequestOptions): APIPromise<void> {
+  downloadAudio(callID: string, options?: RequestOptions): APIPromise<Response> {
     return this._client.get(path`/agents/calls/${callID}/audio`, {
       ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
+      headers: buildHeaders([{ Accept: 'audio/wav' }, options?.headers]),
+      __binaryResponse: true,
     });
   }
 

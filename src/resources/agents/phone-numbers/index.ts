@@ -5,6 +5,7 @@ export {
   type PhoneNumber,
   type PhoneNumberListResponse,
   type PhoneNumberProvisionResponse,
+  type PhoneNumberProvisioningUsageResponse,
   type PhoneNumberUpdateParams,
   type PhoneNumberListParams,
   type PhoneNumberImportParams,

@@ -86,7 +86,7 @@ Methods:
 - <code title="get /agents/calls">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">list</a>({ ...params }) -> AgentCallsCursorIDPage</code>
 - <code title="delete /agents/calls/{call_id}">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">delete</a>(callID) -> AgentCall</code>
 - <code title="post /agents/calls/{call_id}/cancel">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">cancel</a>(callID) -> CallCancelResponse</code>
-- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">downloadAudio</a>(callID) -> void</code>
+- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">downloadAudio</a>(callID) -> Response</code>
 - <code title="get /agents/calls/{call_id}/logs">client.agents.calls.<a href="./src/resources/agents/calls/calls.ts">logs</a>(callID) -> CallLogsResponse</code>
 
 ### Batches
@@ -152,6 +152,7 @@ Types:
 - <code><a href="./src/resources/agents/phone-numbers/phone-numbers.ts">PhoneNumber</a></code>
 - <code><a href="./src/resources/agents/phone-numbers/phone-numbers.ts">PhoneNumberListResponse</a></code>
 - <code><a href="./src/resources/agents/phone-numbers/phone-numbers.ts">PhoneNumberProvisionResponse</a></code>
+- <code><a href="./src/resources/agents/phone-numbers/phone-numbers.ts">PhoneNumberProvisioningUsageResponse</a></code>
 
 Methods:
 
@@ -161,6 +162,7 @@ Methods:
 - <code title="delete /agents/phone-numbers/{id}">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">delete</a>(id) -> void</code>
 - <code title="post /agents/phone-numbers">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">import</a>({ ...params }) -> PhoneNumber</code>
 - <code title="post /agents/phone-numbers/provision">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">provision</a>({ ...params }) -> PhoneNumberProvisionResponse</code>
+- <code title="get /agents/phone-numbers/provision">client.agents.phoneNumbers.<a href="./src/resources/agents/phone-numbers/phone-numbers.ts">provisioningUsage</a>() -> PhoneNumberProvisioningUsageResponse</code>
 
 ### Providers
 
@@ -178,6 +180,18 @@ Methods:
 - <code title="patch /agents/phone-numbers/providers/{id}">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">update</a>(id, { ...params }) -> ProviderUpdateResponse</code>
 - <code title="get /agents/phone-numbers/providers">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">list</a>({ ...params }) -> ProviderListResponse</code>
 - <code title="delete /agents/phone-numbers/providers/{id}">client.agents.phoneNumbers.providers.<a href="./src/resources/agents/phone-numbers/providers.ts">delete</a>(id) -> void</code>
+
+## Sessions
+
+Types:
+
+- <code><a href="./src/resources/agents/sessions.ts">SessionCreateWebrtcResponse</a></code>
+- <code><a href="./src/resources/agents/sessions.ts">SessionCreateWebsocketResponse</a></code>
+
+Methods:
+
+- <code title="post /v1/agents/webrtc/{agent_id}/sessions">client.agents.sessions.<a href="./src/resources/agents/sessions.ts">createWebrtc</a>(agentID, { ...params }) -> SessionCreateWebrtcResponse</code>
+- <code title="post /v1/agents/websocket/{agent_id}/sessions">client.agents.sessions.<a href="./src/resources/agents/sessions.ts">createWebsocket</a>(agentID, { ...params }) -> SessionCreateWebsocketResponse</code>
 
 ## KnowledgeBase
 
@@ -212,6 +226,28 @@ Methods:
 - <code title="delete /agents/documents/{document_id}">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">delete</a>(documentID, { ...params }) -> void</code>
 - <code title="post /agents/documents/bulk">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">createBulk</a>({ ...params }) -> DocumentCreateBulkResponse</code>
 - <code title="post /agents/documents/{document_id}/retry">client.agents.knowledgeBase.documents.<a href="./src/resources/agents/knowledge-base/documents.ts">retry</a>(documentID) -> Document</code>
+
+# Usage
+
+## Agents
+
+Types:
+
+- <code><a href="./src/resources/usage/agents.ts">AgentRetrieveResponse</a></code>
+
+Methods:
+
+- <code title="get /usage/agents">client.usage.agents.<a href="./src/resources/usage/agents.ts">retrieve</a>({ ...params }) -> AgentRetrieveResponse</code>
+
+## Credits
+
+Types:
+
+- <code><a href="./src/resources/usage/credits.ts">CreditRetrieveResponse</a></code>
+
+Methods:
+
+- <code title="get /usage/credits">client.usage.credits.<a href="./src/resources/usage/credits.ts">retrieve</a>({ ...params }) -> CreditRetrieveResponse</code>
 
 # AccessToken
 

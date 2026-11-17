@@ -124,6 +124,7 @@ import {
   STTTranscribeResponse,
   STTWord,
 } from './resources/stt/stt';
+import { Usage } from './resources/usage/usage';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
 import { FinalRequestOptions, RequestOptions } from './internal/request-options';
@@ -139,6 +140,8 @@ import { isEmptyObj } from './internal/utils/values';
 
 export interface ClientOptions {
   apiKey?: string | null | undefined;
+
+  adminAPIKey?: string | null | undefined;
 
   token?: string | null | undefined;
 
@@ -216,6 +219,7 @@ export interface ClientOptions {
  */
 export class Cartesia {
   apiKey: string | null;
+  adminAPIKey: string | null;
   token: string | null;
 
   baseURL: string;
@@ -234,6 +238,7 @@ export class Cartesia {
    * API Client for interfacing with the Cartesia API.
    *
    * @param {string | null | undefined} [opts.apiKey]
+   * @param {string | null | undefined} [opts.adminAPIKey]
    * @param {string | null | undefined} [opts.token]
    * @param {string} [opts.baseURL=process.env['CARTESIA_BASE_URL'] ?? https://api.cartesia.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
@@ -246,11 +251,13 @@ export class Cartesia {
   constructor({
     baseURL = readEnv('CARTESIA_BASE_URL'),
     apiKey = null,
+    adminAPIKey = null,
     token = null,
     ...opts
   }: ClientOptions = {}) {
     const options: ClientOptions = {
       apiKey,
+      adminAPIKey,
       token,
       ...opts,
       baseURL: baseURL || `https://api.cartesia.ai`,
@@ -286,6 +293,7 @@ export class Cartesia {
     this._options = options;
 
     this.apiKey = apiKey;
+    this.adminAPIKey = adminAPIKey;
     this.token = token;
   }
 
@@ -303,6 +311,7 @@ export class Cartesia {
       fetch: this.fetch,
       fetchOptions: this.fetchOptions,
       apiKey: this.apiKey,
+      adminAPIKey: this.adminAPIKey,
       token: this.token,
       ...options,
     });
@@ -342,13 +351,24 @@ export class Cartesia {
       return;
     }
 
+    if (this.adminAPIKey && values.get('authorization')) {
+      return;
+    }
+    if (nulls.has('authorization')) {
+      return;
+    }
+
     throw new Error(
-      'Could not resolve authentication method. Expected either token or apiKey to be set. Or for one of the "Authorization" or "Authorization" headers to be explicitly omitted',
+      'Could not resolve authentication method. Expected one of token, apiKey or adminAPIKey to be set. Or for one of the "Authorization", "Authorization" or "Authorization" headers to be explicitly omitted',
     );
   }
 
   protected async authHeaders(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
-    return buildHeaders([await this.tokenAuth(opts), await this.apiKeyAuth(opts)]);
+    return buildHeaders([
+      await this.tokenAuth(opts),
+      await this.apiKeyAuth(opts),
+      await this.adminAPIKeyAuth(opts),
+    ]);
   }
 
   protected async tokenAuth(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
@@ -363,6 +383,13 @@ export class Cartesia {
       return undefined;
     }
     return buildHeaders([{ Authorization: `Bearer ${this.apiKey}` }]);
+  }
+
+  protected async adminAPIKeyAuth(opts: FinalRequestOptions): Promise<NullableHeaders | undefined> {
+    if (this.adminAPIKey == null) {
+      return undefined;
+    }
+    return buildHeaders([{ Authorization: `Bearer ${this.adminAPIKey}` }]);
   }
 
   protected stringifyQuery(query: object | Record<string, unknown>): string {
@@ -899,6 +926,7 @@ export class Cartesia {
   static toFile = Uploads.toFile;
 
   agents: API.Agents = new API.Agents(this);
+  usage: API.Usage = new API.Usage(this);
   accessToken: API.AccessToken = new API.AccessToken(this);
   datasets: API.Datasets = new API.Datasets(this);
   fineTunes: API.FineTunes = new API.FineTunes(this);
@@ -911,6 +939,7 @@ export class Cartesia {
 }
 
 Cartesia.Agents = Agents;
+Cartesia.Usage = Usage;
 Cartesia.AccessToken = AccessToken;
 Cartesia.Datasets = Datasets;
 Cartesia.FineTunes = FineTunes;
@@ -942,6 +971,8 @@ export declare namespace Cartesia {
     type AgentUpdateParams as AgentUpdateParams,
     type AgentListParams as AgentListParams,
   };
+
+  export { Usage as Usage };
 
   export {
     AccessToken as AccessToken,

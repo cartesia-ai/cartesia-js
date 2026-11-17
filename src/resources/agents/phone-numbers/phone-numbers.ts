@@ -112,6 +112,20 @@ export class PhoneNumbers extends APIResource {
   ): APIPromise<PhoneNumberProvisionResponse> {
     return this._client.post('/agents/phone-numbers/provision', { body, ...options });
   }
+
+  /**
+   * Returns Cartesia-managed phone number provisioning usage for the current month.
+   * Active numbers and numbers deleted during the current month count toward usage.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.agents.phoneNumbers.provisioningUsage();
+   * ```
+   */
+  provisioningUsage(options?: RequestOptions): APIPromise<PhoneNumberProvisioningUsageResponse> {
+    return this._client.get('/agents/phone-numbers/provision', options);
+  }
 }
 
 /**
@@ -290,6 +304,29 @@ export namespace PhoneNumberProvisionResponse {
   }
 }
 
+/**
+ * Cartesia-managed phone number provisioning usage for the current month.
+ */
+export interface PhoneNumberProvisioningUsageResponse {
+  /**
+   * Maximum phone numbers that can be provisioned during the current month. `null`
+   * means the plan has no monthly limit.
+   */
+  monthly_limit: number | null;
+
+  /**
+   * Number of phone numbers provisioned during the current month. This includes
+   * active numbers and numbers deleted during the month.
+   */
+  monthly_usage: number;
+
+  /**
+   * Phone numbers that can still be provisioned during the current month. `null`
+   * means the plan has no monthly limit.
+   */
+  remaining: number | null;
+}
+
 export interface PhoneNumberUpdateParams {
   /**
    * Assign an agent to answer inbound calls to this number, or `null` to unassign.
@@ -437,6 +474,7 @@ export declare namespace PhoneNumbers {
     type PhoneNumber as PhoneNumber,
     type PhoneNumberListResponse as PhoneNumberListResponse,
     type PhoneNumberProvisionResponse as PhoneNumberProvisionResponse,
+    type PhoneNumberProvisioningUsageResponse as PhoneNumberProvisioningUsageResponse,
     type PhoneNumberUpdateParams as PhoneNumberUpdateParams,
     type PhoneNumberListParams as PhoneNumberListParams,
     type PhoneNumberImportParams as PhoneNumberImportParams,

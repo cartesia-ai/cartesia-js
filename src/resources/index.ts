@@ -79,6 +79,7 @@ export {
   type TTSGenerateSseParams,
   type TTSInfillParams,
 } from './tts';
+export { Usage } from './usage/usage';
 export {
   Voices,
   type Accent,
