@@ -358,7 +358,7 @@ export class TTSWrapper {
     }
 
     const params: any = {
-      model_id: options?.modelId ?? 'sonic-2',
+      model_id: options?.modelId ?? 'sonic-3.6',
       transcript,
       voice: { id: voiceId },
     };
