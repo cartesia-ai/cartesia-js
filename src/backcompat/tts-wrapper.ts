@@ -7,15 +7,10 @@ import type { Readable } from 'stream';
 import type { RequestOptions } from '../internal/request-options';
 import { CartesiaError } from '../error';
 import { uuid4 } from '../internal/utils/uuid';
+import { loadStream, loadWs } from '#node-deps';
 
-let _ws: Partial<typeof import('ws')> | undefined;
-let _stream: Partial<typeof import('stream')> | undefined;
-try {
-  _ws = require('ws');
-  _stream = require('stream');
-} catch {
-  // Optional peer dependencies
-}
+const _ws = loadWs();
+const _stream = loadStream();
 
 // Define compatible interfaces to match the old SDK types for WebSocket
 export interface BackCompatWebSocketOptions {

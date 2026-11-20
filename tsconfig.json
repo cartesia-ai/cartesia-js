@@ -9,7 +9,8 @@
     "esModuleInterop": true,
     "paths": {
       "@cartesia/cartesia-js/*": ["./src/*"],
-      "@cartesia/cartesia-js": ["./src/index.ts"]
+      "@cartesia/cartesia-js": ["./src/index.ts"],
+      "#node-deps": ["./src/internal/shims/node-deps.d.ts"]
     },
     "noEmit": true,
 

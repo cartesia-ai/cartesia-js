@@ -40,10 +40,32 @@ cp tsconfig.dist-src.json dist/src/tsconfig.json
 
 node scripts/utils/postprocess-files.cjs
 
+mkdir -p dist/internal/shims
+cp src/internal/shims/node-deps-node.mjs src/internal/shims/node-deps-node.cjs src/internal/shims/node-deps-browser.mjs dist/internal/shims/
+
 # make sure that nothing crashes when we require the output CJS or
 # import the output ESM
 (cd dist && node -e 'require("@cartesia/cartesia-js")')
 (cd dist && node -e 'import("@cartesia/cartesia-js")' --input-type=module)
+
+# The ESM build must load the ws package. A global WebSocket means the loader missed it.
+node --input-type=module << 'EOF'
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+
+const require = createRequire(path.join(process.cwd(), 'package.json'));
+const Ws = require('ws');
+const href = pathToFileURL(path.join(process.cwd(), 'dist/internal/lib/tts/ws.mjs')).href;
+const { TTSWS } = await import(href);
+const tts = new TTSWS({ baseURL: 'http://127.0.0.1:9', apiKey: 'sk_test' });
+tts.on('error', () => {});
+tts.connect().catch(() => {});
+if (tts.socket.constructor !== Ws.WebSocket) {
+  console.error('ESM build did not use the ws package');
+  process.exit(1);
+}
+EOF
 
 if [ -e ./scripts/build-deno ]
 then

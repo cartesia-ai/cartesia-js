@@ -1,12 +1,13 @@
 {
   "extends": "./tsconfig.json",
   "include": ["dist/src"],
-  "exclude": [],
+  "exclude": ["dist/src/internal/shims/node-deps-jest.ts"],
   "compilerOptions": {
     "rootDir": "./dist/src",
     "paths": {
       "@cartesia/cartesia-js/*": ["./dist/src/*"],
-      "@cartesia/cartesia-js": ["./dist/src/index.ts"]
+      "@cartesia/cartesia-js": ["./dist/src/index.ts"],
+      "#node-deps": ["./dist/src/internal/shims/node-deps.d.ts"]
     },
     "noEmit": false,
     "declaration": true,

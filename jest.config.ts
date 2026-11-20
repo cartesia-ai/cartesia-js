@@ -9,6 +9,7 @@ const config: JestConfigWithTsJest = {
   moduleNameMapper: {
     '^@cartesia/cartesia-js$': '<rootDir>/src/index.ts',
     '^@cartesia/cartesia-js/(.*)$': '<rootDir>/src/$1',
+    '^#node-deps$': '<rootDir>/src/internal/shims/node-deps-jest.ts',
   },
   modulePathIgnorePatterns: [
     '<rootDir>/ecosystem-tests/',
