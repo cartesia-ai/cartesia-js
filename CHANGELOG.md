@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.2.0](https://github.com/cartesia-ai/cartesia-js/compare/v5.1.0...v5.2.0) (2026-11-20)
+
+
+### Features
+
+* accept unlisted values for model, language, and emotion enums ([782bf24](https://github.com/cartesia-ai/cartesia-js/commit/782bf245e7eaa83a94f214f2d863025396f7a019))
+
+
+### Bug Fixes
+
+* load ws from the ESM build ([#133](https://github.com/cartesia-ai/cartesia-js/issues/133)) ([7d20543](https://github.com/cartesia-ai/cartesia-js/commit/7d20543a3b3b4d73ad7fe363f95fea392f41cd95))
+
+
+### Chores
+
+* **deps:** bump pnpm to 11.28.12 ([#33](https://github.com/cartesia-ai/cartesia-js/issues/33)) ([2c8e9a1](https://github.com/cartesia-ai/cartesia-js/commit/2c8e9a14001c955b872114ca95c90906182805cc))
+* **deps:** bump pnpm/action-setup from 6.0.9 to 6.1.1 ([#29](https://github.com/cartesia-ai/cartesia-js/issues/29)) ([95cce1f](https://github.com/cartesia-ai/cartesia-js/commit/95cce1fb01d3207fea5940d34b046f9194a3d513))
+
 ## [5.1.0](https://github.com/cartesia-ai/cartesia-js/compare/v5.0.0...v5.1.0) (2026-11-17)
 
 
