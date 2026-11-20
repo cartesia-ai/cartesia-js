@@ -11,13 +11,9 @@ import { CartesiaError } from '../../../error';
 import { getAuthorizationTokenFromHeaders } from '../utils/get-authorization-token-from-headers';
 import { appendBrowserWebSocketClientParam, getWebSocketConnectHeaders } from '../../client-identity';
 import { buildHeaders } from '../../headers';
+import { loadWs } from '#node-deps';
 
-let _ws: Partial<typeof import('ws')> | undefined;
-try {
-  _ws = require('ws');
-} catch {
-  // Optional — in browsers, we use the native WebSocket API instead.
-}
+const _ws = loadWs();
 
 // WebSocket readyState constants (same in both ws and native WebSocket)
 const WS_CLOSING = 2;

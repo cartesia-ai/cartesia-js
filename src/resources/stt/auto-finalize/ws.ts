@@ -11,13 +11,9 @@ import {
   getWebSocketConnectHeaders,
 } from '../../../internal/client-identity';
 import { buildHeaders } from '../../../internal/headers';
+import { loadWs } from '#node-deps';
 
-let _ws: Partial<typeof import('ws')> | undefined;
-try {
-  _ws = require('ws');
-} catch {
-  // Optional — in browsers, we use the native WebSocket API instead.
-}
+const _ws = loadWs();
 
 export type { AutoFinalizeWSParameters, AutoFinalizeWSReconnectOptions } from './ws-base';
 

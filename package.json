@@ -68,6 +68,16 @@
   "resolutions": {
     "minimatch": "^9.0.5"
   },
+  "imports": {
+    "#node-deps": {
+      "browser": "./dist/internal/shims/node-deps-browser.mjs",
+      "node": {
+        "import": "./dist/internal/shims/node-deps-node.mjs",
+        "require": "./dist/internal/shims/node-deps-node.cjs"
+      },
+      "default": "./dist/internal/shims/node-deps-browser.mjs"
+    }
+  },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",

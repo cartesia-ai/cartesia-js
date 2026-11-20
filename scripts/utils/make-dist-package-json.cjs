@@ -8,6 +8,7 @@ function processExportMap(m) {
   }
 }
 processExportMap(pkgJson.exports);
+if (pkgJson.imports) processExportMap(pkgJson.imports);
 
 for (const key of ['types', 'main', 'module']) {
   if (typeof pkgJson[key] === 'string') pkgJson[key] = pkgJson[key].replace(/^(\.\/)?dist\//, './');
