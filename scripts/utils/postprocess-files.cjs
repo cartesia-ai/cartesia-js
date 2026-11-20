@@ -17,23 +17,38 @@ async function* walk(dir) {
 
 async function postprocess() {
   for await (const file of walk(distDir)) {
-    if (!/(\.d)?[cm]?ts$/.test(file)) continue;
+    const isTypeScript = /(\.d)?[cm]?ts$/.test(file);
+    const isEsm = file.endsWith('.mjs');
+    if (!isTypeScript && !isEsm) continue;
 
     const code = await fs.promises.readFile(file, 'utf8');
+    let transformed = code;
 
-    // strip out lib="dom", types="node", and types="react" references; these
-    // are needed at build time, but would pollute the user's TS environment
-    let transformed = code.replace(
-      /^ *\/\/\/ *<reference +(lib="dom"|types="(node|react)").*?\n/gm,
-      // replace with same number of characters to avoid breaking source maps
-      (match) => ' '.repeat(match.length - 1) + '\n',
-    );
+    if (isTypeScript) {
+      // strip out lib="dom", types="node", and types="react" references; these
+      // are needed at build time, but would pollute the user's TS environment
+      transformed = transformed.replace(
+        /^ *\/\/\/ *<reference +(lib="dom"|types="(node|react)").*?\n/gm,
+        // replace with same number of characters to avoid breaking source maps
+        (match) => ' '.repeat(match.length - 1) + '\n',
+      );
 
-    // TypeScript's declaration emitter collapses /** @ts-ignore */ onto the same
-    // line as the type declaration, which doesn't work. So we convert to // @ts-ignore
-    // on its own line to properly suppresses errors.
-    if (file.endsWith('.d.ts') || file.endsWith('.d.mts') || file.endsWith('.d.cts')) {
-      transformed = transformed.replace(/\/\*\* @ts-ignore\b[^*]*\*\/ /gm, '// @ts-ignore\n');
+      // TypeScript's declaration emitter collapses /** @ts-ignore */ onto the same
+      // line as the type declaration, which doesn't work. So we convert to // @ts-ignore
+      // on its own line to properly suppresses errors.
+      if (file.endsWith('.d.ts') || file.endsWith('.d.mts') || file.endsWith('.d.cts')) {
+        transformed = transformed.replace(/\/\*\* @ts-ignore\b[^*]*\*\/ /gm, '// @ts-ignore\n');
+      }
+    }
+
+    if (isEsm) {
+      // The ESM build keeps require() from the TypeScript source. Node has no require
+      // in an ES module, so the call throws and the catch treats an installed ws as missing.
+      // getBuiltinModule stays inside that try/catch: a static node:module import fails browser bundles.
+      transformed = transformed.replace(
+        /\brequire\((['"])([^'"]+)\1\)/g,
+        'process.getBuiltinModule("module").createRequire(import.meta.url)($1$2$1)',
+      );
     }
 
     if (transformed !== code) {
